@@ -2,7 +2,7 @@
 //by Simone Sturniolo
 //
 //Copyright 2013 Science and Technology Facilities Council
-//This program is distributed under the terms of the GNU General Public License (GNU GPL)
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
 //Please refer to the file COPYING for the text of the license
 
 //This file handles the loading and parsing of .magres files, and the storage of the data they contain into a suitable data structure
@@ -619,6 +619,9 @@ function parseMagresBlock(mag_parser)
 						isc.tens.r[i][j] = isc_el;
 					}
 				} 	
+				
+				//Note: the ISC tensor is not diagonalized etc. because the only part we care for in it for now is the isotropic component, that is the trace;
+				//and since the trace is invariant to rotations, there's no reason to do additional calculations 				
 					
 				atom_set.mag_isc[0].push(isc);
 	

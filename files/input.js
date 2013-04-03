@@ -619,7 +619,10 @@ function parseMagresBlock(mag_parser)
 						isc.tens.r[i][j] = isc_el;
 					}
 				} 	
-					
+				
+				//Note: the ISC tensor is not diagonalized etc. because the only part we care for in it for now is the isotropic component, that is the trace;
+				//and since the trace is invariant to rotations, there's no reason to do additional calculations 				
+				
 				atom_set.mag_isc[0].push(isc);
 	
 				break;
