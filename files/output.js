@@ -325,7 +325,7 @@ function json_file_gen(win)
 //Note: an atom and all its periodic images have the same s and a identifiers. Therefore, to tell them apart, we use k_a, k_b and k_c.
 //The loop controlling k_a, k_b and k_c works only if the range option is selected - this is handled in compile_data_set().
 
-function is_in_choice(s, a, ac, k_a, k_b, k_c)
+function is_in_choice(s, a, ac, abc, k_a, k_b, k_c)
 {
 	switch(ac.t)
 	{
@@ -342,7 +342,6 @@ function is_in_choice(s, a, ac, k_a, k_b, k_c)
 		case "sel_range":			
 			if(ac.t == "sel_range" && !is_selected(atom_set.atom_species_labels[s], a))
 				return false;
-			var abc = atom_set.lattice_pars.r;
 			var x_d = atom_set.atoms[s][a].x + k_a*abc[0][0] + k_b*abc[1][0] + k_c*abc[2][0] - atom_set.atoms[ac.s][ac.a].x;
 			var y_d = atom_set.atoms[s][a].y + k_a*abc[0][1] + k_b*abc[1][1] + k_c*abc[2][1]- atom_set.atoms[ac.s][ac.a].y;	
 			var z_d = atom_set.atoms[s][a].z + k_a*abc[0][2] + k_b*abc[1][2] + k_c*abc[2][2]- atom_set.atoms[ac.s][ac.a].z;
@@ -422,7 +421,7 @@ function compile_data_set(ds, ac)
 
 					for (var k_c = -k_c_max; k_c <= k_c_max; ++k_c)
 					{
-						if (is_in_choice(s, a, ac, k_a, k_b, k_c))
+						if (is_in_choice(s, a, ac, abc, k_a, k_b, k_c))
 						{
 							atom_map[s][a][k_a+k_a_max][k_b+k_b_max][k_c+k_c_max] = atom_n;
 							ds.atom_elems[atom_n] = atom_set.atoms[s][a].elem;
@@ -505,7 +504,7 @@ function compile_data_set(ds, ac)
 			var a = atom_set.mag_efg[0][i].sp_i-1;
 			var euler_angs = euler_diff(atom_set.mag_efg_eigenvect[0][i][0], atom_set.mag_efg_eigenvect[0][i][1], atom_set.mag_efg_eigenvect[0][i][2], [1, 0, 0], [0, 1, 0], [0, 0, 1], eul_conv);
 			//Contents to store: [quadrupole constant in Hz, asimmetry, alpha, beta, gamma]
-			var to_store = [vzz_2_chi(atom_set.mag_efg_eigenvals[0][i][2], ds.atom_elems[efg_n]), atom_set.mag_efg_haeb[0][i][2], rad2deg(euler_angs[0]), rad2deg(euler_angs[1]), rad2deg(euler_angs[2])];
+			var to_store = [vzz_2_chi(atom_set.mag_efg_eigenvals[0][i][2], atom_set.atoms[s][a].elem), atom_set.mag_efg_haeb[0][i][2], rad2deg(euler_angs[0]), rad2deg(euler_angs[1]), rad2deg(euler_angs[2])];
 
 			for (var k_a = -k_a_max; k_a <= k_a_max; ++k_a)
 			{
