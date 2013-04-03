@@ -370,10 +370,10 @@ function compile_data_set(ds, ac)
 	var atom_n = 0;    //All atoms in data_set will be simply ordered by an increasing number, no crystallographic labels
 	var atom_map = []; //For the sake of speed, a map which correlates species numbers and indices to the corresponding value of atom_n
 	
-	var abc = atom_set.lattice_pars.r;	//Storing the lattice parameters for convenience 
+	var abc = atom_set.lattice_pars.r;	//Storing the lattice parameters for convenience
 	var k_a_max = 0; var k_b_max = 0; var k_c_max = 0; //Maximum values of k_a, k_b, k_c at which one has to search for periodic images of a certain atom. Only matters for the range option
 	
-	if (ac.t.indexOf("range") > -1) //That is, if one of the "range" options is selected...
+	if ((ac.t.indexOf("range") > -1) && (abc != null)) //That is, if one of the "range" options is selected, and there are lattice parameters in the file...
 	{
 		// The maximum indices along the three unit cell directions are defined as the ratio between the radius ( = maximum possible distance of interest) and the component of, respectively, a, b or c
 		//	along the direction of the vector product of the other two. This corresponds to the shortest distance between two walls of the unit cell. The result is rounded to the next integer.
@@ -381,6 +381,15 @@ function compile_data_set(ds, ac)
 		k_a_max = Math.ceil(ac.r*vec_module(vec_xprod(abc[1], abc[2]))/Math.abs(vec_dotprod(abc[0], vec_xprod(abc[1], abc[2]))));
 		k_b_max = Math.ceil(ac.r*vec_module(vec_xprod(abc[2], abc[0]))/Math.abs(vec_dotprod(abc[1], vec_xprod(abc[2], abc[0]))));
 		k_c_max = Math.ceil(ac.r*vec_module(vec_xprod(abc[0], abc[1]))/Math.abs(vec_dotprod(abc[2], vec_xprod(abc[0], abc[1]))));
+	}
+	
+	//To prevent errors if there is no lattice data; it will be irrelevant anyway, because in this case the k_*_max will all be zero
+	if (abc == null)
+	{
+		abc = new Array();
+		abc[0] = [0, 0, 0];
+		abc[1] = [0, 0, 0];
+		abc[2] = [0, 0, 0];
 	}
 	
 	//Security block, to prevent jamming
