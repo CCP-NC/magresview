@@ -327,6 +327,11 @@ function json_file_gen(win)
 
 function is_in_choice(s, a, ac, abc, k_a, k_b, k_c)
 {
+	//First: check that the selected atom is NMR-active
+
+	if (atom_set.atom_elems[atom_set.atoms[s][a].elem] == 0)
+		return false;
+		
 	switch(ac.t)
 	{
 		case "all":
