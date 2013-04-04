@@ -57,7 +57,7 @@ def json_to_sim(datafile, sim_options, sim_options_num, sim_options_str):
 		in_file = open(datafile, 'r')
 	except IOError:
 		print "File \'" + datafile + "\' not found.\nSkipping..."
-		return
+		return False
 	
 	# Loading the data structure with json
 	
@@ -65,7 +65,7 @@ def json_to_sim(datafile, sim_options, sim_options_num, sim_options_str):
 		dataset = json.loads(in_file.read())
 	except ValueError:
 		print "File \'" + datafile + "\' is corrupted or empty.\nSkipping..."
-		return
+		return False
 	
 	data_name = datafile.split('.', 1)[0]
 	in_file.close()
@@ -74,21 +74,22 @@ def json_to_sim(datafile, sim_options, sim_options_num, sim_options_str):
 	
 	if (not dataset.has_key('atomno')) or (dataset['atomno'] <= 0):
 		print "File \'" + datafile + "\' is corrupted or empty.\nSkipping..."
-		return
+		return False
 	
 	# Processing. If the soft_targ key does not exist or is not recognizable, throw an error and skip the file
 	
 	if dataset.has_key('soft_targ') == False:
 		print "File \'" + datafile + "\' is corrupted. No software target identified.\nSkipping..."
-		return
+		return False
 	elif dataset['soft_targ'] == 'simpson':
 		json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_options_str)
 	elif dataset['soft_targ'] == 'spinev':
 		json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options_str)
 	else:
 		print "File \'" + datafile + "\' has unknown software target.\nSkipping..."
+		return False
 		
-	return
+	return True
 
 def help_msg():
 	
@@ -122,39 +123,42 @@ def help_msg():
 
 # Main program: run the function json_to_sim for all data files received as input
 
-arg_list = sys.argv[1:]
-
-# Read the command line options, obligatorily before the input files
-
-while len(arg_list) > 0 and (sim_options.has_key(arg_list[0]) or sim_options_num.has_key(arg_list[0]) or sim_options_str.has_key(arg_list[0])):
-	# If the option is only a boolean...
-	if sim_options.has_key(arg_list[0]):
-		sim_options[arg_list[0]] = True
-		arg_list.pop(0)
-		if sim_options["-help"] == True:
-			help_msg()
-			exit()
-	# ...if it requires a numerical argument...
-	elif sim_options_num.has_key(arg_list[0]):
-		try:
-			val = float(arg_list[1])
-		except ValueError:
-			print "The option " + arg_list[0] + " requires a numerical argument. Skipping option..."
+if __name__ == "__main__":
+	
+	arg_list = sys.argv[1:]
+	
+	# Read the command line options, obligatorily before the input files
+	
+	while len(arg_list) > 0 and (sim_options.has_key(arg_list[0]) or sim_options_num.has_key(arg_list[0]) or sim_options_str.has_key(arg_list[0])):
+		# If the option is only a boolean...
+		if sim_options.has_key(arg_list[0]):
+			sim_options[arg_list[0]] = True
 			arg_list.pop(0)
-			continue
-		sim_options_num[arg_list[0]] = val
-		arg_list = arg_list[2:]
-	# ...or a string argument.
-	else:
-		sim_options_str[arg_list[0]] = arg_list[1]
-		arg_list = arg_list[2:]
-
-# Process the files
-
-if len(arg_list) <= 0:
-	print "No input file; please supply at least one input file name\nFor a list of commands and a guide on how to use the script, type \"python json_to_sim.py -help\""
-	exit()
-
-for datafile in arg_list:
-	json_to_sim(datafile, sim_options, sim_options_num, sim_options_str)
-
+			if sim_options["-help"] == True:
+				help_msg()
+				exit()
+		# ...if it requires a numerical argument...
+		elif sim_options_num.has_key(arg_list[0]):
+			try:
+				val = float(arg_list[1])
+			except ValueError:
+				print "The option " + arg_list[0] + " requires a numerical argument. Skipping option..."
+				arg_list.pop(0)
+				continue
+			sim_options_num[arg_list[0]] = val
+			arg_list = arg_list[2:]
+		# ...or a string argument.
+		else:
+			sim_options_str[arg_list[0]] = arg_list[1]
+			arg_list = arg_list[2:]
+	
+	# Process the files
+	
+	if len(arg_list) <= 0:
+		print "No input file; please supply at least one input file name\nFor a list of commands and a guide on how to use the script, type \"python json_to_sim.py -help\""
+		exit()
+	
+	for datafile in arg_list:
+		json_to_sim(datafile, sim_options, sim_options_num, sim_options_str)
+	
+	
