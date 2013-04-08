@@ -225,7 +225,11 @@ Copy of the license can be found as a text file in the /jmol folder
       		autoHeight: false
     		});
 
- 		  	$("#main_tabs").tabs();
+ 		  	$("#main_tabs").tabs({
+ 		  		activate: function(event, ui) {
+ 		  			range_sphere_handler();
+ 		  		}
+ 		  	});
  		  	
  		  	$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
  		  		
@@ -516,15 +520,16 @@ Copy of the license can be found as a text file in the /jmol folder
 					</select>
 
 					<div id="range_file_div" style="visibility:hidden">
-					<input type="text" id="range_file_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true"
+					<input type="text" id="range_file_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true" onkeypress="range_file_r_handler(event)"
 					title="Maximum distance from selected atom of nuclei to include"></input> &Aring; of
 					<select id="range_file_species_drop" autocomplete="off" disabled="true" onchange="range_file_species_drop_handler()">
 						<option value="-">--</option>
 					</select>
-					<select id="range_file_atom_drop" autocomplete="off" disabled="true">
+					<select id="range_file_atom_drop" autocomplete="off" disabled="true" onchange="range_sphere_handler()">
 						<option value="-">--</option>
 					</select>
-				
+					&nbsp;
+					<input type="checkbox" id="range_sphere_check" checked="true" autocomplete="off" disabled="true" onchange="range_sphere_handler()"> Visualize range sphere
 					</div>
 
 					<br>

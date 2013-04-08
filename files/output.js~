@@ -57,6 +57,7 @@ function sel_file_drop_handler()
 		document.getElementById("range_file_r").disabled = false;
 		document.getElementById("range_file_species_drop").disabled = false;
 		document.getElementById("range_file_atom_drop").disabled = false;
+		document.getElementById("range_sphere_check").disabled = false;
 	}
 	else
 	{
@@ -64,8 +65,14 @@ function sel_file_drop_handler()
 		document.getElementById("range_file_r").disabled = true;
 		document.getElementById("range_file_species_drop").disabled = true;
 		document.getElementById("range_file_atom_drop").disabled = true;
+		document.getElementById("range_sphere_check").disabled = true;
 	}
+
+	range_sphere_handler();	
+	
 }
+
+//Make the JSON related controls active if needed
 
 function json_controls_switch()
 {
@@ -90,6 +97,8 @@ function json_controls_switch()
 		document.getElementById("sel_file_drop").disabled = true;
 	}
 	
+	range_sphere_handler();
+	
 }
 
 //Updating the atom selection menu, built on the model of sel_drop_handler()
@@ -103,6 +112,54 @@ function range_file_species_drop_handler()
 	dropd_atoms.options.length = atom_set.atoms[s].length;
 	for (var i = 0; i < dropd_atoms.options.length; ++i)
 		dropd_atoms.options[i] = new Option(i+1, i+1);
+	
+	range_sphere_handler();
+}
+
+//Updates the range sphere if ENTER was pressed in the radius textbox
+
+function range_file_r_handler(event)
+{
+	//Compatibility code - see console.js for details
+	var evt = window.event || evt;
+	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
+	
+	if (myKey == 13)
+	{
+		range_sphere_handler();
+	}
+}
+
+//Draws a sphere visualizing the selected range
+
+function range_sphere_handler()
+{
+	sphere_script = "ellipsoid range_sphere_choice";
+	
+	//A bit of jQuery magic to check whether the active tab is the "File generation" one. It just works.
+
+	var active = $("#main_tabs").tabs("option", "active");
+	if($("#main_tabs ul>li a").eq(active).attr('href') == "#file_gen" &&				//Is the File generation tab active?
+		document.getElementById("file_type_drop").value == "json" && 					//Is the JSON file generation active?
+		document.getElementById("sel_file_drop").value.indexOf("range") > -1 &&		//Is one of the 'range' options selected?
+		document.getElementById("range_sphere_check").checked == true)					//Is the box "Visualize range sphere" ticked?
+	{
+		var s_c = atom_set.atom_species[document.getElementById("range_file_species_drop").value];
+		var a_c = parseInt(document.getElementById("range_file_atom_drop").value)-1;
+		var x_c = atom_set.atoms[s_c][a_c].x;
+		var y_c = atom_set.atoms[s_c][a_c].y;
+		var z_c = atom_set.atoms[s_c][a_c].z;
+		var r = parseFloat(document.getElementById("range_file_r").value);
+		
+		sphere_script += " axes {" + r + " 0 0} {0 " + r + " 0} {0 0 " + r + "} center {" + x_c + " " + y_c + " " + z_c + "} color translucent 0.7 {200 200 200};";
+	}
+	else
+	{
+		sphere_script += " delete;";
+	}
+   
+   Jmol.script(mainJmol, sphere_script);		
+				       
 }
 
 //A file format meant for readability
@@ -328,7 +385,10 @@ function json_file_gen(win)
 function is_in_choice(s, a, ac, abc, k_a, k_b, k_c)
 {
 	//First: check that the selected atom is NMR-active
-	if (atom_set.atom_elems[atom_set.atoms[s][a]]
+
+	if (atom_set.atom_elems[atom_set.atoms[s][a].elem] == 0)
+		return false;
+		
 	switch(ac.t)
 	{
 		case "all":
