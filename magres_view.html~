@@ -1,6 +1,6 @@
 <!DOCTYPE html  PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd" encoding="UTF-8">
 
-<!-- MagresView v 1.0.1
+<!-- MagresView v 1.0
 by Simone Sturniolo
 
 A JMol based web viewer for ab-initio calculated NMR parameters stored in the .magres file format.
@@ -35,7 +35,7 @@ Copy of the license can be found as a text file in the /jmol folder
 	 
      -->    
     	
-    <title>MagresView 1.0.1</title>
+    <title>MagresView 1.0</title>
     <meta content="">
     
     <style>
@@ -251,7 +251,7 @@ Copy of the license can be found as a text file in the /jmol folder
   <div class="titlediv">
   <img src="images/stfc_logo.png" alt="STFC" height="70%" style="float: left; margin: 0px;">
   <span style="color: rgb(242, 154, 0); margin: 0px;">M</span>agres<span style="color: rgb(242, 154, 0)">V</span>iew
-  <span style="font-size: 50%; margin: 0px;"> 1.0.1</span>
+  <span style="font-size: 50%; margin: 0px;"> 1.0</span>
   <img src="images/small_epsrc.png" alt="EPSRC" height="70%" style="float:right; margin: 0px;">
   </div>
 	  		<div id="main_app_div" class="appdiv">
@@ -520,7 +520,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					</select>
 
 					<div id="range_file_div" style="visibility:hidden">
-					<input type="text" id="range_file_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true" onkeypress="range_file_r_handler(event)"
+					<input type="text" id="range_file_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true" onkeypress="ms_shield_ref_handler(event)
 					title="Maximum distance from selected atom of nuclei to include"></input> &Aring; of
 					<select id="range_file_species_drop" autocomplete="off" disabled="true" onchange="range_file_species_drop_handler()">
 						<option value="-">--</option>
