@@ -243,7 +243,6 @@ function atom_elems_load()
 function parseAtomBlock(mag_parser)
 {
 	var cell_file = null;
-	var now_scanning = "";
 	
 	while(!mag_parser.prs_end())
 	{
@@ -264,17 +263,16 @@ function parseAtomBlock(mag_parser)
 				//Check the units
 				if ((spl_line.length < 3) || (spl_line[2] != "Angstrom"))
 					return null;
-				now_scanning = spl_line[1];
+				
+				atom_set.units[spl_line[1]] = spl_line[2];
 				break;
 			
 			case "symmetry":
-				if (now_scanning != "atom")
-					return null;
 				break;
 			
 			case "atom":
 				//Exit on error if the length is not right OR if this is not what we're supposed to see now
-				if ((spl_line.length < 7) || (now_scanning != "atom"))
+				if (spl_line.length < 7 || atom_set.units["atom"] == null)
 					return null;
 				
 				var species = spl_line[2];
@@ -305,10 +303,8 @@ function parseAtomBlock(mag_parser)
 				break;
 				
 			case "lattice":
-				if ((spl_line.length < 10) || (now_scanning != "lattice"))
+				if (spl_line.length < 10 || atom_set.units["atom"] == null)
 					return null;
-				//Lattices should last only one line...				
-				now_scanning = "lattice_over";
 								
 				atom_set.lattice_pars = new tensor();
 				
@@ -622,7 +618,7 @@ function parseMagresBlock(mag_parser)
 				
 				//Note: the ISC tensor is not diagonalized etc. because the only part we care for in it for now is the isotropic component, that is the trace;
 				//and since the trace is invariant to rotations, there's no reason to do additional calculations 				
-					
+				
 				atom_set.mag_isc[0].push(isc);
 	
 				break;
