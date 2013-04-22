@@ -243,9 +243,9 @@ Copy of the license can be found as a text file in the /jmol folder
   
   <script type="text/javascript" >
   //The font size for the main division is estimated on the basis of the total window's size. This is the font size for the title - everything else is scaled down proportionally
-  
+
   	document.getElementById("main_div").style.fontSize = Math.ceil(winH/14.0) + "px";
-  
+    
   </script>
   
   <div class="titlediv">
@@ -594,7 +594,17 @@ Copy of the license can be found as a text file in the /jmol folder
 			
   </div>
   </div>  
-  <div class="creditdiv">A CCP-NC project by Simone Sturniolo
+  <div class="creditdiv" id="credit_div">
+  <script type="text/javascript" >
+		//Like for the title, this font size needs to be estimated from the window size
+		//Resize console as well to avoid superposition
+		
+		document.getElementById("jmol_console").size = Math.ceil(winW*0.6/9);
+	   document.getElementById("credit_div").style.fontSize = Math.ceil(winH/70.0) + "px";
+
+  </script>  
+  
+  A CCP-NC project by Simone Sturniolo
   <br>
   Copyright (C) 2013 Science and Technology Facility Council
   <br>
