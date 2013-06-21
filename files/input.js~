@@ -303,7 +303,7 @@ function parseAtomBlock(mag_parser)
 				break;
 				
 			case "lattice":
-				if (spl_line.length < 10 || atom_set.units["atom"] == null)
+				if (spl_line.length < 10 || atom_set.units["lattice"] == null)
 					return null;
 								
 				atom_set.lattice_pars = new tensor();
