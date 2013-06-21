@@ -23,6 +23,10 @@ def efg_to_Cq(efg, s):
   else:
     return None
 
+def efg_to_Cq_isotope(efg, species, isotope):
+  # Magic constants to convert from millibarns to a.u. and then back to MHz
+  return sorted_evals(efg)[0] * (Q[(species, isotope)] * units.millibarn) / units.megahertz
+
 def val_to_Cq(ev, s):
   if s in Q_iso:
     return ev * Q_common[s] * units.millibarn / units.megahertz
@@ -34,7 +38,10 @@ def largest_eval(m):
 
 def K_to_J(K, s1, s2):
   # More magic constants. Should make a proper atomic unit conversion function
-  return (K + K.H)/2.0 * gamma_common[s1] * gamma_common[s2] * 1.05457148e-15 / (2*math.pi)
+  return (K + K.T)/2.0 * gamma_common[s1] * gamma_common[s2] * 1.05457148e-15 / (2*math.pi)
+
+def K_to_J_iso(K, s1, iso1, s2, iso2):
+  return (K + K.T)/2.0 * gamma[(s1,iso1)] * gamma[(s2,iso2)] * 1.05457148e-15 / (2*math.pi)
 
 # Nuclear gyromagnetic ratios, from constants.f90, source IUPAC Recommendations 2001, Robin K. Harris et al
 gamma={('H', 1): 26.7522128e7,

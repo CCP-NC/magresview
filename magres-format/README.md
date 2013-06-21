@@ -3,14 +3,30 @@ magres-format
 
 Code for parsing the CCP-NC ab-initio magnetic resonance file format as used in the latest version of Castep. See more at http://www.ccpnc.ac.uk/pmwiki.php/CCPNC/Fileformat
 
+Documentation for the Python API is [available here](http://tfgg.github.io/magres-format/build/html/).
+
 Installing
 ----------
 
 Clone the repository or download and extract the .zip file somewhere. From the command line, run:
 
-    python setup.py install
+    sudo python setup.py install
+    
+to install it globally, or
 
-and the Python module and associated scripts should now be installed.
+    python setup.py install --user
+    
+to install it just for your user account ([read more here](http://docs.python.org/2/install/#alternate-installation)), and the Python module and associated scripts should now be installed.
+
+If you have installed it locally with --user, you may have to add ~/.local/bin to your PATH. You can do this by adding
+
+    export PATH=$HOME/.local/bin:$PATH
+    
+to your ~/.bashrc and restarting your session or running "source ~/.bashrc". If you use tcsh you do
+
+    setenv PATH $HOME/.local/bin:$PATH
+    
+and then restart your session.
 
 Conversion script usage
 -----------------------
@@ -27,6 +43,8 @@ and optionally with the associated job's .castep file, to capture the lattice in
 Python module usage
 -------------------
 
+More documentation is [available here](http://tfgg.github.io/magres-format/build/html/)
+
 From inside Python you can import the magres.format module and use the MagresFile class.
 
 
@@ -41,3 +59,14 @@ serialized as JSON by the .as_json() method and load JSON data with the .load_js
 The module also include the useful magres.constants module, which gives the best-known gamma constants and quadrupole 
 moments for all isotopes, the most common isotopes used in experiments, and helper functions such as K_to_J, which
 converts a reduced K tensor to a full J tensor.
+
+JSON schema
+-----------
+
+We use the [JSONschema](http://json-schema.org/) definition to provide a specification for the internal datastructure used by the parser and the format of the JSON emitted and consumed by .as_json() and .load_json() on MagresFile.
+
+To dump the JSON representation of a .magres simply do
+
+    magresjson.py sample.magres > sample.magres.json
+
+and sample.magres.json should now contain a schema-compliant JSON representation of sample.magres.
