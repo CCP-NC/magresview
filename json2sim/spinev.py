@@ -2,7 +2,7 @@
 # 
 # by Simone Sturniolo
 # 
-# SPINEVOLUTION module for the json_to_sim.py script tool
+# SPINEVOLUTION module for the json_to_sim.py script tool (version 1.1)
 #
 #Copyright 2013 Science and Technology Facilities Council
 #This software is distributed under the terms of the GNU General Public License (GNU GPL)
@@ -22,8 +22,13 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	main_file = open(data_name + "_spinev", 'w')
 	cor_file = open(data_name + "_spinev.cor", 'w')
 	
+	atoms = dataset['atoms']
+	magres = dataset['magres']
+	isotopes = atoms['isotopes']
+	atomno = len(atoms['atom'])
+	
 	# Dipolar switchboard is generated only if there is more than one spin in the system
-	if dataset['atomno'] > 1:
+	if atomno > 1:
 		dip_file = open(data_name + "_spinev.dip", 'w')
 	else:
 		dip_file = None
@@ -31,11 +36,14 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	# Isotropic and anisotropical chemical shift files are generated only if there is magnetic shielding data in the dataset
 	flag_ms = False
 	flag_ms_aniso = False
-	for ms in dataset['ms']:
-		if ms != 0:
-			flag_ms = True
-			if ms[1] != 0:
-				flag_ms_aniso = True				
+	
+	if magres.has_key('ms'):
+		for ms in magres['ms']:
+			if ms.has_key('mview_data'):
+				if not flag_ms and ms['mview_data'][0] != 0:
+					flag_ms = True
+					if not flag_ms_aniso and ms['mview_data'][1] != 0:
+						flag_ms_aniso = True
 	
 	if flag_ms:
 		cs_file = open(data_name + "_spinev.cs", 'w')
@@ -52,9 +60,12 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	
 	# Same as above for quadrupolar constant file
 	flag_efg = False
-	for efg in dataset['efg']:
-		if efg != 0:
-			flag_efg = True
+	
+	if magres.has_key('efg'):
+		for efg in magres['efg']:
+			if efg.has_key('mview_data'):
+				if not flag_efg and efg['mview_data'][0] != 0:
+					flag_efg = True
 	
 	if flag_efg:
 		q_file = open(data_name + "_spinev.q", 'w')
@@ -65,10 +76,12 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 
 	# Same as above for J coupling file
 	flag_isc = False
-	for isc_row in dataset['isc']:
-		for isc in isc_row:
-			if isc != 0:
-				flag_isc = True
+	
+	if magres.has_key('isc'):
+		for isc in magres['isc']:
+			if isc.has_key('mview_data'):
+				if not flag_isc:
+					flag_isc = True
 	
 	if flag_isc:
 		j_file = open(data_name + "_spinev.j", 'w')
@@ -77,24 +90,49 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 		
 	del(flag_isc)
 	
-	# Output coordinates file
+	# Output coordinates file and create a lookup table of indices in the 'atom' array for further quick reference 
+	atom_lookup = {}
 	
-	for i in range(0, dataset['atomno']):
-		cor_file.write(arr_to_str(dataset['atom_coords'][i]))
-		cor_file.write(dataset['atom_elems'][i] + str(i+1) + "\n")
+	for i in range(0, atomno):
+		a = atoms['atom'][i]
+		if not atom_lookup.has_key(a['label']):
+			atom_lookup[a['label']] = {}
+		atom_lookup[a['label']][a['index']] = i
+		cor_file.write(arr_to_str(a['position']))
+		cor_file.write(a['label'] + str(i+1) + "\n")		
 	
 	cor_file.flush()
 	cor_file.close()
-
+		
 	# Output dipolar switchboard if present
 	
 	if dip_file != None:
-		for i in range(0, dataset['atomno']):
-			for j in range(0, i):
-				if dataset['dip'][i][j] == 0:
-					dip_file.write("0 ")
-				else:
-					dip_file.write("1 ")
+		dip_switch = [[]]*(atomno-1)
+		for i in range(0, atomno-1):
+			dip_switch[i] = [0]*(i+1)
+
+		if magres.has_key('dip'):
+			for dip in magres['dip']:
+				if dip.has_key('mview_data'):
+					if dip['mview_data'][0] != 0:
+						a1 = dip['atom1']
+						a2 = dip['atom2']
+						i = atom_lookup[a1['label']][a1['index']]
+						j = atom_lookup[a2['label']][a2['index']]
+						if j > i:
+							dummy_a = a2
+							dummy = j
+							j = i
+							a2 = a1
+							i = dummy
+							a1 = dummy_a
+						elif j == i:
+							continue					
+						dip_switch[i-1][j] = 1
+		
+		for i in range(0, atomno-1):
+			for j in range(0, i+1):
+				dip_file.write(str(dip_switch[i][j]) + " ")
 			dip_file.write("*\n")
 		dip_file.flush()
 		dip_file.close()
@@ -102,11 +140,13 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	# Output isotropical and anisotropical chemical shift files if present
 	
 	if cs_file != None:
-		for i in range(0, dataset['atomno']):
-			if dataset['ms'][i] != 0:
-				cs_file.write(str(dataset['ms'][i][0]) + "\t" + dataset['atom_elems'][i] + str(i+1) + "\n")
+		for ms in magres['ms']:
+			if ms.has_key('mview_data'):
+				a = ms['atom']
+				i = atom_lookup[a['label']][a['index']]
+				cs_file.write(str(ms['mview_data'][0]) + "\t" + a['label'] + str(i+1) + "\n")		
 				if csa_file != None:
-					csa_file.write(str(i+1) + " " + arr_to_str(dataset['ms'][i][1:]) + dataset['atom_elems'][i] + str(i+1) + "\n")
+					csa_file.write(str(i+1) + " " + arr_to_str(ms['mview_data'][1:]) + a['label'] + str(i+1) + "\n")					
 		cs_file.flush()
 		cs_file.close()
 		if csa_file != None:
@@ -116,19 +156,33 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	#Output quadrupolar constants file if present
 	
 	if q_file != None:
-		for i in range(0, dataset['atomno']):
-			if dataset['efg'][i] != 0 and dataset['efg'][i][0] != 0:
-				q_file.write(str(i+1) + " " + str(dataset['efg'][i][0]/1000.0) + " " + arr_to_str(dataset['efg'][i][1:]) + dataset['atom_elems'][i] + str(i+1) + "\n") # Quadrupole constant is converted Hz -> kHz
+		for efg in magres['efg']:
+			if efg.has_key('mview_data'):
+				a = efg['atom']
+				i = atom_lookup[a['label']][a['index']]
+				q_file.write(str(i+1) + " " + str(efg['mview_data'][0]/1000.0) + " " + arr_to_str(efg['mview_data'][1:]) + a['label'] + str(i+1) + "\n") # Quadrupole constant is converted Hz -> kHz
 		q_file.flush()
 		q_file.close()
 		
 	# Output j-couplings file if present
 	
 	if j_file != None:
-		for i in range(0, dataset['atomno']):
-			for j in range(0, i):
-				if dataset['isc'][i][j] != 0:
-					j_file.write(str(j+1) + " " + str(i+1) + " " + arr_to_str(dataset['isc'][i][j]) + dataset['atom_elems'][i] + str(i+1) + "<-->" + dataset['atom_elems'][j] + str(j+1) + "\n")
+		for isc in magres['isc']:
+			if isc.has_key('mview_data'):
+				a1 = isc['atom1']
+				a2 = isc['atom2']
+				i = atom_lookup[a1['label']][a1['index']]
+				j = atom_lookup[a2['label']][a2['index']]
+				if j > i:
+					dummy_a = a2
+					dummy = j
+					j = i
+					a2 = a1
+					i = dummy
+					a1 = dummy_a
+				elif j == i:
+					continue
+				j_file.write(str(j+1) + " " + str(i+1) + " " + arr_to_str(isc['mview_data']) + a1['label'] + str(i+1) + "<-->" + a2['label'] + str(j+1) + "\n")
 		j_file.flush()
 		j_file.close()
 		
@@ -142,14 +196,14 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	#Identify channels
 	
 	chn_list = []
-	for i in range(0, dataset['atomno']):
-		elem = dataset['atom_elems'][i]
+	for a in atoms['atom']:
+		elem = a['species']
 		is_chn = False
 		for chn in chn_list:
 			if chn == elem:
 				is_chn = True
 		if is_chn == False:
-			chn_list.append([elem, dataset['atom_isos'][i]])
+			chn_list.append([elem, isotopes[elem]])
 	
 	#If there is a preferred channel, identify it and put it at the first place
 	
@@ -173,8 +227,9 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 
 	# Nuclei
 	main_file.write("nuclei           ")
-	for i in range(0, dataset['atomno']):
-		main_file.write(dataset['atom_elems'][i]+str(dataset['atom_isos'][i])+" ")
+	for a in atoms['atom']:
+		elem = a['species']
+		main_file.write(elem+str(isotopes[elem])+" ")
 	main_file.write("\n")
 	main_file.write("atomic_coords      " + data_name + "_spinev.cor\n")
 	if cs_file == None:

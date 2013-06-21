@@ -1,4 +1,4 @@
-# json_to_sim.py 1.0 
+# json_to_sim.py 1.1
 # 
 # by Simone Sturniolo
 # 2013
@@ -9,6 +9,8 @@
 # - Simpson
 # - SPINEVOLUTION
 #
+# Version 1.1 supports the new JSON output format of MagresView 1.0.5
+#
 #Copyright 2013 Science and Technology Facilities Council
 #This software is distributed under the terms of the GNU General Public License (GNU GPL)
 #Please refer to the file COPYING for the text of the license
@@ -17,6 +19,9 @@
 
 import sys
 import json
+from magres.atoms import MagresAtoms
+from magres.format import MagresFile
+from jsonschema import ValidationError
 
 from simpson import json_to_simpson
 from spinev  import json_to_spinev
@@ -56,7 +61,7 @@ def json_to_sim(datafile, sim_options, sim_options_num, sim_options_str):
 	try:
 		in_file = open(datafile, 'r')
 	except IOError:
-		print "File \'" + datafile + "\' not found.\nSkipping..."
+		sys.stderr.write("File \'" + datafile + "\' not found.\nSkipping...\n")
 		return False
 	
 	# Loading the data structure with json
@@ -64,29 +69,31 @@ def json_to_sim(datafile, sim_options, sim_options_num, sim_options_str):
 	try:
 		dataset = json.loads(in_file.read())
 	except ValueError:
-		print "File \'" + datafile + "\' is corrupted or empty.\nSkipping..."
+		sys.stderr.write("File \'" + datafile + "\' is corrupted or empty.\nSkipping...\n")
 		return False
-	
+			
 	data_name = datafile.split('.', 1)[0]
 	in_file.close()
+
+	# Load the json dataset into a MagresAtoms object and check its integrity
 	
-	# Check that the dataset is not empty
-	
-	if (not dataset.has_key('atomno')) or (dataset['atomno'] <= 0):
-		print "File \'" + datafile + "\' is corrupted or empty.\nSkipping..."
+	try:
+		loaded_file = MagresFile(dataset)
+	except ValidationError:
+		sys.stderr.write("File \'" + datafile + "\' is not a valid MagresFile format file.\nSkipping...\n")
 		return False
 	
 	# Processing. If the soft_targ key does not exist or is not recognizable, throw an error and skip the file
 	
 	if dataset.has_key('soft_targ') == False:
-		print "File \'" + datafile + "\' is corrupted. No software target identified.\nSkipping..."
+		sys.stderr.write("File \'" + datafile + "\' is corrupted. No software target identified.\nSkipping...\n")
 		return False
 	elif dataset['soft_targ'] == 'simpson':
 		json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_options_str)
 	elif dataset['soft_targ'] == 'spinev':
 		json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options_str)
 	else:
-		print "File \'" + datafile + "\' has unknown software target.\nSkipping..."
+		sys.stderr.write("File \'" + datafile + "\' has unknown software target.\nSkipping...\n")
 		return False
 		
 	return True
@@ -142,7 +149,7 @@ if __name__ == "__main__":
 			try:
 				val = float(arg_list[1])
 			except ValueError:
-				print "The option " + arg_list[0] + " requires a numerical argument. Skipping option..."
+				sys.stderr.write("The option " + arg_list[0] + " requires a numerical argument. Skipping option...\n")
 				arg_list.pop(0)
 				continue
 			sim_options_num[arg_list[0]] = val
@@ -155,8 +162,7 @@ if __name__ == "__main__":
 	# Process the files
 	
 	if len(arg_list) <= 0:
-		print "No input file; please supply at least one input file name\nFor a list of commands and a guide on how to use the script, type \"python json_to_sim.py -help\""
-		exit()
+		sys.exit("No input file; please supply at least one input file name\nFor a list of commands and a guide on how to use the script, type \"python json_to_sim.py -help\"")
 	
 	for datafile in arg_list:
 		json_to_sim(datafile, sim_options, sim_options_num, sim_options_str)

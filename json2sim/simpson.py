@@ -2,7 +2,7 @@
 # 
 # by Simone Sturniolo
 # 
-# Simpson module for the json_to_sim.py script tool
+# Simpson module for the json_to_sim.py script tool (version 1.1)
 #
 #Copyright 2013 Science and Technology Facilities Council
 #This software is distributed under the terms of the GNU General Public License (GNU GPL)
@@ -22,6 +22,11 @@ def json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_option
 	
 	main_file = open(data_name + "_simps.in", 'w')
 	spinsys_file = open(data_name + "_simps.spinsys", 'w')
+	
+	atoms = dataset['atoms']
+	magres = dataset['magres']
+	isotopes = atoms['isotopes']
+	atomno = len(atoms['atom'])
 
 	# Spinsys file is generated
 	spinsys_file.write("spinsys {\n")
@@ -31,49 +36,77 @@ def json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_option
 	main_chn = ""	# Main channel for the system
 	
 	if sim_options_str["-chn"] != "":
-		for i in range(0, dataset['atomno']):
-			if (str(dataset['atom_isos'][i]) + dataset['atom_elems'][i]) == sim_options_str["-chn"]:
-				main_chn = str(dataset['atom_isos'][i]) + dataset['atom_elems'][i]
+		for el in isotopes:
+			if ((str(isotopes[el]) + el) == sim_options_str["-chn"]):
+				main_chn = str(isotopes[el]) + el
 				break
 		if main_chn == "":
-			main_chn = str(dataset['atom_isos'][0]) + dataset['atom_elems'][0]
+			main_chn = str(isotopes[atoms['atom'][0]['species']]) + atoms['atom'][0]['species']
 			print "Channel " + sim_options_str["-chn"] + " not present in system, using first element as default"			
 	else:
-		main_chn = str(dataset['atom_isos'][0]) + dataset['atom_elems'][0]
-	
+		main_chn = str(isotopes[atoms['atom'][0]['species']]) + atoms['atom'][0]['species']
+		
 	spinsys_file.write(" channels\t" + main_chn + "\n")
 	
+	atom_lookup = []
+
 	#Nuclei list
 	spinsys_file.write(" nuclei\t")
-	for i in range(0, dataset['atomno']):
-		spinsys_file.write(str(dataset['atom_isos'][i]) + dataset['atom_elems'][i] + " ")
+	for a in atoms['atom']:
+		spinsys_file.write(str(isotopes[a['species']]) + a['species'] + " ")
+		atom_lookup.append({"index": a['index'], "label": a['label']})
 	spinsys_file.write("\n")
-	
+		
 	#Chemical shifts
-	for i in range(0, dataset['atomno']):
-		ms = dataset['ms'][i]
-		if ms != 0:
-			spinsys_file.write(" shift\t" + str(i+1) + " " + str(ms[0]) + "p " + str(ms[1]) + "p " + str(ms[2]) + " " + str(ms[3]) + " " + str(ms[4]) + " " + str(ms[5]) + "\n")
+	if magres.has_key('ms'):
+		for ms in magres['ms']:
+			if ms.has_key('mview_data'):
+				try:
+					i = atom_lookup.index(ms['atom'])
+				except ValueError:
+					#If the atom is not present in the system, skip
+					sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+					continue
+				spinsys_file.write(" shift\t" + str(i+1) + " " + str(ms['mview_data'][0]) + "p " + str(ms['mview_data'][1]) 
+				+ "p " + str(ms['mview_data'][2]) + " " + str(ms['mview_data'][3]) + " " + str(ms['mview_data'][4]) + " " + str(ms['mview_data'][5]) + "\n")
 	
 	#Quadrupole interactions
-	for i in range(0, dataset['atomno']):
-		efg = dataset['efg'][i]
-		if efg != 0:
-			spinsys_file.write(" quadrupole\t" + str(i+1) + " 2 " + str(efg[0]) + " " + str(efg[1]) + " " + str(efg[2]) + " " + str(efg[3]) + " " + str(efg[4]) + "\n") #Standard is order 1. Possibly will include in options
-		
+	if magres.has_key('efg'):
+		for efg in magres['efg']:
+			if efg.has_key('mview_data'):
+				try:
+					i = atom_lookup.index(efg['atom'])
+				except ValueError:				
+					sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+					continue
+				spinsys_file.write(" quadrupole\t" + str(i+1) + " 2 " + str(efg['mview_data'][0]) + " " + str(efg['mview_data'][1]) 
+				+ " " + str(efg['mview_data'][2]) + " " + str(efg['mview_data'][3]) + " " + str(efg['mview_data'][4]) + "\n") #Standard is order 1. Possibly will include in options
+
 	#Dipole interactions
-	for i in range(0, dataset['atomno']):
-		for j in range(0, i):
-			dip = dataset['dip'][i][j]
-			if dip != 0:
-				spinsys_file.write(" dipole\t" + str(j+1) + " " + str(i+1) + " " + str(dip[0]/(2.0*math.pi)) + " " + str(dip[1]) + " " + str(dip[2]) + " " + str(dip[3]) + "\n")
-				
+	if magres.has_key('dip'):
+		for dip in magres['dip']:
+			if dip.has_key('mview_data'):
+				try:
+					i = atom_lookup.index(dip['atom1'])
+					j = atom_lookup.index(dip['atom2'])
+				except ValueError:
+					sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+					continue				
+				spinsys_file.write(" dipole\t" + str(j+1) + " " + str(i+1) + " " + str(dip['mview_data'][0]/(2.0*math.pi))
+				+ " " + str(dip['mview_data'][1]) + " " + str(dip['mview_data'][2]) + " " + str(dip['mview_data'][3]) + "\n")
+					
 	#J couplings
-	for i in range(0, dataset['atomno']):
-		for j in range(0, i):
-			isc = dataset['isc'][i][j]
-			if isc != 0:
-				spinsys_file.write(" jcoupling\t" + str(j+1) + " " + str(i+1) + " " + str(isc[0]) + " " + str(isc[1]) + " " + str(isc[2]) + " " + str(isc[3]) + " " + str(isc[4]) + " " + str(isc[5]) + "\n")
+	if magres.has_key('isc'):
+		for isc in magres['isc']:
+			if isc.has_key('mview_data'):
+				try:
+					i = atom_lookup.index(isc['atom1'])
+					j = atom_lookup.index(isc['atom2'])
+				except ValueError:				
+					sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+					continue				
+				spinsys_file.write(" jcoupling\t" + str(j+1) + " " + str(i+1) + " " + str(isc['mview_data'][0]) + " " + str(isc['mview_data'][1]) 
+				+ " " + str(isc['mview_data'][2]) + " " + str(isc['mview_data'][3]) + " " + str(isc['mview_data'][4]) + " " + str(isc['mview_data'][5]) + "\n")
 	
 	spinsys_file.write("}")
 	spinsys_file.flush()
@@ -127,7 +160,5 @@ def json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_option
 	main_file.write("}")
 	
 	main_file.flush()
-	main_file.close()
-
-	
+	main_file.close()	
 	
