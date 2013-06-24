@@ -19,9 +19,9 @@
 
 import sys
 import json
-from magres.atoms import MagresAtoms
-from magres.format import MagresFile
-from jsonschema import ValidationError
+#from magres.atoms import MagresAtoms
+#from magres.format import MagresFile
+#from jsonschema import ValidationError
 
 from simpson import json_to_simpson
 from spinev  import json_to_spinev
@@ -77,11 +77,11 @@ def json_to_sim(datafile, sim_options, sim_options_num, sim_options_str):
 
 	# Load the json dataset into a MagresAtoms object and check its integrity
 	
-	try:
-		loaded_file = MagresFile(dataset)
-	except ValidationError:
-		sys.stderr.write("File \'" + datafile + "\' is not a valid MagresFile format file.\nSkipping...\n")
-		return False
+#	try:
+#		loaded_file = MagresFile(dataset)
+#	except ValidationError:
+#		sys.stderr.write("File \'" + datafile + "\' is not a valid MagresFile format file.\nSkipping...\n")
+#		return False
 	
 	# Processing. If the soft_targ key does not exist or is not recognizable, throw an error and skip the file
 	
