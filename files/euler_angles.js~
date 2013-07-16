@@ -2,7 +2,7 @@
 //by Simone Sturniolo
 //
 //Copyright 2013 Science and Technology Facilities Council
-//This program is distributed under the terms of the GNU General Public License (GNU GPL)
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
 //Please refer to the file COPYING for the text of the license
 
 //This file handles the calculation of differences between reference frames in terms of Euler angles

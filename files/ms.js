@@ -7,69 +7,51 @@
 
 //This file handles the plotting of Magnetic Shieldings
 
+var ms_last_scale = 0.01; //Saves the last used value of the scale - in the case that a zero comes out, uses this one
+
 function ms_plot_handler()
 {
 	var ms_plot_on = document.getElementById("ms_check").checked;
-	var sel = document.getElementById("sel_drop").value;
 	
 	var transl = document.getElementById("opt_transl").value;
+	var scale_ratio = parseFloat(document.getElementById("ms_ell_scale").value);
 
 	var ms_plot_jmol_script = "";
-	
-	//This part serves the purpose of roughly estimating a size scale for the ellipsoids to print
-	
-	var avg_ms = 0;
-	var avg_ms_n = 0;
-		
-	for (var i = 0; i < atom_set.mag_ms.length; ++i)
+
+	if (scale_ratio == 0.0)
 	{
-		if (is_selected(atom_set.mag_ms[i].sp, atom_set.mag_ms[i].sp_i))
-		{
-			eigval = atom_set.mag_ms_symm_eigenvals[i];
-						
-			avg_ms += Math.sqrt(eigval[0]*eigval[0] + eigval[1]*eigval[1] + eigval[2]*eigval[2]);	
-			avg_ms_n += 3;
-		}		
-		else		
-		{
-		}
-	}
-	
-	avg_ms /= avg_ms_n;
-	avg_radius = safe_jmolEvaluate(mainJmol, "{selected}.radius", 100);
-
-	var scale_ratio = avg_radius/avg_ms*1.2; //Slightly bigger than the average atom
-	
-	for (var i = 0; i < atom_set.mag_ms.length; ++i)
-	{
-		var species = atom_set.atom_species[atom_set.mag_ms[i].sp];
-		var atom = atom_set.atoms[species][atom_set.mag_ms[i].sp_i-1];
+		//This part serves the purpose of roughly estimating a size scale for the ellipsoids to print
 		
-		ms_plot_jmol_script += "ellipsoid ms_ellipsoid_" + i;
+		var ms_iso = Jmol.evaluate(mainJmol, "{selected}.tensor(\"ms\", \"isotropy\")").split('\n');
+		var avg_ms = 0.0;
+		var n = 0;
 
-		if ((ms_plot_on == true) && is_selected(atom_set.mag_ms[i].sp, atom_set.mag_ms[i].sp_i))
+		for (var i = 0; i < ms_iso.length; ++i)
 		{
-			//Note: the sp_i indices in the ms objects are the indices as present in the .magres file, that is, they begin with 1. This is why we use [atom_set.mag_ms[i].sp_i-1]
-			//in the instruction above
-			
-			start_number = atom_set.starting_nums[species];
-			
-			eigval = atom_set.mag_ms_symm_eigenvals[i];
-
-			eigv_1 = vec_scale(atom_set.mag_ms_symm_eigenvect[i][0], eigval[0]*scale_ratio);
-			eigv_2 = vec_scale(atom_set.mag_ms_symm_eigenvect[i][1], eigval[1]*scale_ratio);
-			eigv_3 = vec_scale(atom_set.mag_ms_symm_eigenvect[i][2], eigval[2]*scale_ratio);
-						
-			ms_plot_jmol_script += " axes {" + eigv_1[0] + " " + eigv_1[1] + " " + eigv_1[2] + "} {" + eigv_2[0] + " " + eigv_2[1] + " " + eigv_2[2] + "} {" + eigv_3[0] + " " + eigv_3[1] + " " + eigv_3[2] + "} center {" +
-			atom.elem + (start_number + atom_set.mag_ms[i].sp_i) + "} color translucent " + transl + " {192 96 0};";
-		}		
-		else		
-		{
-			ms_plot_jmol_script += " delete;";
+			var mi = parseFloat(ms_iso[i]);
+			if (isNaN(mi))
+				continue;
+			avg_ms += Math.abs(mi);
+			n++;
 		}
+
+		avg_ms /= n;
+		avg_radius = Jmol.evaluate(mainJmol, "{selected}.radius");
+
+		if (avg_radius == 0.0)
+			scale_ratio = 0.5;
+		else
+			scale_ratio = avg_radius/avg_ms*1.2/0.006*0.5; //Slightly bigger than the average atom
 	}
-		
+
+	//New Jmol functionality here!
+
+	ms_plot_jmol_script = "ellipsoid set \"ms\" {all} off;" 
+	if (ms_plot_on == true)
+		ms_plot_jmol_script += "ellipsoid set \"ms\" {selected} on scale " + scale_ratio + " color translucent " + transl + " {192 96 0};";
+
 	Jmol.script(mainJmol, ms_plot_jmol_script);
+	
 }
 
 function ms_label_handler()
@@ -82,19 +64,21 @@ function ms_label_handler()
 	*/
 	
 	var ms_plot_on = document.getElementById("ms_check_2").checked;
-	var sel = document.getElementById("sel_drop").value;
 
-   var shielding_ref = 0;
+    var shielding_ref = 0;
 	
 	var l_type_radios = document.getElementsByName("ms_ltype");
 	var l_type = 0;
 	
+	var ms_plot_jmol_script = "";
+
 	for (var i = 0, length = l_type_radios.length; i < length; i++) {
 		 if (l_type_radios[i].checked) {
 		 	if(l_type_radios[i].value == "shield")
 		 	{
 		 		shielding_ref = document.getElementById("ms_shield_ref").value;
 		 		l_type = -1;
+		 		ms_plot_jmol_script += "{all}.property_cs = {all}.tensor(\"ms\", \"isotropy\").mul(-1).add(" + shielding_ref + ");";
 		 	}
 		 	else
 		 	{
@@ -103,55 +87,50 @@ function ms_label_handler()
 		 }
 	}
 	
-	var ms_plot_jmol_script = "";
-	
-	ms_plot_jmol_script += "font echo 12 sans bold;";
-	
-	for (var i = 0; i < atom_set.mag_ms.length; ++i)
+	if(ms_plot_on)
 	{
-		if ((ms_plot_on == true) && is_selected(atom_set.mag_ms[i].sp, atom_set.mag_ms[i].sp_i))
+		switch(l_type)
 		{
-			//Note: the sp_i indices in the magnetic shielding objects are the indices as present in the .magres file, that is, they begin with 1. This is why we use [atom_set.mag_ms[i].sp_i-1]
-			//in the instruction above
-			var species = atom_set.atom_species[atom_set.mag_ms[i].sp];
-			var atom = atom_set.atoms[species][atom_set.mag_ms[i].sp_i-1];
-			
-			if (l_type >= 0)
-			{
-				ms_haeb = atom_set.mag_ms_haeb[i][l_type];
-			}
-			else
-			{
-				ms_haeb = shielding_ref - atom_set.mag_ms_haeb[i][0];
-			}
-						
-			ms_plot_jmol_script += "set echo ms_label_" + i + " {" + (atom.x-0.4) + " " + (atom.y-0.4) + " " + atom.z + "}; color echo {255 128 0}; echo " + ms_haeb.toFixed(2) + ";";
-		}
-		else
-		{
-			ms_plot_jmol_script += "set echo ms_label_" + i + " off;";			
+			case 0:
+				label_components[1] = "iso = %.2[property_ms_iso] ppm";
+				break; 
+			case 1:
+				label_components[1] = "aniso = %.2[property_ms_aniso] ppm";
+				break; 
+			case 2:
+				label_components[1] = "asymm = %.2[property_ms_asymm]";
+				break; 
+			case -1:
+				label_components[1] = "cs = %.2[property_cs] ppm";
+				break;
 		}
 	}
-			
+	else
+		label_components[1] = "";
+	
+	ms_plot_jmol_script += label_composer();
+
 	Jmol.script(mainJmol, ms_plot_jmol_script);
 }
 
 function ms_color_handler()
 {
 	var ms_plot_on = document.getElementById("ms_check_3").checked;
-	var sel = document.getElementById("sel_drop").value;
 	
-   var shielding_ref = 0;
+    var shielding_ref = 0;
 	
 	var l_type_radios = document.getElementsByName("ms_ltype");
 	var l_type = 0;
 	
+	var ms_plot_jmol_script = "";
+
 	for (var i = 0, length = l_type_radios.length; i < length; i++) {
 		 if (l_type_radios[i].checked) {
 		 	if(l_type_radios[i].value == "shield")
 		 	{
 		 		shielding_ref = document.getElementById("ms_shield_ref").value;
 		 		l_type = -1;
+		 		ms_plot_jmol_script += "{all}.property_cs = {all}.tensor(\"ms\", \"isotropy\").mul(-1).add(" + shielding_ref + ");";
 		 	}
 		 	else
 		 	{
@@ -160,8 +139,6 @@ function ms_color_handler()
 		 }
 	}
 	
-	var ms_plot_jmol_script = "";
-
 	//Disable efg color scale (two at the same time would only generate confusion...)
 	if (ms_plot_on == true)
 	{
@@ -173,87 +150,29 @@ function ms_color_handler()
 
 	//Color all atoms in a bleak tone 
 	
-	ms_plot_jmol_script += "color {all} {200, 200, 200};";
-	
-	//Find the max and min ms_haeb value 
-	var ms_haeb_max = NaN;
-	var ms_haeb_min = NaN;
-	
-	for (var i = 0; i < atom_set.mag_ms.length; ++i)
+
+	if(ms_plot_on)
 	{
-
-		if (l_type >= 0)
+		ms_plot_jmol_script += "color {displayed} {200, 200, 200}; color {selected} ";
+		switch(l_type)
 		{
-			ms_haeb = atom_set.mag_ms_haeb[i][l_type];
-		}
-		else
-		{
-			ms_haeb = shielding_ref - atom_set.mag_ms_haeb[i][0];
-		}
-		
-		if (is_selected(atom_set.mag_ms[i].sp, atom_set.mag_ms[i].sp_i))
-		{
-			if (isNaN(ms_haeb_max) && isNaN(ms_haeb_min))
-			{
-				ms_haeb_max = ms_haeb;
-				ms_haeb_min = ms_haeb;
-				continue;			
-			}
-			
-			if(ms_haeb_max < ms_haeb)
-			{
-				ms_haeb_max = ms_haeb;
-			}
-			else if(ms_haeb_min > ms_haeb)
-			{
-				ms_haeb_min = ms_haeb;
-			}
-		}		
-	}
-		
-	if (ms_plot_on == true)
-	{
-		for (var i = 0; i < atom_set.mag_ms.length; ++i)
-		{
-				if(is_selected(atom_set.mag_ms[i].sp, atom_set.mag_ms[i].sp_i))
-				{
-					//Note: the sp_i indices in the magnetic shielding objects are the indices as present in the .magres file, that is, they begin with 1. This is why we use [atom_set.mag_ms[i].sp_i-1]
-					//in the instruction above
-					var species = atom_set.atom_species[atom_set.mag_ms[i].sp];
-					var atom = atom_set.atoms[species][atom_set.mag_ms[i].sp_i-1];
-
-					if (l_type >= 0)
-					{
-						ms_haeb = atom_set.mag_ms_haeb[i][l_type];
-					}
-					else
-					{
-						ms_haeb = shielding_ref - atom_set.mag_ms_haeb[i][0];
-					}
-
-					var rgb_scale = color_scale((ms_haeb-ms_haeb_min)/(ms_haeb_max-ms_haeb_min));
-										
-					start_number = atom_set.starting_nums[species];					
-					
-					ms_plot_jmol_script += "color {" + atom.elem + (start_number + atom_set.mag_ms[i].sp_i) + "} {" + rgb_scale[0] + " " + rgb_scale[1] + " " + rgb_scale[2] + "};";
-				}
-				else
-				{
-				}
+			case 0:
+				ms_plot_jmol_script += "property_ms_iso;";
+				break; 
+			case 1:
+				ms_plot_jmol_script += "property_ms_aniso;";
+				break; 
+			case 2:
+				ms_plot_jmol_script += "property_ms_asymm;";
+				break; 
+			case -1:
+				ms_plot_jmol_script += "property_cs;";
+				break;
 		}
 	}
 	else
 	{
-		//Restore original colors
-		for (var s = 0; s < atom_set.atoms.length; ++s)
-		{
-			for (var a = 0; a < atom_set.atoms[s].length; ++a)
-			{
-				var el = atom_set.atoms[s][a].elem;
-				var rgb = atom_set.atom_colors[el];
-				ms_plot_jmol_script += "color {" + el + (atom_set.starting_nums[s] + a + 1) + "} {" + rgb[0] + " " + rgb[1] + " " + rgb[2] + "};";
-			}
-		}
+		ms_plot_jmol_script += "color {displayed} none;"
 	}
 			
 	Jmol.script(mainJmol, ms_plot_jmol_script);
@@ -281,4 +200,18 @@ function ms_shield_ref_handler(evt)
 	}
 }
 
+//Same, for ellipsoid scale
+
+function ms_ell_scale_handler(evt)
+{
+	//Compatibility code - see console.js for details
+	var evt = window.event || evt;
+	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
+	
+	if (myKey == 13)
+	{
+		evt.preventDefault();
+		ms_plot_handler();		
+	}
+}
 

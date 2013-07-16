@@ -116,7 +116,6 @@ function shift_btn_handler()
 	//The resetting step is necessary because reloading the molecule will clear the labels of the various ellipsoids/echoes used to plot. Without it there will be weird behaviours.
 	
 	disable_NMR_controls();
-	reset_pickings();
 	plot_update();
 	Jmol.script(mainJmol, load_script);
 	enable_NMR_controls();	
@@ -172,4 +171,20 @@ function opt_width_handler(evt)
 	}
 	
 	plot_update();
+}
+
+function label_composer()
+{
+	var label_row = "{all}.label = \"\";font label 12 sans bold; color label white;";
+
+	if (label_components[0] == "" && label_components[1] == "" && label_components[2] == "")
+		label_row += "labels off;"
+	else
+	{
+		label_row += "labels " + label_components[0] + (label_components[1] == ""? "":"|");
+		label_row += "<color [xC06000]>" + label_components[1] + "</color>" + (label_components[2] == ""? "":"|");
+		label_row += "<color [x0060C0]>" + label_components[2] + "</color>;";
+	}
+
+	return label_row;
 }

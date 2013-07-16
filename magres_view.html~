@@ -1,6 +1,6 @@
 <!DOCTYPE html  PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd" encoding="UTF-8">
 
-<!-- MagresView v 1.0.5
+<!-- MagresView v 1.0.6
 by Simone Sturniolo
 
 A JMol based web viewer for ab-initio calculated NMR parameters stored in the .magres file format.
@@ -38,7 +38,7 @@ Copy of the license can be found as a text file in the /jmol folder
 	<!-- Version definition -->
 	     
 	<script type="text/javascript" >
-		var magresview_version_number = "1.0.5";
+		var magresview_version_number = "1.0.6";
 	</script>    
    
 	<!-- Create title -->   
@@ -46,7 +46,6 @@ Copy of the license can be found as a text file in the /jmol folder
    <script type="text/javascript">
    	document.write("<title>MagresView " + magresview_version_number + "</title>");
    </script>
-    <meta content="">
     
     <style>
     
@@ -226,7 +225,10 @@ Copy of the license can be found as a text file in the /jmol folder
     		$( "#visual_accordion" ).accordion({
       		collapsible: true,
       		heightStyle: "content",
-      		autoHeight: false
+      		autoHeight: false,
+      		activate: function(event, ui) {
+      			vvleck
+				}
     		});
     		
     		$( "#options_accordion" ).accordion({
@@ -238,11 +240,12 @@ Copy of the license can be found as a text file in the /jmol folder
  		  	$("#main_tabs").tabs({
  		  		activate: function(event, ui) {
  		  			range_sphere_handler();
+ 		  			vvleck_sphere_handler();
  		  		}
  		  	});
  		  	
  		  	$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
- 		  		
+ 		  		  		
   		});  		
   		
   </script>
@@ -354,7 +357,7 @@ Copy of the license can be found as a text file in the /jmol folder
 							<br>
 							(For spin 0 nuclei choose "Inactive")
 							</div>						
-														
+																					
 							<div id="visual_accordion">
 							
 							<!-- This is a jQuery ACCORDION. It needs:
@@ -365,7 +368,7 @@ Copy of the license can be found as a text file in the /jmol folder
 									
 									-->
 
-							<h3 class="head">Visualize magnetic shielding (symmetric component)</h3>					
+							<h3 id="ms_head" class="head">Visualize magnetic shielding (symmetric component)</h3>					
 							<div>
 							<script type="text/javascript" src="files/ms.js"></script>
 							<div id="ms_ell_div" class="ctrl_left">
@@ -413,7 +416,7 @@ Copy of the license can be found as a text file in the /jmol folder
 								</div>
 								</div>
 		
-								<h3 class="head">Visualize electric field gradient</h3>					
+								<h3  id="efg_head" class="head">Visualize electric field gradient</h3>					
 								<div>
 								<script type="text/javascript" src="files/efg.js"></script>
 								Component: 
@@ -464,7 +467,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					  			</div>
 					  			</div>
 					  	
-								<h3 class="head">Visualize indirect spin-spin coupling</h3>					
+								<h3  id="isc_head" class="head">Visualize indirect spin-spin coupling</h3>					
 								<div>						
 								<script type="text/javascript" src="files/isc.js"></script>
 								Component:
@@ -490,15 +493,73 @@ Copy of the license can be found as a text file in the /jmol folder
 								</div>
 								
 								<br>
-			  				Visualized range:
-			  				<input type="text" id="isc_min" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
-			  				title="Minimum value of the isotropic J-coupling to visualize"></input>
-			  				-
-			  				<input type="text" id="isc_max" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
-			  				title="Maximum value of the isotropic J-coupling to visualize"></input>
-			  												<span style="color: rgb(128, 255, 0)">Hz</span>
+				  				Visualized range:
+				  				<input type="text" id="isc_min" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
+				  				title="Minimum value of the isotropic J-coupling to visualize"></input>
+				  				-
+				  				<input type="text" id="isc_max" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
+				  				title="Maximum value of the isotropic J-coupling to visualize"></input>
+				  												<span style="color: rgb(128, 255, 0)">Hz</span>
 		
 								</div>
+							
+							<h3  id="dip_head" class="head">Calculate dipolar couplings</h3>
+							<div>
+							<script type="text/javascript" src="files/dipolar.js"></script>
+							
+							<div id="dipolar_ctrl_left" class="ctrl_left">							
+								
+								<br>
+								
+								<input type="checkbox" id="dipolar_check" disabled="true"
+								title="Visualize numerical values for the dipolar coupling with the given direction of the magnetic field">
+								Labels (<span style="color: rgb(128, 255, 0)">Hz</span>)</input>							
+								
+								<br>
+								<br>
+								
+							<div id="dipolar_ctrl_right" class="ctrl_right">
+								Static magnetic field (crystallographic direction):
+								
+								h: <input id="h_Hdir" type="text" maxlength="3" size="3" value="0" autocomplete="off"
+		  						title="Crystallographic direction of the static field H - index h"></input>
+		  						k: <input id="k_Hdir" type="text" maxlength="3" size="3" value="0" autocomplete="off"
+		  						title="Crystallographic direction of the static field H - index k"></input>
+		  						l: <input id="l_Hdir" type="text" maxlength="3" size="3" value="1" autocomplete="off"
+		  						title="Crystallographic direction of the static field H - index l"></input>							
+							
+							</div>							
+							</div>							
+
+							Van Vleck second moment:
+							
+							<br>
+							
+							<div id="vvleck_cutoff_div">
+							Cutoff: 
+							<input type="text" id="vvleck_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true" onkeypress="vvleck_r_handler(event)"
+							title="Cutoff distance from selected atom for computation of Van Vleck second moment"></input> &Aring; of
+							<select id="vvleck_species_drop" autocomplete="off" disabled="true" onchange="vvleck_species_drop_handler()">
+								<option value="-">--</option>
+							</select>
+							<select id="vvleck_atom_drop" autocomplete="off" disabled="true" onchange="vvleck_sphere_handler()">
+								<option value="-">--</option>
+							</select>
+							&nbsp;
+							<input type="checkbox" id="vvleck_sphere_check" checked="true" autocomplete="off" disabled="true" onchange="vvleck_sphere_handler()"> Visualize range sphere
+							</div>
+							
+							<br>
+							
+							<div class="ctrl_left">
+							<input type="button" id="vvleck_iso_eval" value="Evaluate isonuclear moment" disabled="true"></input>
+							<div class="ctrl_right">
+							<input type="button" id="vvleck_tot_eval" value="Evaluate total moment" disabled="true"></input>
+							</div>
+							</div>
+							
+							</div>					
+
 					</div>
 					
 					<div id="file_gen">
@@ -516,12 +577,18 @@ Copy of the license can be found as a text file in the /jmol folder
 					</div>
 					</div>
 					<br>
+					<div class="ctrl_left">
 					Target software: <select id="soft_targ_drop" autocomplete="off" disabled="disabled"
 					title="Select the simulation software you want to use with your data - json_to_sim.py will create the appropriate files">
 						<option value="simpson">SIMPSON</option>
 						<option value="spinev">SPINEVOLUTION</option>
 					</select>
 					<br>
+					<div class="ctrl_right">
+					<input type="checkbox" id="file_newtab_check" autocomplete="off"
+					title="Output the content in a new tab instead of saving it as a file">Output in a new tab </input>
+					</div>
+					</div>
 					Atoms: <select id="sel_file_drop" autocomplete="off" disabled="disabled" onchange="sel_file_drop_handler()">
 						<option value="all">All atoms</option>
 						<option value="sel">Only selected</option>

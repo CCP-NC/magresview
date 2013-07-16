@@ -2,7 +2,7 @@
 //by Simone Sturniolo
 //
 //Copyright 2013 Science and Technology Facilities Council
-//This program is distributed under the terms of the GNU General Public License (GNU GPL)
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
 //Please refer to the file COPYING for the text of the license
 
 //This file handles the plotting of Magnetic Shieldings
@@ -36,10 +36,11 @@ function ms_plot_handler()
 	}
 	
 	avg_ms /= avg_ms_n;
-	avg_radius = safe_jmolEvaluate(mainJmol, "{selected}.radius", 100);
+//	avg_radius = safe_jmolEvaluate(mainJmol, "{selected}.radius", 100);
+	avg_radius = Jmol.evaluate(mainJmol, "{selected}.radius");
 
 	var scale_ratio = avg_radius/avg_ms*1.2; //Slightly bigger than the average atom
-	
+		
 	for (var i = 0; i < atom_set.mag_ms.length; ++i)
 	{
 		var species = atom_set.atom_species[atom_set.mag_ms[i].sp];
@@ -69,7 +70,8 @@ function ms_plot_handler()
 		}
 	}
 		
-	Jmol.script(mainJmol, ms_plot_jmol_script);
+	//Jmol.script(mainJmol, ms_plot_jmol_script);
+	
 }
 
 function ms_label_handler()

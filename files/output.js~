@@ -12,29 +12,63 @@
 function output_file_gen()
 {
 	var filetype = document.getElementById("file_type_drop").value;
-	var out_window = window.open('', 'JMol file output');
-	
-	out_window.document.write("<title>JMol file output</title>");
-	
-	//The <pre> tags are required to make the page writable as if it was a .txt file
-	out_window.document.write("<pre id=\"file_text\" style=\"white-space:pre-wrap\">");	
+	var to_newtab = document.getElementById("file_newtab_check").checked;	
+		
+	if (to_newtab == true)
+	{	
+		var out_window = window.open('', 'JMol file output');	
+		out_window.document.write("<title>JMol file output</title>");	
+		//The <pre> tags are required to make the page writable as if it was a .txt file
+		out_window.document.write("<pre id=\"file_text\" style=\"white-space:pre-wrap\">");
+		var file_destination = out_window.document;
+	}
+	else
+	{
+		var file_destination = {
+			file_str: "",
+			write: function(s) {
+				this.file_str += s;
+			}
+		}
+	}
 	
 	switch (filetype)
 	{
 		case "recap":
-			recap_file_gen(out_window);
-			out_window.document.write("</pre>");
-			out_window.document.close();
+			recap_file_gen(file_destination);
+			if (to_newtab == true)
+			{
+				file_destination.write("</pre>");
+				file_destination.close();
+				out_window.focus();
+			}
 			break;
 		case "json":
-			json_file_gen(out_window);
-			out_window.document.write("</pre>");
-			out_window.document.close();
-			out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
+			json_file_gen(file_destination);
+			if (to_newtab == true)
+			{
+				file_destination.write("</pre>");
+				file_destination.close();
+				out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
+				out_window.focus();
+			}
 			break;
 	}
 			
-	out_window.focus();
+	if(to_newtab == false)
+	{	
+		var savefile_script = "data \"label\"\n" + temp_string + "\nend \"label\";";
+		switch (filetype)
+		{
+			case "recap":
+				savefile_script += "x = data(\"label\"); write var x ?.mview; data clear; x = null;";
+				break;
+			case "json":
+				savefile_script += "x = data(\"label\"); write var x ?.json; data clear; x = null;";
+				break;
+		}
+		Jmol.script(mainJmol, savefile_script);
+	}
 }
 
 //Activate xml format specific controls only when needed
@@ -195,9 +229,8 @@ function trim_num(n, d)
 
 //A file format meant for readability
 
-function recap_file_gen(win)
+function recap_file_gen(out)
 {
-	var out = win.document;
 	//This kind of file is meant to be a recap with readability as its main purpose. As such, it will be spaced and commented as much as possible
 		
 	//Header
@@ -395,12 +428,10 @@ function recap_file_gen(win)
 
 //A file format optimized for transferring data to a Python script
 
-function json_file_gen(win)
+function json_file_gen(out)
 {
 	//A dataset containing all necessary quantities is generated, so that it might be imported later in a Python script
 	//Its structure is thought as to be compatible with Tim Green's MagresAtom Python library conventions, but has added elements to store software target, diagonalized data, etc.	
-	
-	var out = win.document;
 	
 	var data_set = {
 		
@@ -672,7 +703,7 @@ function compile_data_set(ds, ac)
 		
 	//If required, add dipolar couplings
 
-/*	if (document.getElementById("dip_file_check").checked == true)
+	if (document.getElementById("dip_file_check").checked == true)
 	{
 		ds.magres.units.push(["dip", "Hz"]);
 		ds.magres.dip = [];				
@@ -721,7 +752,7 @@ function compile_data_set(ds, ac)
 			}
 		}
 	}
-*/
+
 	
 	//If required, add indirect spin-spin couplings
 	

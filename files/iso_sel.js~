@@ -2,7 +2,7 @@
 //by Simone Sturniolo
 //
 //Copyright 2013 Science and Technology Facilities Council
-//This program is distributed under the terms of the GNU General Public License (GNU GPL)
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
 //Please refer to the file COPYING for the text of the license
 
 //This file handles the dropdown menu controlling the choice of isotopes for the various elements
@@ -135,5 +135,8 @@ function iso_drop_handler(event)
 
 			if (document.getElementById("isc_check_2").checked == true)
 				isc_label_handler();
+				
+			if (document.getElementById("dipolar_check").checked == true)
+				
 
 }

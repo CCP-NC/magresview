@@ -10,130 +10,94 @@
 //This function updates the element selection dropdown with the elements currently present in the model.
 //It's called by the "file loaded" callback of the JMol applet
 
-function elem_dropdown_update()
+function iso_drop_update()
 {
-		var dropd = document.getElementById("elem_drop");
-		
-		dropd.options.length = atom_set.atom_elems.length+1; //The additional one is the "all" option
-		
-		dropd.options[0] = new Option("All elements", "all");
+	//Quit immediately if the currently selected tab is not the one of isotope selection
 
-		var i = 1;
-		for (elem in atom_set.atom_elems)
-		{
-			dropd.options[i] = new Option(elem, elem);
-			++i;
-		}
-}
-
-function iso_dropdown_update()
-{
-		var dropd = document.getElementById("iso_drop");
-		var elem = document.getElementById("elem_drop").value;
-		var sel_index = -1;
-		
-		if (elem == "all")
-		{
-			dropd.options.length = 2;
-
-			dropd.options[0] = new Option("Default", "def");			
-			dropd.options[1] = new Option("Inactive", "inac");	
-			
-			dropd.selectedIndex = -1;		
-		}
-		else if (iso_table[elem].length == 0)
-		{
-			dropd.options.length = 1;
-
-			dropd.options[0] = new Option("Inactive", "inac");
-		}
-		else
-		{			
-			dropd.options.length = iso_table[elem].length+1; //The additional one is the "inactive" option
-
-			
-			var i = 0;
-			
-			for (iso in iso_table[elem])
-			{
-				
-				if (iso == "DEF")
-					dropd.options[i] = new Option("Default", iso_table[elem]['DEF']);
-				else
-					dropd.options[i] = new Option(iso, iso);
-				if (atom_set.atom_elems[elem] == iso)
-				{
-					sel_index = i;
-				}
-				++i;
-			}
-
-			dropd.options[i] = new Option("Inactive", "inac");			
-
-			if (sel_index == -1)
-			{
-				sel_index = i;
-			}
-			
-			dropd.selectedIndex = sel_index;
-		}
-}
-
-function elem_drop_handler(event)
-{
-	iso_dropdown_update();
-}
-
-function iso_drop_handler(event)
-{
-	var elem = document.getElementById("elem_drop").value;
-	var iso = event.target.value;
-		
-	if (elem == "all")
+	var tab_active = $("#main_tabs").tabs("option", "active");
+	if($("#main_tabs ul>li a").eq(tab_active).attr('href') != "#iso_selection")
 	{
-		if (iso == "def")
+		return;
+	}
+
+	//Get data on selection
+
+	var sel_elems = Jmol.evaluate(mainJmol, "{selected}.element").split('\n');
+	var iso_drop = document.getElementById('iso_drop');
+
+	while(sel_elems.indexOf('') >= 0)
+		sel_elems.splice(sel_elems.indexOf(''), 1);
+
+	if(sel_elems.length == 0)
+		return;
+
+	var k = 0;
+	while (!isNaN(parseInt(sel_elems[0].charAt(k))))
+		++k;
+	var el = sel_elems[0].substring(k);
+
+	//Check for the special case of Hydrogen-Deuterium-Tritium
+
+	var is_h = ("H_D_T").indexOf(el);
+
+	if (is_h >=0)
+	{
+		el = "H";
+		for (var i = 1; i < sel_elems.length; ++i)
 		{
-				for (e in atom_set.atom_elems)
-				{
-					//For every atom, we check if there's a record of that atom. If there's not, the isotope is "0", meaning it's NMR inactive.
-					//If there is, we use the default ( = most abundant) isotope
-					
-					if (iso_table[e].length == 0)
-					{
-						atom_set.atom_elems[e] = 0;
-					}
-					else
-					{
-						atom_set.atom_elems[e] = iso_table[e]['DEF'];
-					}
-				}
+			if (("H_D_T").indexOf(sel_elems[i]) < 0)
+			{
+				iso_drop.disabled = true;
+				return;
+			}
+
 		}
-		
-		if (iso == "inac")
-		{
-				for (e in atom_set.atom_elems)
-				{
-					atom_set.atom_elems[e] = 0;
-				}
-		}
+
 	}
 	else
 	{
-		if (iso == "inac")
+		for (var i = 1; i < sel_elems.length; ++i)
 		{
-			atom_set.atom_elems[elem] = 0;
-		}
-		else
-		{
-			atom_set.atom_elems[elem] = iso;
+			var k = 0;
+			while (!isNaN(parseInt(sel_elems[i].charAt(k))))
+				++k;
+			e = sel_elems[i].substring(k);
+
+			if (e != el)
+			{
+				iso_drop.disabled = true;
+				return;
+			}
 		}
 	}
-	
-	//These plotting functions are rerun to update the label numerical values to any changes made in the isotopes
-			if (document.getElementById("efg_check_2").checked == true)
-				efg_label_handler();
 
-			if (document.getElementById("isc_check_2").checked == true)
-				isc_label_handler();
+	iso_drop.disabled = false;
 
+	var iso_raw_list = Jmol.getPropertyAsArray(mainJmol, "NMRinfo", el);
+	var iso_list = [];
+
+	for (var i = 0; i < iso_raw_list.length; ++i)
+	{
+		iso_list.push(iso_raw_list[i][0]);
+	}
+
+	iso_drop.options.length = iso_list.length + 2;
+
+	for (var i=0; i < iso_list.length; ++i)
+	{
+		var iso_name = Math.abs(iso_list[i]) + el;
+		iso_drop.options[i+2] = new Option(iso_name, iso_name);
+		if (iso_list[i] < 0)
+		{
+			iso_drop.options[1] = new Option("Default (" + iso_name + ")", iso_name);
+		}
+	}
+
+}
+
+function iso_drop_handler()
+{
+	Jmol.script(mainJmol, "{selected}.element = \"" + iso_drop.value + "\"");
+	load_data_asproperty();
+	efg_label_handler();
 }

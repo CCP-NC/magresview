@@ -541,10 +541,12 @@ function haeberlen_and_order(diag)
 		ans[2] = 0
 	}
 	
-	//Check that, even after the reordering, the eigenvector set constitutes a proper right-handed set; if not, change sign to the third axis
+	//Check that, even after the reordering, the eigenvector set constitutes a proper right-handed set; if not, change sign of all axes
 	var right_hand = vec_xprod(diag[1], diag[2]);
 	if (vec_dotprod(right_hand, diag[3]) < 0.0)
 	{
+		diag[1] = vec_scale(diag[1], -1.0);
+		diag[2] = vec_scale(diag[2], -1.0);
 		diag[3] = vec_scale(diag[3], -1.0);
 	}
 	

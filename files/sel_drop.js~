@@ -2,7 +2,7 @@
 //by Simone Sturniolo
 //
 //Copyright 2013 Science and Technology Facilities Council
-//This program is distributed under the terms of the GNU General Public License (GNU GPL)
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
 //Please refer to the file COPYING for the text of the license
 
 //This file contains functions useful for handling the "select species" and "select atom" dropdown menus
@@ -15,15 +15,19 @@ function dropdown_update()
 	var dropd_atoms = document.getElementById("sel_atom_drop");
 	// This dropdown menu, used in file output, is updated at the same time 
 	var file_out_dropd = document.getElementById("range_file_species_drop");
+	// Same goes for this one (Van Vleck second moment cutoff)
+	var vvleck_dropd = document.getElementById("vvleck_species_drop");
 	
 	dropd.options.length = atom_set.speciesno + 1; //The additional one is the "all" option
 	dropd_atoms.options.length = 1;
 	file_out_dropd.options.length = atom_set.speciesno;
+	vvleck_dropd.options.length = atom_set.speciesno;
 
 	for (var s = 0; s < atom_set.speciesno; ++s)
 	{
 		dropd.options[s+1] = new Option(atom_set.atom_species_labels[s], atom_set.atom_species_labels[s]);
 		file_out_dropd.options[s] = new Option(atom_set.atom_species_labels[s], atom_set.atom_species_labels[s]);
+		vvleck_dropd.options[s] = new Option(atom_set.atom_species_labels[s], atom_set.atom_species_labels[s]);
 		
 		//The function also defines the Jmol groups corresponding to the various labels for future selection
 		var sel_script = "define ~species_label_" + atom_set.atom_species_labels[s] + " ";

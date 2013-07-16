@@ -2,7 +2,7 @@
 //by Simone Sturniolo
 //
 //Copyright 2013 Science and Technology Facilities Council
-//This program is distributed under the terms of the GNU General Public License (GNU GPL)
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
 //Please refer to the file COPYING for the text of the license
 
 //This file contains all the instructions needed to load the main Jmol applet and Jmol related controls
@@ -42,8 +42,8 @@ var main_info = {
  debug: false,
  defaultModel: "",
  isSigned: true,
- jarFile: "jmol/JmolAppletSigned.jar",
- jarPath: ".",
+ jarFile: "JmolAppletSigned.jar",
+ jarPath: "jmol",
  memoryLimit: 512,
  readyFunction: null,
  script: "",
@@ -127,6 +127,15 @@ function enable_NMR_controls()
 		isc_dropdown_update();
 	}
 	
+	document.getElementById("dipolar_check").disabled = false;
+	document.getElementById("vvleck_r").disabled = false;
+	document.getElementById("vvleck_species_drop").disabled = false;
+	document.getElementById("vvleck_atom_drop").disabled = false;
+	document.getElementById("vvleck_sphere_check").disabled = false;
+	document.getElementById("vvleck_iso_eval").disabled = false;
+	document.getElementById("vvleck_tot_eval").disabled = false;
+	
+	
 	/*
 	
 	Part of the experimental "susceptibility" feature. Unused
@@ -179,6 +188,16 @@ function disable_NMR_controls()
 			document.getElementById("isc_check").disabled = true;
 			document.getElementById("isc_check_2").checked = false;
 			document.getElementById("isc_check_2").disabled = true;
+
+			document.getElementById("dipolar_check").checked = false;
+			document.getElementById("dipolar_check").disabled = true;
+			document.getElementById("vvleck_r").disabled = true;
+			document.getElementById("vvleck_species_drop").disabled = true;
+			document.getElementById("vvleck_atom_drop").disabled = true;
+			document.getElementById("vvleck_sphere_check").checked = true;
+			document.getElementById("vvleck_sphere_check").disabled = true;
+			document.getElementById("vvleck_iso_eval").disabled = true;
+			document.getElementById("vvleck_tot_eval").disabled = true;
 
 /*
 			Part of the experimental "susceptibility" feature. Unused
@@ -259,6 +278,13 @@ function plot_update()
 		
 	if (document.getElementById("isc_check_2").checked == true)
 		isc_label_handler();
+
+	if (document.getElementById("dipolar_check").checked == true)
+	{
+		dip_label_clear();
+		dip_label_handler();
+	}
+
 }
 
 //This callback executes once the loading of the file is complete (confirmed by state == 3). It executes all those parts of the program that depend on communication with the applet
