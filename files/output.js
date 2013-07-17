@@ -70,6 +70,11 @@ function output_file_gen()
 				savefile_script += "x = data(\"out_file\"); write var x ?.json; data clear; x = null;";
 				break;
 		}
+		
+		//Necessary as the "data clear" instruction will delete all new user defined properties
+		
+		savefile_script += load_data_asproperty_script();
+		
 		Jmol.script(mainJmol, savefile_script);
 	}
 }

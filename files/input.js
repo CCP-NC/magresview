@@ -323,6 +323,12 @@ function get_atom_info()
 
 function load_data_asproperty()
 {
+	load_data_script = load_data_asproperty_script();
+	Jmol.script(mainJmol, load_data_script);
+}
+
+function load_data_asproperty_script()
+{
 	load_data_script = "";
 
 	if(atom_set.has_ms)
@@ -344,7 +350,7 @@ function load_data_asproperty()
 		}
 	}
 
-	Jmol.script(mainJmol, load_data_script);
+	return load_data_script;
 }
 
 //Heuristic check to verify whether a system can be considered a molecular crystal or not

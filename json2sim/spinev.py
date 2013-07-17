@@ -145,9 +145,9 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 			if ms.has_key('mview_data'):
 				a = ms['atom_id']
 				i = atom_lookup[a]
-				cs_file.write(str(ms['mview_data'][0]) + "\t#" + str(i) + "\n")		
+				cs_file.write(str(-ms['mview_data'][0]) + "\t#" + str(i) + "\n")		
 				if csa_file != None:
-					csa_file.write(str(i) + " " + arr_to_str(ms['mview_data'][1:]) + "\t#" + str(i) + "\n")					
+					csa_file.write(str(i) + " " + str(-ms['mview_data'][1]) + " " + arr_to_str(ms['mview_data'][2:]) + "\t#" + str(i) + "\n")					
 		cs_file.flush()
 		cs_file.close()
 		if csa_file != None:
