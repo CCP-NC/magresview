@@ -8,6 +8,8 @@
 #This software is distributed under the terms of the GNU General Public License (GNU GPL)
 #Please refer to the file COPYING for the text of the license
 
+import sys
+
 # Small function to print out data in a file
 
 def arr_to_str(arr):
@@ -95,11 +97,10 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	
 	for i in range(0, atomno):
 		a = atoms['atom'][i]
-		if not atom_lookup.has_key(a['label']):
-			atom_lookup[a['label']] = {}
-		atom_lookup[a['label']][a['index']] = i
+		if not atom_lookup.has_key(a['id']):
+			atom_lookup[a['id']] = i+1
 		cor_file.write(arr_to_str(a['position']))
-		cor_file.write(a['label'] + str(i+1) + "\n")		
+		cor_file.write("\t" + a['label'] + "\t" + str(i+1) + "\t#" + a['id'] + "\n")		
 	
 	cor_file.flush()
 	cor_file.close()
@@ -115,10 +116,10 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 			for dip in magres['dip']:
 				if dip.has_key('mview_data'):
 					if dip['mview_data'][0] != 0:
-						a1 = dip['atom1']
-						a2 = dip['atom2']
-						i = atom_lookup[a1['label']][a1['index']]
-						j = atom_lookup[a2['label']][a2['index']]
+						a1 = dip['atom1_id']
+						a2 = dip['atom2_id']
+						i = atom_lookup[a1]
+						j = atom_lookup[a2]
 						if j > i:
 							dummy_a = a2
 							dummy = j
@@ -127,8 +128,8 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 							i = dummy
 							a1 = dummy_a
 						elif j == i:
-							continue					
-						dip_switch[i-1][j] = 1
+							continue
+						dip_switch[i-2][j-1] = 1
 		
 		for i in range(0, atomno-1):
 			for j in range(0, i+1):
@@ -142,11 +143,11 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	if cs_file != None:
 		for ms in magres['ms']:
 			if ms.has_key('mview_data'):
-				a = ms['atom']
-				i = atom_lookup[a['label']][a['index']]
-				cs_file.write(str(ms['mview_data'][0]) + "\t" + a['label'] + str(i+1) + "\n")		
+				a = ms['atom_id']
+				i = atom_lookup[a]
+				cs_file.write(str(ms['mview_data'][0]) + "\t#" + str(i) + "\n")		
 				if csa_file != None:
-					csa_file.write(str(i+1) + " " + arr_to_str(ms['mview_data'][1:]) + a['label'] + str(i+1) + "\n")					
+					csa_file.write(str(i) + " " + arr_to_str(ms['mview_data'][1:]) + "\t#" + str(i) + "\n")					
 		cs_file.flush()
 		cs_file.close()
 		if csa_file != None:
@@ -157,10 +158,10 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	
 	if q_file != None:
 		for efg in magres['efg']:
-			if efg.has_key('mview_data'):
-				a = efg['atom']
-				i = atom_lookup[a['label']][a['index']]
-				q_file.write(str(i+1) + " " + str(efg['mview_data'][0]/1000.0) + " " + arr_to_str(efg['mview_data'][1:]) + a['label'] + str(i+1) + "\n") # Quadrupole constant is converted Hz -> kHz
+			if (efg.has_key('mview_data') and efg['mview_data'][0] != 0.0):
+				a = efg['atom_id']
+				i = atom_lookup[a]
+				q_file.write(str(i) + " " + str(efg['mview_data'][0]/1000.0) + " " + arr_to_str(efg['mview_data'][1:]) + "\t#" + str(i) + "\n") # Quadrupole constant is converted Hz -> kHz
 		q_file.flush()
 		q_file.close()
 		
@@ -169,10 +170,10 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	if j_file != None:
 		for isc in magres['isc']:
 			if isc.has_key('mview_data'):
-				a1 = isc['atom1']
-				a2 = isc['atom2']
-				i = atom_lookup[a1['label']][a1['index']]
-				j = atom_lookup[a2['label']][a2['index']]
+				a1 = isc['atom1_id']
+				a2 = isc['atom2_id']
+				i = atom_lookup[a1]
+				j = atom_lookup[a2]
 				if j > i:
 					dummy_a = a2
 					dummy = j
@@ -182,7 +183,7 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 					a1 = dummy_a
 				elif j == i:
 					continue
-				j_file.write(str(j+1) + " " + str(i+1) + " " + arr_to_str(isc['mview_data']) + a1['label'] + str(i+1) + "<-->" + a2['label'] + str(j+1) + "\n")
+				j_file.write(str(j) + " " + str(i) + " " + arr_to_str(isc['mview_data']) + "\t#" + str(i) + "<-->" + "\t#" + str(j) + "\n")
 		j_file.flush()
 		j_file.close()
 		
@@ -197,13 +198,14 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	
 	chn_list = []
 	for a in atoms['atom']:
-		elem = a['species']
+		a_chn = str(isotopes[a['id']][0]) + isotopes[a['id']][1]
 		is_chn = False
 		for chn in chn_list:
-			if chn == elem:
+			chn_name = str(chn[1]) + chn[0]
+			if chn_name == a_chn:
 				is_chn = True
 		if is_chn == False:
-			chn_list.append([elem, isotopes[elem]])
+			chn_list.append([isotopes[a['id']][1], isotopes[a['id']][0]])
 	
 	#If there is a preferred channel, identify it and put it at the first place
 	
@@ -229,7 +231,7 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	main_file.write("nuclei           ")
 	for a in atoms['atom']:
 		elem = a['species']
-		main_file.write(elem+str(isotopes[elem])+" ")
+		main_file.write(elem+str(isotopes[a['id']][0])+" ")
 	main_file.write("\n")
 	main_file.write("atomic_coords      " + data_name + "_spinev.cor\n")
 	if cs_file == None:

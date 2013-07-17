@@ -791,7 +791,7 @@ function compile_data_set(ds, ac, use_all)
 
 		}
 
-		ds.atoms.isotopes[a_no] = a_iso;
+		ds.atoms.isotopes[a_no] = [a_iso, a_el];
 
 		ds.atoms.atom[i/4] = {
 			id:    		a_no,
@@ -799,8 +799,7 @@ function compile_data_set(ds, ac, use_all)
 			label: 		a_label,
 			species: 	a_el,
 			position: 	a_xyz
-		};								  	       					
-
+		};
 	}
 
 	//If required, cycle through magnetic shieldings
@@ -851,6 +850,8 @@ function compile_data_set(ds, ac, use_all)
 
 	}
 
+	//If required, cycle through electric field gradients
+
 	if ((document.getElementById("efg_file_check").checked == true || use_all == true) && atom_set.has_efg)
 	{
 		ds.magres.units.push(["efg", "au"]);
@@ -895,6 +896,8 @@ function compile_data_set(ds, ac, use_all)
 		}
 
 	}
+
+	//If required, cycle through dipolar couplings
 	
 	if (document.getElementById("dip_file_check").checked == true)
 	{
@@ -928,8 +931,8 @@ function compile_data_set(ds, ac, use_all)
 			
 			ds.magres.dip[i/2] = {
 				mview_data: [a_b, a_alpha, a_beta, 0.0],
-				atom1_id: a_no_1, 
-				atom2_id: a_no_2,
+				atom1_id: "" + a_no_1, 
+				atom2_id: "" + a_no_2,
 			}
 		}
 		
@@ -952,8 +955,6 @@ function compile_data_set(ds, ac, use_all)
 		
 		nonzero_isc = 0;
 		
-		alert(isc_info);
-						
 		for (i in isc_info)
 		{
 			var a_isc = isc_info[i].split('\t');
