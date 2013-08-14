@@ -66,7 +66,7 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	if magres.has_key('efg'):
 		for efg in magres['efg']:
 			if efg.has_key('mview_data'):
-				if not flag_efg and efg['mview_data'][0] != 0:
+				if not flag_efg and efg['mview_data'][0] != 0.0:
 					flag_efg = True
 	
 	if flag_efg:

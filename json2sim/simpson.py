@@ -83,6 +83,9 @@ def json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_option
 				except KeyError:				
 					sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
 					continue
+				#Skip null couplings
+				if (efg['mview_data'][0] == 0.0):
+					continue
 				spinsys_file.write(" quadrupole\t" + str(i) + " 2 " + str(efg['mview_data'][0]) + " " + str(efg['mview_data'][1]) 
 				+ " " + str(efg['mview_data'][2]) + " " + str(efg['mview_data'][3]) + " " + str(efg['mview_data'][4]) + "\n") #Standard is order 1. Possibly will include in options
 	#Dipole interactions

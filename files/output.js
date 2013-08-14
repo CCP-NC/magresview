@@ -948,37 +948,44 @@ function compile_data_set(ds, ac, use_all)
 		ds.magres.units.push(["isc", "10^19.T^2.J^-1"]);
 		ds.magres.isc = [];
 		
-		Jmol.scriptWait(mainJmol, "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [measure(" + ch + "[i] " + ch + "[j], \"isc_hz\")];}}");
+		Jmol.scriptWait(mainJmol, "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"j\")[1])[3], \
+								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"asymmetry\")[1])[3], \
+								   \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eulerzyz\")[1])[3])[1], \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eulerzyz\")[1])[3])[2], \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eulerzyz\")[1])[3])[3],  \
+								   \"#\" + i, \"#\" + j];}}");
 		var isc_info = Jmol.evaluate(mainJmol, "isc_info").split('\n');
-		
+				
 		//Clean up the info array
 		for (l = isc_info.length-1; l >= 0; --l)
 		{
 			if (isc_info[l] == "")
 				isc_info.splice(l, 1);
 		}
-		
+				
 		nonzero_isc = 0;
 		
-		for (i in isc_info)
-		{
-			var a_isc = isc_info[i].split('\t');
-			var a_J = parseFloat(a_isc[2]);		//Coupling constant in Hz
-			var a_no_1 = parseInt(a_isc[4].substring(a_isc[4].indexOf('#')+1));
-			var a_no_2 = parseInt(a_isc[5].substring(a_isc[5].indexOf('#')+1));
+		for (var i = 0; i < isc_info.length; i += 8)
+		{			
+			var a_J = parseFloat(isc_info[i].substring(isc_info[i].indexOf('#')+1));
+			var a_eta = parseFloat(isc_info[i+1].substring(isc_info[i+1].indexOf('#')+1));
+			var a_asymm = parseFloat(isc_info[i+2].substring(isc_info[i+2].indexOf('#')+1));
+			var a_eul_a = parseFloat(isc_info[i+3].substring(isc_info[i+3].indexOf('#')+1));
+			var a_eul_b = parseFloat(isc_info[i+4].substring(isc_info[i+4].indexOf('#')+1));
+			var a_eul_c = parseFloat(isc_info[i+5].substring(isc_info[i+5].indexOf('#')+1));
+			var a_no_1 = parseInt(isc_info[i+6].substring(isc_info[i+6].indexOf('#')+1));
+			var a_no_2 = parseInt(isc_info[i+7].substring(isc_info[i+7].indexOf('#')+1));
 			
-			if (a_J == 0.0)
-				continue
-						
+			if (isNaN(a_J))
+				continue;
+
 			ds.magres.isc[nonzero_isc] = {
-				mview_data: [a_J, 0.0, 0.0, 0.0, 0.0, 0.0],				//Right now only the isotropic component of ISC is implemented!
+				mview_data: [a_J, a_eta, a_asymm, a_eul_a, a_eul_b, a_eul_c],				//Right now only the isotropic component of ISC is implemented!
 				atom1_id: a_no_1,
 				atom2_id: a_no_2,
 			}
 						
 			++nonzero_isc;
-		}
-		
+
+		}		
 	}
 
 /*

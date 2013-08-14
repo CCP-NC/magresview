@@ -207,8 +207,7 @@ function reload_butt_handler()
 		var is_magres = atom_set.is_magres;
 		reset_system();
 		atom_set.is_magres = is_magres;
-		load_string(mainJmol, last_loaded_file);
-		get_atom_info();
+		load_string(mainJmol, last_loaded_file);		
 	}
 }
 

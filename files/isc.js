@@ -90,7 +90,7 @@ function isc_label_handler()
 		document.getElementById("isc_min").disabled = true;
 		document.getElementById("isc_max").disabled = true;
 	}
-
+	
 	Jmol.script(mainJmol, isc_plot_jmol_script);
 }
 
