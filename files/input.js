@@ -164,6 +164,8 @@ function load_string(id, file_as_string)
 		default_displaygroup = displcells;
 
 		load_script += "{" + mincell + " " + maxcell + " -1}; display " + default_displaygroup + ";";
+		
+		document.getElementById("axes_check").checked = true;
 	}
 	else
 	{
