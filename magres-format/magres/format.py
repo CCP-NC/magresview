@@ -9,7 +9,7 @@ except:
 
 import sys
 
-blocks_re = re.compile(r"<(?P<block_name>.*?)>(.*?)\</(?P=block_name)>", re.M | re.S)
+blocks_re = re.compile(r"[\[<](?P<block_name>.*?)[>\]](.*?)[<\[]/(?P=block_name)[\]>]", re.M | re.S)
 
 if numpy is not None:
   def tensor33(x):
@@ -421,7 +421,7 @@ class MagresFile(object):
 
       textout = self.block_writers[block_type](data)
 
-      out.append("<%s>\n" % block_type + textout + "\n</%s>" % block_type)
+      out.append("[%s]\n" % block_type + textout + "\n[/%s]" % block_type)
 
     return "\n".join(out)
 

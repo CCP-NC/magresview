@@ -59,6 +59,12 @@ class MagresAtomEfg(object):
       return 0.0
 
   @lazyproperty
+  def eta(self):
+    evals = self.evals
+
+    return (evals[0] - evals[1])/evals[2]
+
+  @lazyproperty
   def evalsvecs(self):
     """
       The eigenvalues and eigenvectors of V, ordered according to the Haeberlen convention:
@@ -525,6 +531,13 @@ class MagresAtom(object):
     else:
       return 0.0
 
+  @property
+  def spin(self):
+    if (self.species, self.isotope) in constants.iso_spin:
+      return constants.iso_spin[(self.species, self.isotope)]
+    else:
+      return None # We don't even know what spin this isotope is.
+
 class MagresAtomImage(object):
   """
     A periodic image of a particular atom. Exactly like the underlying atom except for its position.
@@ -866,12 +879,6 @@ class MagresAtoms(MagresAtomsView):
           getattr(self, efg_type).append(magres_atom_efg)
           setattr(atom, efg_type, magres_atom_efg)
      
-      #magres_file.data_dict['magres']['isc_spin_total'] = []
-      #for magres_isc_fc in magres_file.data_dict['magres']['isc_fc']:
-      #  for magres_isc_spin in magres_file.data_dict['magres']['isc_spin']:
-      #    if magres_isc_fc['atom1'] == magres_isc_spin['atom1'] and magres_isc_fc['atom2'] == magres_isc_spin['atom2']:
-      #      new = 
-
       for tag in magres_file.data_dict['magres']:
         if not (tag.startswith("isc_") or tag == "isc"):
           continue
