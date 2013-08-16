@@ -672,7 +672,7 @@ function choice_atomexp(ac)
 			return "{displayed and within(" + ac.r + ", ({*}[" + ac.c + "]))}";
 			break;
 		case "sel_range":			
-			return "{displayed and selected and within(" + ac.r + ", ({*}[" + ac.c + "])}";
+			return "{displayed and selected and within(" + ac.r + ", ({*}[" + ac.c + "]))}";
 			break;
 		default:
 			return "{none}";

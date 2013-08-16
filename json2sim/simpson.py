@@ -29,6 +29,11 @@ def json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_option
 	isotopes = atoms['isotopes']
 	atomno = len(atoms['atom'])
 
+	# Check that the file is not empty - if it is, just quit
+	
+	if atomno <= 0:
+		sys.exit("Error - the selected input file has no atom information!")
+
 	# Spinsys file is generated
 	spinsys_file.write("spinsys {\n")
 	

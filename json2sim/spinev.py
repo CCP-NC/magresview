@@ -29,6 +29,11 @@ def json_to_spinev(dataset, data_name, sim_options, sim_options_num, sim_options
 	isotopes = atoms['isotopes']
 	atomno = len(atoms['atom'])
 	
+	# Check that the file is not empty - if it is, just quit
+
+	if atomno <= 0:
+		sys.exit("Error - the selected input file has no atom information!")
+	
 	# Dipolar switchboard is generated only if there is more than one spin in the system
 	if atomno > 1:
 		dip_file = open(data_name + "_spinev.dip", 'w')
