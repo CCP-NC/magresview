@@ -456,7 +456,7 @@ Copy of the license can be found as a text file in the /jmol folder
 												value="2" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Asymmetry </input> <br>
 												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_4"
 												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered"
-												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span style="color: rgb(0, 128, 255)">Hz</span>)</input> <br>
+												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
 											</form>
 					  			</div>
 					  			</div>
@@ -682,6 +682,16 @@ Copy of the license can be found as a text file in the /jmol folder
 					title="Choose here the convention you want to be used for the calculation of Euler angle differences. This will have no effect on the output to simulation programs">
 						<option value="zyz">Rose (ZYZ)</option>
 						<option value="zxz">Goldstein(ZXZ)</option>
+					</select>
+					</div>
+					
+					<h3 class="head">Units</h3>
+					<div>
+					Quadrupolar constants: <select id="q_units_choice"
+					title="Choose here the units to be used in quadrupolar constant labels"
+					onchange="q_units_choice_handler(event)">
+						<option value="MHz">MHz</option>
+						<option value="kHz">kHz</option>
 					</select>
 					</div>
 

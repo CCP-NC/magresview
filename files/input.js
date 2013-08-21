@@ -347,7 +347,9 @@ function load_data_asproperty_script()
 			load_data_script += "{all}.property_" + tag + "_vzz = {all}.tensor(\"" + tag + "\", \"value\"); \
 			{all}.property_" + tag + "_aniso = {all}.tensor(\"" + tag + "\", \"anisotropy\");				\
 			{all}.property_" + tag + "_asymm = {all}.tensor(\"" + tag + "\", \"asymmetry\");				\
-			{all}.property_" + tag + "_chi = {all}.tensor(\"" + tag + "\", \"chi\");";
+			{all}.property_" + tag + "_chi = {all}.tensor(\"" + tag + "\", \"chi\");					\
+			for (a in {all}) { a.property_" + tag + "_chi_MHz = a.property_" + tag + "_chi/1e6;};   \
+			for (a in {all}) { a.property_" + tag + "_chi_kHz = a.property_" + tag + "_chi/1e3;};";
 		}
 	}
 

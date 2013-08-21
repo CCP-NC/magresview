@@ -359,6 +359,8 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		euler_diff_calc_handler(); 	//Takes care also of setting the picking to measure distance
 
 		vvleck_sphere_handler();
+		
+		q_units_choice_handler();
 
 	}
 }

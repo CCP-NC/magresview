@@ -84,6 +84,8 @@ function efg_label_handler()
 	var l_type_radios = document.getElementsByName("efg_ltype");
 	var l_type = 0;
 	
+	var q_units = document.getElementById("q_units_choice").value;	
+	
 	for (var i = 0, length = l_type_radios.length; i < length; i++) {
 		 if (l_type_radios[i].checked) {
 		     l_type = parseInt(l_type_radios[i].value);
@@ -106,7 +108,7 @@ function efg_label_handler()
 				label_components[2] = "asymm = %.2[property_" + tag + "_asymm]";
 				break; 
 			case 3:
-				label_components[2] = "chi = %.2[property_" + tag + "_chi] Hz";
+				label_components[2] = "chi = %.2[property_" + tag + "_chi_" + q_units + "] " + q_units;
 				break;
 		}
 	}

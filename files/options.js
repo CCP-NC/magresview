@@ -188,3 +188,11 @@ function label_composer()
 
 	return label_row;
 }
+
+function q_units_choice_handler()
+{
+	document.getElementById("q_units").innerHTML = document.getElementById("q_units_choice").value;
+	
+	if (document.getElementById("efg_check_2").checked == true)
+		efg_label_handler();
+}
