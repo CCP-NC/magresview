@@ -336,7 +336,9 @@ function load_data_asproperty_script()
 	{
 		load_data_script += "{all}.property_ms_iso = {all}.tensor(\"ms\", \"isotropy\"); \
 		{all}.property_ms_aniso = {all}.tensor(\"ms\", \"anisotropy\");					 \
-		{all}.property_ms_asymm = {all}.tensor(\"ms\", \"asymmetry\");";
+		{all}.property_ms_asymm = {all}.tensor(\"ms\", \"asymmetry\");						 \
+		{all}.property_ms_span = {all}.tensor(\"ms\", \"span\");					 \
+		{all}.property_ms_skew = {all}.tensor(\"ms\", \"skew\");";
 	}
 
 	if(atom_set.has_efg)
@@ -347,6 +349,8 @@ function load_data_asproperty_script()
 			load_data_script += "{all}.property_" + tag + "_vzz = {all}.tensor(\"" + tag + "\", \"value\"); \
 			{all}.property_" + tag + "_aniso = {all}.tensor(\"" + tag + "\", \"anisotropy\");				\
 			{all}.property_" + tag + "_asymm = {all}.tensor(\"" + tag + "\", \"asymmetry\");				\
+			{all}.property_" + tag + "_span = {all}.tensor(\"" + tag + "\", \"span\");				\
+			{all}.property_" + tag + "_skew = {all}.tensor(\"" + tag + "\", \"skew\");				\
 			{all}.property_" + tag + "_chi = {all}.tensor(\"" + tag + "\", \"chi\");					\
 			for (a in {all}) { a.property_" + tag + "_chi_MHz = a.property_" + tag + "_chi/1e6;};   \
 			for (a in {all}) { a.property_" + tag + "_chi_kHz = a.property_" + tag + "_chi/1e3;};";

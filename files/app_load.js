@@ -361,6 +361,7 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		vvleck_sphere_handler();
 		
 		q_units_choice_handler();
+		t_conv_choice_handler();
 
 	}
 }

@@ -70,6 +70,8 @@ function ms_label_handler()
 	var l_type_radios = document.getElementsByName("ms_ltype");
 	var l_type = 0;
 	
+	var conv = document.getElementById("t_conv_choice").value;
+	
 	var ms_plot_jmol_script = "";
 
 	for (var i = 0, length = l_type_radios.length; i < length; i++) {
@@ -95,10 +97,24 @@ function ms_label_handler()
 				label_components[1] = "iso = %.2[property_ms_iso] ppm";
 				break; 
 			case 1:
-				label_components[1] = "aniso = %.2[property_ms_aniso] ppm";
+				if (conv == "haeb")
+				{
+					label_components[1] = "aniso = %.2[property_ms_aniso] ppm";
+				}
+				else 
+				{
+					label_components[1] = "span = %.2[property_ms_span] ppm";
+				}
 				break; 
 			case 2:
-				label_components[1] = "asymm = %.2[property_ms_asymm]";
+				if (conv == "haeb")
+				{
+					label_components[1] = "asymm = %.2[property_ms_asymm]";
+				}
+				else 
+				{
+					label_components[1] = "skew = %.2[property_ms_skew]";
+				}
 				break; 
 			case -1:
 				label_components[1] = "cs = %.2[property_cs] ppm";

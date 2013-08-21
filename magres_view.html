@@ -406,10 +406,10 @@ Copy of the license can be found as a text file in the /jmol folder
 												<input type="text" id="ms_shield_ref" size="3" value="0" onkeypress="ms_shield_ref_handler(event)" autocomplete="off" disabled="disabled"></input> (<span style="color: rgb(255, 128, 0)">ppm</span>) </input> <br> 
 												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_2"
 												title="Anisotropy, defined as s_3-(s_1+s_2)/2"
-												value="1" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled">Anisotropy (<span style="color: rgb(255, 128, 0)">ppm</span>)</input> <br>
+												value="1" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled"><span id="ms_par_1">Anisotropy</span> (<span style="color: rgb(255, 128, 0)">ppm</span>)</input> <br>
 												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_3"
 												title="Asymmetry, defined as (s_2-s_1)/(s_3-s_iso)" 
-												value="2" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled">Asymmetry</input> <br>
+												value="2" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled"><span id="ms_par_2">Asymmetry</span> </input> <br>
 											</form>
 								</div>
 								</div>
@@ -450,10 +450,10 @@ Copy of the license can be found as a text file in the /jmol folder
 												value="0" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled" checked>V<sub>zz</sub> (<span style="color: rgb(0, 128, 255)">au</span>)</input> <br> 
 												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_2"
 												title="Anisotropy, defined as Vzz-(Vxx+Vyy)/2"
-												value="1" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Anisotropy (<span style="color: rgb(0, 128, 255)">au</span>)</input> <br>
+												value="1" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled"><span id="efg_par_1">Anisotropy</span> (<span style="color: rgb(0, 128, 255)">au</span>)</input> <br>
 												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_3"
 												title="Asymmetry, defined as (Vyy-Vxx)/Vzz"
-												value="2" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Asymmetry </input> <br>
+												value="2" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled"><span id="efg_par_2">Asymmetry</span> </input> <br>
 												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_4"
 												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered"
 												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
@@ -685,13 +685,20 @@ Copy of the license can be found as a text file in the /jmol folder
 					</select>
 					</div>
 					
-					<h3 class="head">Units</h3>
+					<h3 class="head">Units and conventions</h3>
 					<div>
 					Quadrupolar constants: <select id="q_units_choice"
 					title="Choose here the units to be used in quadrupolar constant labels"
 					onchange="q_units_choice_handler(event)">
 						<option value="MHz">MHz</option>
 						<option value="kHz">kHz</option>
+					</select>
+					<br><br>
+					Tensor conventions: <select id="t_conv_choice"
+					title="Choose the convention you prefer for tensor representation"
+					onchange="t_conv_choice_handler(event)">
+						<option value="haeb">Haeberlen</option>
+						<option value="herber">Herzfeld-Berger</option>
 					</select>
 					</div>
 

@@ -196,3 +196,31 @@ function q_units_choice_handler()
 	if (document.getElementById("efg_check_2").checked == true)
 		efg_label_handler();
 }
+
+function t_conv_choice_handler()
+{
+	var conv = document.getElementById("t_conv_choice").value;
+	
+	if(conv == "haeb")
+	{
+		document.getElementById("ms_par_1").innerHTML = "Anisotropy";
+		document.getElementById("efg_par_1").innerHTML = "Anisotropy";
+
+		document.getElementById("ms_par_2").innerHTML = "Asymmetry";
+		document.getElementById("efg_par_2").innerHTML = "Asymmetry";
+	}
+	else 
+	{
+		document.getElementById("ms_par_1").innerHTML = "Span";
+		document.getElementById("efg_par_1").innerHTML = "Span";
+
+		document.getElementById("ms_par_2").innerHTML = "Skew";
+		document.getElementById("efg_par_2").innerHTML = "Skew";
+	}
+
+	if (document.getElementById("ms_check_2").checked == true)
+		ms_label_handler();
+	
+	if (document.getElementById("efg_check_2").checked == true)
+		efg_label_handler();
+}

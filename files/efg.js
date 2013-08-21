@@ -102,10 +102,24 @@ function efg_label_handler()
 				label_components[2] = "Vzz = %.2[property_" + tag + "_vzz] au";
 				break; 
 			case 1:
-				label_components[2] = "aniso = %.2[property_" + tag + "_aniso] au";
+				if (conv == "haeb")
+				{
+					label_components[2] = "aniso = %.2[property_" + tag + "_aniso] au";
+				}
+				else 
+				{
+					label_components[2] = "span = %.2[property_" + tag + "_span] au";
+				}
 				break; 
 			case 2:
-				label_components[2] = "asymm = %.2[property_" + tag + "_asymm]";
+				if (conv == "haeb")
+				{
+					label_components[2] = "asymm = %.2[property_" + tag + "_asymm]";
+				}
+				else 
+				{
+					label_components[2] = "skew = %.2[property_" + tag + "_skew]";
+				}
 				break; 
 			case 3:
 				label_components[2] = "chi = %.2[property_" + tag + "_chi_" + q_units + "] " + q_units;
