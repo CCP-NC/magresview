@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 # json_to_sim.py 1.1
 # 
 # by Simone Sturniolo

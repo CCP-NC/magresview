@@ -631,6 +631,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					Include:
 					<div class="ctrl_left">
 					<input type="checkbox" id="ms_file_check" autocomplete="off" disabled="disabled">Magnetic shielding</input>
+					(with reference: <input type="text" id="ms_file_ref" size = "5" autocomplete="off" disabled="disabled"></input> ppm)
 					<br>
 					<input type="checkbox" id="dip_file_check" autocomplete="off" disabled="disabled">Dipolar interactions</input>
 					<div class="ctrl_right">

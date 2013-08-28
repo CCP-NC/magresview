@@ -121,6 +121,7 @@ function json_controls_switch()
 		document.getElementById("soft_targ_drop").disabled = false;
 		if(atom_set.is_magres && atom_set.has_ms)
 			document.getElementById("ms_file_check").disabled = false;
+			document.getElementById("ms_file_ref").disabled = false;
 		if(atom_set.is_magres && atom_set.has_efg)
 			document.getElementById("efg_file_check").disabled = false;
 		
@@ -134,6 +135,7 @@ function json_controls_switch()
 	{
 		document.getElementById("soft_targ_drop").disabled = true;
 		document.getElementById("ms_file_check").disabled = true;
+		document.getElementById("ms_file_ref").disabled = true;
 		document.getElementById("efg_file_check").disabled = true;
 		document.getElementById("isc_file_check").disabled = true;
 		document.getElementById("dip_file_check").disabled = true;
@@ -812,7 +814,9 @@ function compile_data_set(ds, ac, use_all)
 	if ((document.getElementById("ms_file_check").checked == true || use_all == true) && atom_set.has_ms)
 	{
 		ds.magres.units.push(["ms", "ppm"]);
-		ds.magres.ms = [];		
+		ds.magres.ms = [];
+		
+		var ms_reference = parseFloat(document.getElementById("ms_file_ref").value);
 
 		Jmol.scriptWait(mainJmol, "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'), a.tensor('ms', 'euler" + eul_conv + "')];}");
 		var ms_info = Jmol.evaluate(mainJmol, "ms_info").split('\n');
@@ -830,6 +834,10 @@ function compile_data_set(ds, ac, use_all)
 			var a_sigma_2 = ms_info[i+2].substring(ms_info[i+2].lastIndexOf('[')+1, ms_info[i+2].lastIndexOf(']')).split(',');
 			var a_sigma_3 = ms_info[i+3].substring(ms_info[i+3].lastIndexOf('[')+1, ms_info[i+3].lastIndexOf(']')).split(',');
 			var a_iso   = parseFloat(ms_info[i+4]);
+			if (!isNaN(ms_reference))
+			{
+				a_iso = ms_reference - a_iso;
+			}
 			var a_aniso = parseFloat(ms_info[i+5]);
 			var a_asymm = parseFloat(ms_info[i+6]);
 			var a_alpha = parseFloat(ms_info[i+7]);
