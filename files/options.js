@@ -224,3 +224,12 @@ function t_conv_choice_handler()
 	if (document.getElementById("efg_check_2").checked == true)
 		efg_label_handler();
 }
+
+function snap_handler()
+{
+	snap_script = "write image ";
+	snap_script += document.getElementById("snap_w").value + " " + document.getElementById("snap_h").value;
+	snap_script += "png 2 \"?.png\"";
+
+	Jmol.script(mainJmol, snap_script);
+}

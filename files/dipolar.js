@@ -82,7 +82,7 @@ function vvleck_sphere_handler()
 	var tab_active = $("#main_tabs").tabs("option", "active");
 	var acc_active = $("#visual_accordion").accordion("option", "active");
 	if($("#main_tabs ul>li a").eq(tab_active).attr('href') == "#visual_accordion" &&					//Is the Visualization tab active?
-		acc_active == 3																				&&	//Is the Dipolar coupling accordion section active?
+		acc_active == 3															  &&					//Is the Dipolar coupling accordion section active?
 		document.getElementById("vvleck_sphere_check").checked == true)									//Is the box "Visualize range sphere" ticked?
 	{
 		var r = parseFloat(document.getElementById("vvleck_r").value);		
@@ -94,7 +94,14 @@ function vvleck_sphere_handler()
 	else
 	{
 		sphere_script += " delete;";
-		sphere_script += "display default_displaygroup;"
+		//To prevent erroneously deleting "range" ghosts
+		if ($("#main_tabs ul>li a").eq(tab_active).attr('href') != "#file_gen"    ||
+			document.getElementById("file_type_drop").value != "json" 		      ||		//Is the JSON file generation active?
+			document.getElementById("sel_file_drop").value.indexOf("range") <= -1 ||		//Is one of the 'range' options selected?
+			document.getElementById("range_sphere_check").checked == false)					//Is the box "Visualize range sphere" ticked?
+		{
+			sphere_script += "display default_displaygroup;";
+		}
 	}
 
 	Jmol.script(mainJmol, sphere_script);						       

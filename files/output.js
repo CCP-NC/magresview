@@ -186,7 +186,7 @@ function range_sphere_handler()
 	var active = $("#main_tabs").tabs("option", "active");
 	if($("#main_tabs ul>li a").eq(active).attr('href') == "#file_gen" &&				//Is the File generation tab active?
 		document.getElementById("file_type_drop").value == "json" && 					//Is the JSON file generation active?
-		document.getElementById("sel_file_drop").value.indexOf("range") > -1 &&		//Is one of the 'range' options selected?
+		document.getElementById("sel_file_drop").value.indexOf("range") > -1 &&			//Is one of the 'range' options selected?
 		document.getElementById("range_sphere_check").checked == true)					//Is the box "Visualize range sphere" ticked?
 	{
 		var r = parseFloat(document.getElementById("range_file_r").value);
@@ -200,7 +200,7 @@ function range_sphere_handler()
 		sphere_script += " delete;";
 		sphere_script += "display default_displaygroup;"
 	}
-   
+     
    Jmol.script(mainJmol, sphere_script);		
 				       
 }
