@@ -59,23 +59,43 @@ function output_file_gen()
 	}
 			
 	if(to_newtab == false)
-	{	
-		var savefile_script = "data \"out_file\"\n" + file_destination.file_str + "\nend \"out_file\";";
-		switch (filetype)
+	{
+		if (current_framework == "Java") {
+			var savefile_script = "data \"out_file\"\n" + file_destination.file_str + "\nend \"out_file\";";
+			switch (filetype)
+			{
+				case "recap":
+					savefile_script += "x = data(\"out_file\"); write var x ?.mview; data clear; x = null;";
+					break;
+				case "json":
+					savefile_script += "x = data(\"out_file\"); write var x ?.json; data clear; x = null;";
+					break;
+			}
+			
+			//Necessary as the "data clear" instruction will delete all new user defined properties
+			
+			savefile_script += load_data_asproperty_script();
+			
+			Jmol.script(mainJmol, savefile_script);
+		}
+		else
 		{
-			case "recap":
-				savefile_script += "x = data(\"out_file\"); write var x ?.mview; data clear; x = null;";
-				break;
-			case "json":
-				savefile_script += "x = data(\"out_file\"); write var x ?.json; data clear; x = null;";
-				break;
+			//Replacement solution using data URI for JSmol
+			
+			switch(filetype)
+			{
+				case "recap":
+					$("#file_download").attr("download", "magres.txt");
+					break;
+				case "json":
+					$("#file_download").attr("download", "magres.json");
+					break;				
+			}
+			
+			$("#file_download").attr("href", "data:text/plain," + file_destination.file_str);
+			$("#file_download").removeClass("hidden");
 		}
 		
-		//Necessary as the "data clear" instruction will delete all new user defined properties
-		
-		savefile_script += load_data_asproperty_script();
-		
-		Jmol.script(mainJmol, savefile_script);
 	}
 }
 
@@ -173,6 +193,27 @@ function range_file_r_handler(evt)
 	{
 		range_sphere_handler();
 	}
+}
+
+//Clears out the Download link if it's not required
+
+function download_link_handler()
+{
+	var active = $("#main_tabs").tabs("option", "active");
+	if($("#main_tabs ul>li a").eq(active).attr('href') == "#file_gen")				//Is the File generation tab active?
+	{
+		if(current_framework == "Java")
+		{
+			$("#file_download").addClass("hidden");
+			$("#file_download").attr("href", "");
+		}
+	}
+	else
+	{
+		$("#file_download").addClass("hidden");		
+		$("#file_download").attr("href", "");
+	}
+	
 }
 
 //Draws a sphere visualizing the selected range

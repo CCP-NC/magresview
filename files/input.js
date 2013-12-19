@@ -11,7 +11,16 @@
 
 var last_loaded_file = null;						//Holds the last successfully loaded file as string
 
-var supercell_border = 2;							//Standard value for the supercell's width.
+switch (current_framework) {
+	case "Java":
+		var supercell_border = 2;							//Current value for the supercell's widt, Java can handle more
+		break;
+	case "JS":
+		var supercell_border = 1;							//Current value for the supercell's widt, lighter for JSmol
+		break;
+	
+}
+
 
 var default_displaygroup = null;					//Basic Jmol atom expression for default displaying of the structure
 
@@ -45,7 +54,14 @@ var atom_set = {
 
 function reset_system()
 {
-	supercell_border = 2;
+	switch (current_framework) {
+		case "Java":
+			var supercell_border = 2;				
+			break;
+		case "JS":
+			var supercell_border = 1;
+			break;		
+	}
 
 	atom_set = {
 
@@ -92,7 +108,14 @@ function load_file(evt)
 	// Note: this won't work on Chrome if the webpage is running locally. In that case, one must launch Chrome with the flag --allow-file-access-from-files 	
 	// Check if file is running locally and browser is Chrome or Chromium
 
-	var to_load = evt.target.files[0];
+	if (!evt.target.files) {
+		var to_load = evt.originalEvent.dataTransfer.files[0];
+	}
+	else
+	{
+		var to_load = evt.target.files[0];
+	}
+	
 	var jmol_rdr = new FileReader();
 	
 	jmol_rdr.onloadend = function() {
@@ -351,9 +374,10 @@ function load_data_asproperty_script()
 			{all}.property_" + tag + "_asymm = {all}.tensor(\"" + tag + "\", \"asymmetry\");				\
 			{all}.property_" + tag + "_span = {all}.tensor(\"" + tag + "\", \"span\");				\
 			{all}.property_" + tag + "_skew = {all}.tensor(\"" + tag + "\", \"skew\");				\
-			{all}.property_" + tag + "_chi = {all}.tensor(\"" + tag + "\", \"chi\");					\
-			for (a in {all}) { a.property_" + tag + "_chi_MHz = a.property_" + tag + "_chi/1e6;};   \
-			for (a in {all}) { a.property_" + tag + "_chi_kHz = a.property_" + tag + "_chi/1e3;};";
+			a = {all}.tensor(\"" + tag + "\", \"chi\");								\
+			{all}.property_" + tag + "_chi = a;					\
+			{all}.property_" + tag + "_chi_MHz = a.div(1e6);   \
+			{all}.property_" + tag + "_chi_kHz = a.div(1e3);";
 		}
 	}
 

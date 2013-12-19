@@ -255,14 +255,14 @@ function euler_diff_calc_handler()
 		var left_color = (left_type == "ms"? "{192 96 0}":"{0 96 192}");
 		var right_color = (right_type == "ms"? "{192 96 0}":"{0 96 192}");
 
-		euldiff_init_script += "unbind _setMeasure; set picking off; bind \"left-down\" \"+: if (_ATOM != ({})) {draw id euldiff_circle_1 delete; draw id euldiff_circle_1 circle {_ATOM} mesh nofill color " + left_color +" diameter @{{_ATOM}.radius*2.5};"
+		euldiff_init_script += "set disablePopupMenu TRUE; unbind _setMeasure; set picking off; bind \"left-down\" \"+: if (_ATOM != ({})) {draw id euldiff_circle_1 delete; draw id euldiff_circle_1 circle {_ATOM} mesh nofill color " + left_color +" diameter @{{_ATOM}.radius*2.5};"
 		+ " print 'lc_" + left_type + "#_ATOM#'+{_ATOM}.tensor('" + left_type + "', 'quaternion');}\";";
 		euldiff_init_script += "bind \"right-down\" \"if (_ATOM != ({})) {draw id euldiff_circle_2 delete; draw id euldiff_circle_2 circle {_ATOM} mesh nofill color " +right_color +" diameter @{{_ATOM}.radius*2.6};"
 		+ " print 'rc_" + right_type + "#_ATOM#'+{_ATOM}.tensor('" + right_type + "', 'quaternion');}\"";
 	}
 	else
 	{
-		euldiff_init_script += "set picking measure distance; draw id euldiff_circle_1 delete; draw id euldiff_circle_2 delete;";
+		euldiff_init_script += "set disablePopupMenu FALSE; set picking measure distance; draw id euldiff_circle_1 delete; draw id euldiff_circle_2 delete;";
 	}
 	
 	Jmol.script(mainJmol, euldiff_init_script);

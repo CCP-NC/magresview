@@ -16,11 +16,12 @@ Copy of the license can be found as a text file in the /jmol folder
 
 <html>
   <head>
-  
+	<!-- JMol applet scripts loading -->
+	    
+	<script src="jsmol/JSmol.min.js"></script>
 	<!-- This section serves the purpose of loading jQuery, jQuery UI, and the graphic theme "Vader" -->	  		
   	
-    <link href="jquery/css/vader/jquery-ui.css" rel="stylesheet">
-	<script src="jquery/js/jquery-1.9.1.min.js"></script>
+	<link href="jquery/css/vader/jquery-ui.css" rel="stylesheet">
 	<script src="jquery/js/jquery-ui-1.10.0.custom.min.js"></script>
     
     <!-- jQuery is a Javascript library that allows lots of new functionalities, extending in fact the language to be more efficient and flexible.
@@ -38,7 +39,7 @@ Copy of the license can be found as a text file in the /jmol folder
 	<!-- Version definition -->
 	     
 	<script type="text/javascript" >
-		var magresview_version_number = "1.1";
+		var magresview_version_number = "1.2";
 	</script>    
    
 	<!-- Create title -->   
@@ -59,7 +60,8 @@ Copy of the license can be found as a text file in the /jmol folder
 	  height:100%;
 	  background: rgb(30, 30, 30);
 	  box-sizing: border-box;
-	 }
+	  moz-box-sizing: border-box;
+	}
 
     div.main {
     	position: relative;
@@ -85,7 +87,7 @@ Copy of the license can be found as a text file in the /jmol folder
     	padding-left: 1%;
     }
     
-	 div.consdiv {
+    div.consdiv {
     	position: absolute;
     	top: 101%;
     	left: 0;
@@ -94,7 +96,11 @@ Copy of the license can be found as a text file in the /jmol folder
     	border:	0;
     	font-size: 120%; 
     	padding-left: 1%;
-	 }    
+    }
+    
+    .hovered {
+      background-color: rgb(40,40,40);
+    }
     
     div.ctrldiv {
       position: absolute;
@@ -153,20 +159,39 @@ Copy of the license can be found as a text file in the /jmol folder
 		font-size: 80%;
 		color: rgb(245, 245, 235);
     }
+    
+    .switchdiv {
+      
+      border-radius: 15px;
+      background-color: rgb(60,60,60);
+      width: 90px;
+      height: 30px;
+      position: absolute;
+    }
+    
+    .switch_controldiv {
+      border-radius: 15px;
+      background-color: rgb(242, 154, 0);
+      color: rgb(30,30,30);
+      width: 45px;
+      height: 30px;
+      line-height: 28px;
+      position: relative;
+      left: 45px;
+      text-align: center;
+      vertical-align: middle;
+    }
 
-	h3.head {
-		font-weight: bold;
-		font-size: inherit;
-	}    
+    h3.head {
+	font-weight: bold;
+	font-size: inherit;
+    }
+    
+    a.hidden {
+      display: none;
+    }
     
     </style>
-    
-    <!-- JMol applet scripts loading -->
-    
-    <script type="text/javascript" src="jmol/JmolCore.js"></script>
-    <script type="text/javascript" src="jmol/JmolApplet.js"></script>
-    <script type="text/javascript" src="jmol/JmolControls.js"></script>
-    <script type="text/javascript" src="jmol/JmolApi.js"></script>
     
     <!-- Matrix functions -->
     
@@ -200,6 +225,10 @@ Copy of the license can be found as a text file in the /jmol folder
    
     <script type="text/javascript" src="files/options.js"></script>
     
+    <!-- Hovering handling functions -->
+    
+    <script type="text/javascript" src="files/hover.js"></script>
+    
     <!-- JSON parser and stringifier, for passing values to the Python script -->
 
 	 <script type="text/javascript" src="files/json2.js"></script>
@@ -220,7 +249,7 @@ Copy of the license can be found as a text file in the /jmol folder
       		autoHeight: false,
       		activate: function(event, ui) {
       			visual_accor_handler();
-				}
+		}
     		});
     		
     		$( "#options_accordion" ).accordion({
@@ -229,23 +258,23 @@ Copy of the license can be found as a text file in the /jmol folder
       		autoHeight: false
     		});
 
- 		  	$("#main_tabs").tabs({
- 		  		activate: function(event, ui) {
- 		  			sel_file_drop_handler();
- 		  			visual_accor_handler();
- 		  			iso_drop_update();
- 		  		}
- 		  	});
- 		  	
- 		  	$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
- 		  	$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
+		$("#main_tabs").tabs({
+			activate: function(event, ui) {
+				sel_file_drop_handler();
+				visual_accor_handler();
+				iso_drop_update();
+			}
+		});
+		
+		$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
+		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
  		  		  		
   		});  		
   		
   </script>
 
   </head>
-  <body>  
+  <body id="main_page_body">  
   <div id="main_div" class="main">
   
   <script type="text/javascript" >
@@ -262,21 +291,23 @@ Copy of the license can be found as a text file in the /jmol folder
   <img src="images/small_epsrc.png" alt="EPSRC" height="70%" style="float:right; margin: 0px;">
   </div>
 	  		<div id="main_app_div" class="appdiv">
-				<div id="main_cons_div" class="consdiv">
-		  			Console:<br>
-		  			<input id="jmol_console" type="text" size="95%" onkeyup="console_input(event)" autocomplete="off"></input>
-	  			</div>
+			      <div id="jmol_div" style="position: relative"></div>
+			      <div id="main_cons_div" class="consdiv">
+				<br>
+		  		Console:<br>
+		  		<input id="jmol_console" type="text" size="95%" onkeyup="console_input(event)" autocomplete="off"></input>
+			      </div>
+			      <br>
+			      Jmol version: &nbsp;&nbsp; <span id="j_js_switch" class="switchdiv" onclick="switch_handler(true)">
+				<div class="switch_controldiv">
+				  JS
+				</div>
+			      </span>
 	  		</div>
-
-  			<script type="text/javascript" >
-  				//Note: the += is necessary to avoid overwriting the main_cons_div  				
-  				document.getElementById("main_app_div").innerHTML += Jmol.getAppletHtml(mainJmol);
-			</script>
-
 			<div id="main_ctrl_div" class="ctrldiv">
 	
+					<div id="main_system_load_div">
 					<h3 class="head" style="color: rgb(242, 154, 0)">Load file</h3>
-					<div>
 					<div id="main_load_div" class="ctrl_left">
 							File:<br>
 							<input type="file" id="load_button" name="Browse" onchange="load_file(event)" style="text-align: right" size="15%" autocomplete="off"></input>
@@ -611,6 +642,8 @@ Copy of the license can be found as a text file in the /jmol folder
 					<div class="ctrl_right">
 					<input type="checkbox" id="file_newtab_check" autocomplete="off"
 					title="Output the content in a new tab instead of saving it as a file">Output in a new tab </input>
+					<br><br>
+					<a id="file_download" href="" class="hidden" target="_blank" download="">Download</a>
 					</div>
 					</div>
 					Atoms: <select id="sel_file_drop" autocomplete="off" disabled="disabled" onchange="sel_file_drop_handler()">
@@ -728,9 +761,16 @@ Copy of the license can be found as a text file in the /jmol folder
 		//Like for the title, this font size needs to be estimated from the window size
 		//Resize console as well to avoid superposition
 		
-		document.getElementById("jmol_console").size = Math.ceil(winW*0.6/9);
-	   document.getElementById("credit_div").style.fontSize = Math.ceil(winH/70.0) + "px";
-
+		$(document).ready( function() {
+		  $("#jmol_console").attr("size",Math.ceil(winW*0.6/9));
+		  $("#credit_div").css("fontSize", Math.ceil(winH/70.0) + "px");
+		  $("#jmol_div").html(Jmol.getAppletHtml("mainJmol",main_info));
+		  
+		  switch_handler(false);
+		  
+		  hover_load();
+		  
+		});
   </script>  
   
   A CCP-NC project by Simone Sturniolo

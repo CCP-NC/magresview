@@ -12,6 +12,8 @@
 
 var winW = 630, winH = 460;
 
+var current_framework = "JS";
+
 if (document.body && document.body.offsetWidth) {
  winW = document.body.offsetWidth;
  winH = document.body.offsetHeight;
@@ -41,9 +43,8 @@ var main_info = {
  color: "#000000",
  debug: false,
  defaultModel: "",
- isSigned: true,
- jarFile: "JmolAppletSigned.jar",
- jarPath: "jmol",
+ j2sPath: "jsmol/j2s",
+ jarPath: "jsmol/java",
  memoryLimit: 512,
  readyFunction: null,
  script: "",
@@ -54,11 +55,8 @@ var main_info = {
  echoCallback: "echo_callback", 
  pickCallback: "pick_callback",
  src: null,
- use: "Java noWebGL noHTML5 noImage",
+ use: "noWebGL HTML5 noImage",
 }   
-
-Jmol.setDocument(false);
-var mainJmol = Jmol.getApplet("mainJmol", main_info);
 
 //These "safe" functions allow to extract information from the Jmol applet safely - i.e. without the applet lagging behind the javascript and causing weird behaviour
 
@@ -347,7 +345,6 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		get_atom_info();
 		load_data_asproperty();
 
-
 		dropdown_update();
 		
 		enable_NMR_controls();
@@ -445,4 +442,50 @@ function visual_accor_handler()
 {
 	euler_diff_calc_handler();
 	vvleck_sphere_handler();
+	download_link_handler();
 }
+
+//Handler for switching between Jmol and JSmol
+
+function switch_handler(was_clicked) {
+	
+	current_state = window.location.search;
+	
+	if (was_clicked) {
+		switch (current_state) {
+			case "?_USE=SIGNED":
+				window.location.search = "";
+				current_framework = "JS";
+				break;
+			default:
+				window.location.search = "?_USE=SIGNED";
+				current_framework = "Java";
+				break;
+		}
+	}
+	else {
+		switch (current_state) {
+			case "?_USE=SIGNED":
+				current_framework = "Java";
+				break;
+			default:
+				current_framework = "JS";
+				break;
+		}
+
+	}
+	
+	switch (current_framework)
+	{
+		case "JS":
+			$(".switch_controldiv").css("left", 45);
+			break;
+		case "Java":
+			$(".switch_controldiv").css("left", 0);
+			break;
+	}
+	
+	$(".switch_controldiv").html(current_framework);
+}
+
+
