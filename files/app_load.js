@@ -443,6 +443,7 @@ function visual_accor_handler()
 	euler_diff_calc_handler();
 	vvleck_sphere_handler();
 	download_link_handler();
+	snap_download_link_handler();
 }
 
 //Handler for switching between Jmol and JSmol
@@ -486,6 +487,24 @@ function switch_handler(was_clicked) {
 	}
 	
 	$(".switch_controldiv").html(current_framework);
+	
+	
+	//A few adjustments required depending on which framework we are using
+	
+	switch (current_framework)
+	{
+		case "Java":
+			$("#snap_w").attr("disabled", false);
+			$("#snap_h").attr("disabled", false);
+			break;
+		case "JS":
+			$("#snap_w").attr("disabled", true);
+			$("#snap_h").attr("disabled", true);
+			break;
+		
+	}
+	
+	
 }
 
 

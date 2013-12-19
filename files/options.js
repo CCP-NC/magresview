@@ -227,9 +227,46 @@ function t_conv_choice_handler()
 
 function snap_handler()
 {
-	snap_script = "write image ";
-	snap_script += document.getElementById("snap_w").value + " " + document.getElementById("snap_h").value;
-	snap_script += "png 2 \"?.png\"";
+	//The way to do this is very different depending whether we're on Java or Javascript
+	
+	switch(current_framework)
+	{
+		case "Java":
+			var snap_script = "write image ";
+			snap_script += document.getElementById("snap_w").value + " " + document.getElementById("snap_h").value;
+			snap_script += "png 2 \"?.png\"";
+		
+			Jmol.script(mainJmol, snap_script);
+			break;
+		
+		case "JS":
+			//Here we use a URI to let the user download the image
+			var snap_uri = Jmol.getPropertyAsString(mainJmol, "image");
+			$("#snap_download").attr("href", "data:image;base64," + snap_uri);
+			$("#snap_download").attr("download", "snapshot.jpeg");
+			$("#snap_download").removeClass("hidden");
+			break;
+	}
+	
+}
 
-	Jmol.script(mainJmol, snap_script);
+//Clears out the Snapshot download link if it's not required
+
+function snap_download_link_handler()
+{
+	var active = $("#main_tabs").tabs("option", "active");
+	if($("#main_tabs ul>li a").eq(active).attr('href') == "#options_accordion")				//Is the Options tab active?
+	{
+		if(current_framework == "Java")
+		{
+			$("#snap_download").addClass("hidden");
+			$("#snap_download").attr("href", "");
+		}
+	}
+	else
+	{
+		$("#snap_download").addClass("hidden");		
+		$("#snap_download").attr("href", "");
+	}
+	
 }
