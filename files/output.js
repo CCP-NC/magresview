@@ -801,7 +801,7 @@ function compile_data_set(ds, ac, use_all)
 			}
 			else
 			{
-				var isos = Jmol.getPropertyAsArray(mainJmol, "NMRinfo", a_el);
+				var isos = Jmol.getPropertyAsJavaObject(mainJmol, "NMRinfo", a_el).toArray();
 				for (iso in isos)
 				{
 					if (isos[iso][0] < 0)

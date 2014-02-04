@@ -73,7 +73,7 @@ function iso_drop_update()
 
 	iso_drop.disabled = false;
 
-	var iso_raw_list = Jmol.getPropertyAsArray(mainJmol, "NMRinfo", el);
+	var iso_raw_list = Jmol.getPropertyAsJavaObject(mainJmol, "NMRinfo", el).toArray();
 	var iso_list = [];
 
 	for (var i = 0; i < iso_raw_list.length; ++i)

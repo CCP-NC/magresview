@@ -314,7 +314,7 @@ return;
 }if (fileName.endsWith ("jvxl")) {
 cmd = "isosurface ";
 return;
-}if (!fileName.toLowerCase ().endsWith (".spt")) {
+}if (!fileName.endsWith (".spt")) {
 var type = this.getFileTypeName (fileName);
 if (type == null) {
 type = J.io.JmolBinary.determineSurfaceTypeIs (this.viewer.getBufferedInputStream (fileName));

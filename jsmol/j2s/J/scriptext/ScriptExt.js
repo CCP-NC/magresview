@@ -5772,45 +5772,26 @@ return mp.addXAS (data);
 }, $fz.isPrivate = true, $fz), "J.script.ScriptMathProcessor,~A");
 $_M(c$, "evaluateDot", 
 ($fz = function (mp, args, tok, intValue) {
-switch (args.length) {
-case 1:
-if (tok == 1276117505) return false;
-case 2:
-break;
-default:
-return false;
-}
+if (args.length != 1) return false;
 var x1 = mp.getX ();
 var x2 = args[0];
 var pt2 = (x2.tok == 7 ? null : mp.ptValue (x2, false));
 var plane2 = mp.planeValue (x2);
 if (tok == 1276118018) {
 var minMax = intValue & 480;
-var isMinMax = (minMax == 32 || minMax == 64);
 switch (x1.tok) {
 case 10:
-var bs = J.script.SV.bsSelectVar (x1);
-var bs2 = null;
-var returnAtom = (isMinMax && args.length == 2 && args[1].asBoolean ());
 switch (x2.tok) {
 case 10:
-bs2 = (x2.tok == 10 ? J.script.SV.bsSelectVar (x2) : null);
-case 8:
-var atoms = this.viewer.modelSet.atoms;
-if (returnAtom) {
-var dMinMax = NaN;
-var iMinMax = 2147483647;
-for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
-var d = (bs2 == null ? atoms[i].distanceSquared (pt2) : (this.eval.getBitsetProperty (bs2, intValue, atoms[i], plane2, x1.value, null, false, x1.index, false)).floatValue ());
-if (minMax == 32 ? d >= dMinMax : d <= dMinMax) continue;
-dMinMax = d;
-iMinMax = i;
-}
-return mp.addXBs (iMinMax == 2147483647 ?  new JU.BS () : J.util.BSUtil.newAndSetBit (iMinMax));
-}if (isMinMax) {
+var bs = J.script.SV.bsSelectVar (x1);
+if (minMax == 32 || minMax == 64) {
+var bs2 = J.script.SV.bsSelectVar (x2);
 var data =  Clazz.newFloatArray (bs.cardinality (), 0);
-for (var i = bs.nextSetBit (0), p = 0; i >= 0; i = bs.nextSetBit (i + 1)) data[p++] = (this.eval.getBitsetProperty (bs2, intValue, atoms[i], plane2, x1.value, null, false, x1.index, false)).floatValue ();
-
+var atoms = this.viewer.modelSet.atoms;
+for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
+pt2 = atoms[i];
+data[i] = (this.eval.getBitsetProperty (bs2, intValue, pt2, plane2, x1.value, null, false, x1.index, false)).floatValue ();
+}
 return mp.addXAF (data);
 }return mp.addXObj (this.eval.getBitsetProperty (bs, intValue, pt2, plane2, x1.value, null, false, x1.index, false));
 }

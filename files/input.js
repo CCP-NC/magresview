@@ -242,7 +242,7 @@ function get_atom_info()
 {
 	//Get lattice parameters
 
-	var rawlattice = Jmol.getPropertyAsArray(mainJmol, "auxiliaryInfo.models[1].infoUnitCell");
+	var rawlattice = Jmol.getPropertyAsJavaObject(mainJmol, "auxiliaryInfo.models[1].infoUnitCell");
 	if (rawlattice == "")
 	{
 		//No lattice information is present!
