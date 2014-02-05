@@ -39,7 +39,7 @@ Copy of the license can be found as a text file in the /jmol folder
 	<!-- Version definition -->
 	     
 	<script type="text/javascript" >
-		var magresview_version_number = "1.2";
+		var magresview_version_number = "1.2.5";
 	</script>    
    
 	<!-- Create title -->   
@@ -623,8 +623,9 @@ Copy of the license can be found as a text file in the /jmol folder
 					
 					<div id="file_type_div" class="ctrl_left">
 					File type: <select id="file_type_drop" autocomplete="off" onchange="file_type_drop_handler()"
-					title="Select the desired file output type. Overview = a readable format for data summarizing - JSON = formatted data for use by the json_tosim.py script">
+					title="Select the desired file output type. Overview = a readable format for data summarizing - Tabulated = a data summary designed for parsing with Excel or Origin - JSON = formatted data for use by the json_tosim.py script">
 						<option value="recap">Overview</option>
+						<option value="table">Tabulated</option>
 						<option value="json">JSON</option>
 					</select>
 					<div id="file_btn_div" class="ctrl_right">

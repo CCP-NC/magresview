@@ -46,6 +46,16 @@ function output_file_gen()
 				out_window.focus();
 			}
 			break;
+		case "table":
+			table_file_gen(file_destination);
+			if (to_newtab == true)
+			{
+				file_destination.write("</pre>");
+				file_destination.close();
+				out_window.getSelection().selectAllChildren(out_window.document);		//Table document needs to be copied, so we select it all for convenience
+				out_window.focus();
+			}
+			break;						
 		case "json":
 			json_file_gen(file_destination);
 			if (to_newtab == true)
@@ -55,7 +65,7 @@ function output_file_gen()
 				out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
 				out_window.focus();
 			}
-			break;
+			break;			
 	}
 			
 	if(to_newtab == false)
@@ -152,8 +162,24 @@ function json_controls_switch()
 		document.getElementById("dip_file_check").disabled = false;
 		document.getElementById("sel_file_drop").disabled = false;
 	}
+	else if (filetype == "table")
+	{
+		document.getElementById("soft_targ_drop").disabled = true;
+		if(atom_set.is_magres && atom_set.has_ms)
+			document.getElementById("ms_file_check").disabled = false;
+			document.getElementById("ms_file_ref").disabled = false;
+		if(atom_set.is_magres && atom_set.has_efg)
+			document.getElementById("efg_file_check").disabled = false;
+		
+		if(atom_set.is_magres && atom_set.has_isc)
+			document.getElementById("isc_file_check").disabled = false; 
+		
+		document.getElementById("dip_file_check").disabled = false;
+		document.getElementById("sel_file_drop").disabled = false;
+	}
 	else
 	{
+		//Overview
 		document.getElementById("soft_targ_drop").disabled = true;
 		document.getElementById("ms_file_check").disabled = true;
 		document.getElementById("ms_file_ref").disabled = true;
@@ -164,7 +190,6 @@ function json_controls_switch()
 	}
 	
 	range_sphere_handler();
-	
 }
 
 //Updating the atom selection menu, built on the model of sel_drop_handler()
@@ -227,7 +252,7 @@ function range_sphere_handler()
 
 	var active = $("#main_tabs").tabs("option", "active");
 	if($("#main_tabs ul>li a").eq(active).attr('href') == "#file_gen" &&				//Is the File generation tab active?
-		document.getElementById("file_type_drop").value == "json" && 					//Is the JSON file generation active?
+		document.getElementById("file_type_drop").value != "recap" && 					//Is the JSON or the Tabulated file generation active?
 		document.getElementById("sel_file_drop").value.indexOf("range") > -1 &&			//Is one of the 'range' options selected?
 		document.getElementById("range_sphere_check").checked == true)					//Is the box "Visualize range sphere" ticked?
 	{
@@ -479,7 +504,7 @@ function recap_file_gen(out)
 			}
 			
 			//Write down Haeberlen parameters
-			out.write("\nHaeberlen parameters:\nV_zz: " + haeb[0] + " Hz\t\tasymm: " + haeb[1] + "\n");			
+			out.write("\nHaeberlen parameters:\nChi: " + haeb[0] + " Hz\t\tasymm: " + haeb[1] + "\n");			
 			//Write down Euler angles
 			out.write("\nEuler angles:\nalpha: " + eul_ang[0] + "\t\tbeta: " + eul_ang[1] + "\t\tgamma: " + eul_ang[2] + "\n");			
 			
@@ -604,6 +629,223 @@ function recap_file_gen(out)
 			//Dividing line
 			out.write("\n\n--------------------------------------------------------------------------------------\n\n");
 		}
+	
+	}
+
+}
+
+//A file format meant for parsing in Excel/Origin like software
+
+function table_file_gen(out)
+{
+	//This kind of file is meant to be a recap with easy parsing as its main purpose
+	
+	//Uses the same method as the json one to gather data from Jmol
+	
+	var data_set = {
+		
+		magres_view: "Made with MagresView " + magresview_version_number,		//Tagline
+		
+		soft_targ: "", //Software target of the JSON file, the final format to be generated for NMR simulation
+		
+		atoms: {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
+		
+		magres: {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
+
+	};
+	
+	//This structure holds the parameters controlling the choice of atoms to use for the file
+	
+	var atom_choice = {
+		
+		t: document.getElementById("sel_file_drop").value,				//Type of choice
+		
+		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
+
+		c: last_atom_picked,									//Center atom (for "atoms within...")
+				
+	}
+	
+	if(!compile_data_set(data_set, atom_choice, false))
+	{
+		out.close();
+		return;
+	}
+	
+	//Print crystallographic labels and compile id -> label and element table
+	
+	var i_to_info = {};
+
+	var labels = [];
+	var labels_n = {};
+	for (var i = 0; i < data_set.atoms.atom.length; ++i)
+	{
+		var sp = data_set.atoms.atom[i].label;
+		var ind = data_set.atoms.atom[i].index;
+		if (labels.indexOf(sp) < 0)
+		{
+			labels.push(sp);
+			labels_n[sp] = 1;
+		}
+		else
+		{
+			labels_n[sp] += 1;
+		}
+		
+		i_to_info[data_set.atoms.atom[i].id] = [sp, ind];
+	}
+		
+	//Print elements and compile id -> label and element table
+	var elems = [];
+	var elems_n = {};
+	for (var i = 0; i < data_set.atoms.atom.length; ++i)
+	{
+		var el = data_set.atoms.atom[i].species;
+		if (elems.indexOf(el) < 0)
+		{
+			elems.push(el);
+			elems_n[el] = 1;
+		}
+		else
+		{
+			elems_n[el] += 1;
+		}
+
+		i_to_info[data_set.atoms.atom[i].id].push(el);
+	}
+	
+	//If present, print isotropic magnetic shielding tensors
+	if ("ms" in data_set.magres)
+	{
+		out.write("Magnetic shielding data (symmetric component)\n");
+		out.write("Atom\ts_iso(ppm)\ts_aniso(ppm)\ts_asymm\ts_1(ppm)\ts_2(ppm)\ts_3(ppm)\talpha\tbeta\tgamma");
+		for (var i = 0; i < data_set.magres.ms.length; ++i)
+		{
+			var id = data_set.magres.ms[i].atom_id;
+			var sp_label = i_to_info[id][0];
+			var atom_i = i_to_info[id][1];
+			var el = i_to_info[id][2];
+			
+			var tens = data_set.magres.ms[i].sigma;
+			
+			var haeb = data_set.magres.ms[i].mview_data.slice(0, 3);
+			var eul_ang = data_set.magres.ms[i].mview_data.slice(3, 6);
+			
+			var eigvals = [0.0, 0.0, 0.0];
+			eigvals[2] = 2.0/3.0*haeb[1]+haeb[0];
+			eigvals[0] = ((3.0*haeb[0] + eigvals[2])-(haeb[2]*2.0/3.0*haeb[1]))/2.0;
+			eigvals[1] = ((3.0*haeb[0] + eigvals[2])+(haeb[2]*2.0/3.0*haeb[1]))/2.0;
+			
+			//Write down atomic label
+			out.write("\n" + sp_label + "_" + atom_i);
+			//Write down Haeberlen and eigenvalue representations and Euler angles
+			out.write("\t" + haeb[0] + "\t" + haeb[1] + "\t" + haeb[2]);
+			out.write("\t" + eigvals[0] + "\t" + eigvals[1] + "\t" + eigvals[2]);
+			out.write("\t" + eul_ang[0] + "\t" + eul_ang[1] + "\t" + eul_ang[2]);			
+		}
+		
+		out.write("\n\n");
+		
+	}
+
+	//If present, print electric field gradient tensors
+	if ("efg" in data_set.magres)
+	{
+		out.write("Electric field gradient data (symmetric component)\n");
+		out.write("Atom\tChi(Hz)\tasymm\tv_1(Hz)\tv_2(Hz)\tv_3(Hz)\talpha\tbeta\tgamma");
+		for (var i = 0; i < data_set.magres.efg.length; ++i)
+		{
+			var id = data_set.magres.efg[i].atom_id;
+			var sp_label = i_to_info[id][0];
+			var atom_i = i_to_info[id][1];
+			var el = i_to_info[id][2];
+			
+			var tens = data_set.magres.efg[i].sigma;
+			
+			var haeb = data_set.magres.efg[i].mview_data.slice(0, 2);
+			var eul_ang = data_set.magres.efg[i].mview_data.slice(2, 6);
+			
+			var eigvals = [0.0, 0.0, 0.0];
+			eigvals[2] = 2.0/3.0*haeb[0];
+			eigvals[0] = (eigvals[2]-(haeb[1]*2.0/3.0*haeb[0]))/2.0;
+			eigvals[1] = (eigvals[2]+(haeb[1]*2.0/3.0*haeb[0]))/2.0;
+			
+			//Write down atomic label
+			out.write("\n" + sp_label + "_" + atom_i);
+			//Write down Haeberlen and eigenvalue representations and Euler angles
+			out.write("\t" + haeb[0] + "\t" + haeb[1]);
+			out.write("\t" + eigvals[0] + "\t" + eigvals[1] + "\t" + eigvals[2]);
+			out.write("\t" + eul_ang[0] + "\t" + eul_ang[1] + "\t" + eul_ang[2]);			
+		}
+		
+		out.write("\n\n");
+		
+	}
+	
+	//If present, print dipolar couplings
+	if ("dip" in data_set.magres)
+	{
+		out.write("Dipolar coupling data\n")
+		out.write("Atom1\tAtom2\tD(Hz)\talpha\tbeta");
+		
+		for (var i = 0; i < data_set.magres.dip.length; ++i)
+		{
+			var id1 = data_set.magres.dip[i].atom1_id;
+			var id2 = data_set.magres.dip[i].atom2_id;
+			var sp1_label = i_to_info[id1][0];
+			var atom1_i = i_to_info[id1][1];
+			var el1 = i_to_info[id1][2];
+			var sp2_label = i_to_info[id2][0];
+			var atom2_i = i_to_info[id2][1];
+			var el2 = i_to_info[id2][2];
+			
+			var dip_c = data_set.magres.dip[i].mview_data[0];
+			var eul_ang = data_set.magres.dip[i].mview_data.slice(1, 3);
+			
+									
+			//Write down atomic labels
+			out.write("\n" + sp1_label + "_" + atom1_i + "\t" + sp2_label + "_" + atom2_i);
+			//Write down couplings and angles
+			out.write("\t" + dip_c + "\t" + eul_ang[0] + "\t" + eul_ang[1]);
+		}
+		out.write("\n\n");
+	
+	}
+	
+	//If present, print internal spin-spin couplings
+	if ("isc" in data_set.magres)
+	{
+		out.write("Internal spin-spin coupling data\n")
+		out.write("Atom1\tAtom2\tJ(Hz)\taniso(Hz)\tasymm\tj_1(Hz)\tj_2(Hz)\tj_3(Hz)\talpha\tbeta\tgamma");
+		
+		for (var i = 0; i < data_set.magres.isc.length; ++i)
+		{
+			var id1 = data_set.magres.isc[i].atom1_id;
+			var id2 = data_set.magres.isc[i].atom2_id;
+			var sp1_label = i_to_info[id1][0];
+			var atom1_i = i_to_info[id1][1];
+			var el1 = i_to_info[id1][2];
+			var sp2_label = i_to_info[id2][0];
+			var atom2_i = i_to_info[id2][1];
+			var el2 = i_to_info[id2][2];
+			
+			var haeb = data_set.magres.isc[i].mview_data.slice(0, 3);
+			var eul_ang = data_set.magres.isc[i].mview_data.slice(3, 6);
+			
+			var eigvals = [0.0, 0.0, 0.0];
+			eigvals[2] = 2.0/3.0*haeb[1]+haeb[0];
+			eigvals[0] = ((3.0*haeb[0] + eigvals[2])-(haeb[2]*2.0/3.0*haeb[1]))/2.0;
+			eigvals[1] = ((3.0*haeb[0] + eigvals[2])+(haeb[2]*2.0/3.0*haeb[1]))/2.0;
+			
+			//Write down atomic labels
+			out.write("\n" + sp1_label + "_" + atom1_i + "\t" + sp2_label + "_" + atom2_i);
+			//Write down data
+			out.write("\t" + haeb[0] + "\t" + haeb[1] + "\t" + haeb[2]);
+			out.write("\t" + eigvals[0] + "\t" + eigvals[1] + "\t" + eigvals[2]);
+			out.write("\t" + eul_ang[0] + "\t" + eul_ang[1] + "\t" + eul_ang[2]);
+		}
+		
+		out.write("\n\n");
 	
 	}
 
@@ -970,8 +1212,8 @@ function compile_data_set(ds, ac, use_all)
 		
 		Jmol.scriptWait(mainJmol, "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"j\")[1])[3], \
 								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"asymmetry\")[1])[3], \
-								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3],  \
-								   \"#\" + i, \"#\" + j];}}");
+								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3], \
+								   \"#\" + {" + ch + "[i]}.atomno, \"#\" + {" + ch + "[j]}.atomno];}}");
 		var isc_info = Jmol.evaluate(mainJmol, "isc_info").split('\n');
 				
 		//Clean up the info array
