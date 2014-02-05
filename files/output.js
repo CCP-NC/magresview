@@ -61,14 +61,14 @@ function output_file_gen()
 	if(to_newtab == false)
 	{
 		if (current_framework == "Java") {
-			var savefile_script = "data \"out_file\"\n" + file_destination.file_str + "\nend \"out_file\";";
+			var savefile_script = "";
 			switch (filetype)
 			{
 				case "recap":
-					savefile_script += "x = data(\"out_file\"); write var x ?.mview; data clear; x = null;";
+					savefile_script += "x = \"" + file_destination.file_str + "\"; write var x ?.mview; x = null;";
 					break;
 				case "json":
-					savefile_script += "x = data(\"out_file\"); write var x ?.json; data clear; x = null;";
+					savefile_script += "x = \"" + file_destination.file_str + "\"; write var x ?.json; x = null;";
 					break;
 			}
 			
@@ -91,8 +91,7 @@ function output_file_gen()
 					$("#file_download").attr("download", "magres.json");
 					break;				
 			}
-			
-			$("#file_download").attr("href", "data:text/plain," + file_destination.file_str);
+			$("#file_download").attr("href", "data:text/plain," + file_destination.file_str.replace(/\n/g, '%0A').replace(/\t/g, '%09'));
 			$("#file_download").removeClass("hidden");
 		}
 		
@@ -103,6 +102,8 @@ function output_file_gen()
 
 function file_type_drop_handler()
 {
+	//Clear out the previous file
+	$("#file_download").addClass("hidden");
 	json_controls_switch();
 }
 
@@ -352,9 +353,6 @@ function recap_file_gen(out)
 		out.write((i+1) + ":\t" + sp + " => " + labels_n[sp] + " atoms\n"); 
 	}
 	
-	delete(labels);
-	delete(labels_n);
-	
 	//Print elements and compile id -> label and element table
 	var elems = [];
 	var elems_n = {};
@@ -373,9 +371,6 @@ function recap_file_gen(out)
 
 		i_to_info[data_set.atoms.atom[i].id].push(el);
 	}
-
-	delete(elems);
-	delete(elems_n);
 	
 	out.write("\n% Number of elements: " + elems.length + "\n");
 	for (var i = 0; i < elems.length; ++i)
@@ -565,7 +560,9 @@ function recap_file_gen(out)
 			var atom2_i = i_to_info[id2][1];
 			var el2 = i_to_info[id2][2];
 			
-			var J = data_set.magres.isc[i].mview_data[0];
+			var haeb = data_set.magres.isc[i].mview_data.slice(0, 3);
+			var eul_ang = data_set.magres.isc[i].mview_data.slice(3, 6);
+			
 									
 			//Write down atomic labels
 			out.write("\n" + sp1_label + "\t" + atom1_i + "\t<==>\t" + sp2_label + "\t" + atom2_i + ":\n");
@@ -598,55 +595,15 @@ function recap_file_gen(out)
 			*/
 			
 			//Write down coupling constant
-			out.write("\nCoupling:\nJ: " + J + "Hz\n");			
+			out.write("\nCoupling:\nJ: " + haeb[0]+ " Hz\n");			
+			//Write down Haeberlen parameters
+			out.write("\nHaeberlen parameters:\neta: " + haeb[1] + " Hz\t\tasymm: " + haeb[2] + "\n");			
+			//Write down Euler angles
+			out.write("\nEuler angles:\nalpha: " + eul_ang[0] + "\t\tbeta: " + eul_ang[1] + "\t\tgamma: " + eul_ang[2] + "\n");			
 			
 			//Dividing line
 			out.write("\n\n--------------------------------------------------------------------------------------\n\n");
 		}
-		
-		/*
-		
-		for (var t = 0; t < atom_set.mag_isc_tagno; ++t)
-		{
-			out.write("\nISC component: " + atom_set.mag_isc_tags_labels[t] + "\n");
-			
-			for (var i = 0; i < atom_set.mag_isc[t].length; ++i)
-			{
-				var sp1_label = atom_set.mag_isc[t][i].sp1;
-				var atom1_i = atom_set.mag_isc[t][i].sp1_i;
-				var sp2_label = atom_set.mag_isc[t][i].sp2;
-				var atom2_i = atom_set.mag_isc[t][i].sp2_i;
-				
-				var isc = atom_set.mag_isc[t][i].tens.r;
-				
-				//Convert tensor to Hertz
-				for (var j = 0; j < isc.length; ++ j)
-				{
-					for (var k = 0; k < isc[j].length; ++k)
-					{
-						isc[j][k] = t2j_2_hertz(isc[j][k], atom_set.atoms[atom_set.atom_species[sp1_label]][atom1_i-1].elem, atom_set.atoms[atom_set.atom_species[sp2_label]][atom2_i-1].elem);
-					}
-				}
-				
-				//Write down atomic labels
-				out.write("\n" + sp1_label + "\t" + atom1_i + "\t<==>\t" + sp2_label + "\t" + atom2_i + ":\n");
-
-				//Write down coupling tensor
-				out.write("\nCoupling tensor:");
-				out.write("\n\t|" + isc[0][0] + "\t" + isc[0][1] + "\t" + isc[0][2] + "\t|");
-				out.write("\nJ:\t|" + isc[1][0] + "\t" + isc[1][1] + "\t" + isc[1][2] + "\t|\tHz");
-				out.write("\n\t|" + isc[2][0] + "\t" + isc[2][1] + "\t" + isc[2][2] + "\t|\n");
-				
-				//Write down isotropic coupling
-				out.write("\nIsotropic coupling:");
-				out.write("\nJ_iso:\t" + (isc[0][0]+isc[1][1]+isc[2][2])/3 + " Hz\n");			
-				
-				//Dividing line
-				out.write("\n\n--------------------------------------------------------------------------------------\n\n");			
-			}
-		}
-		* 
-		* */
 	
 	}
 
@@ -706,7 +663,14 @@ function choice_atomexp(ac)
 			return "{displayed}";
 			break;
 		case "unitcell":
-			return "{unitcell}";
+			if (atom_set.lattice_pars == null) {
+				//If there are no lattice parameters, "unitcell" is meaningless
+				return "{all}";
+			}
+			else
+			{
+				return "{cell=555 and not (cell=556 or cell=565 or cell=655)}";
+			}
 			break;
 		case "sel":
 			return "{displayed and selected}";
@@ -730,6 +694,10 @@ function choice_atomexp(ac)
 function compile_data_set(ds, ac, use_all)
 {
 	var eul_conv = "zyz"; //May be changed in future
+	var conv_table = {
+		"zyz": "%6",
+		"zxz": "%5" 
+	}
 	
 	ds.soft_targ = document.getElementById("soft_targ_drop").value;
 	
@@ -802,7 +770,7 @@ function compile_data_set(ds, ac, use_all)
 			else
 			{
 				var isos = Jmol.getPropertyAsJavaObject(mainJmol, "NMRinfo", a_el).toArray();
-				for (iso in isos)
+				for (var iso = 0; iso < isos.length; ++iso)
 				{
 					if (isos[iso][0] < 0)
 					{
@@ -859,7 +827,7 @@ function compile_data_set(ds, ac, use_all)
 		
 		var ms_reference = parseFloat(document.getElementById("ms_file_ref").value);
 
-		Jmol.scriptWait(mainJmol, "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'), a.tensor('ms', 'euler" + eul_conv + "')];}");
+		Jmol.scriptWait(mainJmol, "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'), a.tensor('ms', 'quaternion')];}");
 		var ms_info = Jmol.evaluate(mainJmol, "ms_info").split('\n');
 		//Clean up the info array
 		for (l in ms_info)
@@ -868,7 +836,7 @@ function compile_data_set(ds, ac, use_all)
 				ms_info.splice(l, 1);
 		}
 
-		for (var i = 0; i < ms_info.length; i += 11)
+		for (var i = 0; i < ms_info.length-7; i += 8)
 		{
 			var a_no = ms_info[i];
 			var a_sigma_1 = ms_info[i+1].substring(ms_info[i+1].lastIndexOf('[')+1, ms_info[i+1].lastIndexOf(']')).split(',');
@@ -881,9 +849,11 @@ function compile_data_set(ds, ac, use_all)
 			}
 			var a_aniso = parseFloat(ms_info[i+5]);
 			var a_asymm = parseFloat(ms_info[i+6]);
-			var a_alpha = parseFloat(ms_info[i+7]);
-			var a_beta  = parseFloat(ms_info[i+8]);
-			var a_gamma = parseFloat(ms_info[i+9]);
+			//This is very roundabout, but it supplies for the fact that in JSmol there are problem with functions returning arrays, hence "{something}.tensor('ms', 'eulerzyz')" doesn't work properly
+			var a_eulang = Jmol.evaluate(mainJmol, "(" + ms_info[i+7] + ")" + conv_table[eul_conv]).split('\n');
+			var a_alpha = parseFloat(a_eulang[0]);
+			var a_beta  = parseFloat(a_eulang[1]);
+			var a_gamma = parseFloat(a_eulang[2]);
 
 			var a_sigma = [[],[],[]];
 
@@ -894,7 +864,7 @@ function compile_data_set(ds, ac, use_all)
 				a_sigma[2][j] = parseFloat(a_sigma_3[j]);
 			}
 
-			ds.magres.ms[i/11] = {
+			ds.magres.ms[i/8] = {
 				sigma:	a_sigma,
 				mview_data: [a_iso, a_aniso, a_asymm, a_alpha, a_beta, a_gamma],
 				atom_id: a_no, 
@@ -911,7 +881,7 @@ function compile_data_set(ds, ac, use_all)
 		ds.magres.units.push(["efg", "au"]);
 		ds.magres.efg = [];		
 
-		Jmol.scriptWait(mainJmol, "efg_info = []; for (a in " + ch + ") {efg_info = efg_info or [a.atomno, a.tensor('efg', 'asymmatrix'), a.tensor('efg', 'chi'), a.tensor('efg', 'asymmetry'), a.tensor('efg', 'euler" + eul_conv + "')];}");
+		Jmol.scriptWait(mainJmol, "efg_info = []; for (a in " + ch + ") {efg_info = efg_info or [a.atomno, a.tensor('efg', 'asymmatrix'), a.tensor('efg', 'chi'), a.tensor('efg', 'asymmetry'), a.tensor('efg', 'quaternion')];}");
 		var efg_info = Jmol.evaluate(mainJmol, "efg_info").split('\n');
 		//Clean up the info array
 		for (l in efg_info)
@@ -920,7 +890,7 @@ function compile_data_set(ds, ac, use_all)
 				efg_info.splice(l, 1);
 		}
 
-		for (var i = 0; i < efg_info.length; i += 10)
+		for (var i = 0; i < efg_info.length-6; i += 7)
 		{
 			var a_no = efg_info[i];
 			var a_V_1 = efg_info[i+1].substring(efg_info[i+1].lastIndexOf('[')+1, efg_info[i+1].lastIndexOf(']')).split(',');
@@ -928,9 +898,10 @@ function compile_data_set(ds, ac, use_all)
 			var a_V_3 = efg_info[i+3].substring(efg_info[i+3].lastIndexOf('[')+1, efg_info[i+3].lastIndexOf(']')).split(',');
 			var a_chi   = parseFloat(efg_info[i+4]);
 			var a_asymm = parseFloat(efg_info[i+5]);
-			var a_alpha = parseFloat(efg_info[i+6]);
-			var a_beta  = parseFloat(efg_info[i+7]);
-			var a_gamma = parseFloat(efg_info[i+8]);
+			var a_eulang = Jmol.evaluate(mainJmol, "(" + efg_info[i+6] + ")" + conv_table[eul_conv]).split('\n');
+			var a_alpha = parseFloat(a_eulang[0]);
+			var a_beta  = parseFloat(a_eulang[1]);
+			var a_gamma = parseFloat(a_eulang[2]);
 
 			var a_V = [[],[],[]];
 
@@ -941,7 +912,7 @@ function compile_data_set(ds, ac, use_all)
 				a_V[2][j] = parseFloat(a_V_3[j]);
 			}
 
-			ds.magres.efg[i/10] = {
+			ds.magres.efg[i/7] = {
 				V: a_V,
 				mview_data: [a_chi, a_asymm, a_alpha, a_beta, a_gamma],
 				atom_id: a_no, 
@@ -999,7 +970,7 @@ function compile_data_set(ds, ac, use_all)
 		
 		Jmol.scriptWait(mainJmol, "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"j\")[1])[3], \
 								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"asymmetry\")[1])[3], \
-								   \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eulerzyz\")[1])[3])[1], \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eulerzyz\")[1])[3])[2], \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eulerzyz\")[1])[3])[3],  \
+								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3],  \
 								   \"#\" + i, \"#\" + j];}}");
 		var isc_info = Jmol.evaluate(mainJmol, "isc_info").split('\n');
 				
@@ -1012,16 +983,17 @@ function compile_data_set(ds, ac, use_all)
 				
 		nonzero_isc = 0;
 		
-		for (var i = 0; i < isc_info.length; i += 8)
+		for (var i = 0; i < isc_info.length; i += 6)
 		{			
 			var a_J = parseFloat(isc_info[i].substring(isc_info[i].indexOf('#')+1));
 			var a_eta = parseFloat(isc_info[i+1].substring(isc_info[i+1].indexOf('#')+1));
 			var a_asymm = parseFloat(isc_info[i+2].substring(isc_info[i+2].indexOf('#')+1));
-			var a_eul_a = parseFloat(isc_info[i+3].substring(isc_info[i+3].indexOf('#')+1));
-			var a_eul_b = parseFloat(isc_info[i+4].substring(isc_info[i+4].indexOf('#')+1));
-			var a_eul_c = parseFloat(isc_info[i+5].substring(isc_info[i+5].indexOf('#')+1));
-			var a_no_1 = parseInt(isc_info[i+6].substring(isc_info[i+6].indexOf('#')+1));
-			var a_no_2 = parseInt(isc_info[i+7].substring(isc_info[i+7].indexOf('#')+1));
+			var a_eulang = Jmol.evaluate(mainJmol, "(" + isc_info[i+3].substring(isc_info[i+3].indexOf('#')+1) + ")" + conv_table[eul_conv]).split('\n');
+			var a_eul_a = parseFloat(a_eulang[0]);
+			var a_eul_b = parseFloat(a_eulang[1]);
+			var a_eul_c = parseFloat(a_eulang[2]);
+			var a_no_1 = parseInt(isc_info[i+4].substring(isc_info[i+4].indexOf('#')+1));
+			var a_no_2 = parseInt(isc_info[i+5].substring(isc_info[i+5].indexOf('#')+1));
 			
 			if (isNaN(a_J))
 				continue;
@@ -1036,81 +1008,6 @@ function compile_data_set(ds, ac, use_all)
 
 		}		
 	}
-
-/*
-	
-	//If required, add indirect spin-spin couplings
-	
-	if (document.getElementById("isc_file_check").checked == true && atom_set.mag_isc.length > 0)
-	{
-		ds.magres.units.push(["isc", atom_set.units["isc"]]);
-		ds.magres.isc = [];
-		
-		for (var i = 0; i < atom_set.mag_isc[0].length; ++i)
-		{
-				var s1 = atom_set.atom_species[atom_set.mag_isc[0][i].sp1];
-				var a1 = atom_set.mag_isc[0][i].sp1_i-1;
-				var s2 = atom_set.atom_species[atom_set.mag_isc[0][i].sp2];
-				var a2 = atom_set.mag_isc[0][i].sp2_i-1;
-				var label1 = atom_set.mag_isc[0][i].sp1;
-				var label2 = atom_set.mag_isc[0][i].sp2;	
-				
-				var sigma = atom_set.mag_isc[0][i].tens.r;
-				var isc_split_matr = symm_antisymm(sigma);   //Split the matrix into symmetric and anti-symmetric parts				
-				var isc_diag = symm_matr_diag_card(isc_split_matr[0]);
-				var isc_haeb = haeberlen_and_order(isc_diag); 			//Store the values for isotropic component, anisotropy and asymmetry and reorder the eigenvalues and eigenvectors
-				var isc_euler = euler_diff(isc_diag[1], isc_diag[2], isc_diag[3], [1, 0, 0], [0, 1, 0], [0, 0, 1], eul_conv);
-				//Contents to store: [isotropic value, anisotropy, asimmetry, alpha, beta, gamma]
-				var mview_data = [t2j_2_hertz(isc_haeb[0], atom_set.atoms[s1][a1].elem, atom_set.atoms[s2][a2].elem), t2j_2_hertz(2.0/3.0*isc_haeb[1], atom_set.atoms[s1][a1].elem, atom_set.atoms[s2][a2].elem), isc_haeb[2], rad2deg(isc_euler[0]),  rad2deg(isc_euler[1]),  rad2deg(isc_euler[2])]; 
-				
-				//Interactions of an atom with itself are an artifact and ignored by default
-				
-				if (s1 == s2 && a1 == a2)
-				{
-					continue;
-				}
-
-				//Since we have to calculate all possible interactions between all atoms included in the sphere of radius r (for the case of a "range" choice), the loop is doubled
-				
-				for (var k_a1 = -k_a_max; k_a1 <= k_a_max; ++k_a1)
-				{
-					for (var k_b1 = -k_b_max; k_b1 <= k_b_max; ++k_b1)
-					{
-						for (var k_c1 = -k_c_max; k_c1 <= k_c_max; ++k_c1)
-						{
-							for (var k_a2 = -k_a_max; k_a2 <= k_a_max; ++k_a2)
-							{
-								for (var k_b2 = -k_b_max; k_b2 <= k_b_max; ++k_b2)
-								{
-									for (var k_c2 = -k_c_max; k_c2 <= k_c_max; ++k_c2)
-									{
-										var s_i_1 = atom_map[s1][a1][k_a1+k_a_max][k_b1+k_b_max][k_c1+k_c_max][1]; var s_i_2 = atom_map[s2][a2][k_a2+k_a_max][k_b2+k_b_max][k_c2+k_c_max][1];
-										if (s_i_1 > -1 && s_i_2 > -1)
-										{
-											ds.magres.isc.push({
-												sigma: sigma,
-												mview_data: mview_data,
-												atom1: {
-													index: s_i_1,
-													label: label1
-												},
-												atom2: {
-													index: s_i_2,
-													label: label2
-												}												
-											});
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-
-		}
-	}
-
-	*/
 	
 	return true;
 }

@@ -289,6 +289,8 @@ function euldiff_butt_handler()
 
 	if (atom1 == atom2 && type1 == type2)
 		return;
+	
+	alert("(" + quat1 + " \\ " + quat2 + ")" + conv_table[eul_conv]);
 
 	eul = Jmol.evaluate(mainJmol, "(" + quat1 + " \\ " + quat2 + ")" + conv_table[eul_conv]).split('\n');
 

@@ -360,6 +360,8 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		q_units_choice_handler();
 		t_conv_choice_handler();
 
+		//Just to make sure that no one downloads a file belonging to another system
+		$("#file_download").addClass("hidden");		
 	}
 }
 
