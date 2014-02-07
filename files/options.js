@@ -230,10 +230,24 @@ function t_conv_choice_handler()
 {
 	var conv = document.getElementById("t_conv_choice").value;
 	
+	var ms_title_1_haeb  = "Anisotropy, defined as s_3-(s_1+s_2)/2";
+	var ms_title_2_haeb  = "Asymmetry, defined as (s_2-s_1)/(s_3-s_iso)";
+	var efg_title_1_haeb = "Anisotropy, defined as Vzz-(Vxx+Vyy)/2";
+	var efg_title_2_haeb = "Asymmetry, defined as (Vyy-Vxx)/Vzz";
+	var ms_title_1_herz  = "Span, defined as s_1-s_3";
+	var ms_title_2_herz  = "Skew, defined as 3(s_2-s_iso)/(s1-s3)";
+	var efg_title_1_herz = "Span, defined as Vxx-Vzz";
+	var efg_title_2_herz = "Skew, defined as 3Vyy/(Vxx-Vzz)";
+	
 	if(conv == "haeb")
 	{
 		document.getElementById("ms_par_1").innerHTML = "Anisotropy";
 		document.getElementById("efg_par_1").innerHTML = "Anisotropy";
+		
+		document.getElementById("ms_ltype_2").title  = ms_title_1_haeb;
+		document.getElementById("efg_ltype_2").title = efg_title_1_haeb;
+		document.getElementById("ms_ltype_3").title  = ms_title_2_haeb;
+		document.getElementById("efg_ltype_3").title = efg_title_2_haeb;
 
 		document.getElementById("ms_par_2").innerHTML = "Asymmetry";
 		document.getElementById("efg_par_2").innerHTML = "Asymmetry";
@@ -242,6 +256,11 @@ function t_conv_choice_handler()
 	{
 		document.getElementById("ms_par_1").innerHTML = "Span";
 		document.getElementById("efg_par_1").innerHTML = "Span";
+		
+		document.getElementById("ms_ltype_2").title  = ms_title_1_herz;
+		document.getElementById("efg_ltype_2").title = efg_title_1_herz;
+		document.getElementById("ms_ltype_3").title  = ms_title_2_herz;
+		document.getElementById("efg_ltype_3").title = efg_title_2_herz;
 
 		document.getElementById("ms_par_2").innerHTML = "Skew";
 		document.getElementById("efg_par_2").innerHTML = "Skew";

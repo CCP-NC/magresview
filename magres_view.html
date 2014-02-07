@@ -418,7 +418,7 @@ Copy of the license can be found as a text file in the /jmol folder
 							<div id="ms_label_div" class="ctrl_right">
 		
 											<input type="checkbox" id="ms_check_2"
-											title="Visualize numerical values for quantities identifying the shielding tensor. Haeberlen convention used for the definitions, eigenvalues ordering is |s_3-s_iso|>|s_1-s_iso|>|s_2-s_iso|."
+											title="Visualize numerical values for quantities identifying the shielding tensor. Eigenvalue ordering is |s_3-s_iso|>|s_1-s_iso|>|s_2-s_iso|."
 											onchange="ms_label_handler(event)" autocomplete="off" disabled="disabled">
 											Labels</input>
 		
@@ -467,7 +467,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					  			<div id="efg_label_div" class="ctrl_right">
 		
 					  						<input type="checkbox" id="efg_check_2" 
-					  						title="Visualize numerical values for quantities identifying the electric field gradient tensor. Haeberlen convention used for the definitions, eigenvalues ordering is |Vzz|>|Vxx|>|Vyy|."
+					  						title="Visualize numerical values for quantities identifying the electric field gradient tensor. Eigenvalue ordering is |Vzz|>|Vxx|>|Vyy|."
 					  						onchange="efg_label_handler(event)" autocomplete="off" disabled="disabled">
 					  						Labels</input>
 		
@@ -739,7 +739,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					<br><br>
 					Tensor conventions: <select id="t_conv_choice"
 					title="Choose the convention you prefer for tensor representation"
-					onchange="t_conv_choice_handler(event)">
+					onchange="t_conv_choice_handler(event)" autocomplete="off">
 						<option value="haeb">Haeberlen</option>
 						<option value="herber">Herzfeld-Berger</option>
 					</select>
