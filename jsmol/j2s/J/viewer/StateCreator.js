@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.viewer");
-Clazz.load (["J.viewer.JmolStateCreator", "java.util.Hashtable"], "J.viewer.StateCreator", ["java.lang.Boolean", "$.Float", "java.util.Arrays", "$.Date", "javajs.awt.Font", "JU.BS", "$.List", "$.P3", "$.PT", "$.SB", "$.V3", "J.constant.EnumAxesMode", "$.EnumPalette", "$.EnumStereoMode", "$.EnumStructure", "$.EnumVdw", "J.modelset.Atom", "$.AtomCollection", "$.Bond", "$.BondSet", "J.shape.Shape", "J.util.BSUtil", "$.C", "$.ColorEncoder", "$.Escape", "$.JmolEdge", "$.Logger", "J.viewer.AnimationManager", "$.GlobalSettings", "$.JC", "$.StateManager", "$.Viewer"], function () {
+Clazz.load (["J.viewer.JmolStateCreator", "java.util.Hashtable"], "J.viewer.StateCreator", ["java.lang.Boolean", "$.Float", "java.util.Arrays", "$.Date", "javajs.awt.Font", "JU.BS", "$.List", "$.P3", "$.PT", "$.SB", "$.V3", "J.constant.EnumAxesMode", "$.EnumPalette", "$.EnumStereoMode", "$.EnumStructure", "$.EnumVdw", "J.modelset.Atom", "$.AtomCollection", "$.Bond", "$.BondSet", "J.shape.Shape", "J.util.BSUtil", "$.C", "$.ColorEncoder", "$.Escape", "$.JmolEdge", "$.Logger", "J.viewer.GlobalSettings", "$.JC", "$.StateManager", "$.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.viewer = null;
 this.temp = null;
@@ -28,9 +28,9 @@ var s =  new JU.SB ();
 var sfunc = (isAll ?  new JU.SB ().append ("function _setState() {\n") : null);
 if (isAll) s.append ("# Jmol state version " + J.viewer.Viewer.getJmolVersion () + ";\n");
 if (this.viewer.isApplet () && isAll) {
-J.viewer.StateCreator.appendCmd (s, "# fullName = " + J.util.Escape.eS (this.viewer.fullName));
-J.viewer.StateCreator.appendCmd (s, "# documentBase = " + J.util.Escape.eS (this.viewer.appletDocumentBase));
-J.viewer.StateCreator.appendCmd (s, "# codeBase = " + J.util.Escape.eS (this.viewer.appletCodeBase));
+J.viewer.StateCreator.appendCmd (s, "# fullName = " + JU.PT.esc (this.viewer.fullName));
+J.viewer.StateCreator.appendCmd (s, "# documentBase = " + JU.PT.esc (J.viewer.Viewer.appletDocumentBase));
+J.viewer.StateCreator.appendCmd (s, "# codeBase = " + JU.PT.esc (J.viewer.Viewer.appletCodeBase));
 s.append ("\n");
 }var global = this.viewer.global;
 if (isAll || type.equalsIgnoreCase ("windowState")) s.append (this.getWindowState (sfunc, width, height));
@@ -41,7 +41,7 @@ if (isAll || type.equalsIgnoreCase ("dataState")) s.append (this.getDataState (s
 if (isAll || type.equalsIgnoreCase ("modelState")) s.append (this.getModelState (sfunc, true, this.viewer.getBooleanProperty ("saveProteinStructureState")));
 if (isAll || type.equalsIgnoreCase ("colorState")) s.append (this.getColorState (this.viewer.colorManager, sfunc));
 if (isAll || type.equalsIgnoreCase ("frameState")) s.append (this.getAnimState (this.viewer.animationManager, sfunc));
-if (isAll || type.equalsIgnoreCase ("perspectiveState")) s.append (this.getViewState (this.viewer.transformManager, sfunc));
+if (isAll || type.equalsIgnoreCase ("perspectiveState")) s.append (this.getViewState (this.viewer.tm, sfunc));
 if (isAll || type.equalsIgnoreCase ("selectionState")) s.append (this.getSelectionState (this.viewer.selectionManager, sfunc));
 if (sfunc != null) {
 J.viewer.StateCreator.appendCmd (sfunc, "set refreshing true");
@@ -143,9 +143,9 @@ break;
 for (var i = 0; i < modelCount; i++) {
 var fcmd = "  frame " + ms.getModelNumberDotted (i);
 var s = ms.getModelAuxiliaryInfoValue (i, "modelID");
-if (s != null && !s.equals (ms.getModelAuxiliaryInfoValue (i, "modelID0"))) commands.append (fcmd).append ("; frame ID ").append (J.util.Escape.eS (s)).append (";\n");
+if (s != null && !s.equals (ms.getModelAuxiliaryInfoValue (i, "modelID0"))) commands.append (fcmd).append ("; frame ID ").append (JU.PT.esc (s)).append (";\n");
 var t = ms.frameTitles[i];
-if (t != null && t.length > 0) commands.append (fcmd).append ("; frame title ").append (J.util.Escape.eS (t)).append (";\n");
+if (t != null && t.length > 0) commands.append (fcmd).append ("; frame title ").append (JU.PT.esc (t)).append (";\n");
 if (needOrientations && models[i].orientation != null && !ms.isTrajectorySubFrame (i)) commands.append (fcmd).append ("; ").append (models[i].orientation.getMoveToText (false)).append (";\n");
 if (models[i].frameDelay != 0 && !ms.isTrajectorySubFrame (i)) commands.append (fcmd).append ("; frame delay ").appendF (models[i].frameDelay / 1000).append (";\n");
 if (models[i].simpleCage != null) {
@@ -178,9 +178,8 @@ var ivib;
 for (var i = modelCount; --i >= 0; ) {
 if ((ivib = this.viewer.modelGetLastVibrationIndex (i, 1276121113)) >= 0) for (var j = models[i].firstAtomIndex; j <= ivib; j++) {
 var mset = this.viewer.getVibration (j);
-if (mset != null && mset.isEnabled ()) {
-J.util.BSUtil.setMapBitSet (temp, j, j, mset.getState ());
-}}
+if (mset != null) J.util.BSUtil.setMapBitSet (temp, j, j, mset.getState ());
+}
 }
 var s = this.getCommands (temp, null, "select");
 commands.append (s);
@@ -219,7 +218,7 @@ J.viewer.StateCreator.appendCmd (str, "stateVersion = " + global.getParameter ("
 J.viewer.StateCreator.appendCmd (str, "background " + J.util.Escape.escapeColor (global.objColors[0]));
 for (var i = 1; i < 8; i++) if (global.objColors[i] != 0) J.viewer.StateCreator.appendCmd (str, J.viewer.StateManager.getObjectNameFromId (i) + "Color = \"" + J.util.Escape.escapeColor (global.objColors[i]) + '"');
 
-if (global.backgroundImageFileName != null) J.viewer.StateCreator.appendCmd (str, "background IMAGE /*file*/" + J.util.Escape.eS (global.backgroundImageFileName));
+if (global.backgroundImageFileName != null) J.viewer.StateCreator.appendCmd (str, "background IMAGE /*file*/" + JU.PT.esc (global.backgroundImageFileName));
 str.append (this.getSpecularState ());
 J.viewer.StateCreator.appendCmd (str, "statusReporting  = " + global.statusReporting);
 if (sfunc != null) str.append ("}\n\n");
@@ -294,7 +293,7 @@ cmds.append (s);
 $_V(c$, "getInlineData", 
 function (loadScript, strModel, isAppend, loadFilter) {
 var tag = (isAppend ? "append" : "model") + " inline";
-loadScript.append ("load /*data*/ data \"").append (tag).append ("\"\n").append (strModel).append ("end \"").append (tag).append (loadFilter == null || loadFilter.length == 0 ? "" : " filter" + J.util.Escape.eS (loadFilter)).append ("\";");
+loadScript.append ("load /*data*/ data \"").append (tag).append ("\"\n").append (strModel).append ("end \"").append (tag).append (loadFilter == null || loadFilter.length == 0 ? "" : " filter" + JU.PT.esc (loadFilter)).append ("\";");
 }, "JU.SB,~S,~B,~S");
 $_M(c$, "getColorState", 
 ($fz = function (cm, sfunc) {
@@ -419,7 +418,7 @@ J.viewer.StateCreator.addBs (commands, "hide ", sm.bsHidden);
 J.viewer.StateCreator.addBs (commands, "subset ", sm.bsSubset);
 J.viewer.StateCreator.addBs (commands, "delete ", sm.bsDeleted);
 J.viewer.StateCreator.addBs (commands, "fix ", sm.bsFixed);
-temp.put ("-", sm.bsSelection);
+temp.put ("-", this.viewer.getSelectedAtomsNoSubset ());
 cmd = this.getCommands (temp, null, "select");
 if (cmd == null) J.viewer.StateCreator.appendCmd (commands, "select none");
  else commands.append (cmd);
@@ -487,12 +486,12 @@ return commands.toString ();
 }, $fz.isPrivate = true, $fz), "J.viewer.TransformManager,JU.SB");
 $_V(c$, "getSpinState", 
 function (isAll) {
-var tm = this.viewer.transformManager;
+var tm = this.viewer.tm;
 var s = "  set spinX " + Clazz.floatToInt (tm.spinX) + "; set spinY " + Clazz.floatToInt (tm.spinY) + "; set spinZ " + Clazz.floatToInt (tm.spinZ) + "; set spinFps " + Clazz.floatToInt (tm.spinFps) + ";";
 if (!Float.isNaN (tm.navFps)) s += "  set navX " + Clazz.floatToInt (tm.navX) + "; set navY " + Clazz.floatToInt (tm.navY) + "; set navZ " + Clazz.floatToInt (tm.navZ) + "; set navFps " + Clazz.floatToInt (tm.navFps) + ";";
 if (tm.navOn) s += " navigation on;";
 if (!tm.spinOn) return s;
-var prefix = (tm.isSpinSelected ? "\n  select " + J.util.Escape.eBS (this.viewer.getSelectionSet (false)) + ";\n  rotateSelected" : "\n ");
+var prefix = (tm.isSpinSelected ? "\n  select " + J.util.Escape.eBS (this.viewer.getSelectedAtoms ()) + ";\n  rotateSelected" : "\n ");
 if (tm.isSpinInternal) {
 var pt = JU.P3.newP (tm.internalRotationCenter);
 pt.sub (tm.rotationAxis);
@@ -503,33 +502,6 @@ s += prefix + " spin axisangle " + J.util.Escape.eP (tm.rotationAxis) + " " + tm
 s += " spin on";
 }return s + ";";
 }, "~B");
-$_V(c$, "getInfo", 
-function (manager) {
-if (Clazz.instanceOf (manager, J.viewer.AnimationManager)) return this.getAnimationInfo (manager);
-return null;
-}, "~O");
-$_M(c$, "getAnimationInfo", 
-($fz = function (am) {
-var info =  new java.util.Hashtable ();
-info.put ("firstModelIndex", Integer.$valueOf (am.firstFrameIndex));
-info.put ("lastModelIndex", Integer.$valueOf (am.lastFrameIndex));
-info.put ("animationDirection", Integer.$valueOf (am.animationDirection));
-info.put ("currentDirection", Integer.$valueOf (am.currentDirection));
-info.put ("displayModelIndex", Integer.$valueOf (am.currentModelIndex));
-if (am.animationFrames != null) {
-info.put ("isMovie", Boolean.TRUE);
-info.put ("frames", J.util.Escape.eAI (am.animationFrames));
-info.put ("currentAnimationFrame", Integer.$valueOf (am.currentAnimationFrame));
-}info.put ("displayModelNumber", this.viewer.getModelNumberDotted (am.currentModelIndex));
-info.put ("displayModelName", (am.currentModelIndex >= 0 ? this.viewer.getModelName (am.currentModelIndex) : ""));
-info.put ("animationFps", Integer.$valueOf (am.animationFps));
-info.put ("animationReplayMode", am.animationReplayMode.name ());
-info.put ("firstFrameDelay", Float.$valueOf (am.firstFrameDelay));
-info.put ("lastFrameDelay", Float.$valueOf (am.lastFrameDelay));
-info.put ("animationOn", Boolean.$valueOf (am.animationOn));
-info.put ("animationPaused", Boolean.$valueOf (am.animationPaused));
-return info;
-}, $fz.isPrivate = true, $fz), "J.viewer.AnimationManager");
 $_V(c$, "getCommands", 
 function (htDefine, htMore, selectCmd) {
 var s =  new JU.SB ();
@@ -620,7 +592,7 @@ for (var i = 0; i < measurementCount; i++) {
 var m = mList.get (i);
 var count = m.count;
 var sb =  new JU.SB ().append ("measure");
-if (m.thisID != null) sb.append (" ID ").append (J.util.Escape.eS (m.thisID));
+if (m.thisID != null) sb.append (" ID ").append (JU.PT.esc (m.thisID));
 if (m.mad != 0) sb.append (" radius ").appendF (m.thisID == null || m.mad > 0 ? m.mad / 2000 : 0);
 if (m.colix != 0) sb.append (" color ").append (J.util.Escape.escapeColor (J.util.C.getArgb (m.colix)));
 if (m.text != null) {
@@ -637,14 +609,14 @@ J.viewer.StateCreator.appendCmd (commands, "select *; set measures " + this.view
 J.viewer.StateCreator.appendCmd (commands, J.shape.Shape.getFontCommand ("measures", font3d));
 var nHidden = 0;
 var temp =  new java.util.Hashtable ();
-var bs = J.util.BSUtil.newBitSet (measurementCount);
+var bs = JU.BS.newN (measurementCount);
 for (var i = 0; i < measurementCount; i++) {
 var m = mList.get (i);
 if (m.isHidden) {
 nHidden++;
 bs.set (i);
 }if (shape.bsColixSet != null && shape.bsColixSet.get (i)) J.util.BSUtil.setMapBitSet (temp, i, i, J.shape.Shape.getColorCommandUnk ("measure", m.colix, shape.translucentAllowed));
-if (m.strFormat != null) J.util.BSUtil.setMapBitSet (temp, i, i, "measure " + J.util.Escape.eS (m.strFormat));
+if (m.strFormat != null) J.util.BSUtil.setMapBitSet (temp, i, i, "measure " + JU.PT.esc (m.strFormat));
 }
 if (nHidden > 0) if (nHidden == measurementCount) J.viewer.StateCreator.appendCmd (commands, "measures off; # lines and numbers off");
  else for (var i = 0; i < measurementCount; i++) if (bs.get (i)) J.util.BSUtil.setMapBitSet (temp, i, i, "measure off");
@@ -715,7 +687,7 @@ var sb =  new JU.SB ();
 sb.append ("\n  set echo off;\n");
 for (var t, $t = es.objects.values ().iterator (); $t.hasNext () && ((t = $t.next ()) || true);) {
 sb.append (this.getTextState (t));
-if (t.hidden) sb.append ("  set echo ID ").append (J.util.Escape.eS (t.target)).append (" hidden;\n");
+if (t.hidden) sb.append ("  set echo ID ").append (JU.PT.esc (t.target)).append (" hidden;\n");
 }
 s = sb.toString ();
 break;
@@ -727,9 +699,9 @@ break;
 case 34:
 this.clearTemp ();
 var h = shape;
-if (h.atomFormats != null) for (var i = this.viewer.getAtomCount (); --i >= 0; ) if (h.atomFormats[i] != null) J.util.BSUtil.setMapBitSet (this.temp, i, i, "set hoverLabel " + J.util.Escape.eS (h.atomFormats[i]));
+if (h.atomFormats != null) for (var i = this.viewer.getAtomCount (); --i >= 0; ) if (h.atomFormats[i] != null) J.util.BSUtil.setMapBitSet (this.temp, i, i, "set hoverLabel " + JU.PT.esc (h.atomFormats[i]));
 
-s = "\n  hover " + J.util.Escape.eS ((h.labelFormat == null ? "" : h.labelFormat)) + ";\n" + this.getCommands (this.temp, null, "select");
+s = "\n  hover " + JU.PT.esc ((h.labelFormat == null ? "" : h.labelFormat)) + ";\n" + this.getCommands (this.temp, null, "select");
 this.clearTemp ();
 break;
 case 5:
@@ -739,9 +711,9 @@ for (var i = l.bsSizeSet.nextSetBit (0); i >= 0; i = l.bsSizeSet.nextSetBit (i +
 var t = l.getLabel (i);
 var cmd = null;
 if (t != null) {
-cmd = "label " + J.util.Escape.eS (t.textUnformatted);
+cmd = "label " + JU.PT.esc (t.textUnformatted);
 if (t.pymolOffset != null) cmd += ";set labelOffset " + J.util.Escape.eAF (t.pymolOffset);
-}if (cmd == null) cmd = "label " + J.util.Escape.eS (l.formats[i]);
+}if (cmd == null) cmd = "label " + JU.PT.esc (l.formats[i]);
 J.util.BSUtil.setMapBitSet (this.temp, i, i, cmd);
 if (l.bsColixSet != null && l.bsColixSet.get (i)) J.util.BSUtil.setMapBitSet (this.temp2, i, i, J.shape.Shape.getColorCommand ("label", l.paletteIDs[i], l.colixes[i], l.translucentAllowed));
 if (l.bsBgColixSet != null && l.bsBgColixSet.get (i)) J.util.BSUtil.setMapBitSet (this.temp2, i, i, "background label " + J.shape.Shape.encodeColor (l.bgcolixes[i]));
@@ -796,7 +768,7 @@ var text = t.getText ();
 if (text == null || t.isLabelOrHover || t.target.equals ("error")) return "";
 var isImage = (t.image != null);
 var strOff = null;
-var echoCmd = "set echo ID " + J.util.Escape.eS (t.target);
+var echoCmd = "set echo ID " + JU.PT.esc (t.target);
 switch (t.valign) {
 case 0:
 if (t.movableXPercent == 2147483647 || t.movableYPercent == 2147483647) {
@@ -814,10 +786,10 @@ s.append ("  set echo ").append (J.viewer.JC.vAlignNames[t.valign]).append (" ")
 if (t.valign == 0 && t.movableZPercent != 2147483647) s.append (";  ").append (echoCmd).append (" depth ").appendI (t.movableZPercent);
 if (isImage) s.append ("; ").append (echoCmd).append (" IMAGE /*file*/");
  else s.append ("; echo ");
-s.append (J.util.Escape.eS (text));
+s.append (JU.PT.esc (text));
 s.append (";\n");
 if (isImage && t.imageScale != 1) s.append ("  ").append (echoCmd).append (" scale ").appendF (t.imageScale).append (";\n");
-if (t.script != null) s.append ("  ").append (echoCmd).append (" script ").append (J.util.Escape.eS (t.script)).append (";\n");
+if (t.script != null) s.append ("  ").append (echoCmd).append (" script ").append (JU.PT.esc (t.script)).append (";\n");
 if (t.modelIndex >= 0) s.append ("  ").append (echoCmd).append (" model ").append (this.viewer.getModelNumberDotted (t.modelIndex)).append (";\n");
 if (t.pointerPt != null) {
 s.append ("  ").append (echoCmd).append (" point ").append (Clazz.instanceOf (t.pointerPt, J.modelset.Atom) ? "({" + (t.pointerPt).index + "})" : J.util.Escape.eP (t.pointerPt)).append (";\n");
@@ -840,15 +812,15 @@ var str =  new JU.SB ();
 J.viewer.StateCreator.appendCmd (str, "set allowEmbeddedScripts false");
 if (g.allowEmbeddedScripts) g.setB ("allowEmbeddedScripts", true);
 J.viewer.StateCreator.appendCmd (str, "set appendNew " + g.appendNew);
-J.viewer.StateCreator.appendCmd (str, "set appletProxy " + J.util.Escape.eS (g.appletProxy));
+J.viewer.StateCreator.appendCmd (str, "set appletProxy " + JU.PT.esc (g.appletProxy));
 J.viewer.StateCreator.appendCmd (str, "set applySymmetryToBonds " + g.applySymmetryToBonds);
-if (g.atomTypes.length > 0) J.viewer.StateCreator.appendCmd (str, "set atomTypes " + J.util.Escape.eS (g.atomTypes));
+if (g.atomTypes.length > 0) J.viewer.StateCreator.appendCmd (str, "set atomTypes " + JU.PT.esc (g.atomTypes));
 J.viewer.StateCreator.appendCmd (str, "set autoBond " + g.autoBond);
 if (g.axesOrientationRasmol) J.viewer.StateCreator.appendCmd (str, "set axesOrientationRasmol true");
 J.viewer.StateCreator.appendCmd (str, "set bondRadiusMilliAngstroms " + g.bondRadiusMilliAngstroms);
 J.viewer.StateCreator.appendCmd (str, "set bondTolerance " + g.bondTolerance);
 J.viewer.StateCreator.appendCmd (str, "set defaultLattice " + J.util.Escape.eP (g.ptDefaultLattice));
-J.viewer.StateCreator.appendCmd (str, "set defaultLoadFilter " + J.util.Escape.eS (g.defaultLoadFilter));
+J.viewer.StateCreator.appendCmd (str, "set defaultLoadFilter " + JU.PT.esc (g.defaultLoadFilter));
 J.viewer.StateCreator.appendCmd (str, "set defaultLoadScript \"\"");
 if (g.defaultLoadScript.length > 0) g.setS ("defaultLoadScript", g.defaultLoadScript);
 J.viewer.StateCreator.appendCmd (str, "set defaultStructureDssp " + g.defaultStructureDSSP);
@@ -856,14 +828,14 @@ var sMode = this.viewer.getDefaultVdwNameOrData (-2147483648, null, null);
 J.viewer.StateCreator.appendCmd (str, "set defaultVDW " + sMode);
 if (sMode.equals ("User")) J.viewer.StateCreator.appendCmd (str, this.viewer.getDefaultVdwNameOrData (2147483647, null, null));
 J.viewer.StateCreator.appendCmd (str, "set forceAutoBond " + g.forceAutoBond);
-J.viewer.StateCreator.appendCmd (str, "#set defaultDirectory " + J.util.Escape.eS (g.defaultDirectory));
-J.viewer.StateCreator.appendCmd (str, "#set loadFormat " + J.util.Escape.eS (g.loadFormat));
-J.viewer.StateCreator.appendCmd (str, "#set loadLigandFormat " + J.util.Escape.eS (g.loadLigandFormat));
-J.viewer.StateCreator.appendCmd (str, "#set smilesUrlFormat " + J.util.Escape.eS (g.smilesUrlFormat));
-J.viewer.StateCreator.appendCmd (str, "#set nihResolverFormat " + J.util.Escape.eS (g.nihResolverFormat));
-J.viewer.StateCreator.appendCmd (str, "#set pubChemFormat " + J.util.Escape.eS (g.pubChemFormat));
-J.viewer.StateCreator.appendCmd (str, "#set edsUrlFormat " + J.util.Escape.eS (g.edsUrlFormat));
-J.viewer.StateCreator.appendCmd (str, "#set edsUrlCutoff " + J.util.Escape.eS (g.edsUrlCutoff));
+J.viewer.StateCreator.appendCmd (str, "#set defaultDirectory " + JU.PT.esc (g.defaultDirectory));
+J.viewer.StateCreator.appendCmd (str, "#set loadFormat " + JU.PT.esc (g.loadFormat));
+J.viewer.StateCreator.appendCmd (str, "#set loadLigandFormat " + JU.PT.esc (g.loadLigandFormat));
+J.viewer.StateCreator.appendCmd (str, "#set smilesUrlFormat " + JU.PT.esc (g.smilesUrlFormat));
+J.viewer.StateCreator.appendCmd (str, "#set nihResolverFormat " + JU.PT.esc (g.nihResolverFormat));
+J.viewer.StateCreator.appendCmd (str, "#set pubChemFormat " + JU.PT.esc (g.pubChemFormat));
+J.viewer.StateCreator.appendCmd (str, "#set edsUrlFormat " + JU.PT.esc (g.edsUrlFormat));
+J.viewer.StateCreator.appendCmd (str, "#set edsUrlCutoff " + JU.PT.esc (g.edsUrlCutoff));
 J.viewer.StateCreator.appendCmd (str, "set legacyAutoBonding " + g.legacyAutoBonding);
 J.viewer.StateCreator.appendCmd (str, "set legacyHAddition " + g.legacyHAddition);
 J.viewer.StateCreator.appendCmd (str, "set minBondDistance " + g.minBondDistance);
@@ -891,14 +863,14 @@ if (prefix == null || key.indexOf (prefix) == 0 || key.indexOf (_prefix) == 0) l
 for (var key, $key = g.htNonbooleanParameterValues.keySet ().iterator (); $key.hasNext () && ((key = $key.next ()) || true);) {
 if (key.charAt (0) != '@' && (prefix == null || key.indexOf (prefix) == 0 || key.indexOf (_prefix) == 0)) {
 var value = g.htNonbooleanParameterValues.get (key);
-if (Clazz.instanceOf (value, String)) value = J.viewer.StateCreator.chop (J.util.Escape.eS (value));
+if (Clazz.instanceOf (value, String)) value = J.viewer.StateCreator.chop (JU.PT.esc (value));
 list[n++] = (key.indexOf ("_") == 0 ? key + " = " : "set " + key + " ") + value;
 }}
 for (var key, $key = g.htUserVariables.keySet ().iterator (); $key.hasNext () && ((key = $key.next ()) || true);) {
 if (prefix == null || key.indexOf (prefix) == 0) {
 var value = g.htUserVariables.get (key);
 var s = value.asString ();
-list[n++] = key + " " + (key.startsWith ("@") ? "" : "= ") + (value.tok == 4 ? J.viewer.StateCreator.chop (J.util.Escape.eS (s)) : s);
+list[n++] = key + " " + (key.startsWith ("@") ? "" : "= ") + (value.tok == 4 ? J.viewer.StateCreator.chop (JU.PT.esc (s)) : s);
 }}
 java.util.Arrays.sort (list, 0, n);
 for (var i = 0; i < n; i++) if (list[i] != null) J.viewer.StateCreator.appendCmd (commands, list[i]);
@@ -1120,7 +1092,7 @@ bs = this.viewer.getModelUndeletedAtomsBitSet (modelIndex);
 sb.append ("zap ");
 sb.append (J.util.Escape.eBS (bs)).append (";");
 this.getInlineData (sb, this.viewer.getModelExtract (bs, false, true, "MOL"), true, null);
-sb.append ("set refreshing false;").append (this.viewer.actionManager.getPickingState ()).append (this.viewer.transformManager.getMoveToText (0, false)).append ("set refreshing true;");
+sb.append ("set refreshing false;").append (this.viewer.actionManager.getPickingState ()).append (this.viewer.tm.getMoveToText (0, false)).append ("set refreshing true;");
 }if (clearRedo) {
 this.viewer.actionStates.add (0, sb.toString ());
 this.viewer.actionStatesRedo.clear ();
@@ -1183,10 +1155,10 @@ var id = (modelID == null ? null : (filename == null ? "" : filename + "#") + mo
 if ("".equals (baseModel)) id += ".baseModel";
 var modelIndex = (id == null ? -3 : this.viewer.getModelIndexFromId (id));
 if (modelIndex == -2) return;
-script = (modelIndex == -1 && filename != null ? script = "load " + J.util.Escape.eS (filename) : "");
-script = JU.PT.simpleReplace (script, J.viewer.StateCreator.SIMULATION_PROTOCOL, "");
-if (id != null) script += ";model " + J.util.Escape.eS (id);
-if (atoms != null) script += ";select visible & (@" + JU.PT.simpleReplace (atoms, ",", " or @") + ")";
+script = (modelIndex == -1 && filename != null ? script = "load " + JU.PT.esc (filename) : "");
+script = JU.PT.rep (script, J.viewer.StateCreator.SIMULATION_PROTOCOL, "");
+if (id != null) script += ";model " + JU.PT.esc (id);
+if (atoms != null) script += ";select visible & (@" + JU.PT.rep (atoms, ",", " or @") + ")";
  else if (select != null) script += ";select visible & (" + select + ")";
 if (script2 != null) script += ";" + script2;
 } else if (script.toUpperCase ().startsWith ("JSPECVIEW")) {

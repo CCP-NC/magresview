@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JU");
-Clazz.load (["javajs.api.JSONEncodable"], "JU.BS", ["java.lang.IndexOutOfBoundsException", "$.NegativeArraySizeException", "JU.SB"], function () {
+Clazz.load (["javajs.api.JSONEncodable"], "JU.BS", ["java.lang.Character", "$.IndexOutOfBoundsException", "$.NegativeArraySizeException", "JU.SB"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.words = null;
 this.wordsInUse = 0;
@@ -275,6 +275,80 @@ $_V(c$, "toJSON",
 function () {
 return this.toString ();
 });
+c$.escape = $_M(c$, "escape", 
+function (bs, chOpen, chClose) {
+if (bs == null) return chOpen + "{}" + chClose;
+var s =  new JU.SB ();
+s.append (chOpen + "{");
+var imax = bs.length ();
+var iLast = -1;
+var iFirst = -2;
+var i = -1;
+while (++i <= imax) {
+var isSet = bs.get (i);
+if (i == imax || iLast >= 0 && !isSet) {
+if (iLast >= 0 && iFirst != iLast) s.append ((iFirst == iLast - 1 ? " " : ":") + iLast);
+if (i == imax) break;
+iLast = -1;
+}if (bs.get (i)) {
+if (iLast < 0) {
+s.append ((iFirst == -2 ? "" : " ") + i);
+iFirst = i;
+}iLast = i;
+}}
+s.append ("}").appendC (chClose);
+return s.toString ();
+}, "JU.BS,~S,~S");
+c$.unescape = $_M(c$, "unescape", 
+function (str) {
+var ch;
+var len;
+if (str == null || (len = (str = str.trim ()).length) < 4 || str.equalsIgnoreCase ("({null})") || (ch = str.charAt (0)) != '(' && ch != '[' || str.charAt (len - 1) != (ch == '(' ? ')' : ']') || str.charAt (1) != '{' || str.indexOf ('}') != len - 2) return null;
+len -= 2;
+for (var i = len; --i >= 2; ) if (!Character.isDigit (ch = str.charAt (i)) && ch != ' ' && ch != '\t' && ch != ':') return null;
+
+var lastN = len;
+while (Character.isDigit (str.charAt (--lastN))) {
+}
+if (++lastN == len) lastN = 0;
+ else try {
+lastN = Integer.parseInt (str.substring (lastN, len));
+} catch (e) {
+if (Clazz.exceptionOf (e, NumberFormatException)) {
+return null;
+} else {
+throw e;
+}
+}
+var bs = JU.BS.newN (lastN);
+lastN = -1;
+var iPrev = -1;
+var iThis = -2;
+for (var i = 2; i <= len; i++) {
+switch (ch = str.charAt (i)) {
+case '\t':
+case ' ':
+case '}':
+if (iThis < 0) break;
+if (iThis < lastN) return null;
+lastN = iThis;
+if (iPrev < 0) iPrev = iThis;
+bs.setBits (iPrev, iThis + 1);
+iPrev = -1;
+iThis = -2;
+break;
+case ':':
+iPrev = lastN = iThis;
+iThis = -2;
+break;
+default:
+if (Character.isDigit (ch)) {
+if (iThis < 0) iThis = 0;
+iThis = (iThis * 10) + (ch.charCodeAt (0) - 48);
+}}
+}
+return (iPrev >= 0 ? null : bs);
+}, "~S");
 Clazz.defineStatics (c$,
 "ADDRESS_BITS_PER_WORD", 5,
 "BITS_PER_WORD", 32,

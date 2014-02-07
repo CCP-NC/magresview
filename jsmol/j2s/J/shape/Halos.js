@@ -28,10 +28,10 @@ J.util.BSUtil.deleteBits (this.bsHighlight, bs);
 }, "~S,~O,JU.BS");
 $_V(c$, "setVisibilityFlags", 
 function (bs) {
-var bsSelected = (this.viewer.getSelectionHaloEnabled (false) ? this.viewer.getSelectionSet (false) : null);
+var bsSelected = (this.viewer.getSelectionHaloEnabled (false) ? this.viewer.getSelectedAtoms () : null);
 for (var i = this.atomCount; --i >= 0; ) {
 var isVisible = bsSelected != null && bsSelected.get (i) || (this.mads != null && this.mads[i] != 0);
-this.atoms[i].setShapeVisibility (this.myVisibilityFlag, isVisible);
+this.setShapeVisibility (this.atoms[i], isVisible);
 }
 }, "JU.BS");
 $_V(c$, "getShapeState", 

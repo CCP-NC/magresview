@@ -1054,7 +1054,7 @@ function (rotationMatrix) {
 var vertexVectors = J.util.Normix.getVertexVectors ();
 for (var i = J.g3d.Graphics3D.normixCount; --i >= 0; ) {
 var tv = this.transformedVectors[i];
-rotationMatrix.transform2 (vertexVectors[i], tv);
+rotationMatrix.rotate2 (vertexVectors[i], tv);
 this.shadeIndexes[i] = this.shader.getShadeB (tv.x, -tv.y, tv.z);
 this.shadeIndexes2Sided[i] = (tv.z >= 0 ? this.shadeIndexes[i] : this.shader.getShadeB (-tv.x, tv.y, -tv.z));
 }

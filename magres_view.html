@@ -707,6 +707,14 @@ Copy of the license can be found as a text file in the /jmol folder
 						Ellipsoid translucency (0 = solid, 1 = invisible): <input type="text" id="opt_transl" maxlength="4" size="4" value="0.5" autocomplete="off"
 						title="Insert value desired for ellipsoid translucency" onkeypress="opt_transl_handler(event)" onchange="opt_transl_handler(event)"></input>
 						<br>
+						Ellipsoid type: <select id="opt_type" autocomplete="off"
+						title="Choose the type of visualization for ellipsoids. Can speed up rendering when using JSmol (Filled = slower, Axes Only = faster)."
+						onchange="opt_type_handler(event)">
+						  <option value="fill">Filled</option>
+						  <option value="axearcs">Axes and arcs</option>
+						  <option value="axes">Axes Only</option>
+						</select>
+						<br>
 						ISC graph thickness (0.4 = default): <input type="text" id="opt_width" maxlength="4" size="4" value="0.4" autocomplete="off"
 						title="Insert value desired for ISC graph line thickness" onkeypress="opt_width_handler(event)" onchange="opt_width_handler(event)"></input>			
 					</div>

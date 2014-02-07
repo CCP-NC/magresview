@@ -43,16 +43,9 @@ var tokens = this.getTokens ();
 if (tokens.length < 4) {
 J.util.Logger.warn ("line cannot be read for XYZ atom data: " + this.line);
 continue;
-}var atom = this.atomSetCollection.addNewAtom ();
+}var atom = this.addAtomXYZSymName (tokens, 1, null, null);
 this.setElementAndIsotope (atom, tokens[0]);
-atom.x = this.parseFloatStr (tokens[1]);
-atom.y = this.parseFloatStr (tokens[2]);
-atom.z = this.parseFloatStr (tokens[3]);
-if (Float.isNaN (atom.x) || Float.isNaN (atom.y) || Float.isNaN (atom.z)) {
-J.util.Logger.warn ("line cannot be read for XYZ atom data: " + this.line);
-atom.set (0, 0, 0);
-}var vpt = 4;
-this.setAtomCoord (atom);
+var vpt = 4;
 switch (tokens.length) {
 case 4:
 continue;

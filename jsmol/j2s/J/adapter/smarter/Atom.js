@@ -17,7 +17,7 @@ this.radius = NaN;
 this.isHetero = false;
 this.atomSerial = -2147483648;
 this.chainID = 0;
-this.alternateLocationID = '\0';
+this.altLoc = '\0';
 this.group3 = null;
 this.sequenceNumber = -2147483648;
 this.insertionCode = '\0';
@@ -77,8 +77,7 @@ return ch >= 'A' && ch <= 'Z' && J.adapter.smarter.Atom.elementCharMasks[ch.char
 }, "~S");
 c$.isValidElementSymbol2 = $_M(c$, "isValidElementSymbol2", 
 function (chFirst, chSecond) {
-if (chFirst < 'A' || chFirst > 'Z' || chSecond < 'a' || chSecond > 'z') return false;
-return ((J.adapter.smarter.Atom.elementCharMasks[chFirst.charCodeAt (0) - 65] >> (chSecond.charCodeAt (0) - 97)) & 1) != 0;
+return (chFirst >= 'A' && chFirst <= 'Z' && chSecond >= 'a' && chSecond <= 'z' && ((J.adapter.smarter.Atom.elementCharMasks[chFirst.charCodeAt (0) - 65] >> (chSecond.charCodeAt (0) - 97)) & 1) != 0);
 }, "~S,~S");
 c$.isValidElementSymbolNoCaseSecondChar2 = $_M(c$, "isValidElementSymbolNoCaseSecondChar2", 
 function (chFirst, chSecond) {

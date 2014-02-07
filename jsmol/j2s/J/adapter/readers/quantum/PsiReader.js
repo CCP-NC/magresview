@@ -58,14 +58,14 @@ this.discardLinesUntilContains ("----");
 }var atomPt = 0;
 while (this.readLine () != null && this.line.length > 0) {
 var tokens = this.getTokens ();
-var atom = (isInitial ? this.atomSetCollection.addNewAtom () : this.atomSetCollection.getAtom (atomPt++));
+var atom = (isInitial ? this.atomSetCollection.addNewAtom () : this.atomSetCollection.atoms[atomPt++]);
 if (isInitial) {
 this.atomNames.addLast (tokens[0]);
 if (tokens[0].length <= 2) atom.elementNumber = J.api.JmolAdapter.getElementNumber (tokens[0]);
 } else {
 atom.elementNumber = this.parseIntStr (tokens[0]);
 }if (atom.elementNumber < 0) atom.elementNumber = 0;
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[1]) * 0.5291772, this.parseFloatStr (tokens[2]) * 0.5291772, this.parseFloatStr (tokens[3]) * 0.5291772);
+this.setAtomCoordScaled (atom, tokens, 1, 0.5291772);
 }
 }, $fz.isPrivate = true, $fz), "~B");
 $_M(c$, "readBasis", 
@@ -189,7 +189,7 @@ var atomCount = this.atomSetCollection.getLastAtomSetAtomCount ();
 var tokens;
 while (this.readLine () != null && this.line.indexOf ("Frequency") >= 0) {
 tokens = this.getTokens ();
-var iAtom0 = this.atomSetCollection.getAtomCount ();
+var iAtom0 = this.atomSetCollection.atomCount;
 var ignore =  Clazz.newBooleanArray (1, false);
 if (!this.doGetVibration (++this.vibrationNumber)) continue;
 this.atomSetCollection.cloneLastAtomSet ();

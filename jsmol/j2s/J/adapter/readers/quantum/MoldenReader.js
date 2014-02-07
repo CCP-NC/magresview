@@ -38,7 +38,7 @@ J.util.Logger.info (this.line);
 if (this.line.indexOf ("[ATOMS]") == 0) {
 this.readAtoms ();
 this.modelAtomCount = this.atomSetCollection.getFirstAtomSetAtomCount ();
-if (this.atomSetCollection.getAtomSetCount () == 1 && this.moData != null) this.finalizeMOData (this.moData);
+if (this.atomSetCollection.atomSetCount == 1 && this.moData != null) this.finalizeMOData (this.moData);
 return false;
 }if (this.line.indexOf ("[GTO]") == 0) return this.readGaussianBasis ();
 if (this.line.indexOf ("[STO]") == 0) return this.readSlaterBasis ();
@@ -53,8 +53,8 @@ function () {
 if (this.bsBadIndex.isEmpty ()) return;
 try {
 var ilast = 0;
-var atoms = this.atomSetCollection.getAtoms ();
-var nAtoms = this.atomSetCollection.getAtomCount ();
+var atoms = this.atomSetCollection.atoms;
+var nAtoms = this.atomSetCollection.atomCount;
 this.bsAtomOK.set (nAtoms);
 var n = this.shells.size ();
 for (var i = 0; i < n; i++) {
@@ -85,8 +85,6 @@ throw e;
 $_M(c$, "readAtoms", 
 ($fz = function () {
 var coordUnit = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.line.$replace (']', ' '))[1];
-var nPrevAtom = 0;
-var nCurAtom = 0;
 var isAU = (coordUnit.indexOf ("ANGS") < 0);
 if (isAU && coordUnit.indexOf ("AU") < 0) {
 throw  new Exception ("invalid coordinate unit " + coordUnit + " in [Atoms]");
@@ -94,14 +92,9 @@ throw  new Exception ("invalid coordinate unit " + coordUnit + " in [Atoms]");
 while (this.readLine () != null && this.line.indexOf ('[') < 0) {
 var tokens = this.getTokens ();
 if (tokens.length < 6) continue;
-var atom = this.atomSetCollection.addNewAtom ();
+var atom = this.setAtomCoordScaled (null, tokens, 3, f);
 atom.atomName = tokens[0];
-nCurAtom = this.parseIntStr (tokens[1]);
-if (nPrevAtom > 0 && nCurAtom != nPrevAtom + 1) {
-throw  new Exception ("out of order atom in [Atoms]");
-}nPrevAtom = nCurAtom;
 atom.elementNumber = this.parseIntStr (tokens[2]);
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[3]) * f, this.parseFloatStr (tokens[4]) * f, this.parseFloatStr (tokens[5]) * f);
 }
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readSlaterBasis", 
@@ -302,7 +295,7 @@ var firstModel = (this.optOnly || this.desiredModelNumber >= 0 ? 0 : 1);
 this.modelNumber = firstModel;
 var haveModel = false;
 if (this.desiredModelNumber == 0 || this.desiredModelNumber == nGeom) this.desiredModelNumber = nGeom;
- else if (this.atomSetCollection.getAtomSetCount () > 0) this.finalizeMOData (null);
+ else if (this.atomSetCollection.atomSetCount > 0) this.finalizeMOData (null);
 for (var i = 0; i < nGeom; i++) {
 this.readLines (2);
 if (this.doGetModel (++this.modelNumber, null)) {
@@ -324,22 +317,16 @@ $_M(c$, "readAtomSet",
 if (asClone && this.desiredModelNumber < 0) this.atomSetCollection.cloneFirstAtomSet (0);
 var f = (isBohr ? 0.5291772 : 1);
 this.atomSetCollection.setAtomSetName (atomSetName);
-if (this.atomSetCollection.getAtomCount () == 0) {
+if (this.atomSetCollection.atomCount == 0) {
 while (this.readLine () != null && this.line.indexOf ('[') < 0) {
 var tokens = this.getTokens ();
-if (tokens.length != 4) continue;
-var atom = this.atomSetCollection.addNewAtom ();
-atom.atomName = tokens[0];
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[1]) * f, this.parseFloatStr (tokens[2]) * f, this.parseFloatStr (tokens[3]) * f);
+if (tokens.length == 4) this.setAtomCoordScaled (null, tokens, 1, f).atomName = tokens[0];
 }
 this.modelAtomCount = this.atomSetCollection.getLastAtomSetAtomCount ();
 return;
-}var atoms = this.atomSetCollection.getAtoms ();
+}var atoms = this.atomSetCollection.atoms;
 var i0 = this.atomSetCollection.getLastAtomSetAtomIndex ();
-for (var i = 0; i < this.modelAtomCount; i++) {
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.readLine ());
-var atom = atoms[i + i0];
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[1]) * f, this.parseFloatStr (tokens[2]) * f, this.parseFloatStr (tokens[3]) * f);
-}
+for (var i = 0; i < this.modelAtomCount; i++) this.setAtomCoordScaled (atoms[i + i0], J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.readLine ()), 1, f);
+
 }, $fz.isPrivate = true, $fz), "~S,~B,~B");
 });

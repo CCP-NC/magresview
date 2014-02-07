@@ -52,11 +52,9 @@ function () {
 while (this.getLine ()) {
 var tokens = this.getTokens ();
 if (tokens.length == 0) continue;
-var atNo = this.parseIntStr (this.line);
-var atom = this.atomSetCollection.addNewAtom ();
-if (atNo == -2147483648) atom.elementSymbol = tokens[0];
- else atom.elementSymbol = J.adapter.smarter.AtomSetCollectionReader.getElementSymbol (atNo);
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[1]) * 0.5291772, this.parseFloatStr (tokens[2]) * 0.5291772, this.parseFloatStr (tokens[3]) * 0.5291772);
+var sym = tokens[0];
+var atNo = this.parseIntStr (sym);
+this.setAtomCoordScaled (null, tokens, 1, 0.5291772).elementSymbol = (atNo == -2147483648 ? sym : J.adapter.smarter.AtomSetCollectionReader.getElementSymbol (atNo));
 }
 });
 $_M(c$, "readBonds", 

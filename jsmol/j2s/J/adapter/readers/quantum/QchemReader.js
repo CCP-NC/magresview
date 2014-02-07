@@ -69,16 +69,9 @@ while (this.readLine () != null && !this.line.startsWith (" --")) {
 tokens = this.getTokens ();
 if (tokens.length < 5) continue;
 var symbol = tokens[1];
-if (J.api.JmolAdapter.getElementNumber (symbol) < 1) continue;
-var x = this.parseFloatStr (tokens[2]);
-var y = this.parseFloatStr (tokens[3]);
-var z = this.parseFloatStr (tokens[4]);
-if (Float.isNaN (x) || Float.isNaN (y) || Float.isNaN (z)) continue;
-var atom = this.atomSetCollection.addNewAtom ();
-atom.elementSymbol = symbol;
-this.setAtomCoordXYZ (atom, x, y, z);
-this.atomSetCollection.setAtomSetModelProperty (".PATH", "Calculation " + this.calculationNumber);
+if (J.api.JmolAdapter.getElementNumber (symbol) > 0) this.addAtomXYZSymName (tokens, 2, symbol, null);
 }
+this.atomSetCollection.setAtomSetModelProperty (".PATH", "Calculation " + this.calculationNumber);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readFrequencies", 
 ($fz = function () {
@@ -88,7 +81,7 @@ var frequencies = this.getTokens ();
 var frequencyCount = frequencies.length - 1;
 var ignore =  Clazz.newBooleanArray (frequencyCount, false);
 var atomCount = this.atomSetCollection.getLastAtomSetAtomCount ();
-var iAtom0 = this.atomSetCollection.getAtomCount ();
+var iAtom0 = this.atomSetCollection.atomCount;
 for (var i = 0; i < frequencyCount; ++i) {
 ignore[i] = !this.doGetVibration (++this.vibrationNumber);
 if (ignore[i]) continue;
@@ -103,7 +96,7 @@ this.discardLinesUntilBlank ();
 $_M(c$, "readPartialCharges", 
 ($fz = function () {
 this.readLines (3);
-var atoms = this.atomSetCollection.getAtoms ();
+var atoms = this.atomSetCollection.atoms;
 var atomCount = this.atomSetCollection.getLastAtomSetAtomCount ();
 for (var i = 0; i < atomCount && this.readLine () != null; ++i) atoms[i].partialCharge = this.parseFloatStr (this.getTokens ()[2]);
 

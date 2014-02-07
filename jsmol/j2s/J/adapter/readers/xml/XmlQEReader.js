@@ -31,16 +31,13 @@ if ("NUMBER_OF_ATOMS".equalsIgnoreCase (localName) || "CELL_DIMENSIONS".equalsIg
 this.keepChars = true;
 return;
 }if (localName.startsWith ("ATOM.")) {
-var xyz = J.adapter.smarter.AtomSetCollectionReader.getTokensFloat (this.atts.get ("TAU"), null, 3);
-this.atom = this.atomSetCollection.addNewAtom ();
-this.atom.elementSymbol = this.atts.get ("SPECIES").trim ();
-this.parent.setAtomCoordXYZ (this.atom, xyz[0] * 0.5291772, xyz[1] * 0.5291772, xyz[2] * 0.5291772);
+this.parent.setAtomCoordScaled (null, J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.atts.get ("TAU")), 0, 0.5291772).elementSymbol = this.atts.get ("SPECIES").trim ();
 }if ("structure".equals (localName)) {
 if (!this.parent.doGetModel (++this.parent.modelNumber, null)) {
 this.parent.checkLastModel ();
 return;
 }this.parent.setFractionalCoordinates (true);
-this.atomSetCollection.setDoFixPeriodic ();
+this.atomSetCollection.doFixPeriodic = true;
 this.atomSetCollection.newAtomSet ();
 return;
 }if (!this.parent.doProcessLines) return;

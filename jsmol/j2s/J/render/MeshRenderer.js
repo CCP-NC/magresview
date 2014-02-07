@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.render");
-Clazz.load (["J.render.ShapeRenderer", "JU.BS", "$.P3", "$.P3i"], "J.render.MeshRenderer", ["JU.AU", "J.util.BSUtil", "$.C"], function () {
+Clazz.load (["J.render.ShapeRenderer", "JU.BS", "$.P3", "$.P3i"], "J.render.MeshRenderer", ["JU.AU", "J.util.C"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.mesh = null;
 this.vertices = null;
@@ -86,7 +86,7 @@ verticesTemp = (needNormals ?  new Array (this.vertexCount) : null);
 for (var i = this.vertexCount; --i >= 0; ) {
 vTemp.setT (this.vertices[i]);
 unitcell.toFractional (vTemp, true);
-m.transform (vTemp);
+m.rotTrans (vTemp);
 unitcell.toCartesian (vTemp, true);
 this.viewer.transformPtScr (vTemp, this.screens[i]);
 if (needNormals) {
@@ -128,6 +128,7 @@ if (this.isTranslucent || this.volumeRender || this.mesh.bsSlabGhost != null) th
 this.doRender = (this.setColix (this.mesh.colix) || this.mesh.showContourLines);
 if (!this.doRender || this.isGhostPass && !(this.doRender = this.g3d.setColix (this.mesh.slabColix))) {
 this.vertices = this.mesh.vertices;
+if (this.needTranslucent) this.g3d.setColix (J.util.C.getColixTranslucent3 (4, true, 0.5));
 return true;
 }this.vertices = (this.mesh.scale3d == 0 && this.mesh.mat4 == null ? this.mesh.vertices : this.mesh.getOffsetVertices (this.thePlane));
 if (this.mesh.lineData == null) {
@@ -171,7 +172,7 @@ $_M(c$, "renderPoints",
 function () {
 if (this.mesh.isTriangleSet) {
 var polygonIndexes = this.mesh.polygonIndexes;
-var bsPoints = J.util.BSUtil.newBitSet (this.mesh.vertexCount);
+var bsPoints = JU.BS.newN (this.mesh.vertexCount);
 if (this.haveBsDisplay) {
 bsPoints.setBits (0, this.mesh.vertexCount);
 bsPoints.andNot (this.mesh.bsDisplay);

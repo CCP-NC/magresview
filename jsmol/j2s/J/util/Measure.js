@@ -243,16 +243,16 @@ pts[0].scale (1 / n);
 }return pts;
 }, "JU.List");
 c$.getTransformMatrix4 = $_M(c$, "getTransformMatrix4", 
-function (ptsA, ptsB, m, centerA) {
+function (ptsA, ptsB, m, centerA, doReport) {
 var cptsA = J.util.Measure.getCenterAndPoints (ptsA);
 var cptsB = J.util.Measure.getCenterAndPoints (ptsB);
 var retStddev =  Clazz.newFloatArray (2, 0);
-var q = J.util.Measure.calculateQuaternionRotation ([cptsA, cptsB], retStddev, true);
+var q = J.util.Measure.calculateQuaternionRotation ([cptsA, cptsB], retStddev, doReport);
 var v = JU.V3.newVsub (cptsB[0], cptsA[0]);
 m.setMV (q.getMatrix (), v);
 if (centerA != null) centerA.setT (cptsA[0]);
 return retStddev[1];
-}, "JU.List,JU.List,JU.M4,JU.P3");
+}, "JU.List,JU.List,JU.M4,JU.P3,~B");
 c$.calculateQuaternionRotation = $_M(c$, "calculateQuaternionRotation", 
 function (centerAndPoints, retStddev, doReport) {
 retStddev[1] = NaN;
@@ -332,7 +332,7 @@ var v =  new JU.List ();
 for (var i = 0; i < vPts.size (); i++) {
 var pt = JU.P3.newP (vPts.get (i));
 pt.sub (center);
-m4.transform2 (pt, pt);
+m4.rotTrans2 (pt, pt);
 pt.add (center);
 v.addLast (pt);
 }

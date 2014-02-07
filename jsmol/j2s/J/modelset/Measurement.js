@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.modelset");
-Clazz.load (null, "J.modelset.Measurement", ["java.lang.Float", "JU.List", "$.SB", "J.atomdata.RadiusData", "J.constant.EnumVdw", "J.modelset.LabelToken", "J.util.Escape", "$.Measure"], function () {
+Clazz.load (null, "J.modelset.Measurement", ["java.lang.Float", "JU.List", "$.PT", "$.SB", "J.atomdata.RadiusData", "J.constant.EnumVdw", "J.modelset.LabelToken", "J.util.Escape", "$.Measure"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.thisID = null;
 this.modelSet = null;
@@ -329,7 +329,7 @@ var f = this.fixValue (units, true);
 var sb =  new JU.SB ();
 sb.append (this.count == 2 ? (this.type == null ? "distance" : this.type) : this.count == 3 ? "angle" : "dihedral");
 sb.append (" \t").appendF (f);
-sb.append (" \t").append (J.util.Escape.eS (this.strMeasurement));
+sb.append (" \t").append (JU.PT.esc (this.strMeasurement));
 for (var i = 1; i <= this.count; i++) sb.append (" \t").append (this.getLabel (i, false, false));
 
 if (this.thisID != null) sb.append (" \t").append (this.thisID);

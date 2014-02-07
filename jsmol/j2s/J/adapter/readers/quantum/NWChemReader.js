@@ -146,10 +146,9 @@ this.atomTypes =  new JU.List ();
 while (this.readLine () != null && this.line.length > 0) {
 tokens = this.getTokens ();
 if (tokens.length < 6) break;
-var atom = this.atomSetCollection.addNewAtom ();
-atom.atomName = this.fixTag (tokens[1]);
-this.atomTypes.addLast (atom.atomName);
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[3]), this.parseFloatStr (tokens[4]), this.parseFloatStr (tokens[5]));
+var name = this.fixTag (tokens[1]);
+this.addAtomXYZSymName (tokens, 3, null, name);
+this.atomTypes.addLast (name);
 }
 if (this.converged) {
 this.setEnergy (this.energyKey, this.energyValue);
@@ -168,15 +167,14 @@ this.atomSetCollection.setAtomSetModelProperty (".PATH", "Task " + this.taskNumb
 while (this.readLine () != null && this.line.length > 0) {
 tokens = this.getTokens ();
 if (tokens.length < 8) break;
-var atom = this.atomSetCollection.addNewAtom ();
+var atom = this.setAtomCoordScaled (null, tokens, 2, 0.5291772);
 atom.atomName = this.fixTag (tokens[1]);
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[2]) * 0.5291772, this.parseFloatStr (tokens[3]) * 0.5291772, this.parseFloatStr (tokens[4]) * 0.5291772);
 this.atomSetCollection.addVibrationVector (atom.index, -this.parseFloatStr (tokens[5]), -this.parseFloatStr (tokens[6]), -this.parseFloatStr (tokens[7]));
 }
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readFrequencies", 
 ($fz = function () {
-var firstFrequencyAtomSetIndex = this.atomSetCollection.getAtomSetCount ();
+var firstFrequencyAtomSetIndex = this.atomSetCollection.atomSetCount;
 var path = "Task " + this.taskNumber + J.adapter.smarter.SmarterJmolAdapter.PATH_SEPARATOR + "Frequencies";
 this.discardLinesUntilContains ("Atom information");
 this.readLines (2);
@@ -184,9 +182,7 @@ this.atomSetCollection.newAtomSet ();
 var tokens;
 while (this.readLine () != null && this.line.indexOf ("---") < 0) {
 tokens = this.getTokens ();
-var atom = this.atomSetCollection.addNewAtom ();
-atom.atomName = this.fixTag (tokens[0]);
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[2]) * 0.5291772, this.parseFloatStr (tokens[3]) * 0.5291772, this.parseFloatStr (tokens[4]) * 0.5291772);
+this.setAtomCoordScaled (null, tokens, 3, 0.5291772).atomName = this.fixTag (tokens[0]);
 }
 this.discardLinesUntilContains ("(Projected Frequencies expressed in cm-1)");
 this.readLines (3);
@@ -194,7 +190,7 @@ var firstTime = true;
 while (this.readLine () != null && this.line.indexOf ("P.Frequency") >= 0) {
 tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensAt (this.line, 12);
 var frequencyCount = tokens.length;
-var iAtom0 = this.atomSetCollection.getAtomCount ();
+var iAtom0 = this.atomSetCollection.atomCount;
 var atomCount = this.atomSetCollection.getLastAtomSetAtomCount ();
 if (firstTime) iAtom0 -= atomCount;
 var ignore =  Clazz.newBooleanArray (frequencyCount, false);
@@ -216,11 +212,11 @@ for (var i = this.vibrationNumber, idx = firstFrequencyAtomSetIndex; --i >= 0; )
 if (this.readLine () == null) return;
 if (!this.doGetVibration (i + 1)) continue;
 tokens = this.getTokens ();
-var iset = this.atomSetCollection.getCurrentAtomSetIndex ();
-this.atomSetCollection.setCurrentAtomSetIndex (idx++);
+var iset = this.atomSetCollection.currentAtomSetIndex;
+this.atomSetCollection.currentAtomSetIndex = idx++;
 this.atomSetCollection.setAtomSetFrequency (null, null, tokens[i], null);
 this.atomSetCollection.setAtomSetModelProperty ("IRIntensity", tokens[5] + " KM/mol");
-this.atomSetCollection.setCurrentAtomSetIndex (iset);
+this.atomSetCollection.currentAtomSetIndex = iset;
 }
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
@@ -233,9 +229,9 @@ $_M(c$, "readPartialCharges",
 function () {
 var tokens;
 this.readLines (4);
-var atomCount = this.atomSetCollection.getAtomCount ();
+var atomCount = this.atomSetCollection.atomCount;
 var i0 = this.atomSetCollection.getLastAtomSetAtomIndex ();
-var atoms = this.atomSetCollection.getAtoms ();
+var atoms = this.atomSetCollection.atoms;
 for (var i = i0; i < atomCount; ++i) {
 while (atoms[i].elementNumber == 0) ++i;
 

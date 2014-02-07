@@ -1,11 +1,11 @@
 Clazz.declarePackage ("JU");
-Clazz.load (null, "JU.T3", ["java.lang.Float"], function () {
+Clazz.load (["javajs.api.JSONEncodable"], "JU.T3", ["java.lang.Float"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.x = 0;
 this.y = 0;
 this.z = 0;
 Clazz.instantialize (this, arguments);
-}, JU, "T3", null, java.io.Serializable);
+}, JU, "T3", null, [javajs.api.JSONEncodable, java.io.Serializable]);
 Clazz.makeConstructor (c$, 
 function () {
 });
@@ -68,6 +68,12 @@ this.x *= s;
 this.y *= s;
 this.z *= s;
 }, "~N");
+$_M(c$, "add3", 
+function (a, b, c) {
+this.x += a;
+this.y += b;
+this.z += c;
+}, "~N,~N,~N");
 $_M(c$, "scaleAdd2", 
 function (s, t1, t2) {
 this.x = s * t1.x + t2.x;
@@ -120,5 +126,9 @@ return (this.x == t2.x && this.y == t2.y && this.z == t2.z);
 $_V(c$, "toString", 
 function () {
 return "(" + this.x + ", " + this.y + ", " + this.z + ")";
+});
+$_V(c$, "toJSON", 
+function () {
+return "[" + this.x + "," + this.y + "," + this.z + "]";
 });
 });

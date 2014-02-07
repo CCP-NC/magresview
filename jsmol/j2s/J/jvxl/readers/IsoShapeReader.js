@@ -125,7 +125,7 @@ return this.getValueAtPoint (this.ptPsi, false);
 $_V(c$, "getValueAtPoint", 
 function (pt, getSource) {
 this.ptTemp.sub2 (pt, this.center);
-if (this.isEccentric) this.eccentricityMatrixInverse.transform (this.ptTemp);
+if (this.isEccentric) this.eccentricityMatrixInverse.rotate (this.ptTemp);
 if (this.isAnisotropic) {
 this.ptTemp.x /= this.anisotropy[0];
 this.ptTemp.y /= this.anisotropy[1];
@@ -338,7 +338,7 @@ return;
 case 70:
 case 71:
 this.ptPsi.set (0, 0, this.eccentricityScale / 2);
-this.eccentricityMatrixInverse.transform (this.ptPsi);
+this.eccentricityMatrixInverse.rotate (this.ptPsi);
 this.ptPsi.add (this.center);
 this.addVC (this.center, 0, 0);
 this.addVC (this.ptPsi, 0, 0);

@@ -206,9 +206,9 @@ this.setFixedRotationCenter (this.rotationCenterDefault);
 this.rotationRadiusDefault = this.setRotationRadius (0, true);
 this.windowCentered = true;
 this.setRotationCenterAndRadiusXYZ (null, true);
-this.matrixRotate.setIdentity ();
+this.matrixRotate.setScale (1);
 var m = this.viewer.getModelSetAuxiliaryInfoValue ("defaultOrientationMatrix");
-if (m != null) this.matrixRotate.setM (m);
+if (m != null) this.matrixRotate.setM3 (m);
 this.setZoomEnabled (true);
 this.zoomToPercent (this.viewer.global.modelKitMode ? 50 : 100);
 this.zoomPercent = this.zoomPercentSetting;
@@ -266,7 +266,7 @@ y -= this.fixedTranslation.y;
 var z = radius2 - x * x - y * y;
 z = (z < 0 ? -1 : 1) * Math.sqrt (Math.abs (z));
 if (factor == 0) {
-this.arcBall0Rotation.setM (this.matrixRotate);
+this.arcBall0Rotation.setM3 (this.matrixRotate);
 this.arcBall0.set (x, -y, z);
 if (!Float.isNaN (z)) this.arcBall0.normalize ();
 return;
@@ -275,7 +275,7 @@ this.arcBall1.set (x, -y, z);
 this.arcBall1.normalize ();
 this.arcBallAxis.cross (this.arcBall0, this.arcBall1);
 this.axisangleT.setVA (this.arcBallAxis, factor * Math.acos (this.arcBall0.dot (this.arcBall1)));
-this.matrixRotate.setM (this.arcBall0Rotation);
+this.matrixRotate.setM3 (this.arcBall0Rotation);
 this.rotateAxisAngle2 (this.axisangleT, null);
 }, "~N,~N,~N");
 $_M(c$, "rotateXYBy", 
@@ -290,7 +290,7 @@ this.rotateZRadians ((zDelta / 57.29577951308232));
 }, "~N,~N,~N");
 $_M(c$, "rotateFront", 
 function () {
-this.matrixRotate.setIdentity ();
+this.matrixRotate.setScale (1);
 });
 $_M(c$, "rotateX", 
 function (angleRadians) {
@@ -414,7 +414,7 @@ $_M(c$, "rotateAxisAngleRadiansInternal",
 function (radians, bsAtoms) {
 this.internalRotationAngle = radians;
 this.vectorT.set (this.internalRotationAxis.x, this.internalRotationAxis.y, this.internalRotationAxis.z);
-this.matrixRotate.transform2 (this.vectorT, this.vectorT2);
+this.matrixRotate.rotate2 (this.vectorT, this.vectorT2);
 this.axisangleT.setVA (this.vectorT2, radians);
 this.matrixTemp3.setAA (this.axisangleT);
 this.applyRotation (this.matrixTemp3, true, bsAtoms, this.internalTranslation, radians > 1e6);
@@ -424,11 +424,11 @@ $_M(c$, "getNewFixedRotationCenter",
 function () {
 this.axisangleT.setAA (this.internalRotationAxis);
 this.axisangleT.angle = -this.internalRotationAngle;
-this.matrixTemp4.setAA (this.axisangleT);
+this.matrixTemp4.setToAA (this.axisangleT);
 this.vectorT.setT (this.internalRotationCenter);
 this.pointT2.sub2 (this.fixedRotationCenter, this.vectorT);
 var pt =  new JU.P3 ();
-this.matrixTemp4.transform2 (this.pointT2, pt);
+this.matrixTemp4.rotTrans2 (this.pointT2, pt);
 pt.add (this.vectorT);
 this.setRotationCenterAndRadiusXYZ (pt, false);
 });
@@ -564,11 +564,11 @@ return this.matrixRotate;
 });
 $_M(c$, "setRotation", 
 function (matrixRotation) {
-if (!Float.isNaN (matrixRotation.m00)) this.matrixRotate.setM (matrixRotation);
+if (!Float.isNaN (matrixRotation.m00)) this.matrixRotate.setM3 (matrixRotation);
 }, "JU.M3");
 $_M(c$, "getRotation", 
 function (matrixRotation) {
-matrixRotation.setM (this.matrixRotate);
+matrixRotation.setM3 (this.matrixRotate);
 }, "JU.M3");
 $_M(c$, "zoomBy", 
 function (pixels) {
@@ -794,12 +794,12 @@ this.visualRange = angstroms;
 }, "~N");
 $_M(c$, "getUnscaledTransformMatrix", 
 function () {
-var unscaled = JU.M4.newM (null);
+var unscaled = JU.M4.newM4 (null);
 this.vectorTemp.setT (this.fixedRotationCenter);
 this.matrixTemp.setZero ();
 this.matrixTemp.setTranslation (this.vectorTemp);
 unscaled.sub (this.matrixTemp);
-this.matrixTemp.setM3 (this.matrixRotate);
+this.matrixTemp.setToM3 (this.matrixRotate);
 unscaled.mul2 (this.matrixTemp, unscaled);
 return unscaled;
 });
@@ -932,7 +932,7 @@ this.vectorTemp.sub2 (this.fixedRotationCenter, this.frameOffset);
 this.matrixTemp.setZero ();
 this.matrixTemp.setTranslation (this.vectorTemp);
 this.matrixTransform.sub (this.matrixTemp);
-this.matrixTemp.setM3 (this.stereoFrame ? this.matrixStereo : this.matrixRotate);
+this.matrixTemp.setToM3 (this.stereoFrame ? this.matrixStereo : this.matrixRotate);
 this.matrixTransform.mul2 (this.matrixTemp, this.matrixTransform);
 this.matrixTemp.setIdentity ();
 this.matrixTemp.m00 = this.matrixTemp.m11 = this.matrixTemp.m22 = this.scalePixelsPerAngstrom;
@@ -951,7 +951,7 @@ throw e;
 });
 $_M(c$, "rotatePoint", 
 function (pt, ptRot) {
-this.matrixRotate.transform2 (pt, ptRot);
+this.matrixRotate.rotate2 (pt, ptRot);
 ptRot.y = -ptRot.y;
 }, "JU.P3,JU.P3");
 $_M(c$, "transformPoints", 
@@ -983,7 +983,7 @@ this.point3iScreenTemp.y = (this.screenHeight - Clazz.floatToInt (ptXyp.y));
 }if (this.antialias) {
 this.point3iScreenTemp.x <<= 1;
 this.point3iScreenTemp.y <<= 1;
-}this.matrixTransform.transform2 (this.fixedRotationCenter, this.pointTsp);
+}this.matrixTransform.rotTrans2 (this.fixedRotationCenter, this.pointTsp);
 this.point3iScreenTemp.z = Clazz.floatToInt (this.pointTsp.z);
 return this.point3iScreenTemp;
 }, $fz.isPrivate = true, $fz), "JU.P3");
@@ -1004,7 +1004,7 @@ screen.setT (this.point3fScreenTemp);
 }, "JU.P3,JU.P3");
 $_M(c$, "transformVector", 
 function (vectorAngstroms, vectorTransformed) {
-this.matrixTransform.rotate (vectorAngstroms, vectorTransformed);
+this.matrixTransform.rotate2 (vectorAngstroms, vectorTransformed);
 }, "JU.V3,JU.V3");
 $_M(c$, "move", 
 function (eval, dRot, dZoom, dTrans, dSlab, floatSecondsTotal, fps) {
@@ -1019,14 +1019,14 @@ if (Float.isNaN (degrees)) return true;
 this.aaTest1.setVA (axis, (degrees / 57.29577951308232));
 this.ptTest1.set (4.321, 1.23456, 3.14159);
 this.getRotation (this.matrixTest);
-this.matrixTest.transform2 (this.ptTest1, this.ptTest2);
+this.matrixTest.rotate2 (this.ptTest1, this.ptTest2);
 this.matrixTest.setAA (this.aaTest1);
-this.matrixTest.transform2 (this.ptTest1, this.ptTest3);
+this.matrixTest.rotate2 (this.ptTest1, this.ptTest3);
 return (this.ptTest3.distance (this.ptTest2) < 0.1);
 }, "JU.V3,~N");
 $_M(c$, "moveToPyMOL", 
 function (eval, floatSecondsTotal, pymolView) {
-var m3 = JU.M3.newA (pymolView);
+var m3 = JU.M3.newA9 (pymolView);
 m3.invert ();
 var cameraX = pymolView[9];
 var cameraY = -pymolView[10];
@@ -1070,7 +1070,7 @@ var axis = JU.V3.newV (rotAxis);
 if (Float.isNaN (degrees)) {
 matrixEnd.m00 = NaN;
 } else if (degrees < 0.01 && degrees > -0.01) {
-matrixEnd.setIdentity ();
+matrixEnd.setScale (1);
 } else {
 if (axis.x == 0 && axis.y == 0 && axis.z == 0) {
 return;
@@ -1221,7 +1221,7 @@ var m = this.viewer.getModelSetAuxiliaryInfoValue ("defaultOrientationMatrix");
 if (m == null) {
 m = this.matrixRotate;
 } else {
-m = JU.M3.newM (m);
+m = JU.M3.newM3 (m);
 m.invert ();
 m.mul2 (this.matrixRotate, m);
 }var m22 = m.m22;
@@ -1550,7 +1550,7 @@ return (z <= 0 ? this.referencePlaneOffset : this.referencePlaneOffset / z);
 }, "~N");
 $_M(c$, "getTempScreenPt", 
 function (ptXYZ, ptRef) {
-this.matrixTransform.transform2 (ptXYZ, this.point3fScreenTemp);
+this.matrixTransform.rotTrans2 (ptXYZ, this.point3fScreenTemp);
 var z = this.point3fScreenTemp.z;
 if (Float.isNaN (z)) {
 if (!this.haveNotifiedNaN && J.util.Logger.debugging) J.util.Logger.debug ("NaN seen in TransformPoint");
@@ -1621,7 +1621,7 @@ this.untransformedPoint.x -= this.perspectiveShiftXY.x;
 this.untransformedPoint.y -= this.perspectiveShiftXY.y;
 break;
 }
-this.matrixTransformInv.transform2 (this.untransformedPoint, coordPt);
+this.matrixTransformInv.rotTrans2 (this.untransformedPoint, coordPt);
 }, "JU.P3,JU.P3");
 $_M(c$, "canNavigate", 
 function () {

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.script");
-Clazz.load (["J.script.ScriptCompilationTokenParser", "JU.List"], "J.script.ScriptCompiler", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M3", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.BondSet", "$.Group", "J.script.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptEvaluator", "$.ScriptFlowContext", "$.ScriptFunction", "$.T", "J.util.Escape", "$.Logger", "$.Txt", "J.viewer.Viewer"], function () {
+Clazz.load (["J.script.ScriptCompilationTokenParser", "JU.List"], "J.script.ScriptCompiler", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M34", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.BondSet", "$.Group", "J.script.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptEvaluator", "$.ScriptFlowContext", "$.ScriptFunction", "$.T", "J.util.Escape", "$.Logger", "$.Txt", "J.viewer.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.filename = null;
 this.isSilent = false;
@@ -126,7 +126,7 @@ return J.io.JmolBinary.getEmbeddedScript (script);
 }, $fz.isPrivate = true, $fz), "~S");
 $_M(c$, "addTokenToPrefix", 
 ($fz = function (token) {
-if (this.logMessages) J.util.Logger.debug ("addTokenToPrefix" + token);
+if (this.logMessages) J.util.Logger.info ("addTokenToPrefix" + token);
 this.ltoken.addLast (token);
 if (token.tok != 0) this.lastToken = token;
 }, $fz.isPrivate = true, $fz), "J.script.T");
@@ -383,16 +383,8 @@ this.isComment = true;
 this.addTokenToPrefix (J.script.T.o (0, this.comment));
 }} else if (this.setBraceCount > 0 && this.endOfLine && this.ichToken < this.cchScript) {
 return 2;
-}if (this.tokCommand == 135271429 && this.checkImpliedScriptCmd) {
-var s = (this.nTokens == 2 ? this.lastToken.value.toString ().toUpperCase () : null);
-if (this.nTokens > 2 && !(this.tokAt (2) == 269484048 && this.ltoken.get (1).value.toString ().endsWith (".spt")) || s != null && (s.endsWith (".SORT") || s.endsWith (".REVERSE") || s.indexOf (".SORT(") >= 0 || s.indexOf (".REVERSE(") >= 0 || s.indexOf (".POP(") >= 0 || s.indexOf (".PUSH(") >= 0)) {
-this.ichToken = this.ichCurrentCommand;
-this.nTokens = 0;
-this.ltoken.clear ();
-this.cchToken = 0;
-this.tokCommand = 0;
-return 2;
-}}if (this.isNewSet && this.nTokens > 2 && this.tokAt (2) == 1048584 && (this.tokAt (3) == 1276117011 || this.tokAt (3) == 1141899269 || this.tokAt (3) == 1276383749 || this.tokAt (3) == 1276383249)) {
+}if (this.wasImpliedScript ()) return 2;
+if (this.isNewSet && this.nTokens > 2 && this.tokAt (2) == 1048584 && (this.tokAt (3) == 1276117011 || this.tokAt (3) == 1141899269 || this.tokAt (3) == 1276383749 || this.tokAt (3) == 1276383249)) {
 this.ltoken.set (0, J.script.T.tokenSet);
 this.ltoken.add (1, this.tokAt (3) == 1276383249 ? J.script.T.tokenAll : this.ltoken.get (1));
 } else if (this.tokInitialPlusPlus != 0) {
@@ -485,6 +477,19 @@ this.ichToken = this.cchScript;
 return 0;
 }return 0;
 }, $fz.isPrivate = true, $fz), "~N,~B");
+$_M(c$, "wasImpliedScript", 
+($fz = function () {
+if (this.nTokens >= 2 && this.tokCommand == 135271429 && this.checkImpliedScriptCmd) {
+var s = (this.nTokens == 2 ? this.lastToken.value.toString ().toUpperCase () : null);
+if (this.nTokens > 2 ? !(this.tokAt (2) == 269484048 && this.ltoken.get (1).value.toString ().endsWith (".spt")) : s.endsWith (".SORT") || s.endsWith (".REVERSE") || s.endsWith (".POP") || s.indexOf (".SORT(") >= 0 || s.indexOf (".REVERSE(") >= 0 || s.indexOf (".POP(") >= 0 || s.indexOf (".PUSH(") >= 0) {
+this.ichToken = this.ichCurrentCommand;
+this.nTokens = 0;
+this.ltoken.clear ();
+this.cchToken = 0;
+this.tokCommand = 0;
+return true;
+}}return false;
+}, $fz.isPrivate = true, $fz));
 $_M(c$, "compileCommand", 
 ($fz = function () {
 switch (this.ltoken.size ()) {
@@ -582,7 +587,7 @@ if (this.lookingAtString (!this.implicitString)) {
 if (this.cchToken < 0) return this.ERROR (4);
 var str = this.getUnescapedStringLiteral (this.lastToken != null && !this.iHaveQuotedString && this.lastToken.tok != 1073741983 && (this.tokCommand == 1085443 && this.nTokens == 2 && this.lastToken.tok == 545259546 || this.tokCommand == 135271426 || this.tokCommand == 1610616835 || this.tokCommand == 135271429));
 this.iHaveQuotedString = true;
-if (this.tokCommand == 135271426 && this.lastToken.tok == 135270407 || this.tokCommand == 135270407 && str.indexOf ("@") < 0) {
+if (this.tokCommand == 135271426 && this.lastToken.tok == 135270408 || this.tokCommand == 135270408 && str.indexOf ("@") < 0) {
 if (!this.getData (str)) {
 return this.ERROR (11, "data");
 }} else {
@@ -633,7 +638,7 @@ return 2;
 }}}switch (this.tokCommand) {
 case 135271426:
 case 135271429:
-case 135270410:
+case 1276121098:
 if (this.script.charAt (this.ichToken) == '@') {
 this.iHaveQuotedString = true;
 return 0;
@@ -645,7 +650,7 @@ switch (token == null ? 0 : token.tok) {
 case 1073742015:
 case 1073741839:
 if (this.nTokens != 1) return 4;
-case 135270407:
+case 135270408:
 case 1229984263:
 case 1073741983:
 case 1095766030:
@@ -760,8 +765,8 @@ this.addTokenToPrefix (J.script.T.o (10, isBondOrMatrix ?  new J.modelset.BondSe
 return 2;
 }if (isBondOrMatrix) {
 var m = this.lookingAtMatrix ();
-if (Clazz.instanceOf (m, JU.M3) || Clazz.instanceOf (m, JU.M4)) {
-this.addTokenToPrefix (J.script.T.o ((Clazz.instanceOf (m, JU.M3) ? 11 : 12), m));
+if (Clazz.instanceOf (m, JU.M34)) {
+this.addTokenToPrefix (J.script.T.o ((Clazz.instanceOf (m, JU.M4) ? 12 : 11), m));
 return 2;
 }}}return 0;
 }, $fz.isPrivate = true, $fz));
@@ -881,12 +886,13 @@ this.ichBrace = this.ichToken;
 if (this.nTokens == 0) {
 this.braceCount = this.parenCount = 1;
 } else {
+if (!this.wasImpliedScript ()) {
 this.braceCount = this.parenCount = this.nSemiSkip = 0;
 if (this.theToken.tok != 102411 && this.theToken.tok != 102413) this.vBraces.addLast (this.theToken);
 this.iBrace++;
 this.isEndOfCommand = true;
 this.ichEnd = this.ichToken;
-return 2;
+}return 2;
 }}this.braceCount--;
 case 269484049:
 this.parenCount--;
@@ -1408,7 +1414,7 @@ this.ichToken++;
 if (i < 0 || !this.script.substring (i, i + 4).equalsIgnoreCase ("END ")) return false;
 var str = this.script.substring (this.ichToken, i);
 this.incrementLineCount (str);
-this.addTokenToPrefix (J.script.T.o (135270407, str));
+this.addTokenToPrefix (J.script.T.o (135270408, str));
 this.addTokenToPrefix (J.script.T.o (1073741824, "end"));
 this.addTokenToPrefix (J.script.T.o (4, key));
 this.cchToken = i - this.ichToken + key.length + 6;
@@ -1689,7 +1695,7 @@ this.cchToken = 8;
 return  new JU.BS ();
 }var ichT;
 if (this.ichToken + 4 > this.cchScript || this.script.charAt (this.ichToken + 1) != '{' || (ichT = this.script.indexOf ("}", this.ichToken)) < 0 || ichT + 1 == this.cchScript) return null;
-var bs = J.util.Escape.uB (this.script.substring (this.ichToken, ichT + 2));
+var bs = JU.BS.unescape (this.script.substring (this.ichToken, ichT + 2));
 if (bs != null) this.cchToken = ichT + 2 - this.ichToken;
 return bs;
 });

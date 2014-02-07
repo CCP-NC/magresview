@@ -160,10 +160,12 @@ for (; this.readLine () != null; ) {
 if (this.line.startsWith ("property_flags:")) break;
 var tokens = this.getTokens ();
 var atom =  new J.adapter.smarter.Atom ();
+var field;
 for (var i = 0; i < this.fieldCount; i++) {
-var field = tokens[i];
-if (field == null) J.util.Logger.warn ("field == null in " + this.line);
-switch (this.fieldTypes[i]) {
+var type = this.fieldTypes[i];
+if (type == 0) continue;
+if ((field = tokens[i]) == null) J.util.Logger.warn ("field == null in " + this.line);
+switch (type) {
 case -1:
 atom.atomSerial = JU.PT.parseInt (field);
 break;
@@ -181,7 +183,8 @@ case 5:
 atom.partialCharge = this.parseFloatStr (field);
 break;
 case 4:
-this.setAtomCoordXYZ (atom, this.parseFloatStr (field), this.parseFloatStr (tokens[i + 1]), this.parseFloatStr (tokens[i + 2]));
+this.setAtomCoordTokens (atom, tokens, i);
+i += 2;
 break;
 }
 }

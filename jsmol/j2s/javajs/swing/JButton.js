@@ -1,6 +1,6 @@
 Clazz.declarePackage ("javajs.swing");
-Clazz.load (["javajs.swing.JComponent"], "javajs.swing.JButton", ["JU.SB"], function () {
-c$ = Clazz.declareType (javajs.swing, "JButton", javajs.swing.JComponent);
+Clazz.load (["javajs.swing.AbstractButton"], "javajs.swing.JButton", ["JU.SB"], function () {
+c$ = Clazz.declareType (javajs.swing, "JButton", javajs.swing.AbstractButton);
 Clazz.makeConstructor (c$, 
 function () {
 Clazz.superConstructor (this, javajs.swing.JButton, ["btnJB"]);

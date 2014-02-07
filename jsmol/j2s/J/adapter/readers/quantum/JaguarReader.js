@@ -46,18 +46,10 @@ this.readLines (2);
 while (this.readLine () != null && this.line.length >= 60 && this.line.charAt (2) != ' ') {
 var tokens = this.getTokens ();
 var atomName = tokens[0];
-var x = this.parseFloatStr (tokens[1]);
-var y = this.parseFloatStr (tokens[2]);
-var z = this.parseFloatStr (tokens[3]);
-if (Float.isNaN (x) || Float.isNaN (y) || Float.isNaN (z) || atomName.length < 2) return;
-var elementSymbol;
+if (atomName.length < 2) return;
 var ch2 = atomName.charAt (1);
-if (ch2 >= 'a' && ch2 <= 'z') elementSymbol = atomName.substring (0, 2);
- else elementSymbol = atomName.substring (0, 1);
-var atom = this.atomSetCollection.addNewAtom ();
-atom.elementSymbol = elementSymbol;
-atom.atomName = atomName;
-this.setAtomCoordXYZ (atom, x, y, z);
+var elementSymbol = (ch2 >= 'a' && ch2 <= 'z' ? atomName.substring (0, 2) : atomName.substring (0, 1));
+this.addAtomXYZSymName (tokens, 1, elementSymbol, atomName);
 }
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readCharges", 
@@ -66,7 +58,7 @@ var iAtom = 0;
 while (this.readLine () != null && this.line.indexOf ("sum") < 0) {
 if (this.line.indexOf ("Charge") < 0) continue;
 var tokens = this.getTokens ();
-for (var i = 1; i < tokens.length; i++) this.atomSetCollection.getAtom (iAtom++).partialCharge = this.parseFloatStr (tokens[i]);
+for (var i = 1; i < tokens.length; i++) this.atomSetCollection.atoms[iAtom++].partialCharge = this.parseFloatStr (tokens[i]);
 
 }
 }, $fz.isPrivate = true, $fz));
@@ -202,7 +194,7 @@ $_M(c$, "readFrequencies",
 var atomCount = this.atomSetCollection.getLastAtomSetAtomCount ();
 this.discardLinesUntilStartsWith ("  frequencies ");
 while (this.line != null && this.line.startsWith ("  frequencies ")) {
-var iAtom0 = this.atomSetCollection.getAtomCount ();
+var iAtom0 = this.atomSetCollection.atomCount;
 var frequencies = this.getTokens ();
 var frequencyCount = frequencies.length - 1;
 var ignore =  Clazz.newBooleanArray (frequencyCount, false);

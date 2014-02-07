@@ -1,12 +1,12 @@
 Clazz.declarePackage ("J.adapter.readers.xtal");
-Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.xtal.VaspOutcarReader", ["java.lang.Double", "JU.DF", "$.List"], function () {
+Clazz.load (["J.adapter.smarter.AtomSetCollectionReader", "JU.List"], "J.adapter.readers.xtal.VaspOutcarReader", ["java.lang.Double", "JU.DF"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.atomNames = null;
-this.elementNames = null;
 this.atomCount = 0;
 this.inputOnly = false;
 this.mDsimulation = false;
 this.isVersion5 = false;
+this.elementNames = null;
 this.unitCellData = null;
 this.gibbsEnergy = null;
 this.gibbsEntropy = null;
@@ -17,6 +17,7 @@ this.temp = 0;
 Clazz.instantialize (this, arguments);
 }, J.adapter.readers.xtal, "VaspOutcarReader", J.adapter.smarter.AtomSetCollectionReader);
 Clazz.prepareFields (c$, function () {
+this.elementNames =  new JU.List ();
 this.unitCellData =  Clazz.newFloatArray (18, 0);
 });
 $_V(c$, "initializeReader", 
@@ -29,7 +30,7 @@ $_V(c$, "checkLine",
 function () {
 if (this.line.contains (" vasp.5")) {
 this.isVersion5 = true;
-} else if (this.line.toUpperCase ().contains ("INCAR:")) {
+} else if (this.line.toUpperCase ().contains ("TITEL")) {
 this.readElementNames ();
 } else if (this.line.contains ("ions per type")) {
 this.readAtomCountAndSetNames ();
@@ -57,18 +58,7 @@ this.setSymmetry ();
 });
 $_M(c$, "readElementNames", 
 ($fz = function () {
-this.elementNames =  new JU.List ();
-var elementList = "";
-while (this.readLine () != null && this.line.indexOf ("VRHFIN") < 0) {
-var pt = (this.line.contains ("_") ? 2 : 1);
-if (pt == 2) this.line = this.line.$replace ('_', ' ');
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.line.substring (this.line.indexOf (":") + 1));
-var sym = tokens[pt];
-var key = ";" + sym + ";";
-if (elementList.indexOf (key) >= 0) continue;
-elementList += key;
-this.elementNames.addLast (sym);
-}
+this.elementNames.addLast (this.getTokens ()[3]);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readAtomCountAndSetNames", 
 ($fz = function () {
@@ -85,7 +75,7 @@ for (var pt = 0, i = 0; i < nElements; i++) for (var j = 0; j < numofElement[i];
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readUnitCellVectors", 
 ($fz = function () {
-if (this.atomSetCollection.getAtomCount () > 0) {
+if (this.atomSetCollection.atomCount > 0) {
 this.setSymmetry ();
 this.atomSetCollection.newAtomSet ();
 this.setAtomSetInfo ();
@@ -107,31 +97,16 @@ this.setFractionalCoordinates (false);
 $_M(c$, "readInitialCoordinates", 
 ($fz = function () {
 var counter = 0;
-while (this.readLine () != null && this.line.length > 10) {
-var atom = this.atomSetCollection.addNewAtom ();
-var tokens = this.getTokens ();
-atom.atomName = this.atomNames[counter++];
-var x = this.parseFloatStr (tokens[0]);
-var y = this.parseFloatStr (tokens[1]);
-var z = this.parseFloatStr (tokens[2]);
-this.setAtomCoordXYZ (atom, x, y, z);
-}
+while (this.readLine () != null && this.line.length > 10) this.addAtomXYZSymName (this.getTokens (), 0, null, this.atomNames[counter++]);
+
 this.atomSetCollection.setAtomSetName ("Initial Coordinates");
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readPOSITION", 
 ($fz = function () {
 var counter = 0;
 this.readLines (1);
-while (this.readLine () != null && this.line.indexOf ("----------") < 0) {
-var atom = this.atomSetCollection.addNewAtom ();
-var tokens = this.getTokens ();
-atom.atomName = this.atomNames[counter];
-var x = this.parseFloatStr (tokens[0]);
-var y = this.parseFloatStr (tokens[1]);
-var z = this.parseFloatStr (tokens[2]);
-this.setAtomCoordXYZ (atom, x, y, z);
-counter++;
-}
+while (this.readLine () != null && this.line.indexOf ("----------") < 0) this.addAtomXYZSymName (this.getTokens (), 0, null, this.atomNames[counter++]);
+
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readEnergy", 
 ($fz = function () {
@@ -181,8 +156,8 @@ this.atomSetCollection.setAtomSetCollectionAuxiliaryInfo ("Temperature", JU.DF.f
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readFrequency", 
 ($fz = function () {
-var pt = this.atomSetCollection.getCurrentAtomSetIndex ();
-this.atomSetCollection.setBaseSymmetryAtomCount (this.atomCount);
+var pt = this.atomSetCollection.currentAtomSetIndex;
+this.atomSetCollection.baseSymmetryAtomCount = this.atomCount;
 if (this.isVersion5) {
 this.readLines (3);
 } else {
@@ -191,10 +166,10 @@ this.readLines (5);
 }var ignore =  Clazz.newBooleanArray (1, false);
 while (this.readLine () != null && (this.line.contains ("f  = ") || this.line.contains ("f/i= "))) {
 this.applySymmetryAndSetTrajectory ();
-var iAtom0 = this.atomSetCollection.getAtomCount ();
+var iAtom0 = this.atomSetCollection.atomCount;
 this.cloneLastAtomSet (this.atomCount, null);
 if (!ignore[0]) {
-this.atomSetCollection.setCurrentAtomSetIndex (++pt);
+this.atomSetCollection.currentAtomSetIndex = ++pt;
 this.atomSetCollection.setAtomSetFrequency (null, null, this.line.substring (this.line.indexOf ("2PiTHz") + 6, this.line.indexOf ("c") - 1).trim (), null);
 }this.readLine ();
 this.fillFrequencyData (iAtom0, this.atomCount, this.atomCount, ignore, true, 35, 12, null, 0);

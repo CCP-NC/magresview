@@ -114,7 +114,7 @@ this.vTemp2.cross (this.vTemp, this.vTemp2);
 this.vTemp2.cross (this.vTemp2, this.vTemp);
 this.vTemp2.normalize ();
 this.vTemp2.scale (this.dmesh.scale / 2);
-mat.transform (this.vTemp2);
+mat.rotate (this.vTemp2);
 var degrees = theta / 5;
 while (Math.abs (degrees) > 5) degrees /= 2;
 
@@ -131,7 +131,7 @@ if (i == iBase) this.pt0.setT (this.pt1);
 this.pt1.scaleAdd2 (1, this.vTemp2, this.pt1f);
 if (i == 0) this.pt2.setT (this.pt1);
 this.viewer.transformPtScr (this.pt1, this.screens[i]);
-mat.transform (this.vTemp2);
+mat.rotate (this.vTemp2);
 }
 if (this.dmesh.isVector && !this.dmesh.noHead) {
 this.renderArrowHead (this.pt0, this.pt1, 0.3, false, false, this.dmesh.isBarb);

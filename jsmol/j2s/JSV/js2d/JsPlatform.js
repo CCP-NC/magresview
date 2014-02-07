@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JSV.js2d");
-Clazz.load (["javajs.api.GenericPlatform"], "JSV.js2d.JsPlatform", ["java.net.URL", "JU.AjaxURLStreamHandlerFactory", "JSV.js2d.Display", "$.Image", "$.JsFile", "$.JsFont", "$.Mouse"], function () {
+Clazz.load (["javajs.api.GenericPlatform"], "JSV.js2d.JsPlatform", ["java.net.URL", "JU.AjaxURLStreamHandlerFactory", "JSV.app.GenericMouse", "JSV.js2d.Display", "$.Image", "$.JsFile", "$.JsFont"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.canvas = null;
 this.viewer = null;
@@ -35,9 +35,9 @@ $_V(c$, "isHeadless",
 function () {
 return false;
 });
-$_M(c$, "getMouseManager", 
+$_V(c$, "getMouseManager", 
 function (privateKey, jsvp) {
-return  new JSV.js2d.Mouse (jsvp);
+return  new JSV.app.GenericMouse (jsvp);
 }, "~N,~O");
 $_V(c$, "convertPointFromScreen", 
 function (canvas, ptTemp) {
@@ -204,10 +204,6 @@ $_V(c$, "getBufferedURLInputStream",
 function (url, outputBytes, post) {
 return JSV.js2d.JsFile.getBufferedURLInputStream (url, outputBytes, post);
 }, "java.net.URL,~A,~S");
-$_M(c$, "getMouseManager", 
-function (jsvp) {
-return  new JSV.js2d.Mouse (jsvp);
-}, "JSV.api.JSVPanel");
 $_V(c$, "getLocalUrl", 
 function (fileName) {
 return null;

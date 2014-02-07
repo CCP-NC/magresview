@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JSV.common");
-Clazz.load (["javajs.api.BytePoster", "$.JSInterface", "$.PlatformViewer", "javajs.awt.Dimension", "JSV.common.JDXSpectrum"], "JSV.common.JSViewer", ["java.lang.Boolean", "$.Double", "$.Float", "$.Thread", "java.net.URL", "java.util.Hashtable", "JU.List", "$.OC", "$.PT", "$.SB", "JSV.common.Annotation", "$.ExportType", "$.JSVFileManager", "$.PanelData", "$.PanelNode", "$.Parameters", "$.PeakInfo", "$.PrintLayout", "$.RepaintManager", "$.ScriptToken", "$.ScriptTokenizer", "JSV.source.JDXSource", "JSV.tree.SimpleTree", "JSV.util.JSVEscape", "J.util.Logger"], function () {
+Clazz.load (["javajs.api.BytePoster", "$.JSInterface", "$.PlatformViewer", "javajs.awt.Dimension", "JSV.common.JDXSpectrum"], "JSV.common.JSViewer", ["java.io.File", "java.lang.Boolean", "$.Double", "$.Float", "$.Thread", "java.net.URL", "java.util.Hashtable", "JU.List", "$.OC", "$.PT", "$.SB", "JSV.common.Annotation", "$.ExportType", "$.JSVFileManager", "$.PanelData", "$.PanelNode", "$.Parameters", "$.PeakInfo", "$.PrintLayout", "$.RepaintManager", "$.ScriptToken", "$.ScriptTokenizer", "JSV.source.JDXSource", "JSV.tree.SimpleTree", "J.util.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.si = null;
 this.g2d = null;
@@ -9,7 +9,7 @@ this.panelNodes = null;
 this.parameters = null;
 this.repaintManager = null;
 this.selectedPanel = null;
-this.viewPanel = null;
+this.mainPanel = null;
 this.properties = null;
 this.scriptQueue = null;
 this.fileHelper = null;
@@ -33,10 +33,15 @@ this.dimScreen = null;
 this.apiPlatform = null;
 this.popupAllowMenu = true;
 this.popupZoomEnabled = true;
+this.defaultLoadScript = null;
+this.nmrMaxY = NaN;
 this.overlayLegendVisible = false;
 this.recentStackPercent = 5;
 this.lastPrintLayout = null;
 this.offWindowFrame = null;
+this.recentOpenURL = "http://";
+this.recentURL = null;
+this.recentSimulation = "tylenol";
 Clazz.instantialize (this, arguments);
 }, JSV.common, "JSViewer", null, [javajs.api.PlatformViewer, javajs.api.JSInterface, javajs.api.BytePoster]);
 Clazz.prepareFields (c$, function () {
@@ -76,6 +81,7 @@ this.popupZoomEnabled = zoomEnabled;
 }, "~B,~B");
 $_M(c$, "showMenu", 
 function (x, y) {
+if (!this.popupAllowMenu) return;
 if (this.jsvpPopupMenu == null) {
 try {
 this.jsvpPopupMenu = this.getPlatformInterface ("Popup");
@@ -83,7 +89,7 @@ this.jsvpPopupMenu.jpiInitialize (this, this.isApplet ? "appletMenu" : "appMenu"
 this.jsvpPopupMenu.setEnabled (this.popupAllowMenu, this.popupZoomEnabled);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
-System.out.println (e + " initializing popup menu");
+J.util.Logger.error (e + " initializing popup menu");
 return;
 } else {
 throw e;
@@ -97,7 +103,7 @@ this.si.siIncrementViewCount (1);
 if (script == null) script = "";
 script = script.trim ();
 if (script.startsWith ("!")) script = script.substring (1).trim ();
-System.out.println ("RUNSCRIPT " + script);
+J.util.Logger.info ("RUNSCRIPT " + script);
 var isOK = true;
 var nErrorsLeft = 10;
 var commandTokens =  new JSV.common.ScriptTokenizer (script, true);
@@ -109,7 +115,6 @@ var key = JSV.common.ScriptToken.getKey (eachParam);
 if (key == null) continue;
 var st = JSV.common.ScriptToken.getScriptToken (key);
 var value = JSV.common.ScriptToken.getValue (st, eachParam, token);
-System.out.println ("KEY-> " + key + " VALUE-> " + value + " : " + st);
 try {
 switch (st) {
 case JSV.common.ScriptToken.UNKNOWN:
@@ -126,6 +131,13 @@ case JSV.common.ScriptToken.SYNCCALLBACKFUNCTIONNAME:
 case JSV.common.ScriptToken.COORDCALLBACKFUNCTIONNAME:
 case JSV.common.ScriptToken.LOADFILECALLBACKFUNCTIONNAME:
 this.si.siExecSetCallback (st, value);
+break;
+case JSV.common.ScriptToken.DEFAULTLOADSCRIPT:
+value = JU.PT.rep (value, "''", "\"");
+this.defaultLoadScript = (value.length > 0 ? value : null);
+break;
+case JSV.common.ScriptToken.DEFAULTNMRNORMALIZATION:
+this.nmrMaxY = JU.PT.parseFloat (value);
 break;
 case JSV.common.ScriptToken.AUTOINTEGRATE:
 this.si.siExecSetAutoIntegrate (JSV.common.Parameters.isTrue (value));
@@ -145,7 +157,7 @@ this.si.siExecHidden (JSV.common.Parameters.isTrue (value));
 break;
 case JSV.common.ScriptToken.INTEGRATIONRATIOS:
 this.si.siSetIntegrationRatios (value);
-if (this.selectedPanel != null) this.execIntegrate (null);
+if (!this.isClosed ()) this.execIntegrate (null);
 break;
 case JSV.common.ScriptToken.INTERFACE:
 this.si.siExecSetInterface (value);
@@ -161,7 +173,10 @@ case JSV.common.ScriptToken.JSV:
 this.syncScript (JU.PT.trimQuotes (value));
 break;
 case JSV.common.ScriptToken.LOAD:
-msg = this.si.siExecLoad (value);
+if (value.length == 0) {
+if (this.defaultLoadScript != null) this.runScriptNow (this.defaultLoadScript);
+break;
+}msg = this.si.siExecLoad (value, (this.defaultLoadScript == null ? "" : this.defaultLoadScript + ";") + commandTokens.getRemainingScript ());
 break;
 case JSV.common.ScriptToken.LOADIMAGINARY:
 this.si.siSetLoadImaginary (JSV.common.Parameters.isTrue (value));
@@ -303,8 +318,9 @@ break;
 }
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
+msg = e.toString ();
+J.util.Logger.error (e.toString ());
 {
-alert(e + "\n" + Clazz.getStackTrace())
 }isOK = false;
 --nErrorsLeft;
 } else {
@@ -340,7 +356,7 @@ var jsvp = this.selectedPanel;
 var p = this.parameters;
 var b = JSV.common.Parameters.getTFToggle (value);
 if (value.indexOf ("=") < 0) {
-if (jsvp != null) jsvp.getPanelData ().getPeakListing (null, b);
+if (!this.isClosed ()) jsvp.getPanelData ().getPeakListing (null, b);
 } else {
 var tokens = JSV.common.ScriptToken.getTokens (value);
 for (var i = tokens.size (); --i >= 0; ) {
@@ -354,7 +370,7 @@ if (key.startsWith ("thr")) {
 p.peakListThreshold = Double.$valueOf (value).doubleValue ();
 } else if (key.startsWith ("int")) {
 p.peakListInterpolation = (value.equalsIgnoreCase ("none") ? "NONE" : "parabolic");
-}if (jsvp != null) jsvp.getPanelData ().getPeakListing (p, Boolean.TRUE);
+}if (!this.isClosed ()) jsvp.getPanelData ().getPeakListing (p, Boolean.TRUE);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 } else {
@@ -415,9 +431,23 @@ throw e;
 }
 }
 }, $fz.isPrivate = true, $fz), "JU.List,~S");
+$_M(c$, "isClosed", 
+($fz = function () {
+return (this.selectedPanel == null || this.selectedPanel.getPanelData () == null);
+}, $fz.isPrivate = true, $fz));
 $_M(c$, "execSelect", 
 ($fz = function (value) {
-var nodes = this.panelNodes;
+if (value.startsWith ("ID ")) {
+if (!this.isClosed ()) try {
+this.selectedPanel.getPanelData ().selectSpectrum (null, "ID", JU.PT.trimQuotes (value.substring (3)), true);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+} else {
+throw e;
+}
+}
+return;
+}var nodes = this.panelNodes;
 for (var i = nodes.size (); --i >= 0; ) nodes.get (i).jsvp.getPanelData ().selectFromEntireSet (-2147483648);
 
 var speclist =  new JU.List ();
@@ -430,7 +460,7 @@ this.checkOverlay ();
 return;
 }var speclist =  new JU.List ();
 var strlist = this.fillSpecList (value, speclist, true);
-if (speclist.size () > 0) this.si.siOpenDataOrFile (null, strlist, speclist, strlist, -1, -1, false);
+if (speclist.size () > 0) this.si.siOpenDataOrFile (null, strlist, speclist, strlist, -1, -1, false, null, null);
 if (!fromScript) {
 this.si.siValidateAndRepaint ();
 }}, "~S,~B");
@@ -506,7 +536,7 @@ legend = node.setLegend (node.jsvp.getPanelData ().getNumberOfSpectraInCurrentSe
 $_M(c$, "addHighLight", 
 function (x1, x2, r, g, b, a) {
 var jsvp = this.selectedPanel;
-if (jsvp != null) {
+if (!this.isClosed ()) {
 jsvp.getPanelData ().addHighlight (null, x1, x2, null, r, g, b, a);
 jsvp.doRepaint (false);
 }}, "~N,~N,~N,~N,~N,~N");
@@ -516,11 +546,51 @@ if (peakScript.equals ("TEST")) peakScript = JSV.common.JSViewer.testScript;
 J.util.Logger.info ("JSViewer.syncScript Jmol>JSV " + peakScript);
 if (peakScript.indexOf ("<PeakData") < 0) {
 this.runScriptNow (peakScript);
-if (peakScript.indexOf ("#SYNC_PEAKS") >= 0) {
+if (peakScript.indexOf ("#SYNC_PEAKS") >= 0) this.syncPeaksAfterSyncScript ();
+return;
+}var sourceID = JU.PT.getQuotedAttribute (peakScript, "sourceID");
+var type;
+var model;
+var file;
+var jmolSource;
+var index;
+var atomKey;
+if (sourceID == null) {
+file = JU.PT.getQuotedAttribute (peakScript, "file");
+index = JU.PT.getQuotedAttribute (peakScript, "index");
+if (file == null || index == null) return;
+model = JU.PT.getQuotedAttribute (peakScript, "model");
+jmolSource = JU.PT.getQuotedAttribute (peakScript, "src");
+var modelSent = (jmolSource != null && jmolSource.startsWith ("Jmol") ? null : this.si.siGetReturnFromJmolModel ());
+if (model != null && modelSent != null && !model.equals (modelSent)) {
+J.util.Logger.info ("JSV ignoring model " + model + "; should be " + modelSent);
+return;
+}this.si.siSetReturnFromJmolModel (null);
+if (this.panelNodes.size () == 0 || !this.checkFileAlreadyLoaded (file)) {
+J.util.Logger.info ("file " + file + " not found -- JSViewer closing all and reopening");
+this.si.siSyncLoad (file);
+}type = JU.PT.getQuotedAttribute (peakScript, "type");
+atomKey = null;
+} else {
+file = null;
+index = model = sourceID;
+atomKey = "," + JU.PT.getQuotedAttribute (peakScript, "atom") + ",";
+type = "ID";
+jmolSource = sourceID;
+}var pi = this.selectPanelByPeak (file, index, atomKey);
+var pd = this.selectedPanel.getPanelData ();
+pd.selectSpectrum (file, type, model, true);
+this.si.siSendPanelChange ();
+pd.addPeakHighlight (pi);
+this.selectedPanel.doRepaint (true);
+if (jmolSource == null || (pi != null && pi.getAtoms () != null)) this.si.syncToJmol (this.jmolSelect (pi));
+}, "~S");
+$_M(c$, "syncPeaksAfterSyncScript", 
+($fz = function () {
 var source = this.currentSource;
 if (source == null) return;
 try {
-var file = "file=" + JSV.util.JSVEscape.eS (source.getFilePath ());
+var file = "file=" + JU.PT.esc (source.getFilePath ());
 var peaks = source.getSpectra ().get (0).getPeakList ();
 var sb =  new JU.SB ();
 sb.append ("[");
@@ -528,7 +598,7 @@ var n = peaks.size ();
 for (var i = 0; i < n; i++) {
 var s = peaks.get (i).toString ();
 s = s + " " + file;
-sb.append (JSV.util.JSVEscape.eS (s));
+sb.append (JU.PT.esc (s));
 if (i > 0) sb.append (",");
 }
 sb.append ("]");
@@ -539,35 +609,12 @@ if (Clazz.exceptionOf (e, Exception)) {
 throw e;
 }
 }
-}return;
-}peakScript = JU.PT.simpleReplace (peakScript, "\\\"", "");
-var file = JU.PT.getQuotedAttribute (peakScript, "file");
-System.out.println ("file2=" + file);
-var index = JU.PT.getQuotedAttribute (peakScript, "index");
-if (file == null || index == null) return;
-var model = JU.PT.getQuotedAttribute (peakScript, "model");
-var jmolSource = JU.PT.getQuotedAttribute (peakScript, "src");
-var modelSent = (jmolSource != null && jmolSource.startsWith ("Jmol") ? null : this.si.siGetReturnFromJmolModel ());
-if (model != null && modelSent != null && !model.equals (modelSent)) {
-J.util.Logger.info ("JSV ignoring model " + model + "; should be " + modelSent);
-return;
-}this.si.siSetReturnFromJmolModel (null);
-if (this.panelNodes.size () == 0 || !this.checkFileAlreadyLoaded (file)) {
-J.util.Logger.info ("file " + file + " not found -- JSViewer closing all and reopening");
-this.si.siSyncLoad (file);
-}var pi = this.selectPanelByPeak (peakScript);
-var jsvp = this.selectedPanel;
-var type = JU.PT.getQuotedAttribute (peakScript, "type");
-jsvp.getPanelData ().selectSpectrum (file, type, model, true);
-this.si.siSendPanelChange (jsvp);
-jsvp.getPanelData ().addPeakHighlight (pi);
-jsvp.doRepaint (true);
-if (jmolSource == null || (pi != null && pi.getAtoms () != null)) this.si.syncToJmol (this.jmolSelect (pi));
-}, "~S");
+}, $fz.isPrivate = true, $fz));
 $_M(c$, "checkFileAlreadyLoaded", 
 ($fz = function (fileName) {
 var jsvp = this.selectedPanel;
-if (jsvp != null && jsvp.getPanelData ().hasFileLoaded (fileName)) return true;
+if (this.isClosed ()) return false;
+if (jsvp.getPanelData ().hasFileLoaded (fileName)) return true;
 for (var i = this.panelNodes.size (); --i >= 0; ) if (this.panelNodes.get (i).jsvp.getPanelData ().hasFileLoaded (fileName)) {
 this.si.siSetSelectedPanel (this.panelNodes.get (i).jsvp);
 return true;
@@ -575,27 +622,24 @@ return true;
 return false;
 }, $fz.isPrivate = true, $fz), "~S");
 $_M(c$, "selectPanelByPeak", 
-($fz = function (peakScript) {
+($fz = function (file, index, atomKey) {
 if (this.panelNodes == null) return null;
-var file = JU.PT.getQuotedAttribute (peakScript, "file");
-var index = JU.PT.getQuotedAttribute (peakScript, "index");
 var pi = null;
 for (var i = this.panelNodes.size (); --i >= 0; ) this.panelNodes.get (i).jsvp.getPanelData ().addPeakHighlight (null);
 
 var jsvp = this.selectedPanel;
-pi = jsvp.getPanelData ().selectPeakByFileIndex (file, index);
-System.out.println (Thread.currentThread () + "JSViewer selectPanelByPeak pi = " + pi);
+pi = jsvp.getPanelData ().selectPeakByFileIndex (file, index, atomKey);
 if (pi != null) {
 this.setNode (JSV.common.PanelNode.findNode (jsvp, this.panelNodes), false);
 } else {
 for (var i = this.panelNodes.size (); --i >= 0; ) {
 var node = this.panelNodes.get (i);
-if ((pi = node.jsvp.getPanelData ().selectPeakByFileIndex (file, index)) != null) {
+if ((pi = node.jsvp.getPanelData ().selectPeakByFileIndex (file, index, atomKey)) != null) {
 this.setNode (node, false);
 break;
 }}
 }return pi;
-}, $fz.isPrivate = true, $fz), "~S");
+}, $fz.isPrivate = true, $fz), "~S,~S,~S");
 $_M(c$, "processPeakPickEvent", 
 function (eventObj, isApp) {
 var pi;
@@ -625,41 +669,40 @@ this.si.siCheckCallbacks (pi.getTitle ());
 }, "~O,~B");
 $_M(c$, "syncToJmol", 
 ($fz = function (pi) {
+this.selectedPanel.doRepaint (true);
 this.si.siSetReturnFromJmolModel (pi.getModel ());
 this.si.syncToJmol (this.jmolSelect (pi));
 }, $fz.isPrivate = true, $fz), "JSV.common.PeakInfo");
 $_M(c$, "sendPanelChange", 
-function (jsvp) {
-var pd = jsvp.getPanelData ();
+function () {
+var pd = this.selectedPanel.getPanelData ();
 var spec = pd.getSpectrum ();
 var pi = spec.getSelectedPeak ();
 if (pi == null) pi = spec.getModelPeakInfoForAutoSelectOnLoad ();
 if (pi == null) pi = spec.getBasePeakInfo ();
 pd.addPeakHighlight (pi);
-J.util.Logger.info (Thread.currentThread () + "JSViewer sendFrameChange " + jsvp);
+J.util.Logger.info (Thread.currentThread () + "JSViewer sendFrameChange " + this.selectedPanel);
 this.syncToJmol (pi);
-}, "JSV.api.JSVPanel");
+});
 $_M(c$, "jmolSelect", 
 ($fz = function (pi) {
-var script = null;
-if ("IR".equals (pi.getType ()) || "RAMAN".equals (pi.getType ())) {
-script = "vibration ON; selectionHalos OFF;";
-} else if (pi.getAtoms () != null) {
-script = "vibration OFF; selectionhalos ON;";
-} else {
-script = "vibration OFF; selectionhalos OFF;";
-}script = "Select: " + pi + " script=\"" + script;
-System.out.println ("JSViewer.jmolSelect " + script);
-return script;
+var script = ("IR".equals (pi.getType ()) || "RAMAN".equals (pi.getType ()) ? "vibration ON; selectionHalos OFF;" : "vibration OFF; selectionhalos " + (pi.getAtoms () == null ? "OFF" : "ON"));
+return "Select: " + pi + " script=\"" + script + " \" sourceID=\"" + this.selectedPanel.getPanelData ().getSpectrum ().sourceID + "\"";
 }, $fz.isPrivate = true, $fz), "JSV.common.PeakInfo");
 $_M(c$, "getPropertyAsJavaObject", 
 function (key) {
-var isAll = false;
+var map =  new java.util.Hashtable ();
+if ("SOURCEID".equalsIgnoreCase (key)) {
+map.put (key, (this.selectedPanel.getPanelData () == null ? "" : this.selectedPanel.getPanelData ().getSpectrum ().sourceID));
+return map;
+}if (key != null && key.startsWith ("DATA_")) {
+map.put (key, JSV.common.JSVFileManager.getSimulationData (key.substring (5)));
+return map;
+}var isAll = false;
 if (key != null && key.toUpperCase ().startsWith ("ALL ") || "all".equalsIgnoreCase (key)) {
 key = key.substring (3).trim ();
 isAll = true;
 }if ("".equals (key)) key = null;
-var map =  new java.util.Hashtable ();
 var map0 = this.pd ().getInfo (true, key);
 if (!isAll && map0 != null) return map0;
 if (map0 != null) map.put ("current", map0);
@@ -697,15 +740,15 @@ sb.append (tokens[i]).append (" ");
 value = sb.toString ().trim ();
 }if (value.equals ("*")) {
 list = JSV.common.ScriptToken.getTokens (JSV.common.PanelNode.getSpectrumListAsString (this.panelNodes));
-} else if (value.startsWith ("\"")) {
+} else if (value.startsWith ("\"") || value.startsWith ("'")) {
 list = JSV.common.ScriptToken.getTokens (value);
 } else {
-value = JU.PT.simpleReplace (value, "_", " _ ");
-value = JU.PT.simpleReplace (value, "-", " - ");
+value = JU.PT.rep (value, "_", " _ ");
+value = JU.PT.rep (value, "-", " - ");
 list = JSV.common.ScriptToken.getTokens (value);
 list0 = JSV.common.ScriptToken.getTokens (JSV.common.PanelNode.getSpectrumListAsString (this.panelNodes));
 if (list0.size () == 0) return null;
-}var id0 = (this.selectedPanel == null ? prefix : JSV.common.PanelNode.findNode (this.selectedPanel, this.panelNodes).id);
+}var id0 = (this.isClosed () ? prefix : JSV.common.PanelNode.findNode (this.selectedPanel, this.panelNodes).id);
 id0 = id0.substring (0, id0.indexOf (".") + 1);
 var sb =  new JU.SB ();
 var n = list.size ();
@@ -729,14 +772,17 @@ while (pt < list0.size () && !list0.get (pt).equals (idLast)) pt++;
 
 pt++;
 while (pt < list0.size () && !idLast.equals (id)) {
-speclist.addLast (JSV.common.PanelNode.findNodeById (idLast = list0.get (pt++), this.panelNodes).jsvp.getPanelData ().getSpectrumAt (0));
+var node = JSV.common.PanelNode.findNodeById ((idLast = list0.get (pt++)), this.panelNodes);
+speclist.addLast (node.jsvp.getPanelData ().getSpectrumAt (0));
 sb.append (",").append (idLast);
 }
 continue;
 }var node;
+if (id.startsWith ("'") && id.endsWith ("'")) id = "\"" + JU.PT.trim (id, "'") + "\"";
 if (id.startsWith ("\"")) {
 id = JU.PT.trim (id, "\"");
-for (var j = 0; j < this.panelNodes.size (); j++) {
+var pn = this.panelNodes.size ();
+for (var j = 0; j < pn; j++) {
 node = this.panelNodes.get (j);
 if (node.fileName != null && node.fileName.startsWith (id) || node.frameTitle != null && node.frameTitle.startsWith (id)) {
 this.addSpecToList (node.jsvp.getPanelData (), userYFactor, -1, speclist, isView);
@@ -778,7 +824,7 @@ var color = this.getSolutionColor ();
 return "<html><body style='background-color:rgb(" + color + ")'><br />Predicted Solution Colour- RGB(" + color + ")<br /><br /></body></html>";
 });
 $_M(c$, "openDataOrFile", 
-function (data, name, specs, strUrl, firstSpec, lastSpec, isAppend) {
+function (data, name, specs, strUrl, firstSpec, lastSpec, isAppend, id) {
 if ("NONE".equals (name)) {
 this.close ("View*");
 return 0;
@@ -788,6 +834,15 @@ var newPath = null;
 var fileName = null;
 var isView = false;
 if (data != null) {
+try {
+fileName = name;
+newPath = filePath = JSV.common.JSVFileManager.getFullPathName (name);
+} catch (e) {
+if (Clazz.exceptionOf (e, JSV.exception.JSVException)) {
+} else {
+throw e;
+}
+}
 } else if (specs != null) {
 isView = true;
 newPath = fileName = filePath = "View" + this.si.siIncrementViewCount (1);
@@ -795,14 +850,14 @@ newPath = fileName = filePath = "View" + this.si.siIncrementViewCount (1);
 try {
 var u =  new java.net.URL (JSV.common.JSVFileManager.appletDocumentBase, strUrl, null);
 filePath = u.toString ();
-this.si.siSetRecentURL (filePath);
+this.recentURL = filePath;
 fileName = JSV.common.JSVFileManager.getName (filePath);
 } catch (e) {
 if (Clazz.exceptionOf (e, java.net.MalformedURLException)) {
 var file = this.apiPlatform.newFile (strUrl);
 fileName = file.getName ();
 newPath = filePath = file.getFullPath ();
-this.si.siSetRecentURL (null);
+this.recentURL = null;
 } else {
 throw e;
 }
@@ -817,9 +872,11 @@ this.si.siSetCurrentSource (isView ? JSV.source.JDXSource.createView (specs) : t
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 {
-alert(e + "\n" + Clazz.getStackTrace())
+alert(e.toString())
 }this.si.setCursor (0);
-return -3;
+if (this.isApplet) {
+this.selectedPanel.showMessage (e.toString (), "Error Opening File");
+}return -3;
 } else {
 throw e;
 }
@@ -831,7 +888,8 @@ newPath = this.currentSource.getFilePath ();
 if (newPath != null) fileName = newPath.substring (newPath.lastIndexOf ("/") + 1);
 } else {
 this.currentSource.setFilePath (newPath);
-}this.si.siSetLoaded (fileName, newPath);
+}if (id != null) this.currentSource.setID (id);
+this.si.siSetLoaded (fileName, newPath);
 var spec = this.currentSource.getJDXSpectrum (0);
 if (spec == null) {
 return -4;
@@ -846,54 +904,85 @@ this.splitSpectra ();
 }this.selectedPanel.getPanelData ().taintedAll = true;
 if (!isView) this.si.siUpdateRecentMenus (filePath);
 return 0;
-}, "~S,~S,JU.List,~S,~N,~N,~B");
+}, "~S,~S,JU.List,~S,~N,~N,~B,~S");
 $_M(c$, "close", 
 function (value) {
-if (value == null || value.equalsIgnoreCase ("all") || value.equals ("*")) {
+var n0 = 0;
+var pt = (value == null ? -2 : value.indexOf (">"));
+if (pt > 0) {
+n0 = JU.PT.parseInt (value.substring (pt + 1).trim ());
+value = value.substring (0, pt).trim ();
+}if ("*".equals (value)) value = "all";
+var isAll = (value === "all");
+if (value == null || n0 == 0 && value.equalsIgnoreCase ("all")) {
 this.si.siCloseSource (null);
 return;
-}value = value.$replace ('\\', '/');
+}var isViews = value.equalsIgnoreCase ("views");
+var list =  new JU.List ();
+var source;
+value = value.$replace ('\\', '/');
+var n = this.panelNodes.size ();
+var nMax = n - n0;
 if (value.endsWith ("*")) {
 value = value.substring (0, value.length - 1);
-for (var i = this.panelNodes.size (); --i >= 0; ) if (i < this.panelNodes.size () && this.panelNodes.get (i).fileName.startsWith (value)) this.si.siCloseSource (this.panelNodes.get (i).source);
+for (var i = n; --i >= 0; ) if (this.panelNodes.get (i).fileName.startsWith (value)) list.addLast (this.panelNodes.get (i).source);
 
-} else if (value.equals ("selected")) {
-var list =  new JU.List ();
+} else if (value.equalsIgnoreCase ("selected")) {
 var lastSource = null;
-for (var i = this.panelNodes.size (); --i >= 0; ) {
-var source = this.panelNodes.get (i).source;
+for (var i = n; --i >= 0; ) {
+source = this.panelNodes.get (i).source;
 if (this.panelNodes.get (i).isSelected && (lastSource == null || lastSource !== source)) list.addLast (source);
 lastSource = source;
 }
-for (var i = list.size (); --i >= 0; ) this.si.siCloseSource (list.get (i));
-
+} else if (isAll || isViews || value.equalsIgnoreCase ("simulations")) {
+for (var n1 = 0, i = n; --i >= 0 && n1 < nMax; ) if (isAll ? true : isViews ? this.panelNodes.get (i).isView : this.panelNodes.get (i).isSimulation) {
+list.addLast (this.panelNodes.get (i).source);
+n1++;
+}
 } else {
-var source = (value.length == 0 ? this.currentSource : JSV.common.PanelNode.findSourceByNameOrId (value, this.panelNodes));
-if (source == null) return;
-this.si.siCloseSource (source);
-}if (this.selectedPanel == null && this.panelNodes.size () > 0) this.si.siSetSelectedPanel (JSV.common.PanelNode.getLastFileFirstNode (this.panelNodes));
+source = (value.length == 0 ? this.currentSource : JSV.common.PanelNode.findSourceByNameOrId (value, this.panelNodes));
+if (source != null) list.addLast (source);
+}for (var i = list.size (); --i >= 0; ) this.si.siCloseSource (list.get (i));
+
+if (this.selectedPanel == null && this.panelNodes.size () > 0) this.si.siSetSelectedPanel (JSV.common.PanelNode.getLastFileFirstNode (this.panelNodes));
 }, "~S");
 $_M(c$, "load", 
-function (value) {
+function (value, script) {
 var tokens = JSV.common.ScriptToken.getTokens (value);
 var filename = tokens.get (0);
+var id = null;
 var pt = 0;
-var isAppend = filename.equalsIgnoreCase ("APPEND");
+if (filename.equalsIgnoreCase ("ID")) {
+id = JU.PT.trimQuotes (tokens.get (1));
+filename = tokens.get (2);
+pt = 2;
+}var isAppend = filename.equalsIgnoreCase ("APPEND");
 var isCheck = filename.equalsIgnoreCase ("CHECK");
-if (isAppend || isCheck) filename = tokens.get (++pt);
-var isSimulation = filename.equalsIgnoreCase ("MOL");
-if (isSimulation) filename = "http://SIMULATION/" + "MOL=" + JU.PT.trimQuotes (tokens.get (++pt));
+if (isAppend || isCheck) pt++;
+if (pt > 0) filename = tokens.get (pt);
+if (script == null) script = this.defaultLoadScript;
+if (filename.equals ("?")) {
+this.openFileFromDialog (isAppend, false, false, script);
+return;
+}if (filename.equals ("http://?")) {
+this.openFileFromDialog (isAppend, true, false, null);
+return;
+}if (filename.equals ("$?")) {
+this.openFileFromDialog (isAppend, true, true, null);
+return;
+}var isMOL = filename.equalsIgnoreCase ("MOL");
+if (isMOL) filename = "http://SIMULATION/" + "MOL=" + JU.PT.trimQuotes (tokens.get (++pt));
 if (!isCheck && !isAppend) {
 if (filename.equals ("\"\"") && this.currentSource != null) filename = this.currentSource.getFilePath ();
 this.close ("all");
 }filename = JU.PT.trimQuotes (filename);
 if (filename.startsWith ("$")) {
-isSimulation = true;
-filename = "http://SIMULATION/" + filename;
+isMOL = true;
+filename = "http://SIMULATION/" + filename.substring (1);
 }var firstSpec = (pt + 1 < tokens.size () ? Integer.$valueOf (tokens.get (++pt)).intValue () : -1);
 var lastSpec = (pt + 1 < tokens.size () ? Integer.$valueOf (tokens.get (++pt)).intValue () : firstSpec);
-this.si.siOpenDataOrFile (null, null, null, filename, firstSpec, lastSpec, isAppend);
-}, "~S");
+this.si.siOpenDataOrFile (null, null, null, filename, firstSpec, lastSpec, isAppend, script, id);
+}, "~S,~S");
 $_M(c$, "combineSpectra", 
 function (name) {
 var source = this.currentSource;
@@ -1003,14 +1092,14 @@ System.out.println ("not a leaf");
 $_M(c$, "removeAllHighlights", 
 function () {
 var jsvp = this.selectedPanel;
-if (jsvp != null) {
+if (!this.isClosed ()) {
 jsvp.getPanelData ().removeAllHighlights ();
 jsvp.doRepaint (false);
 }});
 $_M(c$, "removeHighlight", 
 function (x1, x2) {
 var jsvp = this.selectedPanel;
-if (jsvp != null) {
+if (!this.isClosed ()) {
 jsvp.getPanelData ().removeHighlight (x1, x2);
 jsvp.doRepaint (false);
 }}, "~N,~N");
@@ -1044,9 +1133,14 @@ this.repaintManager.repaintDone ();
 });
 $_M(c$, "checkOverlay", 
 function () {
-if (this.viewPanel != null) this.viewPanel.markSelectedPanels (this.panelNodes);
+if (this.mainPanel != null) this.markSelectedPanels (this.panelNodes, this.mainPanel.getCurrentPanelIndex ());
 this.viewDialog = this.getDialog (JSV.common.Annotation.AType.Views, null);
 });
+$_M(c$, "markSelectedPanels", 
+($fz = function (panelNodes, ip) {
+for (var i = panelNodes.size (); --i >= 0; ) panelNodes.get (i).isSelected = (ip == i);
+
+}, $fz.isPrivate = true, $fz), "JU.List,~N");
 $_M(c$, "execOverlayOffsetY", 
 ($fz = function (offset) {
 if (this.selectedPanel == null) return;
@@ -1056,6 +1150,7 @@ var f = JU.PT.parseFloat (soffset);
 if (Float.isNaN (f)) return;
 offset = Clazz.floatToInt (f);
 }this.recentStackPercent = offset;
+this.parameters.viewOffset = offset;
 this.pd ().setYStackOffsetPercent (offset);
 }, $fz.isPrivate = true, $fz), "~N");
 $_M(c$, "execScriptInline", 
@@ -1102,7 +1197,7 @@ return (this.selectedPanel != null && this.selectedPanel.processMouseEvent (id, 
 }, "~N,~N,~N,~N,~N");
 $_V(c$, "processTwoPointGesture", 
 function (touches) {
-if (this.selectedPanel != null) this.selectedPanel.processTwoPointGesture (touches);
+if (!this.isClosed ()) this.selectedPanel.processTwoPointGesture (touches);
 }, "~A");
 $_V(c$, "getApplet", 
 function () {
@@ -1216,7 +1311,7 @@ try {
 return (JSV.common.JSViewer.getInterface ("JSV.export.Exporter")).exportTheSpectrum (this, JSV.common.ExportType.getType (type), null, spec, 0, spec.getXYCoords ().length - 1, null);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
-System.out.println (e);
+J.util.Logger.error (e.toString ());
 return null;
 } else {
 throw e;
@@ -1249,6 +1344,51 @@ throw e;
 }
 }
 }, "~S");
+$_M(c$, "showMessage", 
+function (msg) {
+if (this.selectedPanel != null && msg != null) this.selectedPanel.showMessage (msg, null);
+}, "~S");
+$_M(c$, "openFileFromDialog", 
+function (isAppend, isURL, isSimulation, script) {
+var url = null;
+if (isSimulation) {
+url = this.fileHelper.getUrlFromDialog ("Enter the name or identifier of a compound", this.recentSimulation);
+if (url == null) return;
+this.recentSimulation = url;
+this.load ((isAppend ? "APPEND " : "") + "\"$" + url + "\"", script);
+} else if (isURL) {
+url = this.fileHelper.getUrlFromDialog ("Enter the URL of a JCAMP-DX File", this.recentURL == null ? this.recentOpenURL : this.recentURL);
+if (url == null) return;
+this.recentOpenURL = url;
+this.load ((isAppend ? "APPEND " : "") + "\"" + url + "\"", script);
+} else {
+var userData = [Boolean.$valueOf (isAppend), script];
+var file = this.fileHelper.showFileOpenDialog (this.mainPanel, userData);
+if (file != null) this.openFile (file.getFullPath (), !isAppend);
+}}, "~B,~B,~B,~S");
+$_M(c$, "openFile", 
+function (fileName, closeFirst) {
+if (closeFirst && this.panelNodes != null) {
+var source = JSV.common.PanelNode.findSourceByNameOrId (( new java.io.File (fileName)).getAbsolutePath (), this.panelNodes);
+if (source != null) this.si.siCloseSource (source);
+}this.si.siOpenDataOrFile (null, null, null, fileName, -1, -1, true, this.defaultLoadScript, null);
+}, "~S,~B");
+$_M(c$, "selectPanel", 
+function (jsvp, panelNodes) {
+var iPanel = -1;
+if (panelNodes != null) {
+for (var i = panelNodes.size (); --i >= 0; ) {
+var j = panelNodes.get (i).jsvp;
+if (j === jsvp) {
+iPanel = i;
+} else {
+j.setEnabled (false);
+j.setFocusable (false);
+j.getPanelData ().closeAllDialogsExcept (JSV.common.Annotation.AType.NONE);
+}}
+this.markSelectedPanels (panelNodes, iPanel);
+}return iPanel;
+}, "JSV.api.JSVPanel,JU.List");
 Clazz.defineStatics (c$,
 "sourceLabel", "Original...",
 "FILE_OPEN_OK", 0,

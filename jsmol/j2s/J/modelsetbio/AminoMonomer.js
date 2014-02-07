@@ -165,7 +165,7 @@ vB.sub2 (ptCa, this.getNitrogenAtom ());
 vB.cross (vC, vB);
 var mat =  new JU.M3 ();
 mat.setAA (JU.A4.newVA (vB, -0.29670596));
-mat.transform (vC);
+mat.rotate (vC);
 vA.cross (vB, vC);
 break;
 case 'b':

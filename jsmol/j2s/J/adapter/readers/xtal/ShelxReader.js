@@ -68,7 +68,7 @@ break;
 }, $fz.isPrivate = true, $fz), "~N");
 $_M(c$, "parseLattRecord", 
 ($fz = function () {
-this.atomSetCollection.setLatticeParameter (this.parseIntStr (this.tokens[1]));
+this.atomSetCollection.getXSymmetry ().setLatticeParameter (this.parseIntStr (this.tokens[1]));
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "parseSymmRecord", 
 ($fz = function () {
@@ -153,11 +153,8 @@ this.atomSetCollection.setAnisoBorU (atom, data, 8);
 $_M(c$, "processCmdfAtoms", 
 ($fz = function () {
 while (this.readLine () != null && this.line.length > 10) {
-var atom = this.atomSetCollection.addNewAtom ();
 this.tokens = this.getTokens ();
-atom.elementSymbol = this.getSymbol (this.tokens[0]);
-atom.atomName = this.tokens[1];
-this.setAtomCoordXYZ (atom, this.parseFloatStr (this.tokens[2]), this.parseFloatStr (this.tokens[3]), this.parseFloatStr (this.tokens[4]));
+this.addAtomXYZSymName (this.tokens, 2, this.getSymbol (this.tokens[0]), this.tokens[1]);
 }
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "getSymbol", 

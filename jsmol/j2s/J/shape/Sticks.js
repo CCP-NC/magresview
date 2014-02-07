@@ -156,7 +156,7 @@ var bond = bonds[i];
 if (bond.getShapeVisibilityFlags () == 0) continue;
 var atom1 = bond.getAtom1 ();
 var atom2 = bond.getAtom2 ();
-if (!atom1.isVisible (0) || !atom2.isVisible (0)) continue;
+if (!atom1.checkVisible () || !atom2.checkVisible ()) continue;
 v.ave (atom1, atom2);
 var d2 = this.coordinateInRange (x, y, v, dmin2, this.ptXY);
 if (d2 >= 0) {

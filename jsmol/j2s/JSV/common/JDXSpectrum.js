@@ -59,8 +59,6 @@ return this.peakList;
 $_M(c$, "setPeakList", 
 function (list, piUnitsX, piUnitsY) {
 this.peakList = list;
-System.out.println ("setting peaklist for " + this + " to " + list);
-if (this.peakList == null) System.out.println ("ohoh");
 this.piUnitsX = piUnitsX;
 this.piUnitsY = piUnitsY;
 for (var i = list.size (); --i >= 0; ) this.peakList.get (i).spectrum = this;
@@ -69,23 +67,24 @@ if (J.util.Logger.debugging) J.util.Logger.info ("Spectrum " + this.getTitle () 
 return list.size ();
 }, "JU.List,~S,~S");
 $_M(c$, "selectPeakByFileIndex", 
-function (filePath, index) {
-if (this.peakList != null && this.peakList.size () > 0) for (var i = 0; i < this.peakList.size (); i++) if (this.peakList.get (i).checkFileIndex (filePath, index)) {
-System.out.println ("selecting peak in " + this + " " + this.peakList.get (i));
+function (filePath, index, atomKey) {
+if (this.peakList != null && this.peakList.size () > 0 && (atomKey == null || this.sourceID.equals (index))) for (var i = 0; i < this.peakList.size (); i++) if (this.peakList.get (i).checkFileIndex (filePath, index, atomKey)) {
+System.out.println ("selecting peak by FileIndex " + this + " " + this.peakList.get (i));
 return (this.selectedPeak = this.peakList.get (i));
 }
 return null;
-}, "~S,~S");
+}, "~S,~S,~S");
 $_M(c$, "selectPeakByFilePathTypeModel", 
 function (filePath, type, model) {
 if (this.peakList != null && this.peakList.size () > 0) for (var i = 0; i < this.peakList.size (); i++) if (this.peakList.get (i).checkFileTypeModel (filePath, type, model)) {
-System.out.println ("selecting peak in " + this + " " + this.peakList.get (i));
+System.out.println ("selecting peak byFilePathTypeModel " + this + " " + this.peakList.get (i));
 return (this.selectedPeak = this.peakList.get (i));
 }
 return null;
 }, "~S,~S,~S");
 $_M(c$, "matchesPeakTypeModel", 
 function (type, model) {
+if (type.equals ("ID")) return (this.sourceID.equalsIgnoreCase (model));
 if (this.peakList != null && this.peakList.size () > 0) for (var i = 0; i < this.peakList.size (); i++) if (this.peakList.get (i).checkTypeModel (type, model)) return true;
 
 return false;
@@ -400,7 +399,7 @@ c$.areXScalesCompatible = $_M(c$, "areXScalesCompatible",
 function (s1, s2, isSubspecCheck, isLinkCheck) {
 var isNMR1 = s1.isNMR ();
 if (isNMR1 != s2.isNMR ()) return false;
-if (!isLinkCheck && !s1.xUnits.equalsIgnoreCase (s2.xUnits)) return false;
+if (!isLinkCheck && !JSV.common.JDXSpectrum.areUnitsCompatible (s1.xUnits, s2.xUnits)) return false;
 if (isSubspecCheck) {
 if (s1.is1D () != s2.is1D ()) return false;
 } else if (isLinkCheck) {
@@ -409,6 +408,13 @@ if (!isNMR1) return true;
 return false;
 }return (!isNMR1 || s2.is1D () && s1.parent.nucleusX.equals (s2.parent.nucleusX));
 }, "JSV.common.JDXSpectrum,JSV.common.JDXSpectrum,~B,~B");
+c$.areUnitsCompatible = $_M(c$, "areUnitsCompatible", 
+($fz = function (u1, u2) {
+if (u1.equalsIgnoreCase (u2)) return true;
+u1 = u1.toUpperCase ();
+u2 = u2.toUpperCase ();
+return (u1.equals ("HZ") && u2.equals ("PPM") || u1.equals ("PPM") && u2.equals ("HZ"));
+}, $fz.isPrivate = true, $fz), "~S,~S");
 c$.areLinkableX = $_M(c$, "areLinkableX", 
 function (s1, s2) {
 return (s1.isNMR () && s2.isNMR () && s1.nucleusX.equals (s2.nucleusX));

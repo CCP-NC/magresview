@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.viewer");
-Clazz.load (["J.api.JmolPropertyManager", "java.util.Hashtable"], "J.viewer.PropertyManager", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Arrays", "$.Map", "JU.BS", "$.Base64", "$.List", "$.M3", "$.P3", "$.PT", "$.SB", "J.modelset.Atom", "$.BondSet", "$.LabelToken", "J.script.SV", "$.T", "J.util.BSUtil", "$.C", "$.Elements", "$.Escape", "$.JmolEdge", "$.JmolMolecule", "$.Logger", "$.Txt", "J.viewer.Viewer"], function () {
+Clazz.load (["J.api.JmolPropertyManager", "java.util.Hashtable"], "J.viewer.PropertyManager", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Arrays", "$.Map", "JU.BS", "$.Base64", "$.List", "$.M3", "$.M4", "$.P3", "$.PT", "$.SB", "$.V3", "J.modelset.Atom", "$.BondSet", "$.LabelToken", "J.script.SV", "$.T", "J.util.BSUtil", "$.C", "$.Elements", "$.Escape", "$.JmolEdge", "$.JmolMolecule", "$.Logger", "$.Txt", "J.viewer.ActionManager", "$.JC", "$.Viewer", "J.viewer.binding.Binding"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.viewer = null;
 this.map = null;
@@ -51,7 +51,7 @@ return info;
 $_M(c$, "getModelProperty", 
 ($fz = function (propertyName, propertyValue) {
 propertyName = propertyName.$replace (']', ' ').$replace ('[', ' ').$replace ('.', ' ');
-propertyName = JU.PT.simpleReplace (propertyName, "  ", " ");
+propertyName = JU.PT.rep (propertyName, "  ", " ");
 var names = JU.PT.split (JU.PT.trim (propertyName, " "), " ");
 var args =  new Array (names.length);
 propertyName = names[0];
@@ -80,6 +80,12 @@ var m = property;
 var f = [[m.m00, m.m01, m.m02], [m.m10, m.m11, m.m12], [m.m20, m.m21, m.m22]];
 if (pt < 0) pt += 3;
 if (pt >= 0 && pt < 3) return this.extractProperty (f, args, --ptr);
+return "";
+}if (Clazz.instanceOf (property, JU.M4)) {
+var m = property;
+var f = [[m.m00, m.m01, m.m02, m.m03], [m.m10, m.m11, m.m12, m.m13], [m.m20, m.m21, m.m22, m.m23], [m.m30, m.m31, m.m32, m.m33]];
+if (pt < 0) pt += 4;
+if (pt >= 0 && pt < 4) return this.extractProperty (f, args, --ptr);
 return "";
 }if (JU.PT.isAI (property)) {
 var ilist = property;
@@ -169,19 +175,19 @@ var iHaveParameter = (paramInfo != null && paramInfo.toString ().length > 0);
 var myParam = (iHaveParameter ? paramInfo : this.getDefaultPropertyParam (id));
 switch (id) {
 case 0:
-return this.viewer.getAppletInfo ();
+return this.getAppletInfo ();
 case 5:
-return this.viewer.getAnimationInfo ();
+return this.getAnimationInfo ();
 case 13:
 return this.viewer.getAtomBitSetVector (myParam);
 case 14:
 return this.getAllAtomInfo (this.viewer.getAtomBitSet (myParam));
 case 24:
-return this.viewer.getAuxiliaryInfo (myParam);
+return this.getAuxiliaryInfo (myParam);
 case 15:
 return this.getAllBondInfo (myParam);
 case 25:
-return this.viewer.getBoundBoxInfo ();
+return this.getBoundBoxInfo ();
 case 10:
 return this.viewer.getRotationCenter ();
 case 16:
@@ -199,29 +205,16 @@ return this.viewer.getModelExtract (myParam, true, false, "MOL");
 case 32:
 return J.viewer.PropertyManager.getFileInfo (this.viewer.getFileData (), myParam.toString ());
 case 1:
-return this.viewer.getFullPathName ();
+return this.viewer.getFullPathName (false);
 case 2:
 return this.viewer.getFileHeader ();
 case 4:
 case 3:
-if (iHaveParameter) return this.viewer.getFileAsString (myParam.toString ());
-return this.viewer.getCurrentFileAsString ();
+return (iHaveParameter ? this.viewer.getFileAsString (myParam.toString (), true) : this.viewer.getCurrentFileAsString ());
 case 27:
 var params = myParam.toString ().toLowerCase ();
-var height = -1;
-var width = -1;
-var pt;
-if ((pt = params.indexOf ("height=")) >= 0) height = JU.PT.parseInt (params.substring (pt + 7));
-if ((pt = params.indexOf ("width=")) >= 0) width = JU.PT.parseInt (params.substring (pt + 6));
-if (width < 0 && height < 0) height = width = -1;
- else if (width < 0) width = height;
- else height = width;
 if (params.indexOf ("g64") >= 0 || params.indexOf ("base64") >= 0) returnType = "string";
-var type = "JPG";
-if (params.indexOf ("type=") >= 0) type = JU.PT.getTokens (JU.PT.replaceAllCharacter (params.substring (params.indexOf ("type=") + 5), ";,", ' '))[0];
-var errMsg =  new Array (1);
-var bytes = this.viewer.getImageAsBytes (type.toUpperCase (), width, height, -1, errMsg);
-return (errMsg[0] != null ? errMsg[0] : returnType == null ? bytes : JU.Base64.getBase64 (bytes).toString ());
+return this.getImage (params, returnType);
 case 35:
 return this.viewer.getShapeProperty (24, "getInfo");
 case 36:
@@ -239,7 +232,7 @@ return this.viewer.getJspecViewProperties (myParam);
 case 7:
 return this.getLigandInfo (this.viewer.getAtomBitSet (myParam));
 case 9:
-return this.viewer.getMeasurementInfo ();
+return this.getMeasurementInfo ();
 case 29:
 return this.viewer.getMenu (myParam.toString ());
 case 23:
@@ -251,7 +244,7 @@ return this.getModelInfo (this.viewer.getAtomBitSet (myParam));
 case 18:
 return this.getMoleculeInfo (this.viewer.getAtomBitSet (myParam));
 case 34:
-return this.viewer.getMouseInfo ();
+return this.getMouseInfo ();
 case 11:
 return this.viewer.getOrientationInfo ();
 case 31:
@@ -261,7 +254,7 @@ return this.getAllPolymerInfo (this.viewer.getAtomBitSet (myParam));
 case 39:
 return this.viewer.getScriptQueueInfo ();
 case 8:
-return this.viewer.getShapeInfo ();
+return this.getShapeInfo ();
 case 19:
 return this.viewer.getStateInfo3 (myParam.toString (), 0, 0);
 case 12:
@@ -281,6 +274,22 @@ for (var i = 0; i < 42; i++) if (data[i].length > 0) info.append ("\n getPropert
 
 return info.toString ();
 }, $fz.isPrivate = true, $fz), "~S,~O,~S");
+$_M(c$, "getImage", 
+($fz = function (params, returnType) {
+var height = -1;
+var width = -1;
+var pt;
+if ((pt = params.indexOf ("height=")) >= 0) height = JU.PT.parseInt (params.substring (pt + 7));
+if ((pt = params.indexOf ("width=")) >= 0) width = JU.PT.parseInt (params.substring (pt + 6));
+if (width < 0 && height < 0) height = width = -1;
+ else if (width < 0) width = height;
+ else height = width;
+var type = "JPG";
+if (params.indexOf ("type=") >= 0) type = JU.PT.getTokens (JU.PT.replaceWithCharacter (params.substring (params.indexOf ("type=") + 5), ";,", ' '))[0];
+var errMsg =  new Array (1);
+var bytes = this.viewer.getImageAsBytes (type.toUpperCase (), width, height, -1, errMsg);
+return (errMsg[0] != null ? errMsg[0] : returnType == null ? bytes : JU.Base64.getBase64 (bytes).toString ());
+}, $fz.isPrivate = true, $fz), "~S,~S");
 $_M(c$, "getVariables", 
 ($fz = function (name) {
 return (name.toLowerCase ().equals ("all") ? this.viewer.global.getAllVariables () : this.viewer.evaluateExpressionAsVariable (name));
@@ -471,7 +480,7 @@ var asJSON = type.equalsIgnoreCase ("JSON") || type.equalsIgnoreCase ("CD");
 var mol =  new JU.SB ();
 var ms = this.viewer.modelSet;
 if (!asXYZVIB && !asJSON) {
-mol.append (isModelKit ? "Jmol Model Kit" : this.viewer.getFullPathName ().$replace ('\\', '/'));
+mol.append (isModelKit ? "Jmol Model Kit" : this.viewer.getFullPathName (false).$replace ('\\', '/'));
 var version = J.viewer.Viewer.getJmolVersion ();
 mol.append ("\n__Jmol-").append (version.substring (0, 2));
 var cMM;
@@ -711,7 +720,7 @@ case 1073742120:
 case 1087373320:
 var id = a.getChainID ();
 s = (id == 0 ? " " : a.getChainIDStr ());
-if (id > 255) s = J.util.Escape.eS (s);
+if (id > 255) s = JU.PT.esc (s);
 switch (tok) {
 case 1073742120:
 s = "[" + a.getGroup3 (false) + "]" + a.getSeqcodeString () + ":" + s;
@@ -751,12 +760,12 @@ var sb =  new JU.SB ();
 for (var i = 0; i < ms.modelCount; ++i) {
 if (frames != null && !frames.get (i)) continue;
 var s = "[\"" + ms.getModelNumberDotted (i) + "\"] = ";
-sb.append ("\n\nfile").append (s).append (J.util.Escape.eS (ms.getModelFileName (i)));
+sb.append ("\n\nfile").append (s).append (JU.PT.esc (ms.getModelFileName (i)));
 var id = ms.getModelAuxiliaryInfoValue (i, "modelID");
-if (id != null) sb.append ("\nid").append (s).append (J.util.Escape.eS (id));
-sb.append ("\ntitle").append (s).append (J.util.Escape.eS (ms.getModelTitle (i)));
-sb.append ("\nname").append (s).append (J.util.Escape.eS (ms.getModelName (i)));
-sb.append ("\ntype").append (s).append (J.util.Escape.eS (ms.getModelFileType (i)));
+if (id != null) sb.append ("\nid").append (s).append (JU.PT.esc (id));
+sb.append ("\ntitle").append (s).append (JU.PT.esc (ms.getModelTitle (i)));
+sb.append ("\nname").append (s).append (JU.PT.esc (ms.getModelName (i)));
+sb.append ("\ntype").append (s).append (JU.PT.esc (ms.getModelFileType (i)));
 }
 return sb.toString ();
 }, "JU.BS");
@@ -784,8 +793,9 @@ if (ms.vibrations != null && ms.vibrations[i] != null) ms.vibrations[i].getInfo 
 info.put ("bondCount", Integer.$valueOf (atom.getCovalentBondCount ()));
 info.put ("radius", Float.$valueOf ((atom.getRasMolRadius () / 120.0)));
 info.put ("model", atom.getModelNumberForLabel ());
-info.put ("shape", J.modelset.Atom.atomPropertyString (this.viewer, atom, 1087373323));
-info.put ("visible", Boolean.$valueOf (atom.isVisible (0)));
+var shape = J.modelset.Atom.atomPropertyString (this.viewer, atom, 1087373323);
+if (shape != null) info.put ("shape", shape);
+info.put ("visible", Boolean.$valueOf (atom.checkVisible ()));
 info.put ("clickabilityFlags", Integer.$valueOf (atom.clickabilityFlags));
 info.put ("visibilityFlags", Integer.$valueOf (atom.shapeVisibilityFlags));
 info.put ("spacefill", Float.$valueOf (atom.getRadius ()));
@@ -906,7 +916,7 @@ infoChains.addLast (arrayName);
 return infoChains;
 }, $fz.isPrivate = true, $fz), "~N,JU.BS");
 $_M(c$, "getAllPolymerInfo", 
-function (bs) {
+($fz = function (bs) {
 var finalInfo =  new java.util.Hashtable ();
 var modelVector =  new JU.List ();
 var modelCount = this.viewer.modelSet.modelCount;
@@ -915,7 +925,7 @@ for (var i = 0; i < modelCount; ++i) if (models[i].isBioModel) models[i].getAllP
 
 finalInfo.put ("models", modelVector);
 return finalInfo;
-}, "JU.BS");
+}, $fz.isPrivate = true, $fz), "JU.BS");
 $_M(c$, "getBasePairInfo", 
 ($fz = function (bs) {
 var info =  new JU.SB ();
@@ -936,6 +946,99 @@ info.append ("[").append (atom.getGroup3 (false)).append ("]").append (atom.getS
 var id = atom.getChainID ();
 info.append (id == 0 ? " " : atom.getChainIDStr ());
 }, $fz.isPrivate = true, $fz), "JU.SB,J.modelset.Atom");
+$_M(c$, "getAppletInfo", 
+($fz = function () {
+var info =  new java.util.Hashtable ();
+info.put ("htmlName", this.viewer.htmlName);
+info.put ("syncId", this.viewer.syncId);
+info.put ("fullName", this.viewer.fullName);
+info.put ("codeBase", "" + J.viewer.Viewer.appletCodeBase);
+if (this.viewer.isApplet ()) {
+info.put ("documentBase", J.viewer.Viewer.appletDocumentBase);
+info.put ("registry", this.viewer.statusManager.getRegistryInfo ());
+}info.put ("version", J.viewer.JC.version);
+info.put ("date", J.viewer.JC.date);
+info.put ("javaVendor", J.viewer.Viewer.strJavaVendor);
+info.put ("javaVersion", J.viewer.Viewer.strJavaVersion + (!this.viewer.isJS ? "" : this.viewer.isWebGL ? "(WebGL)" : "(HTML5)"));
+info.put ("operatingSystem", J.viewer.Viewer.strOSName);
+return info;
+}, $fz.isPrivate = true, $fz));
+$_M(c$, "getAnimationInfo", 
+($fz = function () {
+var am = this.viewer.animationManager;
+var info =  new java.util.Hashtable ();
+info.put ("firstModelIndex", Integer.$valueOf (am.firstFrameIndex));
+info.put ("lastModelIndex", Integer.$valueOf (am.lastFrameIndex));
+info.put ("animationDirection", Integer.$valueOf (am.animationDirection));
+info.put ("currentDirection", Integer.$valueOf (am.currentDirection));
+info.put ("displayModelIndex", Integer.$valueOf (am.currentModelIndex));
+if (am.animationFrames != null) {
+info.put ("isMovie", Boolean.TRUE);
+info.put ("frames", J.util.Escape.eAI (am.animationFrames));
+info.put ("currentAnimationFrame", Integer.$valueOf (am.currentAnimationFrame));
+}info.put ("displayModelNumber", this.viewer.getModelNumberDotted (am.currentModelIndex));
+info.put ("displayModelName", (am.currentModelIndex >= 0 ? this.viewer.getModelName (am.currentModelIndex) : ""));
+info.put ("animationFps", Integer.$valueOf (am.animationFps));
+info.put ("animationReplayMode", am.animationReplayMode.name ());
+info.put ("firstFrameDelay", Float.$valueOf (am.firstFrameDelay));
+info.put ("lastFrameDelay", Float.$valueOf (am.lastFrameDelay));
+info.put ("animationOn", Boolean.$valueOf (am.animationOn));
+info.put ("animationPaused", Boolean.$valueOf (am.animationPaused));
+return info;
+}, $fz.isPrivate = true, $fz));
+$_M(c$, "getBoundBoxInfo", 
+($fz = function () {
+var pts = this.viewer.getBoxInfo (null, 1).getBoundBoxPoints (true);
+var info =  new java.util.Hashtable ();
+info.put ("center", JU.P3.newP (pts[0]));
+info.put ("vector", JU.V3.newV (pts[1]));
+info.put ("corner0", JU.P3.newP (pts[2]));
+info.put ("corner1", JU.P3.newP (pts[3]));
+return info;
+}, $fz.isPrivate = true, $fz));
+$_M(c$, "getShapeInfo", 
+($fz = function () {
+var info =  new java.util.Hashtable ();
+var commands =  new JU.SB ();
+var shapes = this.viewer.shapeManager.shapes;
+if (shapes != null) for (var i = 0; i < 36; ++i) {
+var shape = shapes[i];
+if (shape != null) {
+var shapeType = J.viewer.JC.shapeClassBases[i];
+var shapeDetail = shape.getShapeDetail ();
+if (shapeDetail != null) info.put (shapeType, shapeDetail);
+}}
+if (commands.length () > 0) info.put ("shapeCommands", commands.toString ());
+return info;
+}, $fz.isPrivate = true, $fz));
+$_M(c$, "getAuxiliaryInfo", 
+($fz = function (atomExpression) {
+return this.viewer.modelSet.getAuxiliaryInfo (this.viewer.getModelBitSet (this.viewer.getAtomBitSet (atomExpression), false));
+}, $fz.isPrivate = true, $fz), "~O");
+$_M(c$, "getMeasurementInfo", 
+($fz = function () {
+return this.viewer.getShapeProperty (6, "info");
+}, $fz.isPrivate = true, $fz));
+$_M(c$, "getMouseInfo", 
+($fz = function () {
+if (!this.viewer.haveDisplay) return null;
+var info =  new java.util.Hashtable ();
+var list =  new JU.List ();
+var am = this.viewer.actionManager;
+for (var obj, $obj = am.binding.getBindings ().values ().iterator (); $obj.hasNext () && ((obj = $obj.next ()) || true);) {
+if (Clazz.instanceOf (obj, Boolean)) continue;
+if (JU.PT.isAI (obj)) {
+var binding = obj;
+obj = [J.viewer.binding.Binding.getMouseActionName (binding[0], false), J.viewer.ActionManager.getActionName (binding[1])];
+}list.addLast (obj);
+}
+info.put ("bindings", list);
+info.put ("bindingName", am.binding.name);
+info.put ("actionNames", J.viewer.ActionManager.actionNames);
+info.put ("actionInfo", J.viewer.ActionManager.actionInfo);
+info.put ("bindingInfo", JU.PT.split (am.getBindingInfo (null), "\n"));
+return info;
+}, $fz.isPrivate = true, $fz));
 Clazz.defineStatics (c$,
 "atomExpression", "<atom selection>");
 c$.propertyTypes = c$.prototype.propertyTypes = ["appletInfo", "", "", "fileName", "", "", "fileHeader", "", "", "fileContents", "<pathname>", "", "fileContents", "", "", "animationInfo", "", "", "modelInfo", "<atom selection>", "{*}", "ligandInfo", "<atom selection>", "{*}", "shapeInfo", "", "", "measurementInfo", "", "", "centerInfo", "", "", "orientationInfo", "", "", "transformInfo", "", "", "atomList", "<atom selection>", "(visible)", "atomInfo", "<atom selection>", "(visible)", "bondInfo", "<atom selection>", "(visible)", "chainInfo", "<atom selection>", "(visible)", "polymerInfo", "<atom selection>", "(visible)", "moleculeInfo", "<atom selection>", "(visible)", "stateInfo", "<state type>", "all", "extractModel", "<atom selection>", "(visible)", "jmolStatus", "statusNameList", "", "jmolViewer", "", "", "messageQueue", "", "", "auxiliaryInfo", "<atom selection>", "{*}", "boundBoxInfo", "", "", "dataInfo", "<data type>", "types", "image", "<width=www,height=hhh>", "", "evaluate", "<expression>", "", "menu", "<type>", "current", "minimizationInfo", "", "", "pointGroupInfo", "<atom selection>", "(visible)", "fileInfo", "<type>", "", "errorMessage", "", "", "mouseInfo", "", "", "isosurfaceInfo", "", "", "isosurfaceData", "", "", "consoleText", "", "", "JSpecView", "<key>", "", "scriptQueueInfo", "", "", "nmrInfo", "<elementSymbol> or 'all' or 'shifts'", "all", "variableInfo", "<name>", "all"];

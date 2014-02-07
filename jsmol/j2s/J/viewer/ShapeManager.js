@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.viewer");
-Clazz.load (["JU.BS"], "J.viewer.ShapeManager", ["java.lang.Boolean", "java.util.Hashtable", "JU.P3", "$.SB", "J.constant.EnumPalette", "$.EnumVdw", "J.modelset.Atom", "J.util.BSUtil", "$.Logger", "J.viewer.JC"], function () {
+Clazz.load (["JU.BS"], "J.viewer.ShapeManager", ["java.lang.Boolean", "JU.P3", "J.constant.EnumPalette", "$.EnumVdw", "J.modelset.Atom", "J.util.BSUtil", "$.Logger", "J.viewer.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.gdata = null;
 this.modelSet = null;
@@ -97,7 +97,7 @@ if (!this.viewer.noGraphicsAllowed ()) this.shapes =  new Array (36);
 $_M(c$, "setShapeSizeBs", 
 function (shapeID, size, rd, bsSelected) {
 if (this.shapes == null) return;
-if (bsSelected == null && (shapeID != 1 || size != 2147483647)) bsSelected = this.viewer.getSelectionSet (false);
+if (bsSelected == null && (shapeID != 1 || size != 2147483647)) bsSelected = this.viewer.getSelectedAtoms ();
 if (rd != null && rd.value != 0 && rd.vdwType === J.constant.EnumVdw.TEMP) this.modelSet.getBfactor100Lo ();
 this.viewer.setShapeErrorState (shapeID, "set size");
 if (rd == null ? size != 0 : rd.value != 0) this.loadShape (shapeID);
@@ -113,11 +113,11 @@ if (this.shapes[5] == null) return;
 this.loadShape (5);
 this.setShapeSizeBs (5, 0, null, bsSelection);
 }this.setShapePropertyBs (5, "label", strLabel, bsSelection);
-}, "~S,JU.BS");
+}, "~O,JU.BS");
 $_M(c$, "setShapePropertyBs", 
 function (shapeID, propertyName, value, bsSelected) {
 if (this.shapes == null || this.shapes[shapeID] == null) return;
-if (bsSelected == null) bsSelected = this.viewer.getSelectionSet (false);
+if (bsSelected == null) bsSelected = this.viewer.getSelectedAtoms ();
 this.viewer.setShapeErrorState (shapeID, "set " + propertyName);
 this.shapes[shapeID].setProperty (propertyName.intern (), value, bsSelected);
 this.viewer.setShapeErrorState (-1, null);
@@ -161,7 +161,7 @@ if (this.shapes != null) for (var j = 0; j < 36; j++) if (this.shapes[j] != null
 }, "~A,JU.BS");
 $_M(c$, "deleteVdwDependentShapes", 
 function (bs) {
-if (bs == null) bs = this.viewer.getSelectionSet (false);
+if (bs == null) bs = this.viewer.getSelectedAtoms ();
 if (this.shapes[24] != null) this.shapes[24].setProperty ("deleteVdw", null, bs);
 if (this.shapes[25] != null) this.shapes[25].setProperty ("deleteVdw", null, bs);
 }, "JU.BS");
@@ -195,20 +195,6 @@ $_M(c$, "getShape",
 function (i) {
 return (this.shapes == null ? null : this.shapes[i]);
 }, "~N");
-$_M(c$, "getShapeInfo", 
-function () {
-var info =  new java.util.Hashtable ();
-var commands =  new JU.SB ();
-if (this.shapes != null) for (var i = 0; i < 36; ++i) {
-var shape = this.shapes[i];
-if (shape != null) {
-var shapeType = J.viewer.JC.shapeClassBases[i];
-var shapeDetail = shape.getShapeDetail ();
-if (shapeDetail != null) info.put (shapeType, shapeDetail);
-}}
-if (commands.length () > 0) info.put ("shapeCommands", commands.toString ());
-return info;
-});
 $_M(c$, "mergeShapes", 
 function (newShapes) {
 if (newShapes == null) return;
@@ -239,6 +225,22 @@ if (this.shapes == null || this.shapes[0] == null) return;
 var bs = this.viewer.getVisibleFramesBitSet ();
 for (var i = 1; i < 36; i++) if (this.shapes[i] != null) this.shapes[i].setVisibilityFlags (bs);
 
+var showHydrogens = this.viewer.getBoolean (603979922);
+var bsDeleted = this.viewer.getDeletedAtoms ();
+var atoms = this.modelSet.atoms;
+var flag0 = -48;
+for (var i = this.modelSet.atomCount; --i >= 0; ) {
+var atom = atoms[i];
+atom.shapeVisibilityFlags &= flag0;
+if (bsDeleted != null && bsDeleted.get (i) || !showHydrogens && atom.getElementNumber () == 1) continue;
+var modelIndex = atom.getModelIndex ();
+if (bs.get (modelIndex)) {
+var f = 1;
+if (!this.modelSet.isAtomHidden (i)) {
+f |= 8;
+if (atom.madAtom != 0) f |= 16;
+atom.setShapeVisibility (f, true);
+}}}
 this.shapes[0].setVisibilityFlags (bs);
 for (var i = 0; i < 36; ++i) {
 var shape = this.shapes[i];
@@ -256,16 +258,7 @@ this.viewer.unTransformPoint (pt, pt);
 pt.sub (ptCenter);
 this.viewer.setAtomCoordsRelative (pt, bsAtoms);
 ptOffset.set (0, 0, 0);
-}this.bsRenderableAtoms.clearAll ();
-var atoms = this.modelSet.atoms;
-for (var i = this.modelSet.getAtomCount (); --i >= 0; ) {
-var atom = atoms[i];
-if ((atom.getShapeVisibilityFlags () & 1) == 0) continue;
-this.bsRenderableAtoms.set (i);
-}
-}, "JU.BS,JU.P3");
-$_M(c$, "transformAtoms", 
-function () {
+}this.modelSet.getRenderable (this.bsRenderableAtoms);
 var vibrationVectors = this.modelSet.vibrations;
 var atoms = this.modelSet.atoms;
 var vibs = (vibrationVectors != null && this.viewer.isVibrationOn ());
@@ -326,7 +319,7 @@ this.navigationCrossHairMinMax[1] = maxX;
 this.navigationCrossHairMinMax[2] = minY;
 this.navigationCrossHairMinMax[3] = maxY;
 return this.navigationCrossHairMinMax;
-});
+}, "JU.BS,JU.P3");
 $_M(c$, "setModelSet", 
 function (modelSet) {
 this.modelSet = this.viewer.modelSet = modelSet;
@@ -338,12 +331,12 @@ this.setShapePropertyBs (24, "remapInherited", null, null);
 });
 $_M(c$, "restrictSelected", 
 function (isBond, doInvert) {
-var bsSelected = J.util.BSUtil.copy (this.viewer.getSelectionSet (true));
+var bsSelected = this.viewer.getSelectedAtomsNoSubset ();
 if (doInvert) {
 this.viewer.invertSelection ();
 var bsSubset = this.viewer.getSelectionSubset ();
 if (bsSubset != null) {
-bsSelected = J.util.BSUtil.copy (this.viewer.getSelectionSet (true));
+bsSelected = this.viewer.getSelectedAtomsNoSubset ();
 bsSelected.and (bsSubset);
 this.viewer.select (bsSelected, false, 0, true);
 J.util.BSUtil.invertInPlace (bsSelected, this.viewer.getAtomCount ());
@@ -355,7 +348,7 @@ this.setShapeSizeBs (1, 0, null, null);
 this.setShapePropertyBs (1, "type", Integer.$valueOf (32768), null);
 this.setShapeSizeBs (1, 0, null, null);
 this.setShapePropertyBs (1, "type", Integer.$valueOf (1023), null);
-var bs = this.viewer.getSelectionSet (false);
+var bs = this.viewer.getSelectedAtoms ();
 for (var iShape = 21; --iShape >= 0; ) if (iShape != 6 && this.getShape (iShape) != null) this.setShapeSizeBs (iShape, 0, null, bs);
 
 if (this.getShape (21) != null) this.setShapePropertyBs (21, "delete", bs, null);

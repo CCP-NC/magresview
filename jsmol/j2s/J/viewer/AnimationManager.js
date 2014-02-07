@@ -28,6 +28,7 @@ this.lastFrameDelay = 1;
 this.lastFramePainted = 0;
 this.lastModelPainted = 0;
 this.intAnimThread = 0;
+this.currentAtomIndex = -1;
 Clazz.instantialize (this, arguments);
 }, J.viewer, "AnimationManager");
 Clazz.prepareFields (c$, function () {
@@ -84,6 +85,7 @@ this.initializePointers (0);
 this.setAnimationOn (false);
 this.setModel (0, true);
 this.currentDirection = 1;
+this.currentAtomIndex = -1;
 this.setAnimationDirection (1);
 this.setAnimationFps (10);
 this.setAnimationReplayMode (J.constant.EnumAnimationMode.ONCE, 0, 0);

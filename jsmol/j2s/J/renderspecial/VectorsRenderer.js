@@ -35,7 +35,7 @@ this.vectorScale = this.viewer.getFloat (1649410049);
 this.vectorSymmetry = this.viewer.getBoolean (603979973);
 for (var i = this.modelSet.getAtomCount (); --i >= 0; ) {
 var atom = atoms[i];
-if (!atom.isVisible (this.myVisibilityFlag)) continue;
+if (!this.isVisibleForMe (atom)) continue;
 var vibrationVector = this.viewer.getVibration (i);
 if (vibrationVector == null) continue;
 if (!this.transform (mads[i], atom, vibrationVector)) continue;

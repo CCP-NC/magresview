@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.util");
-Clazz.load (["JU.P3", "$.P3i", "$.V3"], "J.util.BoxInfo", ["java.util.Hashtable", "JU.List", "$.P4", "J.util.Measure", "$.Point3fi"], function () {
+Clazz.load (["JU.P3", "$.P3i", "$.V3"], "J.util.BoxInfo", ["JU.List", "$.P4", "J.util.Measure", "$.Point3fi"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.bbCorner0 = null;
 this.bbCorner1 = null;
@@ -116,16 +116,6 @@ $_M(c$, "getBoundBoxVertices",
 function () {
 if (!this.isScaleSet) this.setBbcage (1);
 return this.bbVertices;
-});
-$_M(c$, "getBoundBoxInfo", 
-function () {
-if (!this.isScaleSet) this.setBbcage (1);
-var info =  new java.util.Hashtable ();
-info.put ("center", JU.P3.newP (this.bbCenter));
-info.put ("vector", JU.V3.newV (this.bbVector));
-info.put ("corner0", JU.P3.newP (this.bbCorner0));
-info.put ("corner1", JU.P3.newP (this.bbCorner1));
-return info;
 });
 $_M(c$, "setBoundBox", 
 function (pt1, pt2, byCorner, scale) {

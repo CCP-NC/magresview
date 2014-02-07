@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.util");
-Clazz.load (["J.api.JmolAppletInterface", "$.JmolStatusListener", "java.util.Hashtable"], "J.util.GenericApplet", ["java.lang.Boolean", "java.net.URL", "javajs.awt.Dimension", "JU.List", "$.PT", "$.SB", "J.constant.EnumCallback", "J.i18n.GT", "J.util.Escape", "$.Logger", "J.viewer.JC", "$.Viewer"], function () {
+Clazz.load (["J.api.JmolAppletInterface", "$.JmolStatusListener", "java.util.Hashtable"], "J.util.GenericApplet", ["java.lang.Boolean", "java.net.URL", "javajs.awt.Dimension", "JU.List", "$.PT", "$.SB", "J.constant.EnumCallback", "J.i18n.GT", "J.util.Logger", "J.viewer.JC", "$.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.isJS = false;
 this.codeBase = null;
@@ -33,8 +33,8 @@ this.b$ =  new java.util.Hashtable ();
 $_M(c$, "init", 
 function (applet) {
 this.appletObject = applet;
-this.htmlName = this.getParameter ("name");
-this.syncId = this.getParameter ("syncId");
+this.htmlName = this.getJmolParameter ("name");
+this.syncId = this.getJmolParameter ("syncId");
 this.fullName = this.htmlName + "__" + this.syncId + "__";
 System.out.println ("Jmol JavaScript applet " + this.fullName + " initializing");
 var iLevel = (this.getValue ("logLevel", (this.getBooleanValue ("debug", false) ? "5" : "4"))).charCodeAt (0) - 48;
@@ -48,7 +48,7 @@ this.initApplication ();
 $_M(c$, "initApplication", 
 ($fz = function () {
 this.viewerOptions.put ("applet", Boolean.TRUE);
-if (this.getParameter ("statusListener") == null) this.viewerOptions.put ("statusListener", this);
+if (this.getJmolParameter ("statusListener") == null) this.viewerOptions.put ("statusListener", this);
 this.viewer =  new J.viewer.Viewer (this.viewerOptions);
 this.viewer.pushHoldRepaint ();
 var emulate = this.getValueLowerCase ("emulate", "jmol");
@@ -59,7 +59,7 @@ this.loading = true;
 for (var item, $item = 0, $$item = J.constant.EnumCallback.values (); $item < $$item.length && ((item = $$item[$item]) || true); $item++) this.setValue (item.name () + "Callback", null);
 
 this.loading = false;
-this.language = this.getParameter ("language");
+this.language = this.getJmolParameter ("language");
  new J.i18n.GT (this.viewer, this.language);
 if (this.language != null) System.out.print ("requested language=" + this.language + "; ");
 this.doTranslate = (!"none".equals (this.language) && this.getBooleanValue ("doTranslate", true));
@@ -74,6 +74,8 @@ J.util.Logger.warn ("Note -- Presence of message callback disables disable trans
 J.i18n.GT.setDoTranslate (false);
 J.util.Logger.warn ("Note -- language translation disabled");
 }if (!this.getBooleanValue ("popupMenu", true)) this.viewer.getProperty ("DATA_API", "disablePopupMenu", null);
+var menuFile = this.getJmolParameter ("menuFile");
+if (menuFile != null) this.viewer.setMenu (menuFile, true);
 var script = this.getValue ("script", "");
 var loadParam = this.getValue ("loadInline", null);
 if (loadParam == null) {
@@ -98,7 +100,7 @@ return (value.equalsIgnoreCase ("true") || value.equalsIgnoreCase ("on") || valu
 }, "~S,~B");
 $_M(c$, "getValue", 
 function (propertyName, defaultValue) {
-var s = this.getParameter (propertyName);
+var s = this.getJmolParameter (propertyName);
 System.out.println ("Jmol getValue " + propertyName + " " + s);
 return (s == null ? defaultValue : s);
 }, "~S,~S");
@@ -154,7 +156,7 @@ return this.viewer.processMouseEvent (e.id, e.x, e.y, e.modifiers, e.when);
 }, "java.awt.Event");
 $_V(c$, "getAppletInfo", 
 function () {
-return J.i18n.GT.o (J.i18n.GT._ ("Jmol Applet version {0} {1}.\n\nAn OpenScience project.\n\nSee http://www.jmol.org for more information"), [J.viewer.JC.version, J.viewer.JC.date]) + "\nhtmlName = " + J.util.Escape.eS (this.htmlName) + "\nsyncId = " + J.util.Escape.eS (this.syncId) + "\ndocumentBase = " + J.util.Escape.eS (this.documentBase) + "\ncodeBase = " + J.util.Escape.eS (this.codeBase);
+return J.i18n.GT.o (J.i18n.GT._ ("Jmol Applet version {0} {1}.\n\nAn OpenScience project.\n\nSee http://www.jmol.org for more information"), [J.viewer.JC.version, J.viewer.JC.date]) + "\nhtmlName = " + JU.PT.esc (this.htmlName) + "\nsyncId = " + JU.PT.esc (this.syncId) + "\ndocumentBase = " + JU.PT.esc (this.documentBase) + "\ncodeBase = " + JU.PT.esc (this.codeBase);
 });
 $_V(c$, "script", 
 function (script) {
@@ -188,6 +190,10 @@ this.viewer.scriptWaitStatus (script, "");
 var str = (this.outputBuffer == null ? "" : this.outputBuffer.toString ());
 this.outputBuffer = null;
 return str;
+}, "~S");
+$_V(c$, "getModelIndexFromId", 
+function (id) {
+return this.viewer.getModelIndexFromId (id);
 }, "~S");
 $_V(c$, "getProperty", 
 function (infoType, paramInfo) {
@@ -522,7 +528,8 @@ if (!appletName2.equals (excludeName) && appletName2.indexOf (ext) > 0) {
 apps.addLast (appletName2);
 }}
 return;
-}if (appletName.indexOf ("__") < 0) appletName += ext;
+}if (excludeName.indexOf ("_object") >= 0 && appletName.indexOf ("_object") < 0) appletName += "_object";
+if (appletName.indexOf ("__") < 0) appletName += ext;
 if (!J.util.GenericApplet.htRegistry.containsKey (appletName)) appletName = "jmolApplet" + appletName;
 if (!appletName.equals (excludeName) && J.util.GenericApplet.htRegistry.containsKey (appletName)) {
 apps.addLast (appletName);

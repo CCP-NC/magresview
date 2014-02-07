@@ -12,12 +12,12 @@ var showHiddenSelections = (selectDisplayTrue && this.viewer.getBoolean (6039799
 if (halos.mads == null && halos.bsHighlight == null && !selectDisplayTrue) return false;
 this.isAntialiased = this.g3d.isAntialiased ();
 var atoms = this.modelSet.atoms;
-var bsSelected = (selectDisplayTrue ? this.viewer.getSelectionSet (false) : null);
+var bsSelected = (selectDisplayTrue ? this.viewer.getSelectedAtoms () : null);
 var needTranslucent = false;
 this.g3d.addRenderer (1073741880);
 for (var i = this.modelSet.getAtomCount (); --i >= 0; ) {
 var atom = atoms[i];
-if ((atom.getShapeVisibilityFlags () & 1) == 0) continue;
+if ((atom.shapeVisibilityFlags & 1) == 0) continue;
 var isHidden = this.modelSet.isAtomHidden (i);
 this.mad = (halos.mads == null ? 0 : halos.mads[i]);
 this.colix = (halos.colixes == null || i >= halos.colixes.length ? 0 : halos.colixes[i]);
@@ -53,7 +53,7 @@ var d = this.mad;
 if (d < 0) {
 d = atom.sD;
 if (d == 0) {
-var ellipsemax = (atom.isShapeVisible (20) ? atom.getADPMinMax (true) : 0);
+var ellipsemax = (atom.isVisible (20) ? atom.getADPMinMax (true) : 0);
 if (ellipsemax > 0) d = this.viewer.scaleToScreen (z, Clazz.doubleToInt (Math.floor (ellipsemax * 2000)));
 if (d == 0) {
 d = Clazz.floatToInt (this.viewer.scaleToScreen (z, this.mad == -2 ? 250 : 500));

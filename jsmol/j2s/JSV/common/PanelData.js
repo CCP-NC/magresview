@@ -238,12 +238,12 @@ for (var i = 0; i < this.graphSets.size (); i++) this.graphSets.get (i).addPeakH
 
 }, "JSV.common.PeakInfo");
 $_M(c$, "selectPeakByFileIndex", 
-function (filePath, index) {
-var pi = this.currentGraphSet.selectPeakByFileIndex (filePath, index);
-if (pi == null) for (var i = this.graphSets.size (); --i >= 0; ) if (this.graphSets.get (i) !== this.currentGraphSet && (pi = this.graphSets.get (i).selectPeakByFileIndex (filePath, index)) != null) break;
+function (filePath, index, atomKey) {
+var pi = this.currentGraphSet.selectPeakByFileIndex (filePath, index, atomKey);
+if (pi == null) for (var i = this.graphSets.size (); --i >= 0; ) if (this.graphSets.get (i) !== this.currentGraphSet && (pi = this.graphSets.get (i).selectPeakByFileIndex (filePath, index, atomKey)) != null) break;
 
 return pi;
-}, "~S,~S");
+}, "~S,~S,~S");
 $_M(c$, "setPlotColors", 
 function (colors) {
 for (var i = this.graphSets.size (); --i >= 0; ) this.graphSets.get (i).setPlotColors (colors);
@@ -252,7 +252,10 @@ for (var i = this.graphSets.size (); --i >= 0; ) this.graphSets.get (i).setPlotC
 $_M(c$, "selectSpectrum", 
 function (filePath, type, model, andCurrent) {
 if (andCurrent) this.currentGraphSet.selectSpectrum (filePath, type, model);
-for (var i = 0; i < this.graphSets.size (); i += 1) if (this.graphSets.get (i) !== this.currentGraphSet) this.graphSets.get (i).selectSpectrum (filePath, type, model);
+if ("ID".equals (type)) {
+this.jumpToSpectrum (this.getCurrentSpectrumIndex (), true);
+return;
+}for (var i = 0; i < this.graphSets.size (); i += 1) if (this.graphSets.get (i) !== this.currentGraphSet) this.graphSets.get (i).selectSpectrum (filePath, type, model);
 
 }, "~S,~S,~S,~B");
 $_M(c$, "hasFileLoaded", 
@@ -267,7 +270,7 @@ for (var i = this.graphSets.size (); --i >= 0; ) this.graphSets.get (i).clearVie
 
 });
 $_M(c$, "drawGraph", 
-function (gMain, gTop, width, height, addFilePath) {
+function (gMain, gFront, gRear, width, height, addFilePath) {
 var withCoords;
 this.gMain = gMain;
 this.display1D = !this.isLinked && this.getBoolean (JSV.common.ScriptToken.DISPLAY1D);
@@ -275,9 +278,10 @@ var top = 40;
 var bottom = 50;
 var isResized = (this.isPrinting || this.doReset || this.thisWidth != width || this.thisHeight != height);
 if (isResized) this.taintedAll = true;
-if (this.taintedAll) this.g2d.fillBackground (gMain, this.bgcolor);
-if (gTop !== gMain) {
-this.g2d.fillBackground (gTop, null);
+if (this.taintedAll) this.g2d.fillBackground (gRear, this.bgcolor);
+if (gFront !== gMain) {
+this.g2d.fillBackground (gFront, null);
+if (gMain !== gRear) this.g2d.fillBackground (gMain, null);
 this.g2d.setStrokeBold (gMain, false);
 }if (this.isPrinting) {
 top *= 3;
@@ -293,18 +297,18 @@ this.gridOn = this.getBoolean (JSV.common.ScriptToken.GRIDON);
 this.titleDrawn = false;
 this.thisWidth = width;
 this.thisHeight = height;
-for (var i = this.graphSets.size (); --i >= 0; ) this.graphSets.get (i).drawGraphSet (gMain, gTop, width, height, this.left, this.right, top, bottom, isResized, this.taintedAll);
+for (var i = this.graphSets.size (); --i >= 0; ) this.graphSets.get (i).drawGraphSet (gMain, gFront, gRear, width, height, this.left, this.right, top, bottom, isResized, this.taintedAll);
 
 if (this.titleOn && !this.titleDrawn && this.taintedAll) this.drawTitle (gMain, height * this.scalingFactor, width * this.scalingFactor, this.getDrawTitle (this.isPrinting));
-if (withCoords && this.coordStr != null) this.drawCoordinates (gTop, top, this.thisWidth - this.right, top - 20);
+if (withCoords && this.coordStr != null) this.drawCoordinates (gFront, top, this.thisWidth - this.right, top - 20);
 if (addFilePath && this.taintedAll) {
 var s = (this.commonFilePath != null ? this.commonFilePath : this.graphSets.size () == 1 && this.currentGraphSet.getTitle (true) != null ? this.getSpectrum ().getFilePath () : null);
 if (s != null) {
 this.printFilePath (gMain, this.left, height, s);
 }}if (this.isPrinting) {
 this.printVersion (gMain, height);
-}this.taintedAll = (this.isPrinting || gMain === gTop);
-}, "~O,~O,~N,~N,~B");
+}this.taintedAll = (this.isPrinting || gMain === gFront);
+}, "~O,~O,~O,~N,~N,~B");
 $_M(c$, "drawCoordinates", 
 function (g, top, x, y) {
 this.g2d.setGraphicsColor (g, this.coordinatesColor);
@@ -382,7 +386,7 @@ for (var i = this.graphSets.size (); --i >= 0; ) this.graphSets.get (i).scaleSel
 
 }, "~N");
 $_M(c$, "setCurrentGraphSet", 
-function (gs, yPixel, clickCount) {
+($fz = function (gs, yPixel, clickCount) {
 var splitPoint = gs.getSplitPoint (yPixel);
 var isNewSet = (this.currentGraphSet !== gs);
 var isNewSplitPoint = (isNewSet || this.currentSplitPoint != splitPoint);
@@ -392,10 +396,16 @@ if (isNewSet || gs.nSplit > 1 && isNewSplitPoint) this.setSpectrum (this.current
 if (!isNewSet) {
 isNewSet = gs.checkSpectrumClickedEvent (this.mouseX, this.mouseY, clickCount);
 if (!isNewSet) return;
-}if (isNewSet || gs.nSplit > 1 && isNewSplitPoint) this.setSpectrum (this.currentSplitPoint, true);
-var spec = gs.getSpectrum ();
+}this.jumpToSpectrum (splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
+}, $fz.isPrivate = true, $fz), "JSV.common.GraphSet,~N,~N");
+$_M(c$, "jumpToSpectrum", 
+function (index, doSetSpec) {
+if (index < 0 || index >= this.currentGraphSet.nSpectra) return;
+this.currentSplitPoint = index;
+if (doSetSpec) this.setSpectrum (this.currentSplitPoint, true);
+var spec = this.getSpectrum ();
 this.notifySubSpectrumChange (spec.getSubIndex (), spec);
-}, "JSV.common.GraphSet,~N,~N");
+}, "~N,~B");
 $_M(c$, "splitStack", 
 function (doSplit) {
 this.currentGraphSet.splitStack (this.graphSets, doSplit);
@@ -403,6 +413,10 @@ this.currentGraphSet.splitStack (this.graphSets, doSplit);
 $_M(c$, "getNumberOfSpectraInCurrentSet", 
 function () {
 return this.currentGraphSet.nSpectra;
+});
+$_M(c$, "getSourceID", 
+function () {
+return this.getSpectrumAt (0).sourceID;
 });
 $_M(c$, "getStartingPointIndex", 
 function (index) {
@@ -454,6 +468,7 @@ return this.currentGraphSet.getCurrentSpectrumIndex ();
 });
 $_M(c$, "getSpectrumAt", 
 function (index) {
+if (this.currentGraphSet == null) return null;
 return this.currentGraphSet.getSpectrumAt (index);
 }, "~N");
 $_M(c$, "addHighlight", 
@@ -708,6 +723,7 @@ if (title == null) title = this.viewTitle;
 } else {
 title = this.jsvp.getTitle ().trim ();
 }if (title.indexOf ("\n") >= 0) title = title.substring (0, title.indexOf ("\n")).trim ();
+ else if (title.startsWith ("$")) title = title.substring (1);
 return title;
 }, "~B");
 $_M(c$, "linkSpectra", 
@@ -966,7 +982,7 @@ y = Clazz.doubleToInt (Clazz.doubleToInt (paperWidth - 280) / 2);
 x = Clazz.doubleToInt (Clazz.doubleToInt (paperHeight - 450) / 2);
 }}this.g2d.translateScale (g, x, y, 0.1);
 this.taintedAll = true;
-this.drawGraph (g, g, Clazz.doubleToInt (width), Clazz.doubleToInt (height), addFilePath);
+this.drawGraph (g, g, g, Clazz.doubleToInt (width), Clazz.doubleToInt (height), addFilePath);
 this.isPrinting = false;
 return 0;
 }this.isPrinting = false;
@@ -1084,7 +1100,7 @@ if (this.coordStr != null) this.repaint ();
 break;
 case 2:
 if (this.checkMod (buttonMods, 4)) {
-this.viewer.showMenu (x, y);
+this.jsvp.showMenu (x, y);
 return;
 }this.ctrlPressed = false;
 this.doMouseClicked (x, y, this.updateControlPressed (buttonMods));
@@ -1118,7 +1134,15 @@ this.thisWidget = null;
 this.isIntegralDrag = false;
 this.integralShiftMode = 0;
 } else {
+try {
 this.jsvp.getFocusNow (false);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+System.out.println ("pd " + this + " cannot focus");
+} else {
+throw e;
+}
+}
 }}, "~N,~N,~N,~B");
 Clazz.pu$h ();
 c$ = Clazz.declareType (JSV.common.PanelData, "LinkMode", Enum);

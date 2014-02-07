@@ -9,6 +9,7 @@ this.id = null;
 this.legend = null;
 this.isSelected = false;
 this.isView = false;
+this.isSimulation = false;
 this.frameTitle = null;
 Clazz.instantialize (this, arguments);
 }, JSV.common, "PanelNode");
@@ -17,6 +18,7 @@ function (id, fileName, source, jsvp) {
 this.id = id;
 this.source = source;
 this.fileName = fileName;
+this.isSimulation = (source.getFilePath ().indexOf ("http://SIMULATION/") >= 0);
 this.jsvp = jsvp;
 if (jsvp != null) {
 jsvp.getPanelData ().getSpectrumAt (0).setId (id);
@@ -66,7 +68,7 @@ return null;
 }, "~S,JU.List");
 c$.findNodeById = $_M(c$, "findNodeById", 
 function (id, panelNodes) {
-for (var i = panelNodes.size (); --i >= 0; ) if (id.equals (panelNodes.get (i).id)) return panelNodes.get (i);
+if (id != null) for (var i = panelNodes.size (); --i >= 0; ) if (id.equals (panelNodes.get (i).id)) return panelNodes.get (i);
 
 return null;
 }, "~S,JU.List");

@@ -19,6 +19,7 @@ this.atoms = null;
 this.id = null;
 this.spectrum = null;
 this._match = null;
+this.atomKey = null;
 Clazz.instantialize (this, arguments);
 }, JSV.common, "PeakInfo");
 Clazz.makeConstructor (c$, 
@@ -42,6 +43,7 @@ this.filePathForwardSlash = (this.file == null ? null : this.file.$replace ('\\'
 this.model = JU.PT.getQuotedAttribute (s, "model");
 var isBaseModel = s.contains ("baseModel=\"\"");
 if (!isBaseModel) this.atoms = JU.PT.getQuotedAttribute (s, "atoms");
+this.atomKey = "," + this.atoms + ",";
 this.title = JU.PT.getQuotedAttribute (s, "title");
 this._match = JU.PT.getQuotedAttribute (s, "_match");
 this.xMax = JU.PT.parseFloat (JU.PT.getQuotedAttribute (s, "xMax"));
@@ -102,9 +104,9 @@ function () {
 return this.title;
 });
 $_M(c$, "checkFileIndex", 
-function (filePath, sIndex) {
-return (sIndex.equals (this.index) && (filePath.equals (this.file) || filePath.equals (this.filePathForwardSlash)));
-}, "~S,~S");
+function (filePath, sIndex, sAtomKey) {
+return (sAtomKey != null ? this.atomKey.indexOf (sAtomKey) >= 0 : sIndex.equals (this.index) && (filePath.equals (this.file) || filePath.equals (this.filePathForwardSlash)));
+}, "~S,~S,~S");
 $_M(c$, "checkFileTypeModel", 
 function (filePath, type, model) {
 return filePath.equals (this.file) && this.checkModel (model) && this.type.endsWith (type);

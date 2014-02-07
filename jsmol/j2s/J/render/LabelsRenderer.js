@@ -53,7 +53,7 @@ this.minZ[0] = 2147483647;
 var isAntialiased = this.g3d.isAntialiased ();
 for (var i = labelStrings.length; --i >= 0; ) {
 this.atomPt = this.atom = atoms[i];
-if (!this.atom.isVisible (this.myVisibilityFlag)) continue;
+if (!this.isVisibleForMe (this.atom)) continue;
 var label = labelStrings[i];
 if (label == null || label.length == 0 || labels.mads != null && labels.mads[i] < 0) continue;
 this.labelColix = labels.getColix2 (i, this.atom, false);
@@ -108,9 +108,7 @@ text.setBgColix (this.bgcolix);
 } else {
 if (text.pymolOffset[0] == 1) this.pTemp.setT (this.atomPt);
  else this.pTemp.set (0, 0, 0);
-this.pTemp.x += text.pymolOffset[4];
-this.pTemp.y += text.pymolOffset[5];
-this.pTemp.z += text.pymolOffset[6];
+this.pTemp.add3 (text.pymolOffset[4], text.pymolOffset[5], text.pymolOffset[6]);
 this.viewer.transformPtScr (this.pTemp, this.screen);
 text.setXYZs (this.screen.x, this.screen.y, this.screen.z, this.zSlab);
 text.setScalePixelsPerMicron (this.sppm);

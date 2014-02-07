@@ -56,14 +56,7 @@ $_M(c$, "readCoordinates",
 ($fz = function () {
 if (this.discardLinesUntilNonBlank ().toLowerCase ().contains ("selective")) this.readLine ();
 if (this.line.toLowerCase ().contains ("cartesian")) this.setFractionalCoordinates (false);
-for (var i = 0; i < this.atomCount; i++) {
-var atom = this.atomSetCollection.addNewAtom ();
-var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.readLine ());
-atom.atomName = this.atomLabels.get (i);
-var x = this.parseFloatStr (tokens[0]);
-var y = this.parseFloatStr (tokens[1]);
-var z = this.parseFloatStr (tokens[2]);
-this.setAtomCoordXYZ (atom, x, y, z);
-}
+for (var i = 0; i < this.atomCount; i++) this.addAtomXYZSymName (J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.readLine ()), 0, null, this.atomLabels.get (i));
+
 }, $fz.isPrivate = true, $fz));
 });

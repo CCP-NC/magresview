@@ -79,6 +79,10 @@ for (var i = rowData.length; --i >= 0; ) data[data.length - rowData.length + i] 
 
 return data;
 }, "~B,~A");
+$_M(c$, "setID", 
+function (id) {
+this.jdxSpectra.get (0).sourceID = id;
+}, "~S");
 Clazz.defineStatics (c$,
 "TYPE_VIEW", -2,
 "TYPE_UNKNOWN", -1,

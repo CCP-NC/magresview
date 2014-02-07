@@ -55,12 +55,8 @@ while (this.readLine () != null && !this.line.startsWith (" -----")) {
 tokens = this.getTokens ();
 if (tokens.length < 5) break;
 var symbol = tokens[1];
-if (J.api.JmolAdapter.getElementNumber (symbol) < 1) {
-this.nXX++;
-continue;
-}var atom = this.atomSetCollection.addNewAtom ();
-atom.elementSymbol = symbol;
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[pt0]), this.parseFloatStr (tokens[pt0 + 1]), this.parseFloatStr (tokens[pt0 + 2]));
+if (J.api.JmolAdapter.getElementNumber (symbol) < 1) this.nXX++;
+ else this.addAtomXYZSymName (tokens, pt0, symbol, null);
 }
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "readFrequencies", 
@@ -72,7 +68,7 @@ while (this.readLine () != null && this.line.indexOf (".") < 0 && this.line.inde
 if (this.line == null || this.line.indexOf (".") < 0) return;
 var frequencies = this.getTokens ();
 this.readLine ();
-var iAtom0 = this.atomSetCollection.getAtomCount ();
+var iAtom0 = this.atomSetCollection.atomCount;
 var atomCount = this.atomSetCollection.getLastAtomSetAtomCount ();
 var frequencyCount = frequencies.length;
 var ignore =  Clazz.newBooleanArray (frequencyCount, false);

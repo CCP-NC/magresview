@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.modelset");
-Clazz.load (["J.util.JmolNode", "$.Point3fi", "J.constant.EnumPalette", "J.viewer.JC"], "J.modelset.Atom", ["java.lang.Float", "JU.CU", "$.P3", "$.SB", "$.V3", "J.atomdata.RadiusData", "J.constant.EnumVdw", "J.util.C", "$.Elements", "$.Escape"], function () {
+Clazz.load (["J.util.JmolNode", "$.Point3fi", "J.constant.EnumPalette"], "J.modelset.Atom", ["java.lang.Float", "JU.CU", "$.P3", "$.PT", "$.SB", "$.V3", "J.atomdata.RadiusData", "J.constant.EnumVdw", "J.util.C", "$.Elements", "J.viewer.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.altloc = '\0';
 this.atomID = 0;
@@ -39,7 +39,7 @@ $_M(c$, "getNBackbonesDisplayed",
 function () {
 return this.nBackbonesDisplayed;
 });
-Clazz.overrideConstructor (c$, 
+$_V(c$, "setAtom", 
 function (modelIndex, atomIndex, xyz, radius, atomSymmetry, atomSite, atomicAndIsotopeNumber, formalCharge, isHetero) {
 this.modelIndex = modelIndex;
 this.atomSymmetry = atomSymmetry;
@@ -50,15 +50,12 @@ if (isHetero) this.formalChargeAndFlags = 2;
 if (formalCharge != 0 && formalCharge != -2147483648) this.setFormalCharge (formalCharge);
 this.userDefinedVanDerWaalRadius = radius;
 this.setT (xyz);
+return this;
 }, "~N,~N,JU.P3,~N,JU.BS,~N,~N,~N,~B");
 $_M(c$, "setAltLoc", 
 function (altLoc) {
 this.altloc = altLoc;
 }, "~S");
-$_M(c$, "setShapeVisibilityFlags", 
-function (flag) {
-this.shapeVisibilityFlags = flag;
-}, "~N");
 $_M(c$, "setShapeVisibility", 
 function (flag, isVisible) {
 if (isVisible) {
@@ -253,7 +250,7 @@ $_M(c$, "getAlternateLocationID",
 function () {
 return this.altloc;
 });
-$_M(c$, "isAlternateLocationMatch", 
+$_M(c$, "isAltLoc", 
 function (strPattern) {
 if (strPattern == null) return (this.altloc == '\0');
 if (strPattern.length != 1) return false;
@@ -462,17 +459,9 @@ function () {
 var atomSerials = this.group.chain.model.modelSet.atomSerials;
 return (atomSerials != null ? atomSerials[this.index] : this.index);
 });
-$_M(c$, "isInFrame", 
-function () {
-return ((this.shapeVisibilityFlags & 1) != 0);
-});
-$_M(c$, "getShapeVisibilityFlags", 
-function () {
-return this.shapeVisibilityFlags;
-});
-$_M(c$, "isShapeVisible", 
-function (shapeVisibilityFlag) {
-return ((this.shapeVisibilityFlags & shapeVisibilityFlag) != 0);
+$_M(c$, "isVisible", 
+function (flags) {
+return ((this.shapeVisibilityFlags & flags) == flags);
 }, "~N");
 $_M(c$, "getPartialCharge", 
 function () {
@@ -523,12 +512,16 @@ return (ch == 'X' ? pt.x : ch == 'Y' ? pt.y : pt.z);
 }, $fz.isPrivate = true, $fz), "~S,~B");
 $_M(c$, "getFractionalCoordPt", 
 ($fz = function (asAbsolute) {
-var c = this.group.chain.model.modelSet.getUnitCell (this.modelIndex);
+var c = this.getUnitCell ();
 if (c == null) return this;
 var pt = JU.P3.newP (this);
 c.toFractional (pt, asAbsolute);
 return pt;
 }, $fz.isPrivate = true, $fz), "~B");
+$_M(c$, "getUnitCell", 
+function () {
+return this.group.chain.model.modelSet.getUnitCellForAtom (this.index);
+});
 $_M(c$, "getFractionalUnitCoord", 
 ($fz = function (ch) {
 var pt = this.getFractionalUnitCoordPt (false);
@@ -536,7 +529,7 @@ return (ch == 'X' ? pt.x : ch == 'Y' ? pt.y : pt.z);
 }, $fz.isPrivate = true, $fz), "~S");
 $_M(c$, "getFractionalUnitCoordPt", 
 function (asCartesian) {
-var c = this.group.chain.model.modelSet.getUnitCell (this.modelIndex);
+var c = this.getUnitCell ();
 if (c == null) return this;
 var pt = JU.P3.newP (this);
 if (this.group.chain.model.isJmolDataFrame) {
@@ -549,7 +542,7 @@ if (!asCartesian) c.toFractional (pt, false);
 }, "~B");
 $_M(c$, "getFractionalUnitDistance", 
 function (pt, ptTemp1, ptTemp2) {
-var c = this.group.chain.model.modelSet.getUnitCell (this.modelIndex);
+var c = this.getUnitCell ();
 if (c == null) return this.distance (pt);
 ptTemp1.setT (this);
 ptTemp2.setT (pt);
@@ -563,7 +556,7 @@ c.toUnitCell (ptTemp2, null);
 }, "JU.P3,JU.P3,JU.P3");
 $_M(c$, "setFractionalCoord", 
 function (tok, fValue, asAbsolute) {
-var c = this.group.chain.model.modelSet.getUnitCell (this.modelIndex);
+var c = this.getUnitCell ();
 if (c != null) c.toFractional (this, asAbsolute);
 switch (tok) {
 case 1112541191:
@@ -588,7 +581,7 @@ this.setFractionalCoordPt (this, ptNew, asAbsolute);
 $_M(c$, "setFractionalCoordPt", 
 function (pt, ptNew, asAbsolute) {
 pt.setT (ptNew);
-var c = this.group.chain.model.modelSet.getUnitCell (this.modelIndex);
+var c = this.getUnitCell ();
 if (c != null) c.toCartesian (pt, asAbsolute && !this.group.chain.model.isJmolDataFrame);
 }, "JU.P3,JU.P3,~B");
 $_M(c$, "isCursorOnTopOf", 
@@ -648,7 +641,7 @@ var chainID = this.getChainID ();
 if (chainID != 0 && chainID != 32) {
 info.append (":");
 var s = this.getChainIDStr ();
-if (chainID >= 256) s = J.util.Escape.eS (s);
+if (chainID >= 256) s = JU.PT.esc (s);
 info.append (s);
 }if (!allInfo) return info.toString ();
 info.append (".");
@@ -715,27 +708,27 @@ return this.group.getResno ();
 });
 $_M(c$, "isClickable", 
 function () {
-if (!this.isVisible (0)) return false;
-var flags = this.shapeVisibilityFlags | this.group.shapeVisibilityFlags;
-return ((flags & this.clickabilityFlags) != 0);
-});
-$_M(c$, "getClickabilityFlags", 
-function () {
-return this.clickabilityFlags;
+return (this.checkVisible () && this.clickabilityFlags != 0 && ((this.shapeVisibilityFlags | this.group.shapeVisibilityFlags) & this.clickabilityFlags) != 0);
 });
 $_M(c$, "setClickable", 
 function (flag) {
 if (flag == 0) this.clickabilityFlags = 0;
  else this.clickabilityFlags |= flag;
 }, "~N");
-$_M(c$, "isVisible", 
-function (flags) {
-if (!this.isInFrame () || this.group.chain.model.modelSet.isAtomHidden (this.index)) return false;
-if (flags != 0) return (this.isShapeVisible (flags));
-flags = this.shapeVisibilityFlags;
-if (this.group.shapeVisibilityFlags != J.modelset.Atom.BACKBONE_VISIBILITY_FLAG || this.isLeadAtom ()) flags |= this.group.shapeVisibilityFlags;
-return ((flags & -2) != 0);
-}, "~N");
+$_M(c$, "checkVisible", 
+function () {
+if (this.isVisible (2)) return this.isVisible (4);
+var isVis = this.isVisible (9);
+if (isVis) {
+var flags = this.shapeVisibilityFlags;
+if (this.group.shapeVisibilityFlags != 0 && (this.group.shapeVisibilityFlags != 8192 || this.isLeadAtom ())) flags |= this.group.shapeVisibilityFlags;
+flags &= -10;
+if (flags == 32 && this.clickabilityFlags == 0) flags = 0;
+isVis = (flags != 0);
+if (isVis) this.shapeVisibilityFlags |= 4;
+}this.shapeVisibilityFlags |= 2;
+return isVis;
+});
 $_V(c$, "isLeadAtom", 
 function () {
 return this.group.isLeadAtom (this.index);
@@ -874,7 +867,7 @@ return atom.getAtomNumber ();
 case 1095761922:
 return atom.atomID;
 case 1095761923:
-return atom.getIndex ();
+return atom.index;
 case 1095761924:
 return atom.getCovalentBondCount ();
 case 1095761927:
@@ -1056,7 +1049,7 @@ function (viewer, atom, tokWhat) {
 var ch;
 switch (tokWhat) {
 case 1087373315:
-ch = atom.getAlternateLocationID ();
+ch = atom.altloc;
 return (ch == '\0' ? "" : "" + ch);
 case 1087375362:
 return atom.getAtomName ();
@@ -1078,8 +1071,8 @@ case 1087373322:
 ch = atom.getInsertionCode ();
 return (ch == '\0' ? "" : "" + ch);
 case 1826248715:
-case 1288701960:
-var s = atom.group.chain.model.modelSet.getAtomLabel (atom.getIndex ());
+case 1288701959:
+var s = atom.group.chain.model.modelSet.getAtomLabel (atom.index);
 if (s == null) s = "";
 return s;
 case 1641025539:
@@ -1163,5 +1156,4 @@ Clazz.defineStatics (c$,
 "RADIUS_MAX", 16,
 "RADIUS_GLOBAL", 16.1,
 "MAD_GLOBAL", 32200);
-c$.BACKBONE_VISIBILITY_FLAG = c$.prototype.BACKBONE_VISIBILITY_FLAG = J.viewer.JC.getShapeVisibilityFlag (9);
 });

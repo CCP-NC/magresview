@@ -295,7 +295,7 @@ for (var i = 0; i < faces.length; i++) {
 this.getIntersection (0, faces[i], null, null, null, null, null, andCap, false, 135266319, isGhost);
 }
 break;
-case 135270407:
+case 135270408:
 this.getIntersection (0, null, null, null, slabbingObject, null, null, false, false, 32, isGhost);
 break;
 case 135266325:

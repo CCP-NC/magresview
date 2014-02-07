@@ -33,12 +33,12 @@ if (this.spaceGroup == null) this.spaceGroup = (J.symmetry.SpaceGroup.getNull (t
 }, "~B");
 $_M(c$, "addSpaceGroupOperation", 
 function (xyz, opId) {
-return this.spaceGroup.addSymmetry (xyz, opId);
+return this.spaceGroup.addSymmetry (xyz, opId, false);
 }, "~S,~N");
 $_M(c$, "addBioMoleculeOperation", 
 function (mat, isReverse) {
 this.$isBio = this.spaceGroup.isBio = true;
-return this.spaceGroup.addSymmetry ((isReverse ? "!" : "") + "[[bio" + mat, 0);
+return this.spaceGroup.addSymmetry ((isReverse ? "!" : "") + "[[bio" + mat, 0, false);
 }, "JU.M4,~B");
 $_V(c$, "setLattice", 
 function (latt) {
@@ -52,16 +52,16 @@ $_M(c$, "getSpaceGroup",
 function () {
 return this.spaceGroup;
 });
-$_V(c$, "setSpaceGroupS", 
+$_V(c$, "setSpaceGroupFrom", 
 function (symmetry) {
-this.spaceGroup = (symmetry == null ? null : symmetry.getSpaceGroup ());
+this.spaceGroup = symmetry.getSpaceGroup ();
 }, "J.api.SymmetryInterface");
 $_V(c$, "createSpaceGroup", 
-function (desiredSpaceGroupIndex, name, notionalUnitCell) {
-this.spaceGroup = J.symmetry.SpaceGroup.createSpaceGroup (desiredSpaceGroupIndex, name, notionalUnitCell);
+function (desiredSpaceGroupIndex, name, object) {
+this.spaceGroup = J.symmetry.SpaceGroup.createSpaceGroup (desiredSpaceGroupIndex, name, object);
 if (this.spaceGroup != null && J.util.Logger.debugging) J.util.Logger.debug ("using generated space group " + this.spaceGroup.dumpInfo (null));
 return this.spaceGroup != null;
-}, "~N,~S,~A");
+}, "~N,~S,~O");
 $_M(c$, "getSpaceGroupInfo", 
 function (name, cellInfo) {
 return J.symmetry.SpaceGroup.getInfo (name, cellInfo);
@@ -77,15 +77,15 @@ this.spaceGroup.setFinalOperations (atoms, iAtomFirst, noSymmetryCount, doNormal
 }, "~S,~A,~N,~N,~B");
 $_V(c$, "getSpaceGroupOperationCount", 
 function () {
-return (this.symmetryInfo != null ? this.symmetryInfo.symmetryOperations.length : this.spaceGroup != null ? this.spaceGroup.finalOperations.length : 0);
+return (this.symmetryInfo != null ? this.symmetryInfo.symmetryOperations.length : this.spaceGroup != null && this.spaceGroup.finalOperations != null ? this.spaceGroup.finalOperations.length : 0);
 });
 $_V(c$, "getSpaceGroupOperation", 
 function (i) {
-return (i < this.spaceGroup.finalOperations.length ? this.spaceGroup.finalOperations[i] : null);
+return (i >= this.spaceGroup.operations.length ? null : this.spaceGroup.finalOperations == null ? this.spaceGroup.operations[i] : this.spaceGroup.finalOperations[i]);
 }, "~N");
 $_V(c$, "getSpaceGroupXyz", 
 function (i, doNormalize) {
-return this.spaceGroup.finalOperations[i].getXyz (doNormalize);
+return this.spaceGroup.getXyz (i, doNormalize);
 }, "~N,~B");
 $_M(c$, "newSpaceGroupPoint", 
 function (i, atom1, atom2, transX, transY, transZ) {
@@ -108,12 +108,12 @@ function (p) {
 return J.symmetry.SymmetryOperation.fcoord (p);
 }, "JU.T3");
 $_V(c$, "getMatrixFromString", 
-function (xyz, rotTransMatrix, allowScaling) {
+function (xyz, rotTransMatrix, allowScaling, modDim) {
 return J.symmetry.SymmetryOperation.getMatrixFromString (null, xyz, rotTransMatrix, allowScaling);
-}, "~S,~A,~B");
+}, "~S,~A,~B,~N");
 $_V(c$, "getCoordinatesAreFractional", 
 function () {
-return this.symmetryInfo.coordinatesAreFractional;
+return this.symmetryInfo == null || this.symmetryInfo.coordinatesAreFractional;
 });
 $_V(c$, "getCellRange", 
 function () {
@@ -129,7 +129,7 @@ return this.symmetryInfo == null ? this.spaceGroup.getOperationList () : this.sy
 });
 $_V(c$, "isPeriodic", 
 function () {
-return (this.symmetryInfo == null || this.symmetryInfo.isPeriodic ());
+return (this.symmetryInfo == null ? false : this.symmetryInfo.isPeriodic ());
 });
 $_V(c$, "setSymmetryInfo", 
 function (modelIndex, modelAuxiliaryInfo) {
@@ -224,9 +224,9 @@ function () {
 return this.unitCell.getUnitCellMultiplier ();
 });
 $_V(c$, "getCanonicalCopy", 
-function (scale) {
-return this.unitCell.getCanonicalCopy (scale);
-}, "~N");
+function (scale, withOffset) {
+return this.unitCell.getCanonicalCopy (scale, withOffset);
+}, "~N,~B");
 $_V(c$, "getUnitCellInfoType", 
 function (infoType) {
 return this.unitCell.getInfo (infoType);
@@ -260,11 +260,11 @@ function () {
 return this.unitCell.getUnitCellVectors ();
 });
 $_V(c$, "getUnitCell", 
-function (points) {
+function (points, setRelative) {
 var sym =  new J.symmetry.Symmetry ();
-sym.unitCell = J.symmetry.UnitCell.newP (points);
+sym.unitCell = J.symmetry.UnitCell.newP (points, setRelative);
 return sym;
-}, "~A");
+}, "~A,~B");
 $_V(c$, "isSupercell", 
 function () {
 return this.unitCell.isSupercell ();
@@ -461,9 +461,9 @@ $_V(c$, "getLatticeOp",
 function () {
 return this.spaceGroup.latticeOp;
 });
-$_V(c$, "getOperationGammaIS", 
+$_V(c$, "getOperationRsVs", 
 function (iop) {
-return this.spaceGroup.finalOperations[iop].gammaIS;
+return (this.spaceGroup.finalOperations == null ? this.spaceGroup.operations : this.spaceGroup.finalOperations)[iop].rsvs;
 }, "~N");
 $_V(c$, "getSiteMultiplicity", 
 function (pt) {
@@ -473,4 +473,20 @@ $_M(c$, "isBio",
 function () {
 return this.$isBio;
 });
+$_V(c$, "addOp", 
+function (code, rs, vs, sigma) {
+this.spaceGroup.isSSG = true;
+var s = J.symmetry.SymmetryOperation.getXYZFromRsVs (rs, vs, false);
+var i = this.spaceGroup.addSymmetry (s, -1, true);
+this.spaceGroup.operations[i].setSigma (code, sigma);
+return s;
+}, "~S,JU.Matrix,JU.Matrix,JU.Matrix");
+$_V(c$, "getUnitCellState", 
+function () {
+return (this.unitCell == null ? "" : this.unitCell.getState ());
+});
+$_V(c$, "getSpaceGroupOperationCode", 
+function (iOp) {
+return this.spaceGroup.operations[iOp].subsystemCode;
+}, "~N");
 });

@@ -142,7 +142,7 @@ return param;
 $_M(c$, "getBsOK", 
 ($fz = function () {
 if (this.noValuesAtAll || this.nMolecules == 1) return;
-this.bsOK = J.util.BSUtil.newBitSet (this.nX * this.nY * this.nZ);
+this.bsOK = JU.BS.newN (this.nX * this.nY * this.nZ);
 this.setXYZBohr (null);
 for (var ix = 0, index = 0; ix < this.countsXYZ[0]; ix++) for (var iy = 0; iy < this.countsXYZ[1]; iy++) for (var iz = 0; iz < this.countsXYZ[2]; index++, iz++) this.processAtoms (ix, iy, iz, index);
 

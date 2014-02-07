@@ -218,14 +218,17 @@ $_M(c$, "getDeletedAtoms",
 function () {
 return this.bsDeleted;
 });
-$_M(c$, "getSelectionSet", 
-function (includeDeleted) {
-if (includeDeleted || this.bsDeleted == null && this.bsSubset == null) return this.bsSelection;
-var bs =  new JU.BS ();
-bs.or (this.bsSelection);
-this.excludeAtoms (bs, false);
+$_M(c$, "getSelectedAtoms", 
+function () {
+if (this.bsSubset == null) return this.bsSelection;
+var bs = J.util.BSUtil.copy (this.bsSelection);
+bs.and (this.bsSubset);
 return bs;
-}, "~B");
+});
+$_M(c$, "getSelectedAtomsNoSubset", 
+function () {
+return J.util.BSUtil.copy (this.bsSelection);
+});
 $_M(c$, "getSelectionSubset", 
 function () {
 return this.bsSubset;

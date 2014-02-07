@@ -33,7 +33,7 @@ function () {
 this.setGlobals ();
 for (var i = this.isosurface.meshCount; --i >= 0; ) {
 this.mesh = this.imesh = this.isosurface.meshes[i];
-if (this.imesh.connections != null && !this.viewer.getModelSet ().atoms[this.imesh.connections[0]].isVisible (0)) continue;
+if (this.imesh.connections != null && !this.viewer.getModelSet ().atoms[this.imesh.connections[0]].checkVisible ()) continue;
 this.hasColorRange = false;
 if (this.renderMeshSlab ()) {
 if (!this.isExport) this.renderInfo ();
@@ -111,7 +111,7 @@ $_M(c$, "renderMeshSlab",
 ($fz = function () {
 this.volumeRender = (this.imesh.jvxlData.colorDensity && this.imesh.jvxlData.allowVolumeRender);
 var thisSlabValue = this.mySlabValue;
-this.frontOnly = this.mesh.frontOnly;
+this.frontOnly = this.mesh.frontOnly || this.shapeID == 26;
 if (!this.isNavigationMode) {
 this.meshSlabValue = this.imesh.jvxlData.slabValue;
 if (this.meshSlabValue != -2147483648 && this.imesh.jvxlData.isSlabbable) {

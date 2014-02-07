@@ -15,7 +15,7 @@ if (this.mar == 0 && (this.g3d.isAntialiased () || this.isExport)) this.mar = 50
 var atoms = this.modelSet.atoms;
 for (var i = this.modelSet.getAtomCount (); --i >= 0; ) {
 var atom = atoms[i];
-if (!atom.isVisible (this.myVisibilityFlag)) continue;
+if (!this.isVisibleForMe (atom)) continue;
 this.colix = J.shape.Shape.getColix (stars.colixes, i, atom);
 if (this.g3d.setColix (this.colix)) this.render1 (atom, stars.mads[i]);
  else needTranslucent = true;

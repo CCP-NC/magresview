@@ -9,6 +9,10 @@ $_M(c$, "getInfo",
 function (info) {
 info.put ("vibVector", JU.V3.newV (this));
 }, "java.util.Map");
+$_M(c$, "getUnitCell", 
+function () {
+return null;
+});
 Clazz.defineStatics (c$,
 "twoPI", 6.283185307179586);
 });

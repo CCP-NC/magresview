@@ -3,7 +3,7 @@ Clazz.load (["JU.BS"], "J.util.BSUtil", null, function () {
 c$ = Clazz.declareType (J.util, "BSUtil");
 c$.newAndSetBit = $_M(c$, "newAndSetBit", 
 function (i) {
-var bs = J.util.BSUtil.newBitSet (i + 1);
+var bs = JU.BS.newN (i + 1);
 bs.set (i);
 return bs;
 }, "~N");
@@ -21,13 +21,13 @@ return (bs == null ? 0 : bs.cardinality ());
 }, "JU.BS");
 c$.newBitSet2 = $_M(c$, "newBitSet2", 
 function (i0, i1) {
-var bs = J.util.BSUtil.newBitSet (i1);
+var bs = JU.BS.newN (i1);
 bs.setBits (i0, i1);
 return bs;
 }, "~N,~N");
 c$.setAll = $_M(c$, "setAll", 
 function (n) {
-var bs = J.util.BSUtil.newBitSet (n);
+var bs = JU.BS.newN (n);
 bs.setBits (0, n);
 return bs;
 }, "~N");
@@ -80,10 +80,6 @@ for (i = lend; i < len; i++) bs.setBitTo (ipt++, bs.get (i));
 if (ipt < len) bs.clearBits (ipt, len);
 return bs;
 }, "JU.BS,JU.BS");
-c$.newBitSet = $_M(c$, "newBitSet", 
-function (nFree) {
-return JU.BS.newN (nFree);
-}, "~N");
 c$.offset = $_M(c$, "offset", 
 function (bs0, pos, offset) {
 if (bs0 == null) return;

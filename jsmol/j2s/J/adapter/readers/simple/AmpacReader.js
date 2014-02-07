@@ -37,18 +37,15 @@ if (tokens.length < 5) break;
 if (haveFreq) {
 this.atomPositions[this.atomCount] = JU.P3.new3 (this.parseFloatStr (tokens[2]), this.parseFloatStr (tokens[3]), this.parseFloatStr (tokens[4]));
 } else {
-var symbol = tokens[1];
-var atom = this.atomSetCollection.addNewAtom ();
-atom.elementSymbol = symbol;
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[2]), this.parseFloatStr (tokens[3]), this.parseFloatStr (tokens[4]));
+this.addAtomXYZSymName (tokens, 2, tokens[1], null);
 }this.atomCount++;
 }
 if (haveFreq) this.setPositions ();
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "setPositions", 
 ($fz = function () {
-var maxAtom = this.atomSetCollection.getAtomCount ();
-var atoms = this.atomSetCollection.getAtoms ();
+var maxAtom = this.atomSetCollection.atomCount;
+var atoms = this.atomSetCollection.atoms;
 for (var i = this.freqAtom0; i < maxAtom; i++) {
 atoms[i].setT (this.atomPositions[i % this.atomCount]);
 atoms[i].partialCharge = this.partialCharges[i % this.atomCount];
@@ -72,7 +69,7 @@ while (this.line != null && this.line.indexOf ("FREQ  :") >= 0) {
 var frequencies = this.getTokens ();
 while (this.readLine () != null && this.line.indexOf ("IR I") < 0) {
 }
-var iAtom0 = this.atomSetCollection.getAtomCount ();
+var iAtom0 = this.atomSetCollection.atomCount;
 if (this.vibrationNumber == 0) this.freqAtom0 = iAtom0;
 var frequencyCount = frequencies.length - 2;
 var ignore =  Clazz.newBooleanArray (frequencyCount, false);

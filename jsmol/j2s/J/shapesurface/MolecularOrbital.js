@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapesurface");
-Clazz.load (["J.shapesurface.Isosurface"], "J.shapesurface.MolecularOrbital", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.AU", "$.List", "$.SB", "J.constant.EnumQuantumShell", "J.jvxl.data.JvxlCoder", "J.util.Escape"], function () {
+Clazz.load (["J.shapesurface.Isosurface"], "J.shapesurface.MolecularOrbital", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.AU", "$.List", "$.PT", "$.SB", "J.constant.EnumQuantumShell", "J.jvxl.data.JvxlCoder", "J.util.Escape"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.moTranslucency = null;
 this.moTranslucentLevel = null;
@@ -293,7 +293,7 @@ this.currentMesh.isColorSolid = false;
 if (this.moSlabValue != null) this.setPropI ("slab", this.moSlabValue, null);
 if (this.moSlab != null) for (var i = 0; i < this.moSlab.size (); i++) this.setPropI ("slab", this.moSlab.get (i), null);
 
-if (this.moTranslucentLevel != null) this.setPropI ("translucenctLevel", this.moTranslucentLevel, null);
+if (this.moTranslucentLevel != null) this.setPropI ("translucentLevel", this.moTranslucentLevel, null);
 if (this.moTranslucency != null) this.setPropI ("translucency", this.moTranslucency, null);
 this.setPropI ("token", Integer.$valueOf (this.moFill), null);
 this.setPropI ("token", Integer.$valueOf (this.moMesh), null);
@@ -323,7 +323,7 @@ if (this.moScale != null) J.shape.Shape.appendCmd (s, "mo scale " + this.moScale
 if (this.moMonteCarloCount != null) J.shape.Shape.appendCmd (s, "mo points " + this.moMonteCarloCount + " " + this.moRandomSeed);
 if (this.moResolution != null) J.shape.Shape.appendCmd (s, "mo resolution " + this.moResolution);
 if (this.moPlane != null) J.shape.Shape.appendCmd (s, "mo plane {" + this.moPlane.x + " " + this.moPlane.y + " " + this.moPlane.z + " " + this.moPlane.w + "}");
-if (this.moTitleFormat != null) J.shape.Shape.appendCmd (s, "mo titleFormat " + J.util.Escape.eS (this.moTitleFormat));
+if (this.moTitleFormat != null) J.shape.Shape.appendCmd (s, "mo titleFormat " + JU.PT.esc (this.moTitleFormat));
 if (this.moColorNeg != null) J.shape.Shape.appendCmd (s, "mo color " + J.util.Escape.escapeColor (this.moColorNeg.intValue ()) + (this.moColorNeg.equals (this.moColorPos) ? "" : " " + J.util.Escape.escapeColor (this.moColorPos.intValue ())));
 if (this.moSlab != null) {
 if (this.thisMesh.slabOptions != null) J.shape.Shape.appendCmd (s, this.thisMesh.slabOptions.toString ());

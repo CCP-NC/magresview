@@ -29,9 +29,9 @@ this.setFractionalCoordinates (this.readDimensionality ());
 $_V(c$, "finalizeReader", 
 function () {
 if (this.atomCharges == null) return;
-var atoms = this.atomSetCollection.getAtoms ();
+var atoms = this.atomSetCollection.atoms;
 var f;
-for (var i = this.atomSetCollection.getAtomCount (); --i >= 0; ) if ((f = this.atomCharges.get (atoms[i].atomName)) != null || (f = this.atomCharges.get (atoms[i].getElementSymbol ())) != null) atoms[i].partialCharge = f.floatValue ();
+for (var i = this.atomSetCollection.atomCount; --i >= 0; ) if ((f = this.atomCharges.get (atoms[i].atomName)) != null || (f = this.atomCharges.get (atoms[i].getElementSymbol ())) != null) atoms[i].partialCharge = f.floatValue ();
 
 });
 $_V(c$, "checkLine", 
@@ -188,9 +188,9 @@ if (this.coordinatesArePrimitive && this.iHaveUnitCell && this.doCheckUnitCell &
 this.setModelParameters (false);
 var symFull = this.symmetry;
 this.setModelParameters (true);
-var atoms = this.atomSetCollection.getAtoms ();
+var atoms = this.atomSetCollection.atoms;
 var i0 = this.atomSetCollection.getLastAtomSetAtomIndex ();
-var i1 = this.atomSetCollection.getAtomCount ();
+var i1 = this.atomSetCollection.atomCount;
 for (var i = i0; i < i1; i++) {
 var atom = atoms[i];
 this.symmetry.toCartesian (atom, true);
@@ -211,10 +211,7 @@ this.readLine ();
 continue;
 }this.line = this.line.$replace ('*', ' ');
 var tokens = this.getTokens ();
-if (!tokens[2].equals ("c")) continue;
-var atom = this.atomSetCollection.addNewAtom ();
-atom.atomName = tokens[1];
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[3]), this.parseFloatStr (tokens[4]), this.parseFloatStr (tokens[5]));
+if (tokens[2].equals ("c")) this.addAtomXYZSymName (tokens, 3, null, tokens[1]);
 }
 if (finalizeSymmetry) this.applySymmetryAndSetTrajectory ();
 }, $fz.isPrivate = true, $fz), "~B");

@@ -8,8 +8,9 @@ this.name = null;
 this.width = 0;
 this.height = 0;
 this.id = null;
-this.controller = null;
+this.parent = null;
 this.actionListener = null;
+this.mouseListener = null;
 this.bgcolor = null;
 this.minWidth = 30;
 this.minHeight = 30;
@@ -19,6 +20,7 @@ Clazz.instantialize (this, arguments);
 }, javajs.awt, "Component");
 Clazz.makeConstructor (c$, 
 function (type) {
+this.id = type + ("" + Math.random ()).substring (3, 10);
 if (type == null) return;
 {
 SwingController.register(this, type);
@@ -37,6 +39,14 @@ $_M(c$, "setName",
 function (name) {
 this.name = name;
 }, "~S");
+$_M(c$, "getName", 
+function () {
+return this.name;
+});
+$_M(c$, "getParent", 
+function () {
+return this.parent;
+});
 $_M(c$, "setPreferredSize", 
 function (dimension) {
 this.width = dimension.width;
@@ -46,9 +56,17 @@ $_M(c$, "addActionListener",
 function (listener) {
 this.actionListener = listener;
 }, "~O");
+$_M(c$, "addMouseListener", 
+function (listener) {
+this.mouseListener = listener;
+}, "~O");
 $_M(c$, "getText", 
 function () {
 return this.text;
+});
+$_M(c$, "isEnabled", 
+function () {
+return this.enabled;
 });
 $_M(c$, "setEnabled", 
 function (enabled) {

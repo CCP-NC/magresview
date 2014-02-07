@@ -8,9 +8,6 @@ this.isWebGL = false;
 this.isSingleThreaded = false;
 this.queueOnHold = false;
 this.fullName = "";
-this.appletDocumentBase = "";
-this.appletCodeBase = "";
-this.appletIdiomaBase = null;
 this.compiler = null;
 this.definedAtomSets = null;
 this.modelSet = null;
@@ -34,7 +31,7 @@ this.selectionManager = null;
 this.repaintManager = null;
 this.global = null;
 this.statusManager = null;
-this.transformManager = null;
+this.tm = null;
 this.syncId = "";
 this.logFilePath = "";
 this.allowScripting = false;
@@ -224,7 +221,7 @@ this.smilesMatcher = J.api.Interface.getOptionInterface ("smiles.SmilesMatcher")
 });
 $_V(c$, "getSmartsMatch", 
 function (smarts, bsSelected) {
-if (bsSelected == null) bsSelected = this.getSelectionSet (false);
+if (bsSelected == null) bsSelected = this.getSelectedAtoms ();
 return this.getSmilesMatcher ().getSubstructureSet (smarts, this.modelSet.atoms, this.getAtomCount (), bsSelected, true, false);
 }, "~S,JU.BS");
 $_M(c$, "getViewerOptions", 
@@ -242,10 +239,10 @@ this.fullName = info.get ("fullName");
 if (this.fullName == null) this.fullName = "";
 var o = info.get ("codePath");
 if (o == null) o = "../java/";
-this.appletCodeBase = o.toString ();
-this.appletIdiomaBase = this.appletCodeBase.substring (0, this.appletCodeBase.lastIndexOf ("/", this.appletCodeBase.length - 2) + 1) + "idioma";
+J.viewer.Viewer.appletCodeBase = o.toString ();
+J.viewer.Viewer.appletIdiomaBase = J.viewer.Viewer.appletCodeBase.substring (0, J.viewer.Viewer.appletCodeBase.lastIndexOf ("/", J.viewer.Viewer.appletCodeBase.length - 2) + 1) + "idioma";
 o = info.get ("documentBase");
-this.appletDocumentBase = (o == null ? "" : o.toString ());
+J.viewer.Viewer.appletDocumentBase = (o == null ? "" : o.toString ());
 o = info.get ("options");
 this.commandOptions = (o == null ? "" : o.toString ());
 if (info.containsKey ("debug") || this.commandOptions.indexOf ("-debug") >= 0) J.util.Logger.setLogLevel (5);
@@ -299,7 +296,7 @@ this.gdata.initialize (this.apiPlatform);
 this.stateManager =  new J.viewer.StateManager (this);
 this.colorManager =  new J.viewer.ColorManager (this, this.gdata);
 this.statusManager =  new J.viewer.StatusManager (this);
-this.transformManager =  new J.viewer.TransformManager (this, 2147483647, 0);
+this.tm =  new J.viewer.TransformManager (this, 2147483647, 0);
 this.selectionManager =  new J.viewer.SelectionManager (this);
 if (this.haveDisplay) {
 this.actionManager = (this.multiTouch ? J.api.Interface.getOptionInterface ("multitouch.ActionManagerMT") :  new J.viewer.ActionManager ());
@@ -324,7 +321,7 @@ if (!this.isJS && path != null && path.startsWith ("file:/")) {
 path = path.substring (0, path.substring (0, (path + "?").indexOf ("?")).lastIndexOf ("/"));
 J.util.Logger.info ("setting current directory to " + path);
 this.cd (path);
-}path = this.appletDocumentBase;
+}path = J.viewer.Viewer.appletDocumentBase;
 i = path.indexOf ("#");
 if (i >= 0) path = path.substring (0, i);
 i = path.lastIndexOf ("?");
@@ -332,12 +329,12 @@ if (i >= 0) path = path.substring (0, i);
 i = path.lastIndexOf ("/");
 if (i >= 0) path = path.substring (0, i);
 J.viewer.Viewer.jsDocumentBase = path;
-this.fileManager.setAppletContext (this.appletDocumentBase);
+this.fileManager.setAppletContext (J.viewer.Viewer.appletDocumentBase);
 var appletProxy = info.get ("appletProxy");
 if (appletProxy != null) this.setStringProperty ("appletProxy", appletProxy);
 if (this.$isSignedApplet) {
-this.logFilePath = JU.PT.simpleReplace (this.appletCodeBase, "file://", "");
-this.logFilePath = JU.PT.simpleReplace (this.logFilePath, "file:/", "");
+this.logFilePath = JU.PT.rep (J.viewer.Viewer.appletCodeBase, "file://", "");
+this.logFilePath = JU.PT.rep (this.logFilePath, "file:/", "");
 if (this.logFilePath.indexOf ("//") >= 0) this.logFilePath = null;
  else this.isSignedAppletLocal = true;
 } else if (!this.isJS) {
@@ -359,8 +356,6 @@ this.setTimeout ("" + Math.random (), (o).intValue (), "exitJmol");
 }}this.useCommandThread = !this.isHeadless () && this.checkOption2 ("useCommandThread", "-threaded");
 this.setStartupBooleans ();
 this.setIntProperty ("_nProcessors", J.viewer.Viewer.nProcessors);
-o = info.get ("menuFile");
-if (o != null) this.getProperty ("DATA_API", "setMenu", this.getFileAsString (o));
 if (!this.isSilent) {
 J.util.Logger.info ("(C) 2012 Jmol Development" + "\nJmol Version: " + J.viewer.Viewer.getJmolVersion () + "\njava.vendor: " + J.viewer.Viewer.strJavaVendor + "\njava.version: " + J.viewer.Viewer.strJavaVersion + "\nos.name: " + J.viewer.Viewer.strOSName + "\nAccess: " + this.access + "\nmemory: " + this.getParameter ("_memory") + "\nprocessors available: " + J.viewer.Viewer.nProcessors + "\nuseCommandThread: " + this.useCommandThread + (!this.$isApplet ? "" : "\nappletId:" + this.htmlName + (this.$isSignedApplet ? " (signed)" : "")));
 }this.zap (false, true, false);
@@ -444,7 +439,7 @@ $_M(c$, "reset",
 function (includingSpin) {
 this.modelSet.calcBoundBoxDimensions (null, 1);
 this.axesAreTainted = true;
-this.transformManager.homePosition (includingSpin);
+this.tm.homePosition (includingSpin);
 if (this.modelSet.setCrystallographicDefaults ()) this.stateManager.setCrystallographicDefaults ();
  else this.setAxesModeMolecular (false);
 this.prevFrame = -2147483648;
@@ -453,23 +448,6 @@ if (!this.getSpinOn ()) this.refresh (-1, "Viewer:homePosition()");
 $_V(c$, "homePosition", 
 function () {
 this.evalString ("reset spin");
-});
-$_M(c$, "getAppletInfo", 
-function () {
-var info =  new java.util.Hashtable ();
-info.put ("htmlName", this.htmlName);
-info.put ("syncId", this.syncId);
-info.put ("fullName", this.fullName);
-if (this.$isApplet) {
-info.put ("documentBase", this.appletDocumentBase);
-info.put ("codeBase", this.appletCodeBase);
-info.put ("registry", this.statusManager.getRegistryInfo ());
-}info.put ("version", J.viewer.JC.version);
-info.put ("date", J.viewer.JC.date);
-info.put ("javaVendor", J.viewer.Viewer.strJavaVendor);
-info.put ("javaVersion", J.viewer.Viewer.strJavaVersion + (!this.isJS ? "" : this.isWebGL ? "(WebGL)" : "(HTML5)"));
-info.put ("operatingSystem", J.viewer.Viewer.strOSName);
-return info;
 });
 $_M(c$, "initialize", 
 function (clearUserVariables) {
@@ -582,7 +560,7 @@ return this.stateManager.getSavedCoordinates (saveName);
 }, "~S");
 $_M(c$, "saveSelection", 
 function (saveName) {
-this.stateManager.saveSelection (saveName, this.getSelectionSet (false));
+this.stateManager.saveSelection (saveName, this.getSelectedAtoms ());
 this.stateManager.restoreSelection (saveName);
 }, "~S");
 $_M(c$, "restoreSelection", 
@@ -591,85 +569,85 @@ return this.stateManager.restoreSelection (saveName);
 }, "~S");
 $_M(c$, "getMatrixtransform", 
 function () {
-return this.transformManager.getMatrixtransform ();
+return this.tm.getMatrixtransform ();
 });
 $_M(c$, "getRotationQuaternion", 
 function () {
-return this.transformManager.getRotationQuaternion ();
+return this.tm.getRotationQuaternion ();
 });
 $_M(c$, "setRotationRadius", 
 function (angstroms, doAll) {
-if (doAll) angstroms = this.transformManager.setRotationRadius (angstroms, false);
+if (doAll) angstroms = this.tm.setRotationRadius (angstroms, false);
 if (this.modelSet.setRotationRadius (this.animationManager.currentModelIndex, angstroms)) this.global.setF ("rotationRadius", angstroms);
 }, "~N,~B");
 $_M(c$, "getRotationCenter", 
 function () {
-return this.transformManager.getRotationCenter ();
+return this.tm.getRotationCenter ();
 });
 $_M(c$, "setCenterAt", 
 function (relativeTo, pt) {
 if (this.isJmolDataFrame ()) return;
-this.transformManager.setCenterAt (relativeTo, pt);
+this.tm.setCenterAt (relativeTo, pt);
 }, "~S,JU.P3");
 $_M(c$, "setCenterBitSet", 
 function (bsCenter, doScale) {
 var center = (J.util.BSUtil.cardinalityOf (bsCenter) > 0 ? this.getAtomSetCenter (bsCenter) : null);
 if (this.isJmolDataFrame ()) return;
-this.transformManager.setNewRotationCenter (center, doScale);
+this.tm.setNewRotationCenter (center, doScale);
 }, "JU.BS,~B");
 $_M(c$, "setNewRotationCenter", 
 function (center) {
 if (this.isJmolDataFrame ()) return;
-this.transformManager.setNewRotationCenter (center, true);
+this.tm.setNewRotationCenter (center, true);
 }, "JU.P3");
 $_M(c$, "getNavigationCenter", 
 function () {
-return this.transformManager.getNavigationCenter ();
+return this.tm.getNavigationCenter ();
 });
 $_M(c$, "getNavigationDepthPercent", 
 function () {
-return this.transformManager.getNavigationDepthPercent ();
+return this.tm.getNavigationDepthPercent ();
 });
 $_M(c$, "navigate", 
 function (keyWhere, modifiers) {
 if (this.isJmolDataFrame ()) return;
-this.transformManager.navigateKey (keyWhere, modifiers);
-if (!this.transformManager.vibrationOn && keyWhere != 0) this.refresh (1, "Viewer:navigate()");
+this.tm.navigateKey (keyWhere, modifiers);
+if (!this.tm.vibrationOn && keyWhere != 0) this.refresh (1, "Viewer:navigate()");
 }, "~N,~N");
 $_M(c$, "getNavigationOffset", 
 function () {
-return this.transformManager.getNavigationOffset ();
+return this.tm.getNavigationOffset ();
 });
 $_M(c$, "getNavigationOffsetPercent", 
 function (XorY) {
-return this.transformManager.getNavigationOffsetPercent (XorY);
+return this.tm.getNavigationOffsetPercent (XorY);
 }, "~S");
 $_M(c$, "isNavigating", 
 function () {
-return this.transformManager.isNavigating ();
+return this.tm.isNavigating ();
 });
 $_M(c$, "isInPosition", 
 function (axis, degrees) {
-return this.transformManager.isInPosition (axis, degrees);
+return this.tm.isInPosition (axis, degrees);
 }, "JU.V3,~N");
 $_M(c$, "move", 
 function (eval, dRot, dZoom, dTrans, dSlab, floatSecondsTotal, fps) {
-this.transformManager.move (eval, dRot, dZoom, dTrans, dSlab, floatSecondsTotal, fps);
+this.tm.move (eval, dRot, dZoom, dTrans, dSlab, floatSecondsTotal, fps);
 this.moveUpdate (floatSecondsTotal);
 }, "J.api.JmolScriptEvaluator,JU.V3,~N,JU.V3,~N,~N,~N");
 $_M(c$, "stopMotion", 
 function () {
-this.transformManager.stopMotion ();
+this.tm.stopMotion ();
 });
 $_M(c$, "setRotationMatrix", 
 function (rotationMatrix) {
-this.transformManager.setRotation (rotationMatrix);
+this.tm.setRotation (rotationMatrix);
 }, "JU.M3");
 $_M(c$, "moveTo", 
 function (eval, floatSecondsTotal, center, rotAxis, degrees, rotationMatrix, zoom, xTrans, yTrans, rotationRadius, navCenter, xNav, yNav, navDepth, cameraDepth, cameraX, cameraY) {
 if (!this.haveDisplay) floatSecondsTotal = 0;
 this.setTainted (true);
-this.transformManager.moveTo (eval, floatSecondsTotal, center, rotAxis, degrees, rotationMatrix, zoom, xTrans, yTrans, rotationRadius, navCenter, xNav, yNav, navDepth, cameraDepth, cameraX, cameraY);
+this.tm.moveTo (eval, floatSecondsTotal, center, rotAxis, degrees, rotationMatrix, zoom, xTrans, yTrans, rotationRadius, navCenter, xNav, yNav, navDepth, cameraDepth, cameraX, cameraY);
 }, "J.api.JmolScriptEvaluator,~N,JU.P3,JU.V3,~N,JU.M3,~N,~N,~N,~N,JU.P3,~N,~N,~N,~N,~N,~N");
 $_M(c$, "moveUpdate", 
 function (floatSecondsTotal) {
@@ -678,27 +656,27 @@ if (floatSecondsTotal > 0) this.requestRepaintAndWait ("moveUpdate");
 }, "~N");
 $_M(c$, "getMoveToText", 
 function (timespan) {
-return this.transformManager.getMoveToText (timespan, false);
+return this.tm.getMoveToText (timespan, false);
 }, "~N");
 $_M(c$, "navigateList", 
 function (eval, list) {
 if (this.isJmolDataFrame ()) return;
-this.transformManager.navigateList (eval, list);
+this.tm.navigateList (eval, list);
 }, "J.api.JmolScriptEvaluator,JU.List");
 $_M(c$, "navigatePt", 
 function (center) {
-this.transformManager.setNavigatePt (center);
+this.tm.setNavigatePt (center);
 this.setSync ();
 }, "JU.P3");
 $_M(c$, "navigateAxis", 
 function (rotAxis, degrees) {
-this.transformManager.navigateAxis (rotAxis, degrees);
+this.tm.navigateAxis (rotAxis, degrees);
 this.setSync ();
 }, "JU.V3,~N");
 $_M(c$, "navTranslatePercent", 
 function (x, y) {
 if (this.isJmolDataFrame ()) return;
-this.transformManager.navTranslatePercentOrTo (0, x, y);
+this.tm.navTranslatePercentOrTo (0, x, y);
 this.setSync ();
 }, "~N,~N");
 $_M(c$, "setMouseEnabled", 
@@ -711,41 +689,41 @@ this.actionManager.processMultitouchEvent (groupID, eventType, touchID, iData, p
 }, "~N,~N,~N,~N,JU.P3,~N");
 $_M(c$, "zoomBy", 
 function (pixels) {
-if (this.mouseEnabled) this.transformManager.zoomBy (pixels);
+if (this.mouseEnabled) this.tm.zoomBy (pixels);
 this.refresh (2, this.statusManager.syncingMouse ? "Mouse: zoomBy " + pixels : "");
 }, "~N");
 $_M(c$, "zoomByFactor", 
 function (factor, x, y) {
-if (this.mouseEnabled) this.transformManager.zoomByFactor (factor, x, y);
+if (this.mouseEnabled) this.tm.zoomByFactor (factor, x, y);
 this.refresh (2, !this.statusManager.syncingMouse ? "" : "Mouse: zoomByFactor " + factor + (x == 2147483647 ? "" : " " + x + " " + y));
 }, "~N,~N,~N");
 $_M(c$, "rotateXYBy", 
 function (xDelta, yDelta) {
-if (this.mouseEnabled) this.transformManager.rotateXYBy (xDelta, yDelta, null);
+if (this.mouseEnabled) this.tm.rotateXYBy (xDelta, yDelta, null);
 this.refresh (2, this.statusManager.syncingMouse ? "Mouse: rotateXYBy " + xDelta + " " + yDelta : "");
 }, "~N,~N");
 $_M(c$, "spinXYBy", 
 function (xDelta, yDelta, speed) {
-if (this.mouseEnabled) this.transformManager.spinXYBy (xDelta, yDelta, speed);
+if (this.mouseEnabled) this.tm.spinXYBy (xDelta, yDelta, speed);
 if (xDelta == 0 && yDelta == 0) return;
 this.refresh (2, this.statusManager.syncingMouse ? "Mouse: spinXYBy " + xDelta + " " + yDelta + " " + speed : "");
 }, "~N,~N,~N");
 $_M(c$, "rotateZBy", 
 function (zDelta, x, y) {
-if (this.mouseEnabled) this.transformManager.rotateZBy (zDelta, x, y);
+if (this.mouseEnabled) this.tm.rotateZBy (zDelta, x, y);
 this.refresh (2, this.statusManager.syncingMouse ? "Mouse: rotateZBy " + zDelta + (x == 2147483647 ? "" : " " + x + " " + y) : "");
 }, "~N,~N,~N");
 $_M(c$, "rotateSelected", 
 function (deltaX, deltaY, bsSelected) {
 if (this.isJmolDataFrame ()) return;
 if (this.mouseEnabled) {
-this.transformManager.rotateXYBy (deltaX, deltaY, this.setMovableBitSet (bsSelected, false));
+this.tm.rotateXYBy (deltaX, deltaY, this.setMovableBitSet (bsSelected, false));
 this.refreshMeasures (true);
 }this.refresh (2, this.statusManager.syncingMouse ? "Mouse: rotateMolecule " + deltaX + " " + deltaY : "");
 }, "~N,~N,JU.BS");
 $_M(c$, "setMovableBitSet", 
 ($fz = function (bsSelected, checkMolecule) {
-if (bsSelected == null) bsSelected = this.getSelectionSet (false);
+if (bsSelected == null) bsSelected = this.getSelectedAtoms ();
 bsSelected = J.util.BSUtil.copy (bsSelected);
 J.util.BSUtil.andNot (bsSelected, this.getMotionFixedAtoms ());
 if (checkMolecule && !this.global.allowMoveAtoms) bsSelected = this.modelSet.getMoleculeBitSet (bsSelected);
@@ -753,27 +731,27 @@ return bsSelected;
 }, $fz.isPrivate = true, $fz), "JU.BS,~B");
 $_M(c$, "translateXYBy", 
 function (xDelta, yDelta) {
-if (this.mouseEnabled) this.transformManager.translateXYBy (xDelta, yDelta);
+if (this.mouseEnabled) this.tm.translateXYBy (xDelta, yDelta);
 this.refresh (2, this.statusManager.syncingMouse ? "Mouse: translateXYBy " + xDelta + " " + yDelta : "");
 }, "~N,~N");
 $_V(c$, "rotateFront", 
 function () {
-this.transformManager.rotateFront ();
+this.tm.rotateFront ();
 this.refresh (1, "Viewer:rotateFront()");
 });
 $_V(c$, "rotateX", 
 function (angleRadians) {
-this.transformManager.rotateX (angleRadians);
+this.tm.rotateX (angleRadians);
 this.refresh (1, "Viewer:rotateX()");
 }, "~N");
 $_V(c$, "rotateY", 
 function (angleRadians) {
-this.transformManager.rotateY (angleRadians);
+this.tm.rotateY (angleRadians);
 this.refresh (1, "Viewer:rotateY()");
 }, "~N");
 $_V(c$, "rotateZ", 
 function (angleRadians) {
-this.transformManager.rotateZ (angleRadians);
+this.tm.rotateZ (angleRadians);
 this.refresh (1, "Viewer:rotateZ()");
 }, "~N");
 $_V(c$, "rotateXDeg", 
@@ -786,53 +764,53 @@ this.rotateY (angleDegrees * 0.017453292);
 }, "~N");
 $_M(c$, "translate", 
 function (xyz, x, type, bsAtoms) {
-var xy = (type == '\0' ? Clazz.floatToInt (x) : type == '%' ? this.transformManager.percentToPixels (xyz, x) : this.transformManager.angstromsToPixels (x * (type == 'n' ? 10 : 1)));
+var xy = (type == '\0' ? Clazz.floatToInt (x) : type == '%' ? this.tm.percentToPixels (xyz, x) : this.tm.angstromsToPixels (x * (type == 'n' ? 10 : 1)));
 if (bsAtoms != null) {
 if (xy == 0) return;
-this.transformManager.setSelectedTranslation (bsAtoms, xyz, xy);
+this.tm.setSelectedTranslation (bsAtoms, xyz, xy);
 } else {
 switch (xyz) {
 case 'X':
 case 'x':
-if (type == '\0') this.transformManager.translateToPercent ('x', x);
- else this.transformManager.translateXYBy (xy, 0);
+if (type == '\0') this.tm.translateToPercent ('x', x);
+ else this.tm.translateXYBy (xy, 0);
 break;
 case 'Y':
 case 'y':
-if (type == '\0') this.transformManager.translateToPercent ('y', x);
- else this.transformManager.translateXYBy (0, xy);
+if (type == '\0') this.tm.translateToPercent ('y', x);
+ else this.tm.translateXYBy (0, xy);
 break;
 case 'Z':
 case 'z':
-if (type == '\0') this.transformManager.translateToPercent ('z', x);
- else this.transformManager.translateZBy (xy);
+if (type == '\0') this.tm.translateToPercent ('z', x);
+ else this.tm.translateZBy (xy);
 break;
 }
 }this.refresh (1, "Viewer:translate()");
 }, "~S,~N,~S,JU.BS");
 $_M(c$, "getTranslationXPercent", 
 function () {
-return this.transformManager.getTranslationXPercent ();
+return this.tm.getTranslationXPercent ();
 });
 $_M(c$, "getTranslationYPercent", 
 function () {
-return this.transformManager.getTranslationYPercent ();
+return this.tm.getTranslationYPercent ();
 });
 $_M(c$, "getTranslationZPercent", 
 function () {
-return this.transformManager.getTranslationZPercent ();
+return this.tm.getTranslationZPercent ();
 });
 $_M(c$, "getTranslationScript", 
 function () {
-return this.transformManager.getTranslationScript ();
+return this.tm.getTranslationScript ();
 });
 $_M(c$, "getZShadeStart", 
 function () {
-return this.transformManager.getZShadeStart ();
+return this.tm.getZShadeStart ();
 });
 $_M(c$, "isWindowCentered", 
 function () {
-return this.transformManager.isWindowCentered ();
+return this.tm.isWindowCentered ();
 });
 $_V(c$, "getZoomPercent", 
 function () {
@@ -840,11 +818,11 @@ return Clazz.floatToInt (this.getZoomSetting ());
 });
 $_M(c$, "getZoomSetting", 
 function () {
-return this.transformManager.getZoomSetting ();
+return this.tm.getZoomSetting ();
 });
 $_V(c$, "getZoomPercentFloat", 
 function () {
-return this.transformManager.getZoomPercentFloat ();
+return this.tm.getZoomPercentFloat ();
 });
 $_M(c$, "getMaxZoomPercent", 
 function () {
@@ -852,113 +830,113 @@ return 200000;
 });
 $_M(c$, "slabReset", 
 function () {
-this.transformManager.slabReset ();
+this.tm.slabReset ();
 });
 $_M(c$, "getZoomEnabled", 
 function () {
-return this.transformManager.zoomEnabled;
+return this.tm.zoomEnabled;
 });
 $_M(c$, "getSlabEnabled", 
 function () {
-return this.transformManager.slabEnabled;
+return this.tm.slabEnabled;
 });
 $_M(c$, "slabByPixels", 
 function (pixels) {
-this.transformManager.slabByPercentagePoints (pixels);
+this.tm.slabByPercentagePoints (pixels);
 this.refresh (3, "slabByPixels");
 }, "~N");
 $_M(c$, "depthByPixels", 
 function (pixels) {
-this.transformManager.depthByPercentagePoints (pixels);
+this.tm.depthByPercentagePoints (pixels);
 this.refresh (3, "depthByPixels");
 }, "~N");
 $_M(c$, "slabDepthByPixels", 
 function (pixels) {
-this.transformManager.slabDepthByPercentagePoints (pixels);
+this.tm.slabDepthByPercentagePoints (pixels);
 this.refresh (3, "slabDepthByPixels");
 }, "~N");
 $_M(c$, "slabInternal", 
 function (plane, isDepth) {
-this.transformManager.slabInternal (plane, isDepth);
+this.tm.slabInternal (plane, isDepth);
 }, "JU.P4,~B");
 $_M(c$, "slabToPercent", 
 function (percentSlab) {
-this.transformManager.slabToPercent (percentSlab);
+this.tm.slabToPercent (percentSlab);
 }, "~N");
 $_M(c$, "depthToPercent", 
 function (percentDepth) {
-this.transformManager.depthToPercent (percentDepth);
+this.tm.depthToPercent (percentDepth);
 }, "~N");
 $_M(c$, "setSlabDepthInternal", 
 function (isDepth) {
-this.transformManager.setSlabDepthInternal (isDepth);
+this.tm.setSlabDepthInternal (isDepth);
 }, "~B");
 $_M(c$, "zValueFromPercent", 
 function (zPercent) {
-return this.transformManager.zValueFromPercent (zPercent);
+return this.tm.zValueFromPercent (zPercent);
 }, "~N");
 $_V(c$, "getUnscaledTransformMatrix", 
 function () {
-return this.transformManager.getUnscaledTransformMatrix ();
+return this.tm.getUnscaledTransformMatrix ();
 });
 $_M(c$, "finalizeTransformParameters", 
 function () {
-this.transformManager.finalizeTransformParameters ();
-this.gdata.setSlab (this.transformManager.slabValue);
-this.gdata.setDepth (this.transformManager.depthValue);
-this.gdata.setZShade (this.transformManager.zShadeEnabled, this.transformManager.zSlabValue, this.transformManager.zDepthValue, this.global.zShadePower);
+this.tm.finalizeTransformParameters ();
+this.gdata.setSlab (this.tm.slabValue);
+this.gdata.setDepth (this.tm.depthValue);
+this.gdata.setZShade (this.tm.zShadeEnabled, this.tm.zSlabValue, this.tm.zDepthValue, this.global.zShadePower);
 });
 $_M(c$, "rotatePoint", 
 function (pt, ptRot) {
-this.transformManager.rotatePoint (pt, ptRot);
+this.tm.rotatePoint (pt, ptRot);
 }, "JU.P3,JU.P3");
 $_M(c$, "transformPt", 
 function (pointAngstroms) {
-return this.transformManager.transformPoint (pointAngstroms);
+return this.tm.transformPoint (pointAngstroms);
 }, "JU.P3");
 $_M(c$, "transformPtVib", 
 function (pointAngstroms, vibrationVector) {
-return this.transformManager.transformPointVib (pointAngstroms, vibrationVector);
+return this.tm.transformPointVib (pointAngstroms, vibrationVector);
 }, "JU.P3,J.util.Vibration");
 $_M(c$, "transformPtScr", 
 function (pointAngstroms, pointScreen) {
-this.transformManager.transformPointScr (pointAngstroms, pointScreen);
+this.tm.transformPointScr (pointAngstroms, pointScreen);
 }, "JU.P3,JU.P3i");
 $_M(c$, "transformPtNoClip", 
 function (pointAngstroms, pt) {
-this.transformManager.transformPointNoClip (pointAngstroms, pt);
+this.tm.transformPointNoClip (pointAngstroms, pt);
 }, "JU.P3,JU.P3");
 $_M(c$, "transformPt3f", 
 function (pointAngstroms, pointScreen) {
-this.transformManager.transformPoint2 (pointAngstroms, pointScreen);
+this.tm.transformPoint2 (pointAngstroms, pointScreen);
 }, "JU.P3,JU.P3");
 $_M(c$, "transformPoints", 
 function (pointsAngstroms, pointsScreens) {
-this.transformManager.transformPoints (pointsAngstroms.length, pointsAngstroms, pointsScreens);
+this.tm.transformPoints (pointsAngstroms.length, pointsAngstroms, pointsScreens);
 }, "~A,~A");
 $_M(c$, "transformVector", 
 function (vectorAngstroms, vectorTransformed) {
-this.transformManager.transformVector (vectorAngstroms, vectorTransformed);
+this.tm.transformVector (vectorAngstroms, vectorTransformed);
 }, "JU.V3,JU.V3");
 $_M(c$, "unTransformPoint", 
 function (pointScreen, pointAngstroms) {
-this.transformManager.unTransformPoint (pointScreen, pointAngstroms);
+this.tm.unTransformPoint (pointScreen, pointAngstroms);
 }, "JU.P3,JU.P3");
 $_M(c$, "getScalePixelsPerAngstrom", 
 function (asAntialiased) {
-return this.transformManager.scalePixelsPerAngstrom * (asAntialiased || !this.antialiasDisplay ? 1 : 0.5);
+return this.tm.scalePixelsPerAngstrom * (asAntialiased || !this.antialiasDisplay ? 1 : 0.5);
 }, "~B");
 $_M(c$, "scaleToScreen", 
 function (z, milliAngstroms) {
-return this.transformManager.scaleToScreen (z, milliAngstroms);
+return this.tm.scaleToScreen (z, milliAngstroms);
 }, "~N,~N");
 $_M(c$, "unscaleToScreen", 
 function (z, screenDistance) {
-return this.transformManager.unscaleToScreen (z, screenDistance);
+return this.tm.unscaleToScreen (z, screenDistance);
 }, "~N,~N");
 $_M(c$, "scaleToPerspective", 
 function (z, sizeAngstroms) {
-return this.transformManager.scaleToPerspective (z, sizeAngstroms);
+return this.tm.scaleToPerspective (z, sizeAngstroms);
 }, "~N,~N");
 $_M(c$, "setSpin", 
 function (key, value) {
@@ -966,29 +944,29 @@ if (!JU.PT.isOneOf (key, "x;y;z;fps;X;Y;Z;FPS")) return;
 var i = "x;y;z;fps;X;Y;Z;FPS".indexOf (key);
 switch (i) {
 case 0:
-this.transformManager.setSpinXYZ (value, NaN, NaN);
+this.tm.setSpinXYZ (value, NaN, NaN);
 break;
 case 2:
-this.transformManager.setSpinXYZ (NaN, value, NaN);
+this.tm.setSpinXYZ (NaN, value, NaN);
 break;
 case 4:
-this.transformManager.setSpinXYZ (NaN, NaN, value);
+this.tm.setSpinXYZ (NaN, NaN, value);
 break;
 case 6:
 default:
-this.transformManager.setSpinFps (value);
+this.tm.setSpinFps (value);
 break;
 case 10:
-this.transformManager.setNavXYZ (value, NaN, NaN);
+this.tm.setNavXYZ (value, NaN, NaN);
 break;
 case 12:
-this.transformManager.setNavXYZ (NaN, value, NaN);
+this.tm.setNavXYZ (NaN, value, NaN);
 break;
 case 14:
-this.transformManager.setNavXYZ (NaN, NaN, value);
+this.tm.setNavXYZ (NaN, NaN, value);
 break;
 case 16:
-this.transformManager.setNavFps (value);
+this.tm.setNavFps (value);
 break;
 }
 this.global.setI ((i < 10 ? "spin" : "nav") + key, value);
@@ -999,24 +977,24 @@ return this.getStateCreator ().getSpinState (false);
 });
 $_M(c$, "setSpinOn", 
 function (spinOn) {
-if (spinOn) this.transformManager.setSpinOn ();
- else this.transformManager.setSpinOff ();
+if (spinOn) this.tm.setSpinOn ();
+ else this.tm.setSpinOff ();
 }, "~B");
 $_M(c$, "getSpinOn", 
 function () {
-return this.transformManager.getSpinOn ();
+return this.tm.getSpinOn ();
 });
 $_M(c$, "setNavOn", 
 function (navOn) {
-this.transformManager.setNavOn (navOn);
+this.tm.setNavOn (navOn);
 }, "~B");
 $_M(c$, "getNavOn", 
 function () {
-return this.transformManager.getNavOn ();
+return this.tm.getNavOn ();
 });
 $_M(c$, "setNavXYZ", 
 function (x, y, z) {
-this.transformManager.setNavXYZ (Clazz.floatToInt (x), Clazz.floatToInt (y), Clazz.floatToInt (z));
+this.tm.setNavXYZ (Clazz.floatToInt (x), Clazz.floatToInt (y), Clazz.floatToInt (z));
 }, "~N,~N,~N");
 $_M(c$, "getOrientationText", 
 function (type, name) {
@@ -1027,32 +1005,32 @@ case 1112541205:
 case 1112541206:
 case 1112541207:
 case 135270418:
-return this.modelSet.getBoundBoxOrientation (type, this.getSelectionSet (false));
+return this.modelSet.getBoundBoxOrientation (type, this.getSelectedAtoms ());
 case 1073742035:
 return this.stateManager.getSavedOrientationText (name);
 default:
-return this.transformManager.getOrientationText (type);
+return this.tm.getOrientationText (type);
 }
 }, "~N,~S");
 $_M(c$, "getOrientationInfo", 
 function () {
-return this.transformManager.getOrientationInfo ();
+return this.tm.getOrientationInfo ();
 });
 $_M(c$, "getMatrixRotate", 
 function () {
-return this.transformManager.getMatrixRotate ();
+return this.tm.getMatrixRotate ();
 });
 $_M(c$, "getAxisAngle", 
 function (axisAngle) {
-this.transformManager.getAxisAngle (axisAngle);
+this.tm.getAxisAngle (axisAngle);
 }, "JU.A4");
 $_M(c$, "getTransformText", 
 function () {
-return this.transformManager.getTransformText ();
+return this.tm.getTransformText ();
 });
 $_M(c$, "getRotation", 
 function (matrixRotation) {
-this.transformManager.getRotation (matrixRotation);
+this.tm.getRotation (matrixRotation);
 }, "JU.M3");
 $_M(c$, "getCurrentColorRange", 
 function () {
@@ -1088,21 +1066,21 @@ this.global.vectorScale = scale;
 }, "~N");
 $_M(c$, "isVibrationOn", 
 function () {
-return this.transformManager.vibrationOn;
+return this.tm.vibrationOn;
 });
 $_V(c$, "setVibrationScale", 
 function (scale) {
-this.transformManager.setVibrationScale (scale);
+this.tm.setVibrationScale (scale);
 this.global.vibrationScale = scale;
 this.global.setF ("vibrationScale", scale);
 }, "~N");
 $_M(c$, "setVibrationOff", 
 function () {
-this.transformManager.setVibrationPeriod (0);
+this.tm.setVibrationPeriod (0);
 });
 $_V(c$, "setVibrationPeriod", 
 function (period) {
-this.transformManager.setVibrationPeriod (period);
+this.tm.setVibrationPeriod (period);
 period = Math.abs (period);
 this.global.vibrationPeriod = period;
 this.global.setF ("vibrationPeriod", period);
@@ -1311,10 +1289,14 @@ $_M(c$, "invertSelection",
 function () {
 this.selectionManager.invertSelection ();
 });
-$_M(c$, "getSelectionSet", 
-function (includeDeleted) {
-return this.selectionManager.getSelectionSet (includeDeleted);
-}, "~B");
+$_V(c$, "getSelectedAtoms", 
+function () {
+return this.selectionManager.getSelectedAtoms ();
+});
+$_M(c$, "getSelectedAtomsNoSubset", 
+function () {
+return this.selectionManager.getSelectedAtomsNoSubset ();
+});
 $_M(c$, "setSelectedAtom", 
 function (atomIndex, TF) {
 this.selectionManager.setSelectedAtom (atomIndex, TF);
@@ -1329,7 +1311,7 @@ return this.selectionManager.getSelectionCount ();
 });
 $_M(c$, "setFormalCharges", 
 function (formalCharge) {
-this.modelSet.setFormalCharges (this.getSelectionSet (false), formalCharge);
+this.modelSet.setFormalCharges (this.getSelectedAtoms (), formalCharge);
 }, "~N");
 $_V(c$, "addSelectionListener", 
 function (listener) {
@@ -1472,7 +1454,7 @@ var s = loadScript.toString ();
 for (var i = 0; i < fileNames.length; i++) {
 var fname = fileNames[i];
 if (fileTypes != null && fileTypes[i] != null) fname = fileTypes[i] + "::" + fname;
-s = JU.PT.simpleReplace (s, "$FILENAME" + (i + 1) + "$", J.util.Escape.eS (fname.$replace ('\\', '/')));
+s = JU.PT.rep (s, "$FILENAME" + (i + 1) + "$", JU.PT.esc (fname.$replace ('\\', '/')));
 }
 loadScript =  new JU.SB ().append (s);
 } else if (reader == null) {
@@ -1490,7 +1472,7 @@ if (loadScript != null) {
 var fname = htParams.get ("fullPathName");
 if (fname == null) fname = "";
 if (htParams.containsKey ("loadScript")) loadScript = htParams.get ("loadScript");
-htParams.put ("loadScript", loadScript =  new JU.SB ().append (JU.PT.simpleReplace (loadScript.toString (), "$FILENAME$", J.util.Escape.eS (fname.$replace ('\\', '/')))));
+htParams.put ("loadScript", loadScript =  new JU.SB ().append (JU.PT.rep (loadScript.toString (), "$FILENAME$", JU.PT.esc (fname.$replace ('\\', '/')))));
 }return this.createModelSetAndReturnError (atomSetCollection, isAppend, loadScript, htParams);
 }, "~S,~S,~A,~O,~B,java.util.Map,JU.SB,~N");
 $_M(c$, "setLigandModel", 
@@ -1525,9 +1507,9 @@ if (isLigand) {
 fname = this.setLoadFormat ("#" + id, '#', false);
 if (fname.length == 0) return null;
 this.scriptEcho ("fetching " + fname);
-s = this.getFileAsString (fname);
+s = this.getFileAsString (fname, false);
 } else {
-s = this.getFileAsString (prefix);
+s = this.getFileAsString (prefix, false);
 var pt = (terminator == null ? -1 : s.indexOf (terminator));
 if (pt >= 0) s = s.substring (0, pt);
 }isError = (s.indexOf ("java.") == 0);
@@ -1573,7 +1555,7 @@ return this.loadInlineScript (strModel, '\0', isAppend, htParams);
 strModel = this.modelSet.getInlineData (-1);
 if (strModel == null) if (this.global.modelKitMode) strModel = "5\n\nC 0 0 0\nH .63 .63 .63\nH -.63 -.63 .63\nH -.63 .63 -.63\nH .63 -.63 -.63";
  else return "cannot find string data";
-if (loadScript != null) htParams.put ("loadScript", loadScript =  new JU.SB ().append (JU.PT.simpleReplace (loadScript.toString (), "$FILENAME$", "data \"model inline\"\n" + strModel + "end \"model inline\"")));
+if (loadScript != null) htParams.put ("loadScript", loadScript =  new JU.SB ().append (JU.PT.rep (loadScript.toString (), "$FILENAME$", "data \"model inline\"\n" + strModel + "end \"model inline\"")));
 }if (strModel != null) {
 if (!isAppend) this.zap (true, false, false);
 if (!isLoadVariable && (!haveFileData || isString)) this.getStateCreator ().getInlineData (loadScript, strModel, isAppend, this.getDefaultLoadFilter ());
@@ -1658,8 +1640,8 @@ c$.fixInlineString = $_M(c$, "fixInlineString",
 function (strModel, newLine) {
 var i;
 if (strModel.indexOf ("\\/n") >= 0) {
-strModel = JU.PT.simpleReplace (strModel, "\n", "");
-strModel = JU.PT.simpleReplace (strModel, "\\/n", "\n");
+strModel = JU.PT.rep (strModel, "\n", "");
+strModel = JU.PT.rep (strModel, "\\/n", "\n");
 newLine = String.fromCharCode ( 0);
 }if (newLine.charCodeAt (0) != 0 && newLine != '\n') {
 var repEmpty = (strModel.indexOf ('\n') >= 0);
@@ -1667,7 +1649,7 @@ var len = strModel.length;
 for (i = 0; i < len && strModel.charAt (i) == ' '; ++i) {
 }
 if (i < len && strModel.charAt (i) == newLine) strModel = strModel.substring (i + 1);
-if (repEmpty) strModel = JU.PT.simpleReplace (strModel, "" + newLine, "");
+if (repEmpty) strModel = JU.PT.rep (strModel, "" + newLine, "");
  else strModel = strModel.$replace (newLine, '\n');
 }return strModel;
 }, "~S,~S");
@@ -1704,7 +1686,7 @@ return this.global.getParameter ("dataseparator");
 });
 $_M(c$, "createModelSetAndReturnError", 
 ($fz = function (atomSetCollection, isAppend, loadScript, htParams) {
-var fullPathName = this.fileManager.getFullPathName ();
+var fullPathName = this.fileManager.getFullPathName (false);
 var fileName = this.fileManager.getFileName ();
 var errMsg;
 if (loadScript == null) {
@@ -1789,7 +1771,7 @@ return this.fileManager.getFileAsBytes (pathName, out, true);
 }, "~S,JU.OC");
 $_M(c$, "getCurrentFileAsString", 
 function () {
-var filename = this.getFullPathName ();
+var filename = this.getFullPathName (false);
 if (filename.equals ("string") || filename.equals ("Jmol Model Kit")) return this.modelSet.getInlineData (this.getCurrentModelIndex ());
 if (filename.indexOf ("[]") >= 0) return filename;
 if (filename === "JSNode") return "<DOM NODE>";
@@ -1798,9 +1780,9 @@ if (pathName == null) return null;
 return this.getFileAsString4 (pathName, -1, true, false, false);
 });
 $_M(c$, "getFullPathName", 
-function () {
-return this.fileManager.getFullPathName ();
-});
+function (orPrevious) {
+return this.fileManager.getFullPathName (orPrevious);
+}, "~B");
 $_M(c$, "getFileName", 
 function () {
 return this.fileManager.getFileName ();
@@ -1810,9 +1792,9 @@ function (filename) {
 return this.fileManager.getFullPathNameOrError (filename);
 }, "~S");
 $_V(c$, "getFileAsString", 
-function (name) {
-return this.getFileAsString4 (name, -1, false, false, false);
-}, "~S");
+function (name, checkProtected) {
+return this.getFileAsString4 (name, -1, false, false, checkProtected);
+}, "~S,~B");
 $_M(c$, "getFileAsString4", 
 function (name, nBytesMax, doSpecialLoad, allowBinary, checkProtected) {
 if (name == null) return this.getCurrentFileAsString ();
@@ -1822,9 +1804,9 @@ this.fileManager.getFileDataOrErrorAsString (data, nBytesMax, doSpecialLoad, all
 return data[1];
 }, "~S,~N,~B,~B,~B");
 $_M(c$, "getFileAsStringBin", 
-function (data) {
-return this.fileManager.getFileDataOrErrorAsString (data, -1, false, true, false);
-}, "~A");
+function (data, allowBinary) {
+return this.fileManager.getFileDataOrErrorAsString (data, -1, false, allowBinary, !allowBinary);
+}, "~A,~B");
 $_M(c$, "getFilePath", 
 function (name, asShortName) {
 return this.fileManager.getFilePath (name, false, asShortName);
@@ -1859,7 +1841,7 @@ this.modelSet.calculateStraightness ();
 });
 $_M(c$, "calculateSurface", 
 function (bsSelected, envelopeRadius) {
-if (bsSelected == null) bsSelected = this.getSelectionSet (false);
+if (bsSelected == null) bsSelected = this.getSelectedAtoms ();
 if (envelopeRadius == 3.4028235E38 || envelopeRadius == -1) this.addStateScriptRet ("calculate surfaceDistance " + (envelopeRadius == 3.4028235E38 ? "FROM" : "WITHIN"), null, bsSelected, null, "", false, true);
 return this.modelSet.calculateSurface (bsSelected, envelopeRadius);
 }, "JU.BS,~N");
@@ -1874,12 +1856,12 @@ this.modelSet.setStructureList (this.getStructureList ());
 }, "~A,J.constant.EnumStructure");
 $_M(c$, "getDefaultStructure", 
 function (bsAtoms, bsAllAtoms) {
-if (bsAtoms == null) bsAtoms = this.getSelectionSet (false);
+if (bsAtoms == null) bsAtoms = this.getSelectedAtoms ();
 return this.modelSet.getDefaultStructure (bsAtoms, bsAllAtoms);
 }, "JU.BS,JU.BS");
 $_M(c$, "calculateStructures", 
 function (bsAtoms, asDSSP, setStructure) {
-if (bsAtoms == null) bsAtoms = this.getSelectionSet (false);
+if (bsAtoms == null) bsAtoms = this.getSelectedAtoms ();
 return this.modelSet.calculateStructures (bsAtoms, asDSSP, this.global.dsspCalcHydrogen, setStructure);
 }, "JU.BS,~B,~B");
 $_V(c$, "getSelectedAtomIterator", 
@@ -1935,7 +1917,7 @@ this.clearModelDependentObjects ();
 this.fileManager.clear ();
 this.clearRepaintManager (-1);
 this.animationManager.clear ();
-this.transformManager.clear ();
+this.tm.clear ();
 this.selectionManager.clear ();
 this.clearAllMeasurements ();
 this.clearMinimization ();
@@ -1994,7 +1976,7 @@ this.rotatePrev1 = this.rotateBondIndex = -1;
 this.movingSelected = false;
 this.noneSelected = false;
 this.hoverEnabled = true;
-this.transformManager.setCenter ();
+this.tm.setCenter ();
 this.animationManager.initializePointers (1);
 if (!this.modelSet.getModelSetAuxiliaryInfoBoolean ("isPyMOL")) {
 this.clearAtomSets ();
@@ -2021,7 +2003,8 @@ return this.modelManager.getModelSetFileName ();
 });
 $_M(c$, "getUnitCellInfoText", 
 function () {
-return this.modelSet.getUnitCellInfoText ();
+var c = this.getCurrentUnitCell ();
+return (c == null ? "not applicable" : c.getUnitCellInfo ());
 });
 $_M(c$, "getUnitCellInfo", 
 function (infoType) {
@@ -2079,9 +2062,7 @@ return this.getModelUndeletedAtomsBitSet (-1);
 });
 $_M(c$, "getModelUndeletedAtomsBitSet", 
 function (modelIndex) {
-var bs = this.modelSet.getModelAtomBitSetIncludingDeleted (modelIndex, true);
-this.excludeAtoms (bs, false);
-return bs;
+return this.excludeAtoms (this.modelSet.getModelAtomBitSetIncludingDeleted (modelIndex, true), false);
 }, "~N");
 $_M(c$, "getModelBitSet", 
 function (atomList, allTrajectories) {
@@ -2089,13 +2070,12 @@ return this.modelSet.getModelBitSet (atomList, allTrajectories);
 }, "JU.BS,~B");
 $_M(c$, "getModelUndeletedAtomsBitSetBs", 
 function (bsModels) {
-var bs = this.modelSet.getModelAtomBitSetIncludingDeletedBs (bsModels);
-this.excludeAtoms (bs, false);
-return bs;
+return this.excludeAtoms (this.modelSet.getModelAtomBitSetIncludingDeletedBs (bsModels), false);
 }, "JU.BS");
 $_M(c$, "excludeAtoms", 
 function (bs, ignoreSubset) {
 this.selectionManager.excludeAtoms (bs, ignoreSubset);
+return bs;
 }, "JU.BS,~B");
 $_M(c$, "getModelSet", 
 function () {
@@ -2141,10 +2121,6 @@ return this.modelSet.getBoundBoxCornerVector ();
 $_M(c$, "getBoundBoxVertices", 
 function () {
 return this.modelSet.getBboxVertices ();
-});
-$_M(c$, "getBoundBoxInfo", 
-function () {
-return this.modelSet.getBoundBoxInfo ();
 });
 $_M(c$, "getBoundBoxModels", 
 function () {
@@ -2329,16 +2305,12 @@ this.modelSet.setModelCage (this.getCurrentModelIndex (), data[1]);
 }, "~S");
 $_M(c$, "setCurrentCagePts", 
 function (points) {
-this.modelSet.setModelCage (this.getCurrentModelIndex (), this.getSymmetry ().getUnitCell (points));
+this.modelSet.setModelCage (this.getCurrentModelIndex (), this.getSymmetry ().getUnitCell (points, true));
 }, "~A");
 $_M(c$, "setCurrentUnitCellOffset", 
-function (ijk) {
-this.modelSet.setUnitCellOffset (this.animationManager.currentModelIndex, null, ijk);
-}, "~N");
-$_M(c$, "setCurrentUnitCellOffsetPt", 
-function (pt) {
-this.modelSet.setUnitCellOffset (this.animationManager.currentModelIndex, pt, 0);
-}, "JU.P3");
+function (pt, ijk) {
+this.modelSet.setUnitCellOffset (this.getCurrentUnitCell (), pt, ijk);
+}, "JU.P3,~N");
 $_M(c$, "addUnitCellOffset", 
 function (pt) {
 var unitCell = this.getCurrentUnitCell ();
@@ -2353,7 +2325,7 @@ this.refreshMeasures (true);
 }, "~N,~S,~S,~B");
 $_V(c$, "setCenterSelected", 
 function () {
-this.setCenterBitSet (this.getSelectionSet (false), true);
+this.setCenterBitSet (this.getSelectedAtoms (), true);
 });
 $_M(c$, "setApplySymmetryToBonds", 
 function (TF) {
@@ -2430,15 +2402,15 @@ return this.modelSet.getClickableSet ();
 });
 $_M(c$, "calcSelectedGroupsCount", 
 function () {
-this.modelSet.calcSelectedGroupsCount (this.getSelectionSet (false));
+this.modelSet.calcSelectedGroupsCount (this.getSelectedAtoms ());
 });
 $_M(c$, "calcSelectedMonomersCount", 
 function () {
-this.modelSet.calcSelectedMonomersCount (this.getSelectionSet (false));
+this.modelSet.calcSelectedMonomersCount (this.getSelectedAtoms ());
 });
 $_M(c$, "calcSelectedMoleculesCount", 
 function () {
-this.modelSet.calcSelectedMoleculesCount (this.getSelectionSet (false));
+this.modelSet.calcSelectedMoleculesCount (this.getSelectedAtoms ());
 });
 $_M(c$, "getFileHeader", 
 function () {
@@ -2451,7 +2423,7 @@ return this.modelSet.getFileData (this.animationManager.currentModelIndex);
 $_M(c$, "getCifData", 
 function (modelIndex) {
 var name = this.getModelFileName (modelIndex);
-var data = this.getFileAsString (name);
+var data = this.getFileAsString (name, false);
 if (data == null) return null;
 return J.io.CifDataReader.readCifData (J.io.JmolBinary.getBR (data));
 }, "~N");
@@ -2459,13 +2431,9 @@ $_M(c$, "getPDBHeader",
 function () {
 return this.modelSet.getPDBHeader (this.animationManager.currentModelIndex);
 });
-$_M(c$, "getAuxiliaryInfo", 
-function (atomExpression) {
-return this.modelSet.getAuxiliaryInfo (this.getModelBitSet (this.getAtomBitSet (atomExpression), false));
-}, "~O");
 $_M(c$, "getChimeInfo", 
 function (tok) {
-return this.getPropertyManager ().getChimeInfo (tok, this.getSelectionSet (false));
+return this.getPropertyManager ().getChimeInfo (tok, this.getSelectedAtoms ());
 }, "~N");
 $_M(c$, "getStateCreator", 
 function () {
@@ -2490,7 +2458,7 @@ return this.getStateCreator ().getModelState (null, false, true);
 });
 $_M(c$, "getProteinStructureState", 
 function () {
-return this.modelSet.getProteinStructureState (this.getSelectionSet (false), false, false, 3);
+return this.modelSet.getProteinStructureState (this.getSelectedAtoms (), false, false, 3);
 });
 $_M(c$, "getCoordinateState", 
 function (bsSelected) {
@@ -2500,7 +2468,7 @@ $_M(c$, "setCurrentColorRange",
 function (label) {
 var data = this.getDataFloat (label);
 var bs = (data == null ? null : (this.getDataManager ().getData (label))[2]);
-if (bs != null && this.global.rangeSelected) bs.and (this.getSelectionSet (false));
+if (bs != null && this.global.rangeSelected) bs.and (this.getSelectedAtoms ());
 this.setCurrentColorRangeData (data, bs);
 }, "~S");
 $_M(c$, "setCurrentColorRangeData", 
@@ -2545,7 +2513,7 @@ return this.modelSet.getAltLocListInModel (modelIndex);
 }, "~N");
 $_M(c$, "setConformation", 
 function () {
-return this.modelSet.setConformation (this.getSelectionSet (false));
+return this.modelSet.setConformation (this.getSelectedAtoms ());
 });
 $_M(c$, "getConformation", 
 function (iModel, conformationIndex, doSet) {
@@ -2553,7 +2521,7 @@ return this.modelSet.getConformation (iModel, conformationIndex, doSet);
 }, "~N,~N,~B");
 $_M(c$, "autoHbond", 
 function (bsFrom, bsTo, onlyIfHaveCalculated) {
-if (bsFrom == null) bsFrom = bsTo = this.getSelectionSet (false);
+if (bsFrom == null) bsFrom = bsTo = this.getSelectedAtoms ();
 return this.modelSet.autoHbond (bsFrom, bsTo, onlyIfHaveCalculated);
 }, "JU.BS,JU.BS,~B");
 $_V(c$, "havePartialCharges", 
@@ -2562,6 +2530,7 @@ return this.modelSet.getPartialCharges () != null;
 });
 $_M(c$, "getCurrentUnitCell", 
 function () {
+if (this.animationManager.currentAtomIndex >= 0) return this.modelSet.getUnitCellForAtom (this.animationManager.currentAtomIndex);
 if (this.animationManager.currentModelIndex >= 0) return this.modelSet.getUnitCell (this.animationManager.currentModelIndex);
 var models = this.getVisibleFramesBitSet ();
 var ucLast = null;
@@ -2600,10 +2569,6 @@ function (i) {
 var str = "" + this.getShapePropertyIndex (6, "stringValue", i);
 return str;
 }, "~N");
-$_M(c$, "getMeasurementInfo", 
-function () {
-return this.getShapeProperty (6, "info");
-});
 $_M(c$, "getMeasurementInfoAsString", 
 function () {
 return this.getShapeProperty (6, "infostring");
@@ -2664,10 +2629,6 @@ this.animationManager.setAnimationDirection (direction);
 $_M(c$, "getAnimationDirection", 
 function () {
 return this.animationManager.animationDirection;
-});
-$_M(c$, "getAnimationInfo", 
-function () {
-return this.getStateCreator ().getInfo (this.animationManager);
 });
 $_V(c$, "setAnimationFps", 
 function (fps) {
@@ -2769,12 +2730,12 @@ return this.getStateCreator ().getTrajectoryState ();
 });
 $_M(c$, "setFrameOffset", 
 function (modelIndex) {
-this.transformManager.setFrameOffset (modelIndex);
+this.tm.setFrameOffset (modelIndex);
 }, "~N");
 $_M(c$, "setFrameOffsets", 
 function (bsAtoms) {
 this.bsFrameOffsets = bsAtoms;
-this.transformManager.setFrameOffsets (this.frameOffsets = this.modelSet.getFrameOffsets (this.bsFrameOffsets));
+this.tm.setFrameOffsets (this.frameOffsets = this.modelSet.getFrameOffsets (this.bsFrameOffsets));
 }, "JU.BS");
 $_M(c$, "getFrameOffsets", 
 function () {
@@ -2857,7 +2818,7 @@ if (this.repaintManager == null || !this.refreshing) return;
 if (mode == 6 && this.getInMotion (true)) return;
 if (this.isWebGL) {
 if (mode == 2 || mode == 7) {
-this.transformManager.finalizeTransformParameters ();
+this.tm.finalizeTransformParameters ();
 {
 if (!self.Jmol) return;
 if(Jmol._refresh) Jmol._refresh(this.applet, mode, strWhy,
@@ -2929,7 +2890,7 @@ this.setStatusResized (width, height);
 }} else {
 width = (this.dimScreen.width == 0 ? this.dimScreen.width = 500 : this.dimScreen.width);
 height = (this.dimScreen.height == 0 ? this.dimScreen.height = 500 : this.dimScreen.height);
-}this.transformManager.setScreenParameters (width, height, isImageWrite || isReset ? this.global.zoomLarge : false, this.antialiasDisplay, false, false);
+}this.tm.setScreenParameters (width, height, isImageWrite || isReset ? this.global.zoomLarge : false, this.antialiasDisplay, false, false);
 this.gdata.setWindowParameters (width, height, this.antialiasDisplay);
 }, "~N,~N,~B,~B,~B");
 $_V(c$, "getScreenWidth", 
@@ -2961,7 +2922,7 @@ this.getScreenImageBuffer (gLeft, false);
 this.render1 (gRight, this.getImage (true, false), 0, 0);
 this.render1 (gLeft, this.getImage (false, false), 0, 0);
 }}if (this.captureParams != null && Boolean.FALSE !== this.captureParams.get ("captureEnabled")) {
-if (System.currentTimeMillis () >= (this.captureParams.get ("endTime")).longValue ()) this.captureParams.put ("captureMode", Integer.$valueOf (1150985));
+if (System.currentTimeMillis () + 50 > (this.captureParams.get ("endTime")).longValue ()) this.captureParams.put ("captureMode", Integer.$valueOf (1150985));
 this.processWriteOrCapture (this.captureParams);
 }this.notifyViewerRepaintDone ();
 }, "~O,~O,~N,~N");
@@ -2982,6 +2943,11 @@ g = this.apiPlatform.context;
 gright = this.statusManager.jmolStatusListener.gright;
 }this.renderScreenImageStereo (g, gright, width, height);
 }}, "~N,~N");
+$_M(c$, "updateJSView", 
+($fz = function (imodel, iatom) {
+{
+this.applet && this.applet._viewSet != null && this.applet._atomPickedCallback(imodel, iatom);
+}}, $fz.isPrivate = true, $fz), "~N,~N");
 $_M(c$, "updateWindow", 
 ($fz = function (width, height) {
 if (!this.refreshing || this.creatingImage) return false;
@@ -3017,7 +2983,7 @@ return image;
 }, $fz.isPrivate = true, $fz), "~B,~B");
 $_M(c$, "beginRendering", 
 ($fz = function (isDouble, isImageWrite) {
-this.gdata.beginRendering (this.transformManager.getStereoRotationMatrix (isDouble), this.global.translucent, isImageWrite, !this.checkMotionRendering (603979967));
+this.gdata.beginRendering (this.tm.getStereoRotationMatrix (isDouble), this.global.translucent, isImageWrite, !this.checkMotionRendering (603979967));
 }, $fz.isPrivate = true, $fz), "~B,~B");
 $_M(c$, "isAntialiased", 
 function () {
@@ -3028,18 +2994,17 @@ $_M(c$, "render",
 if (this.modelSet == null || !this.mustRender || !this.refreshing && !this.creatingImage || this.repaintManager == null) return;
 var antialias2 = this.antialiasDisplay && this.global.antialiasTranslucent;
 this.finalizeTransformParameters ();
-this.shapeManager.finalizeAtoms (this.transformManager.bsSelectedAtoms, this.transformManager.ptOffset);
-var minMax = this.shapeManager.transformAtoms ();
-this.transformManager.bsSelectedAtoms = null;
+var minMax = this.shapeManager.finalizeAtoms (this.tm.bsSelectedAtoms, this.tm.ptOffset);
+this.tm.bsSelectedAtoms = null;
 if (this.isWebGL) {
 this.repaintManager.renderExport (this.gdata, this.modelSet, this.jsParams);
 this.notifyViewerRepaintDone ();
 return;
 }this.repaintManager.render (this.gdata, this.modelSet, true, minMax);
 if (this.gdata.setPass2 (antialias2)) {
-this.transformManager.setAntialias (antialias2);
+this.tm.setAntialias (antialias2);
 this.repaintManager.render (this.gdata, this.modelSet, false, null);
-this.transformManager.setAntialias (this.antialiasDisplay);
+this.tm.setAntialias (this.antialiasDisplay);
 }}, $fz.isPrivate = true, $fz));
 $_M(c$, "render1", 
 ($fz = function (graphic, img, x, y) {
@@ -3052,7 +3017,7 @@ function (graphic, isImageWrite) {
 if (this.isWebGL) return null;
 var mergeImages = (graphic == null && this.isStereoDouble ());
 var imageBuffer;
-if (this.transformManager.stereoMode.isBiColor ()) {
+if (this.tm.stereoMode.isBiColor ()) {
 this.beginRendering (true, isImageWrite);
 this.render ();
 this.gdata.endRendering ();
@@ -3060,7 +3025,7 @@ this.gdata.snapshotAnaglyphChannelBytes ();
 this.beginRendering (false, isImageWrite);
 this.render ();
 this.gdata.endRendering ();
-this.gdata.applyAnaglygh (this.transformManager.stereoMode, this.transformManager.stereoColors);
+this.gdata.applyAnaglygh (this.tm.stereoMode, this.tm.stereoColors);
 imageBuffer = this.gdata.getScreenImage (isImageWrite);
 } else {
 imageBuffer = this.getImage (this.isStereoDouble (), isImageWrite);
@@ -3270,7 +3235,7 @@ f = "name/" + JU.PT.escapeUrl (f);
 case '$':
 if (name.startsWith ("$$")) {
 f = f.substring (1);
-format = JU.PT.simpleReplace (this.global.smilesUrlFormat, "&get3d=True", "");
+format = JU.PT.rep (this.global.smilesUrlFormat, "&get3d=True", "");
 return J.util.Txt.formatStringS (format, "FILE", JU.PT.escapeUrl (f));
 }case 'N':
 case '2':
@@ -3324,7 +3289,7 @@ return this.global.defaultLabelPDB;
 }, "~N");
 $_M(c$, "getAdditionalHydrogens", 
 function (bsAtoms, doAll, justCarbon, vConnections) {
-if (bsAtoms == null) bsAtoms = this.getSelectionSet (false);
+if (bsAtoms == null) bsAtoms = this.getSelectedAtoms ();
 var nTotal =  Clazz.newIntArray (1, 0);
 var pts = this.modelSet.calculateHydrogens (bsAtoms, nTotal, doAll, justCarbon, vConnections);
 var points =  new Array (nTotal[0]);
@@ -3357,7 +3322,7 @@ return;
 }if (this.eval != null && this.isScriptExecuting () || atomIndex == this.hoverAtomIndex || this.global.hoverDelayMs == 0) return;
 if (!this.isInSelectionSubset (atomIndex)) return;
 this.loadShape (34);
-if (isLabel && this.modelSet.atoms[atomIndex].isShapeVisible (J.viewer.JC.getShapeVisibilityFlag (5))) {
+if (isLabel && this.modelSet.atoms[atomIndex].isVisible (512)) {
 this.setShapeProperty (34, "specialLabel", J.i18n.GT._ ("Drag to move label"));
 }this.setShapeProperty (34, "text", null);
 this.setShapeProperty (34, "target", Integer.$valueOf (atomIndex));
@@ -3511,14 +3476,15 @@ try {
 this.getPopupMenu ();
 this.jmolpopup.jpiShow (x, y);
 } catch (e) {
+J.util.Logger.info (e.toString ());
 this.global.disablePopupMenu = true;
 }
 break;
 case 'a':
 case 'b':
 case 'm':
-this.modelkitPopup = this.apiPlatform.getMenuPopup (null, type);
-if (this.modelkitPopup != null) this.modelkitPopup.jpiShow (x, y);
+if (this.modelkitPopup == null && (this.modelkitPopup = this.apiPlatform.getMenuPopup (null, type)) == null) return;
+this.modelkitPopup.jpiShow (x, y);
 break;
 }
 }, "~N,~N,~S");
@@ -3539,11 +3505,11 @@ this.global.disablePopupMenu = true;
 return null;
 }}return this.jmolpopup.jpiGetMenuAsObject ();
 }, $fz.isPrivate = true, $fz));
-$_M(c$, "setMenu", 
+$_V(c$, "setMenu", 
 function (fileOrText, isFile) {
 if (isFile) J.util.Logger.info ("Setting menu " + (fileOrText.length == 0 ? "to Jmol defaults" : "from file " + fileOrText));
 if (fileOrText.length == 0) fileOrText = null;
- else if (isFile) fileOrText = this.getFileAsString (fileOrText);
+ else if (isFile) fileOrText = this.getFileAsString (fileOrText, false);
 this.getProperty ("DATA_API", "setMenu", fileOrText);
 this.statusManager.setCallbackFunction ("menu", fileOrText);
 }, "~S,~B");
@@ -3552,7 +3518,7 @@ function (isVib, doNotify) {
 if (isVib) {
 this.prevFrame = -2147483648;
 }var frameNo = this.animationManager.getCurrentModelIndex ();
-this.transformManager.setVibrationPeriod (NaN);
+this.tm.setVibrationPeriod (NaN);
 var firstIndex = this.animationManager.firstFrameIndex;
 var lastIndex = this.animationManager.lastFrameIndex;
 var isMovie = this.isMovie ();
@@ -3599,6 +3565,7 @@ if (!entryName.equals (script)) entryName = script + ": " + entryName;
 if (entryName.length > 50) entryName = entryName.substring (0, 45) + "...";
 }this.statusManager.setStatusFrameChanged (frameNo, fileNo, modelNo, (this.animationManager.animationDirection < 0 ? -firstNo : firstNo), (this.animationManager.currentDirection < 0 ? -lastNo : lastNo), currentFrame, entryName);
 if (this.doHaveJDX ()) this.getJSV ().setModel (modelIndex);
+if (this.isJS) this.updateJSView (modelIndex, -1);
 }, "~B,~B");
 $_M(c$, "doHaveJDX", 
 ($fz = function () {
@@ -3607,7 +3574,7 @@ return (this.haveJDX || (this.haveJDX = this.getBooleanProperty ("_JSpecView".to
 $_M(c$, "getJSV", 
 ($fz = function () {
 if (this.jsv == null) {
-this.jsv = J.api.Interface.getOptionInterface ("viewer.JSpecView");
+this.jsv = J.api.Interface.getOptionInterface ("jsv.JSpecView");
 this.jsv.setViewer (this);
 }return this.jsv;
 }, $fz.isPrivate = true, $fz));
@@ -3660,8 +3627,10 @@ this.global.setI ("_loadPoint", ptLoad.getCode ());
 var doCallback = (ptLoad !== J.constant.EnumFileStatus.CREATING_MODELSET);
 if (doCallback) this.setStatusFrameChanged (false, false);
 this.statusManager.setFileLoadStatus (fullPathName, fileName, modelName, strError, ptLoad.getCode (), doCallback, isAsync);
-if (doCallback && this.doHaveJDX ()) this.getJSV ().setModel (this.getCurrentModelIndex ());
-}, $fz.isPrivate = true, $fz), "J.constant.EnumFileStatus,~S,~S,~S,~S,Boolean");
+if (doCallback) {
+if (this.doHaveJDX ()) this.getJSV ().setModel (this.getCurrentModelIndex ());
+if (this.isJS) this.updateJSView (this.getCurrentModelIndex (), -2);
+}}, $fz.isPrivate = true, $fz), "J.constant.EnumFileStatus,~S,~S,~S,~S,Boolean");
 $_M(c$, "getZapName", 
 function () {
 return (this.global.modelKitMode ? "Jmol Model Kit" : "zapped");
@@ -3686,8 +3655,8 @@ if (info.length == 0) info = this.getAtomInfoXYZ (atomIndex, this.global.message
 this.global.setS ("_pickinfo", info);
 this.statusManager.setStatusAtomPicked (atomIndex, info);
 var syncMode = this.statusManager.getSyncMode ();
-if (syncMode != 1 || !this.doHaveJDX ()) return;
-this.getJSV ().atomPicked (atomIndex);
+if (syncMode == 1 && this.doHaveJDX ()) this.getJSV ().atomPicked (atomIndex);
+if (this.isJS) this.updateJSView (this.getAtomModelIndex (atomIndex), atomIndex);
 }, "~N,~S");
 $_M(c$, "setStatusResized", 
 function (width, height) {
@@ -3723,7 +3692,7 @@ function (urlString) {
 if (urlString == null) return;
 if (urlString.indexOf (":") < 0) {
 var base = this.fileManager.getAppletDocumentBase ();
-if (base === "") base = this.fileManager.getFullPathName ();
+if (base === "") base = this.fileManager.getFullPathName (false);
 if (base.indexOf ("/") >= 0) {
 base = base.substring (0, base.lastIndexOf ("/") + 1);
 } else if (base.indexOf ("\\") >= 0) {
@@ -3825,8 +3794,6 @@ case 553648154:
 return this.global.percentVdwAtom;
 case 553648157:
 return this.global.pickingSpinRate;
-case 553648158:
-return this.global.platformSpeed;
 case 553648166:
 return this.global.ribbonAspectRatio;
 case 536870922:
@@ -4052,7 +4019,7 @@ return this.global.pointGroupDistanceTolerance;
 case 570425384:
 return this.global.pointGroupLinearTolerance;
 case 570425388:
-return this.transformManager.getRotationRadius ();
+return this.tm.getRotationRadius ();
 case 570425392:
 return this.global.sheetSmoothing;
 case 570425394:
@@ -4290,7 +4257,7 @@ case 570425370:
 this.global.multipleBondSpacing = value;
 break;
 case 570425393:
-this.transformManager.setSlabRange (value);
+this.tm.setSlabRange (value);
 break;
 case 570425365:
 this.global.minimizationCriterion = value;
@@ -4363,7 +4330,7 @@ case 570425346:
 this.setAxesScale (value);
 break;
 case 570425416:
-this.transformManager.setVisualRange (value);
+this.tm.setVisualRange (value);
 this.refresh (1, "set visualRange");
 break;
 case 570425372:
@@ -4373,10 +4340,10 @@ case 570425374:
 this.global.navigationSpeed = value;
 break;
 case 570425373:
-this.transformManager.setNavigationSlabOffsetPercent (value);
+this.tm.setNavigationSlabOffsetPercent (value);
 break;
 case 570425350:
-this.transformManager.setCameraDepthPercent (value, false);
+this.tm.setCameraDepthPercent (value, false);
 this.refresh (1, "set cameraDepth");
 return;
 case 570425388:
@@ -4393,7 +4360,7 @@ value = J.viewer.Viewer.checkFloatRange (value, -10, 10);
 this.global.dipoleScale = value;
 break;
 case 570425404:
-this.transformManager.setStereoDegrees (value);
+this.tm.setStereoDegrees (value);
 break;
 case 1649410049:
 this.setVectorScale (value);
@@ -4411,7 +4378,7 @@ case 570425364:
 this.setMinBondDistance (value);
 return;
 case 570425390:
-this.transformManager.setScaleAngstromsPerInch (value);
+this.tm.setScaleAngstromsPerInch (value);
 break;
 case 570425394:
 value = J.viewer.Viewer.checkFloatRange (value, 0, 10);
@@ -4557,16 +4524,16 @@ value = J.viewer.Viewer.checkIntRange (value, 0, 100);
 this.gdata.setAmbientPercent (value);
 break;
 case 553648186:
-this.transformManager.zDepthToPercent (value);
+this.tm.zDepthToPercent (value);
 break;
 case 553648188:
-this.transformManager.zSlabToPercent (value);
+this.tm.zSlabToPercent (value);
 break;
 case 554176526:
-this.transformManager.depthToPercent (value);
+this.tm.depthToPercent (value);
 break;
 case 554176565:
-this.transformManager.slabToPercent (value);
+this.tm.slabToPercent (value);
 break;
 case 553648190:
 this.global.zShadePower = Math.max (value, 1);
@@ -4867,7 +4834,7 @@ case 603979888:
 this.global.navigationPeriodic = value;
 break;
 case 603979984:
-this.transformManager.setZShadeEnabled (value);
+this.tm.setZShadeEnabled (value);
 return;
 case 603979832:
 if (this.haveDisplay) this.global.drawHover = value;
@@ -4902,10 +4869,10 @@ case 536870924:
 this.gdata.setSpecular (value);
 break;
 case 603979942:
-this.transformManager.setSlabEnabled (value);
+this.tm.setSlabEnabled (value);
 return;
 case 603979980:
-this.transformManager.setZoomEnabled (value);
+this.tm.setZoomEnabled (value);
 return;
 case 603979864:
 this.global.highResolutionFlag = value;
@@ -4915,11 +4882,11 @@ this.global.traceAlpha = value;
 break;
 case 603979983:
 this.global.zoomLarge = value;
-this.transformManager.setZoomHeight (this.global.zoomHeight, value);
+this.tm.setZoomHeight (this.global.zoomHeight, value);
 break;
 case 603979982:
 this.global.zoomHeight = value;
-this.transformManager.setZoomHeight (value, this.global.zoomLarge);
+this.tm.setZoomHeight (value, this.global.zoomLarge);
 break;
 case 603979873:
 J.i18n.GT.setDoTranslate (value);
@@ -4952,7 +4919,7 @@ case 603979920:
 this.global.showHiddenSelectionHalos = value;
 break;
 case 603979975:
-this.transformManager.setWindowCentered (value);
+this.tm.setWindowCentered (value);
 break;
 case 603979828:
 this.global.displayCellParameters = value;
@@ -5145,12 +5112,12 @@ return (asPower ? this.global.isosurfacePropertySmoothingPower : this.global.iso
 }, "~B");
 $_M(c$, "setNavigationDepthPercent", 
 function (percent) {
-this.transformManager.setNavigationDepthPercent (percent);
+this.tm.setNavigationDepthPercent (percent);
 this.refresh (1, "set navigationDepth");
 }, "~N");
 $_M(c$, "getShowNavigationPoint", 
 function () {
-if (!this.global.navigationMode || !this.transformManager.canNavigate ()) return false;
+if (!this.global.navigationMode || !this.tm.canNavigate ()) return false;
 return (this.isNavigating () && !this.global.hideNavigationPoint || this.global.showNavigationPointAlways || this.getInMotion (true));
 });
 $_M(c$, "getCurrentSolventProbeRadius", 
@@ -5173,7 +5140,7 @@ return false;
 }, "~N");
 $_V(c$, "setPerspectiveDepth", 
 function (perspectiveDepth) {
-this.transformManager.setPerspectiveDepth (perspectiveDepth);
+this.tm.setPerspectiveDepth (perspectiveDepth);
 }, "~B");
 $_V(c$, "setAxesOrientationRasmol", 
 function (TF) {
@@ -5219,7 +5186,7 @@ return this.global.axesMode;
 });
 $_V(c$, "getPerspectiveDepth", 
 function () {
-return this.transformManager.getPerspectiveDepth ();
+return this.tm.getPerspectiveDepth ();
 });
 $_V(c$, "setSelectionHalos", 
 function (TF) {
@@ -5260,25 +5227,25 @@ return (type == 12 ? this.global.strandCountForStrands : this.global.strandCount
 $_M(c$, "setNavigationMode", 
 function (TF) {
 this.global.navigationMode = TF;
-this.transformManager.setNavigationMode (TF);
+this.tm.setNavigationMode (TF);
 }, "~B");
 $_M(c$, "setTransformManagerDefaults", 
 ($fz = function () {
-this.transformManager.setCameraDepthPercent (this.global.defaultCameraDepth, true);
-this.transformManager.setPerspectiveDepth (this.global.defaultPerspectiveDepth);
-this.transformManager.setStereoDegrees (-5);
-this.transformManager.setVisualRange (this.global.visualRange);
-this.transformManager.setSpinOff ();
-this.transformManager.setVibrationPeriod (0);
-this.transformManager.setFrameOffsets (this.frameOffsets);
+this.tm.setCameraDepthPercent (this.global.defaultCameraDepth, true);
+this.tm.setPerspectiveDepth (this.global.defaultPerspectiveDepth);
+this.tm.setStereoDegrees (-5);
+this.tm.setVisualRange (this.global.visualRange);
+this.tm.setSpinOff ();
+this.tm.setVibrationPeriod (0);
+this.tm.setFrameOffsets (this.frameOffsets);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "getCameraFactors", 
 function () {
-return this.transformManager.getCameraFactors ();
+return this.tm.getCameraFactors ();
 });
 $_M(c$, "getCameraDepth", 
 function () {
-return this.transformManager.getCameraDepth ();
+return this.tm.getCameraDepth ();
 });
 $_M(c$, "getLoadState", 
 function (htParams) {
@@ -5485,10 +5452,10 @@ if ((i = text0.indexOf ("@{")) < 0 && (i = text0.indexOf ("%{")) < 0) return tex
 var text = text0;
 var isEscaped = (text.indexOf ("\\") >= 0);
 if (isEscaped) {
-text = JU.PT.simpleReplace (text, "\\%", "\1");
-text = JU.PT.simpleReplace (text, "\\@", "\2");
+text = JU.PT.rep (text, "\\%", "\1");
+text = JU.PT.rep (text, "\\@", "\2");
 isEscaped = !text.equals (text0);
-}text = JU.PT.simpleReplace (text, "%{", "@{");
+}text = JU.PT.rep (text, "%{", "@{");
 var name;
 while ((i = text.indexOf ("@{")) >= 0) {
 i++;
@@ -5503,8 +5470,8 @@ if (Clazz.instanceOf (v, JU.P3)) v = J.util.Escape.eP (v);
 text = text.substring (0, i0 - 2) + v.toString () + text.substring (i + 1);
 }
 if (isEscaped) {
-text = JU.PT.simpleReplace (text, "\2", "@");
-text = JU.PT.simpleReplace (text, "\1", "%");
+text = JU.PT.rep (text, "\2", "@");
+text = JU.PT.rep (text, "\1", "%");
 }return text;
 }, "~S");
 $_M(c$, "getElementSymbol", 
@@ -5587,12 +5554,12 @@ $_M(c$, "setStereoMode",
 function (twoColors, stereoMode, degrees) {
 this.setFloatProperty ("stereoDegrees", degrees);
 this.setBooleanProperty ("greyscaleRendering", stereoMode.isBiColor ());
-if (twoColors != null) this.transformManager.setStereoMode2 (twoColors);
- else this.transformManager.setStereoMode (stereoMode);
+if (twoColors != null) this.tm.setStereoMode2 (twoColors);
+ else this.tm.setStereoMode (stereoMode);
 }, "~A,J.constant.EnumStereoMode,~N");
 $_M(c$, "isStereoDouble", 
 function () {
-return this.transformManager.stereoMode === J.constant.EnumStereoMode.DOUBLE;
+return this.tm.stereoMode === J.constant.EnumStereoMode.DOUBLE;
 });
 $_V(c$, "getOperatingSystemName", 
 function () {
@@ -5718,13 +5685,13 @@ if (iShape == 22) this.scriptEcho (this.getShapeProperty (22, "command"));
 }}, "~N,~N,~N,~N,~N");
 $_M(c$, "rotateAxisAngleAtCenter", 
 function (eval, rotCenter, rotAxis, degreesPerSecond, endDegrees, isSpin, bsSelected) {
-var isOK = this.transformManager.rotateAxisAngleAtCenter (eval, rotCenter, rotAxis, degreesPerSecond, endDegrees, isSpin, bsSelected);
+var isOK = this.tm.rotateAxisAngleAtCenter (eval, rotCenter, rotAxis, degreesPerSecond, endDegrees, isSpin, bsSelected);
 if (isOK) this.refresh (-1, "rotateAxisAngleAtCenter");
 return isOK;
 }, "J.api.JmolScriptEvaluator,JU.P3,JU.V3,~N,~N,~B,JU.BS");
 $_M(c$, "rotateAboutPointsInternal", 
 function (eval, point1, point2, degreesPerSecond, endDegrees, isSpin, bsSelected, translation, finalPoints, dihedralList) {
-var isOK = this.transformManager.rotateAboutPointsInternal (eval, point1, point2, degreesPerSecond, endDegrees, false, isSpin, bsSelected, false, translation, finalPoints, dihedralList);
+var isOK = this.tm.rotateAboutPointsInternal (eval, point1, point2, degreesPerSecond, endDegrees, false, isSpin, bsSelected, false, translation, finalPoints, dihedralList);
 if (isOK) this.refresh (-1, "rotateAxisAboutPointsInternal");
 return isOK;
 }, "J.api.JmolScriptEvaluator,JU.P3,JU.P3,~N,~N,~B,JU.BS,JU.V3,JU.List,~A");
@@ -5734,7 +5701,7 @@ if (this.getSpinOn () || this.getNavOn ()) {
 this.setSpinOn (false);
 this.setNavOn (false);
 return;
-}this.transformManager.rotateAboutPointsInternal (null, pt1, pt2, this.global.pickingSpinRate, 3.4028235E38, isClockwise, true, null, false, null, null, null);
+}this.tm.rotateAboutPointsInternal (null, pt1, pt2, this.global.pickingSpinRate, 3.4028235E38, isClockwise, true, null, false, null, null, null);
 }, "JU.P3,JU.P3,~B");
 $_M(c$, "getModelDipole", 
 function () {
@@ -5775,7 +5742,7 @@ if (type.toLowerCase ().indexOf ("property_") == 0) exp = "{selected}.label(\"%{
  else if (type.equalsIgnoreCase ("XYZRN")) exp = "\"\" + {selected}.size + \"\n\n\"+{selected}.label(\"%-2e %8.3x %8.3y %8.3z %4.2[vdw] 1 [%n]%r.%a#%i\").lines";
  else if (type.startsWith ("USER:")) exp = "{selected}.label(\"" + type.substring (5) + "\").lines";
  else exp = "\"\" + {selected}.size + \"\n\n\"+{selected}.label(\"%-2e %10.5x %10.5y %10.5z\").lines";
-if (!atomExpression.equals ("selected")) exp = JU.PT.simpleReplace (exp, "selected", atomExpression);
+if (!atomExpression.equals ("selected")) exp = JU.PT.rep (exp, "selected", atomExpression);
 return this.evaluateExpression (exp);
 }, "~S,~S");
 $_M(c$, "getModelCml", 
@@ -5788,7 +5755,7 @@ return this.modelSet.getHelixData (bs, tokType);
 }, "JU.BS,~N");
 $_M(c$, "getPdbAtomData", 
 function (bs, sb) {
-return this.modelSet.getPdbAtomData (bs == null ? this.getSelectionSet (true) : bs, sb);
+return this.modelSet.getPdbAtomData (bs == null ? this.getSelectedAtoms () : bs, sb);
 }, "JU.BS,JU.OC");
 $_M(c$, "isJmolDataFrameForModel", 
 function (modelIndex) {
@@ -5868,7 +5835,7 @@ this.statusManager.setStatusAtomMoved (bs);
 }, "JU.BS,~N,~O");
 $_M(c$, "setAtomCoordsRelative", 
 function (offset, bs) {
-if (bs == null) bs = this.getSelectionSet (false);
+if (bs == null) bs = this.getSelectedAtoms ();
 if (bs.cardinality () == 0) return;
 this.modelSet.setAtomCoordsRelative (offset, bs);
 this.checkMinimization ();
@@ -5888,7 +5855,7 @@ this.statusManager.setStatusAtomMoved (bs);
 }, "JU.P4,JU.BS");
 $_M(c$, "invertSelected", 
 function (pt, plane, iAtom, invAtoms) {
-var bs = this.getSelectionSet (false);
+var bs = this.getSelectedAtoms ();
 if (bs.cardinality () == 0) return;
 this.modelSet.invertSelected (pt, plane, iAtom, invAtoms, bs);
 this.checkMinimization ();
@@ -5926,7 +5893,7 @@ bsSelected = this.setMovableBitSet (bsSelected, !asAtoms);
 if (bsSelected.cardinality () != 0) {
 if (isTranslation) {
 var ptCenter = this.getAtomSetCenter (bsSelected);
-this.transformManager.finalizeTransformParameters ();
+this.tm.finalizeTransformParameters ();
 var f = (this.global.antialiasDisplay ? 2 : 1);
 var ptScreen = this.transformPt (ptCenter);
 var ptScreenNew;
@@ -5937,7 +5904,7 @@ this.unTransformPoint (ptScreenNew, ptNew);
 ptNew.sub (ptCenter);
 this.setAtomCoordsRelative (ptNew, bsSelected);
 } else {
-this.transformManager.rotateXYBy (deltaX, deltaY, bsSelected);
+this.tm.rotateXYBy (deltaX, deltaY, bsSelected);
 }}}this.refresh (2, "");
 this.movingSelected = false;
 }, "~N,~N,~N,~N,~N,JU.BS,~B,~B");
@@ -5985,7 +5952,7 @@ atom1 = b.getAtom1 ();
 atom2 = b.getAtom2 ();
 this.undoMoveActionClear (atom1.index, 2, true);
 var pt = JU.P3.new3 (x, y, Clazz.doubleToInt ((atom1.sZ + atom2.sZ) / 2));
-this.transformManager.unTransformPoint (pt, pt);
+this.tm.unTransformPoint (pt, pt);
 if (atom2.getCovalentBondCount () == 1 || pt.distance (atom1) < pt.distance (atom2) && atom1.getCovalentBondCount () != 1) {
 var a = atom1;
 atom1 = atom2;
@@ -6021,7 +5988,7 @@ if (andStopMinimization) this.stopMinimization ();
 $_M(c$, "functionXY", 
 function (functionName, nX, nY) {
 var data = null;
-if (functionName.indexOf ("file:") == 0) data = this.getFileAsString (functionName.substring (5));
+if (functionName.indexOf ("file:") == 0) data = this.getFileAsString (functionName.substring (5), false);
  else if (functionName.indexOf ("data2d_") != 0) return this.statusManager.functionXY (functionName, nX, nY);
 nX = Math.abs (nX);
 nY = Math.abs (nY);
@@ -6041,7 +6008,7 @@ return fdata;
 $_M(c$, "functionXYZ", 
 function (functionName, nX, nY, nZ) {
 var data = null;
-if (functionName.indexOf ("file:") == 0) data = this.getFileAsString (functionName.substring (5));
+if (functionName.indexOf ("file:") == 0) data = this.getFileAsString (functionName.substring (5), false);
  else if (functionName.indexOf ("data3d_") != 0) return this.statusManager.functionXYZ (functionName, nX, nY, nZ);
 nX = Math.abs (nX);
 nY = Math.abs (nY);
@@ -6081,12 +6048,12 @@ this.syncScript ("true", "*", 0);
 this.syncScript ("JSpecView:", ".", 0);
 }return null;
 }var url = this.global.nmrPredictFormat + molFile;
-return this.getFileAsString (url);
+return this.getFileAsString (url, false);
 }, "~B");
 $_M(c$, "getHelp", 
 function (what) {
 if (this.global.helpPath.indexOf ("?") < 0) {
-if (what.length > 0 && what.indexOf ("?") != 0) what = "?search=" + JU.PT.simpleReplace (what, " ", "%20");
+if (what.length > 0 && what.indexOf ("?") != 0) what = "?search=" + JU.PT.rep (what, " ", "%20");
 what += (what.length == 0 ? "?ver=" : "&ver=") + J.viewer.JC.version;
 } else {
 what = "&" + what;
@@ -6099,7 +6066,7 @@ this.showUrl (this.setLoadFormat ("_" + smiles, '2', false));
 $_M(c$, "getChemicalInfo", 
 function (smiles, type, info) {
 var s = this.setLoadFormat ("_" + smiles, type, false);
-if (type == '/') s += JU.PT.simpleReplace (info, " ", "%20");
+if (type == '/') s += JU.PT.rep (info, " ", "%20");
 return this.getFileAsString4 (s, -1, false, false, false);
 }, "~S,~S,~S");
 $_M(c$, "addCommand", 
@@ -6178,7 +6145,7 @@ this.statusManager.syncingScripts = TF;
 break;
 case 2:
 this.statusManager.syncSend (TF ? "GET_GRAPHICS" : "SET_GRAPHICS_OFF", "*", 0);
-if (Float.isNaN (this.transformManager.stereoDegrees)) this.setFloatProperty ("stereoDegrees", -5);
+if (Float.isNaN (this.tm.stereoDegrees)) this.setFloatProperty ("stereoDegrees", -5);
 if (TF) {
 this.setBooleanProperty ("_syncMouse", false);
 this.setBooleanProperty ("_syncScript", false);
@@ -6190,7 +6157,7 @@ $_V(c$, "syncScript",
 function (script, applet, port) {
 this.getStateCreator ().syncScript (script, applet, port);
 }, "~S,~S,~N");
-$_M(c$, "getModelIndexFromId", 
+$_V(c$, "getModelIndexFromId", 
 function (id) {
 return this.modelSet.getModelIndexFromId (id);
 }, "~S");
@@ -6204,7 +6171,7 @@ return this.modelSet.getPartialCharges ();
 });
 $_M(c$, "setProteinType", 
 function (type, bs) {
-this.modelSet.setProteinType (bs == null ? this.getSelectionSet (false) : bs, type);
+this.modelSet.setProteinType (bs == null ? this.getSelectedAtoms () : bs, type);
 }, "J.constant.EnumStructure,JU.BS");
 $_V(c$, "getBondPoint3f1", 
 function (i) {
@@ -6335,7 +6302,7 @@ return this.global.quaternionFrame.charAt (this.global.quaternionFrame.length ==
 });
 $_M(c$, "calculatePointGroup", 
 function () {
-return this.modelSet.calculatePointGroup (this.getSelectionSet (false));
+return this.modelSet.calculatePointGroup (this.getSelectedAtoms ());
 });
 $_M(c$, "getPointGroupInfo", 
 function (atomExpression) {
@@ -6343,7 +6310,7 @@ return this.modelSet.getPointGroupInfo (this.getAtomBitSet (atomExpression));
 }, "~O");
 $_M(c$, "getPointGroupAsString", 
 function (asDraw, type, index, scale) {
-return this.modelSet.getPointGroupAsString (this.getSelectionSet (false), asDraw, type, index, scale);
+return this.modelSet.getPointGroupAsString (this.getSelectedAtoms (), asDraw, type, index, scale);
 }, "~B,~S,~N,~N");
 $_M(c$, "loadImage", 
 function (pathName, echoName) {
@@ -6484,21 +6451,17 @@ $_M(c$, "unBindAction",
 function (desc, name) {
 if (this.haveDisplay) this.actionManager.unbindAction (desc, name);
 }, "~S,~S");
-$_M(c$, "getMouseInfo", 
-function () {
-return (this.haveDisplay ? this.actionManager.getMouseInfo () : null);
-});
 $_M(c$, "getFrontPlane", 
 function () {
-return this.transformManager.getFrontPlane ();
+return this.tm.getFrontPlane ();
 });
 $_M(c$, "getPlaneIntersection", 
 function (type, plane, scale, flags) {
-return this.modelSet.getPlaneIntersection (type, plane, scale, flags, this.animationManager.currentModelIndex);
+return this.modelSet.getPlaneIntersection (type, plane, scale, flags, type == 1614417948 ? this.getCurrentUnitCell () : null);
 }, "~N,JU.P4,~N,~N");
 $_M(c$, "calculateStruts", 
 function (bs1, bs2) {
-return this.modelSet.calculateStruts (bs1 == null ? this.getSelectionSet (false) : bs1, bs2 == null ? this.getSelectionSet (false) : bs2);
+return this.modelSet.calculateStruts (bs1 == null ? this.getSelectedAtoms () : bs1, bs2 == null ? this.getSelectedAtoms () : bs2);
 }, "JU.BS,JU.BS");
 $_M(c$, "getPreserveState", 
 function () {
@@ -6586,7 +6549,7 @@ return this.selectionManager.getMotionFixedAtoms ();
 });
 $_M(c$, "rotateArcBall", 
 function (x, y, factor) {
-this.transformManager.rotateArcBall (x, y, factor);
+this.tm.rotateArcBall (x, y, factor);
 this.refresh (2, this.statusManager.syncingMouse ? "Mouse: rotateArcBall " + x + " " + y + " " + factor : "");
 }, "~N,~N,~N");
 $_M(c$, "getAtomicPropertyState", 
@@ -6603,7 +6566,7 @@ return this.getOutputManager ().writeFileData (fileName, type, modelIndex, param
 }, "~S,~S,~N,~A");
 $_M(c$, "getPdbData", 
 function (modelIndex, type, parameters) {
-return this.modelSet.getPdbData (modelIndex, type, this.getSelectionSet (false), parameters, null);
+return this.modelSet.getPdbData (modelIndex, type, this.getSelectedAtoms (), parameters, null);
 }, "~N,~S,~A");
 $_M(c$, "getGroupsWithin", 
 function (nResidues, bs) {
@@ -6632,13 +6595,9 @@ throw e$$;
 if (this.executor == null) J.util.Logger.error ("parallel processing is not available");
 return this.executor;
 });
-$_M(c$, "getShapeInfo", 
-function () {
-return this.shapeManager.getShapeInfo ();
-});
 $_M(c$, "togglePickingLabel", 
 function (bs) {
-if (bs == null) bs = this.getSelectionSet (false);
+if (bs == null) bs = this.getSelectedAtoms ();
 this.loadShape (5);
 this.shapeManager.setShapePropertyBs (5, "toggleLabel", null, bs);
 }, "JU.BS");
@@ -6648,7 +6607,7 @@ this.shapeManager.loadShape (shapeID);
 }, "~N");
 $_M(c$, "setShapeSize", 
 function (shapeID, mad, bsSelected) {
-if (bsSelected == null) bsSelected = this.getSelectionSet (false);
+if (bsSelected == null) bsSelected = this.getSelectedAtoms ();
 this.shapeManager.setShapeSizeBs (shapeID, mad, null, bsSelected);
 }, "~N,~N,JU.BS");
 $_M(c$, "setShapeSizeRD", 
@@ -6766,9 +6725,9 @@ function (atomIndex, pt, type) {
 if (type.equals ("X")) this.setRotateBondIndex (-1);
 if (this.modelSet.atoms[atomIndex].modelIndex != this.modelSet.modelCount - 1) return;
 this.clearModelDependentObjects ();
+var atomCount = this.modelSet.getAtomCount ();
 if (pt == null) {
 this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, 1);
-var atomCount = this.modelSet.getAtomCount ();
 this.modelSet.assignAtom (atomIndex, type, true);
 if (!JU.PT.isOneOf (type, ";Mi;Pl;X;")) this.modelSet.setAtomNamesAndNumbers (atomIndex, -atomCount, null);
 this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, -1);
@@ -6791,7 +6750,7 @@ if (Clazz.exceptionOf (e, Exception)) {
 throw e;
 }
 }
-this.modelSet.setAtomNamesAndNumbers (atomIndex, -1, null);
+this.modelSet.setAtomNamesAndNumbers (atomIndex, -atomCount, null);
 this.statusManager.modifySend (atomIndex, modelIndex, -3);
 }, "~N,JU.P3,~S");
 $_M(c$, "assignConnect", 
@@ -6844,12 +6803,16 @@ $_M(c$, "getModelKitStateBitSet",
 function (bs, bsDeleted) {
 return this.modelSet.getModelKitStateBitset (bs, bsDeleted);
 }, "JU.BS,JU.BS");
-$_M(c$, "getSmiles", 
-function (index1, index2, bsSelected, isBioSmiles, allowUnmatchedRings, addCrossLinks, addComment) {
+$_V(c$, "getSmiles", 
+function (bs) {
+return this.getSmilesOpt (bs, -1, -1, false, false, false, false, false);
+}, "JU.BS");
+$_M(c$, "getSmilesOpt", 
+function (bsSelected, index1, index2, explicitH, isBioSmiles, bioAllowUnmatchedRings, bioAddCrossLinks, bioAddComment) {
 var atoms = this.modelSet.atoms;
 if (bsSelected == null) {
 if (index1 < 0 || index2 < 0) {
-bsSelected = this.getSelectionSet (true);
+bsSelected = this.getSelectedAtoms ();
 } else {
 if (isBioSmiles) {
 if (index1 > index2) {
@@ -6860,9 +6823,9 @@ index2 = i;
 index2 = atoms[index2].getGroup ().lastAtomIndex;
 }bsSelected =  new JU.BS ();
 bsSelected.setBits (index1, index2 + 1);
-}}var comment = (addComment ? J.viewer.Viewer.getJmolVersion () + " " + this.getModelName (this.getCurrentModelIndex ()) : null);
-return this.getSmilesMatcher ().getSmiles (atoms, this.getAtomCount (), bsSelected, isBioSmiles, allowUnmatchedRings, addCrossLinks, comment);
-}, "~N,~N,JU.BS,~B,~B,~B,~B");
+}}var bioComment = (bioAddComment ? J.viewer.Viewer.getJmolVersion () + " " + this.getModelName (this.getCurrentModelIndex ()) : null);
+return this.getSmilesMatcher ().getSmiles (atoms, this.getAtomCount (), bsSelected, isBioSmiles, bioAllowUnmatchedRings, bioAddCrossLinks, bioComment, explicitH);
+}, "JU.BS,~N,~N,~B,~B,~B,~B,~B");
 $_M(c$, "connect", 
 function (connections) {
 this.modelSet.connect (connections);
@@ -6943,7 +6906,7 @@ return this.refreshing && !this.creatingImage;
 });
 $_M(c$, "setZslabPoint", 
 function (pt) {
-this.transformManager.setZslabPoint (pt);
+this.tm.setZslabPoint (pt);
 }, "JU.P3");
 $_V(c$, "calcAtomsMinMax", 
 function (bs, boxInfo) {
@@ -7212,19 +7175,17 @@ return this.eval.evaluateExpression (stringOrTokens, true);
 }, "~O");
 $_M(c$, "getAtomBitSet", 
 function (atomExpression) {
-if (Clazz.instanceOf (atomExpression, JU.BS)) return atomExpression;
+if (Clazz.instanceOf (atomExpression, JU.BS)) return this.excludeAtoms (atomExpression, false);
 this.getScriptManager ();
 return this.getAtomBitSetEval (this.eval, atomExpression);
 }, "~O");
 $_M(c$, "getAtomBitSetVector", 
 function (atomExpression) {
-if (this.getScriptManager () == null) return null;
-return this.eval.getAtomBitSetVector (this.getAtomCount (), atomExpression);
+return (this.getScriptManager () == null ? null : this.eval.getAtomBitSetVector (this.getAtomCount (), atomExpression));
 }, "~O");
 $_M(c$, "getContextVariables", 
 function () {
-if (this.getScriptManager () == null) return null;
-return this.eval.getContextVariables ();
+return (this.getScriptManager () == null ? null : this.eval.getContextVariables ());
 });
 $_M(c$, "getScriptContext", 
 function (why) {
@@ -7249,12 +7210,12 @@ this.animationManager.setFrame (i - 1);
 }, "~N");
 $_M(c$, "movePyMOL", 
 function (eval, floatSecondsTotal, pymolView) {
-this.transformManager.moveToPyMOL (eval, floatSecondsTotal, pymolView);
+this.tm.moveToPyMOL (eval, floatSecondsTotal, pymolView);
 return true;
 }, "J.api.JmolScriptEvaluator,~N,~A");
 $_M(c$, "getCamera", 
 function () {
-return this.transformManager.camera;
+return this.tm.camera;
 });
 $_M(c$, "setModelSet", 
 function (modelSet) {
@@ -7328,7 +7289,7 @@ return (pt < 0 ? this.getMeasureDistanceUnits () : s.substring (pt + 2));
 }, "~S");
 $_M(c$, "calculateFormalCharges", 
 function (bs) {
-if (bs == null) bs = this.getSelectionSet (false);
+if (bs == null) bs = this.getSelectedAtoms ();
 return this.modelSet.fixFormalCharges (bs);
 }, "JU.BS");
 $_M(c$, "cachePngFiles", 
@@ -7358,7 +7319,7 @@ break;
 }, "~N");
 $_M(c$, "checkMotionRendering", 
 function (tok) {
-if (!this.getInMotion (true) && !this.transformManager.spinOn && !this.transformManager.vibrationOn && !this.animationManager.animationOn) return true;
+if (!this.getInMotion (true) && !this.tm.spinOn && !this.tm.vibrationOn && !this.animationManager.animationOn) return true;
 if (this.global.wireframeRotation) return false;
 var n = 0;
 switch (tok) {
@@ -7421,8 +7382,16 @@ return this.modelSet.getModulationList (bs, type, t456);
 }, "JU.BS,~S,JU.P3");
 $_M(c$, "getVibrationPoint", 
 function (vibration, pt) {
-return this.transformManager.getVibrationPoint (vibration, pt);
+return this.tm.getVibrationPoint (vibration, pt);
 }, "J.util.Vibration,J.util.Point3fi");
+$_M(c$, "setCurrentAtom", 
+function (iAtom) {
+this.animationManager.currentAtomIndex = iAtom;
+}, "~N");
+$_M(c$, "getCurrentAtom", 
+function () {
+return this.animationManager.currentAtomIndex;
+});
 Clazz.pu$h ();
 c$ = Clazz.declareType (J.viewer.Viewer, "ACCESS", Enum);
 Clazz.defineEnumConstant (c$, "NONE", 0, []);
@@ -7430,6 +7399,9 @@ Clazz.defineEnumConstant (c$, "READSPT", 1, []);
 Clazz.defineEnumConstant (c$, "ALL", 2, []);
 c$ = Clazz.p0p ();
 Clazz.defineStatics (c$,
+"appletDocumentBase", "",
+"appletCodeBase", "",
+"appletIdiomaBase", null,
 "jsDocumentBase", "");
 c$.strJavaVendor = c$.prototype.strJavaVendor = System.getProperty ("java.vendor", "j2s");
 c$.strOSName = c$.prototype.strOSName = System.getProperty ("os.name", "j2s");

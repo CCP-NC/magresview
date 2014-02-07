@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapespecial");
-Clazz.load (["java.lang.Enum", "J.shape.MeshCollection", "JU.P3i", "$.V3"], "J.shapespecial.Draw", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.List", "$.P3", "$.SB", "J.shapespecial.DrawMesh", "J.util.BSUtil", "$.C", "$.Escape", "$.Logger", "$.Measure", "$.MeshSurface", "$.Txt"], function () {
+Clazz.load (["java.lang.Enum", "J.shape.MeshCollection", "JU.P3i", "$.V3"], "J.shapespecial.Draw", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.List", "$.P3", "$.PT", "$.SB", "J.shapespecial.DrawMesh", "J.util.BSUtil", "$.C", "$.Escape", "$.Logger", "$.Measure", "$.MeshSurface", "$.Txt"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.dmeshes = null;
 this.thisMesh = null;
@@ -894,7 +894,7 @@ if (dmesh.drawType === J.shapespecial.Draw.EnumDrawType.NONE && dmesh.lineData =
 var str =  new JU.SB ();
 var modelCount = this.viewer.getModelCount ();
 if (!dmesh.isFixed && iModel >= 0 && modelCount > 1) J.shape.Shape.appendCmd (str, "frame " + this.viewer.getModelNumberDotted (iModel));
-str.append ("  draw ID ").append (J.util.Escape.eS (dmesh.thisID));
+str.append ("  draw ID ").append (JU.PT.esc (dmesh.thisID));
 if (dmesh.isFixed) str.append (" fixed");
 if (iModel < 0) iModel = 0;
 if (dmesh.noHead) str.append (" noHead");
@@ -976,13 +976,13 @@ if (s.indexOf ("NaN") >= 0) return "";
 str.append (s);
 }}if (dmesh.mat4 != null) {
 var v =  new JU.V3 ();
-dmesh.mat4.get (v);
+dmesh.mat4.getTranslation (v);
 str.append (" offset ").append (J.util.Escape.eP (v));
 }if (dmesh.title != null) {
 var s = "";
 for (var i = 0; i < dmesh.title.length; i++) s += "|" + dmesh.title[i];
 
-str.append (J.util.Escape.eS (s.substring (1)));
+str.append (JU.PT.esc (s.substring (1)));
 }str.append (";\n");
 J.shape.Shape.appendCmd (str, dmesh.getState ("draw"));
 J.shape.Shape.appendCmd (str, J.shape.Shape.getColorCommandUnk ("draw", dmesh.colix, this.translucentAllowed));
@@ -1075,7 +1075,7 @@ for (var i = 0; i < this.meshCount; i++) {
 var mesh = this.dmeshes[i];
 if (mesh.vertexCount == 0 && mesh.lineData == null) continue;
 s.append (this.getCommand2 (mesh, mesh.modelIndex));
-if (!mesh.visible) s.append (" " + this.myType + " ID " + J.util.Escape.eS (mesh.thisID) + " off;\n");
+if (!mesh.visible) s.append (" " + this.myType + " ID " + JU.PT.esc (mesh.thisID) + " off;\n");
 }
 return s.toString ();
 });

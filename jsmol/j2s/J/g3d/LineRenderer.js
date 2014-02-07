@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.g3d");
-Clazz.load (["java.util.Hashtable"], "J.g3d.LineRenderer", ["java.lang.Float", "J.util.BSUtil", "$.Logger", "$.Shader"], function () {
+Clazz.load (["java.util.Hashtable"], "J.g3d.LineRenderer", ["java.lang.Float", "JU.BS", "J.util.Logger", "$.Shader"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.g3d = null;
 this.shader = null;
@@ -35,7 +35,7 @@ this.slope = (dx != 0 ? dy / dx : dy >= 0 ? 3.4028235E38 : -3.4028235E38);
 this.lineTypeX = (this.slope <= 1 && this.slope >= -1);
 this.nBits = (this.lineTypeX ? this.g3d.getRenderWidth () : this.g3d.getRenderHeight ());
 if (this.getCachedLine ()) return;
-this.lineBits = J.util.BSUtil.newBitSet (this.nBits);
+this.lineBits = JU.BS.newN (this.nBits);
 dy = Math.abs (dy);
 dx = Math.abs (dx);
 if (dy > dx) {

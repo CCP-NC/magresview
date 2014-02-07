@@ -33,7 +33,7 @@ $_M(c$, "processAtoms",
 function () {
 var atomCount = this.parseIntAt (this.line, 6);
 for (var i = 0; i < atomCount; ++i) {
-if (this.atomSetCollection.getAtomCount () != i) throw  new Exception ("GhemicalMMReader error #1");
+if (this.atomSetCollection.atomCount != i) throw  new Exception ("GhemicalMMReader error #1");
 this.readLine ();
 var atomIndex = this.parseIntStr (this.line);
 if (atomIndex != i) throw  new Exception ("bad atom index in !Atomsexpected: " + i + " saw:" + atomIndex);
@@ -70,19 +70,15 @@ this.atomSetCollection.addNewBondWithOrder (atomIndex1, atomIndex2, order);
 });
 $_M(c$, "processCoord", 
 function () {
-var atoms = this.atomSetCollection.getAtoms ();
-var atomCount = this.atomSetCollection.getAtomCount ();
-for (var i = 0; i < atomCount; ++i) {
-this.readLine ();
-var atomIndex = this.parseIntStr (this.line);
-if (atomIndex != i) throw  new Exception ("bad atom index in !Coordexpected: " + i + " saw:" + atomIndex);
-this.setAtomCoordXYZ (atoms[i], this.parseFloat () * 10, this.parseFloat () * 10, this.parseFloat () * 10);
-}
+var atoms = this.atomSetCollection.atoms;
+var atomCount = this.atomSetCollection.atomCount;
+for (var i = 0; i < atomCount; ++i) this.setAtomCoordScaled (atoms[i], J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.readLine ()), 1, 10);
+
 });
 $_M(c$, "processCharges", 
 function () {
-var atoms = this.atomSetCollection.getAtoms ();
-var atomCount = this.atomSetCollection.getAtomCount ();
+var atoms = this.atomSetCollection.atoms;
+var atomCount = this.atomSetCollection.atomCount;
 for (var i = 0; i < atomCount; ++i) {
 this.readLine ();
 var atomIndex = this.parseIntStr (this.line);

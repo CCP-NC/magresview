@@ -49,7 +49,7 @@ J.awtjs2d.Display.getFullScreenDimensions (canvas, widthHeight);
 }, "~O,~A");
 $_V(c$, "getMenuPopup", 
 function (menuStructure, type) {
-var c = (type == 'j' ? "awtjs2d.JSmolPopup" : "awtjs2d.JSModelKitPopup");
+var c = (type == 'j' ? "awtjs2d.JmolJSPopup" : "awtjs2d.JSModelKitPopup");
 var jmolpopup = J.api.Interface.getOptionInterface (c);
 try {
 if (jmolpopup != null) jmolpopup.jpiInitialize (this.viewer, menuStructure);

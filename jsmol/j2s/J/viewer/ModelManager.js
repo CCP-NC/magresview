@@ -56,6 +56,6 @@ return fileName;
 }, $fz.isPrivate = true, $fz), "~S");
 $_M(c$, "createAtomDataSet", 
 function (atomSetCollection, tokType) {
-J.modelset.ModelLoader.createAtomDataSet (this.viewer, this.modelSet, tokType, atomSetCollection, this.viewer.getSelectionSet (false));
+J.modelset.ModelLoader.createAtomDataSet (this.viewer, this.modelSet, tokType, atomSetCollection, this.viewer.getSelectedAtoms ());
 }, "~O,~N");
 });

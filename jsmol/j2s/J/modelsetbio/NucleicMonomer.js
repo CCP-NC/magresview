@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.modelsetbio");
-Clazz.load (["J.modelsetbio.PhosphorusMonomer", "J.viewer.JC"], "J.modelsetbio.NucleicMonomer", ["JU.P3", "$.V3", "J.constant.EnumStructure", "J.util.Quaternion"], function () {
+Clazz.load (["J.modelsetbio.PhosphorusMonomer"], "J.modelsetbio.NucleicMonomer", ["JU.P3", "$.V3", "J.constant.EnumStructure", "J.shapebio.BioShape", "J.util.Quaternion"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.hasRnaO2Prime = false;
 this.baseCenter = null;
@@ -143,11 +143,11 @@ var atom;
 if (this.isAtomHidden (this.leadAtomIndex)) return;
 for (var i = 6; --i >= 0; ) {
 atom = this.getAtomFromOffsetIndex (J.modelsetbio.NucleicMonomer.ring6OffsetIndexes[i]);
-atom.setClickable (J.modelsetbio.NucleicMonomer.CARTOON_VISIBILITY_FLAG);
+atom.setClickable (J.shapebio.BioShape.CARTOON_VISIBILITY_FLAG);
 }
 if (this.$isPurine) for (var i = 4; --i >= 1; ) {
 atom = this.getAtomFromOffsetIndex (J.modelsetbio.NucleicMonomer.ring5OffsetIndexes[i]);
-atom.setClickable (J.modelsetbio.NucleicMonomer.CARTOON_VISIBILITY_FLAG);
+atom.setClickable (J.shapebio.BioShape.CARTOON_VISIBILITY_FLAG);
 }
 });
 $_M(c$, "getN0", 
@@ -337,5 +337,4 @@ Clazz.defineStatics (c$,
 "ring6OffsetIndexes", [3, 1, 4, 5, 6, 7],
 "ring5OffsetIndexes", [3, 9, 10, 11, 7],
 "heavyAtomIndexes", [3, 1, 4, 5, 6, 7, 11, 10, 9, 16, 14, 8, 12, 17, 13]);
-c$.CARTOON_VISIBILITY_FLAG = c$.prototype.CARTOON_VISIBILITY_FLAG = J.viewer.JC.getShapeVisibilityFlag (11);
 });

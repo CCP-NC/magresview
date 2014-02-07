@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.i18n");
-Clazz.load (null, "J.i18n.Resource", ["java.util.Hashtable", "JU.PT", "J.i18n.GT", "J.util.Logger"], function () {
+Clazz.load (null, "J.i18n.Resource", ["java.util.Hashtable", "JU.PT", "J.i18n.GT", "J.util.Logger", "J.viewer.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.resource = null;
 this.resourceMap = null;
@@ -14,9 +14,9 @@ c$.getResource = $_M(c$, "getResource",
 function (className, name) {
 var poData = null;
 if (J.i18n.GT.viewer.isApplet ()) {
-var fname = J.i18n.GT.viewer.appletIdiomaBase + "/" + name + ".po";
+var fname = J.viewer.Viewer.appletIdiomaBase + "/" + name + ".po";
 J.util.Logger.info ("Loading language resource " + fname);
-poData = J.i18n.GT.viewer.getFileAsString (fname);
+poData = J.i18n.GT.viewer.getFileAsString (fname, false);
 return J.i18n.Resource.getResourceFromPO (poData);
 }var bundleClass = null;
 className += name + ".Messages_" + name;
@@ -99,6 +99,6 @@ return (map.size () == 0 ? null :  new J.i18n.Resource (map, null));
 }, "~S");
 c$.fix = $_M(c$, "fix", 
 function (line) {
-return JU.PT.simpleReplace (line.substring (line.indexOf ("\"") + 1, line.lastIndexOf ("\"")), "\\n", "\n");
+return JU.PT.rep (line.substring (line.indexOf ("\"") + 1, line.lastIndexOf ("\"")), "\\n", "\n");
 }, "~S");
 });

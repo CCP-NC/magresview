@@ -40,7 +40,7 @@ var maps = dots.ec.getDotsConvexMaps ();
 for (var i = dots.ec.getDotsConvexMax (); --i >= 0; ) {
 var atom = this.modelSet.atoms[i];
 var map = maps[i];
-if (map == null || !atom.isVisible (this.myVisibilityFlag) || !this.g3d.isInDisplayRange (atom.sX, atom.sY)) continue;
+if (map == null || !this.isVisibleForMe (atom) || !this.g3d.isInDisplayRange (atom.sX, atom.sY)) continue;
 try {
 var nPoints = this.calcScreenPoints (map, dots.ec.getAppropriateRadius (i) + this.testRadiusAdjust, atom.sX, atom.sY, atom.sZ);
 if (nPoints != 0) this.renderConvex (J.util.C.getColixInherited (dots.colixes[i], atom.getColix ()), map, nPoints);

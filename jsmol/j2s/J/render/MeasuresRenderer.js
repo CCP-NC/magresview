@@ -164,7 +164,7 @@ for (var i = dotCount; --i >= 0; ) {
 this.aaT.angle = i * stepAngle;
 this.matrixT.setAA (this.aaT);
 this.pointT.setT (this.m.renderArc);
-this.matrixT.transform (this.pointT);
+this.matrixT.rotate (this.pointT);
 this.pointT.add (b);
 var p3i = this.viewer.transformPt (this.pointT);
 var zArc = p3i.z - zOffset;
@@ -173,7 +173,7 @@ this.g3d.drawPixel (p3i.x, p3i.y, zArc);
 if (i != iMid) continue;
 this.pointT.setT (this.m.renderArc);
 this.pointT.scale (1.1);
-this.matrixT.transform (this.pointT);
+this.matrixT.rotate (this.pointT);
 this.pointT.add (b);
 this.viewer.transformPt (this.pointT);
 var zLabel = p3i.z - zOffset;

@@ -37,11 +37,8 @@ $_M(c$, "readAtoms",
 ($fz = function () {
 var f = (this.isAngstroms ? 1 : 0.5291772);
 for (var i = 0; i < this.atomCount; ++i) {
-this.readLine ();
-var atom = this.atomSetCollection.addNewAtom ();
-atom.elementNumber = this.parseIntStr (this.line);
-this.parseFloat ();
-this.setAtomCoordXYZ (atom, this.parseFloat () * f, this.parseFloat () * f, this.parseFloat () * f);
+var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.readLine ());
+this.setAtomCoordScaled (null, tokens, 2, f).elementNumber = this.parseIntStr (tokens[0]);
 }
 }, $fz.isPrivate = true, $fz));
 });

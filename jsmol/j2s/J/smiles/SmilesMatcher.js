@@ -23,11 +23,11 @@ throw e;
 }
 }, "~S,~B");
 $_V(c$, "getSmiles", 
-function (atoms, atomCount, bsSelected, asBioSmiles, allowUnmatchedRings, addCrossLinks, comment) {
+function (atoms, atomCount, bsSelected, asBioSmiles, bioAllowUnmatchedRings, bioAddCrossLinks, bioComment, explicitH) {
 J.smiles.InvalidSmilesException.setLastError (null);
 try {
-if (asBioSmiles) return ( new J.smiles.SmilesGenerator ()).getBioSmiles (atoms, atomCount, bsSelected, allowUnmatchedRings, addCrossLinks, comment);
-return ( new J.smiles.SmilesGenerator ()).getSmiles (atoms, atomCount, bsSelected);
+if (asBioSmiles) return ( new J.smiles.SmilesGenerator ()).getBioSmiles (atoms, atomCount, bsSelected, bioAllowUnmatchedRings, bioAddCrossLinks, bioComment);
+return ( new J.smiles.SmilesGenerator ()).getSmiles (atoms, atomCount, bsSelected, explicitH);
 } catch (e) {
 if (Clazz.exceptionOf (e, J.smiles.InvalidSmilesException)) {
 if (J.smiles.InvalidSmilesException.getLastError () == null) J.smiles.InvalidSmilesException.setLastError (e.toString ());
@@ -36,7 +36,7 @@ return null;
 throw e;
 }
 }
-}, "~A,~N,JU.BS,~B,~B,~B,~S");
+}, "~A,~N,JU.BS,~B,~B,~B,~S,~B");
 $_M(c$, "areEqual", 
 function (smiles1, smiles2) {
 var result = this.find (smiles1, smiles2, false, false);
@@ -87,12 +87,12 @@ if (check) return (n1 == n2 ? "diastereomers" : "ambiguous stereochemistry!");
 }, "~S,~S");
 $_V(c$, "reverseChirality", 
 function (smiles) {
-smiles = JU.PT.simpleReplace (smiles, "@@", "!@");
-smiles = JU.PT.simpleReplace (smiles, "@", "@@");
-smiles = JU.PT.simpleReplace (smiles, "!@@", "@");
-smiles = JU.PT.simpleReplace (smiles, "@@SP", "@SP");
-smiles = JU.PT.simpleReplace (smiles, "@@OH", "@OH");
-smiles = JU.PT.simpleReplace (smiles, "@@TB", "@TB");
+smiles = JU.PT.rep (smiles, "@@", "!@");
+smiles = JU.PT.rep (smiles, "@", "@@");
+smiles = JU.PT.rep (smiles, "!@@", "@");
+smiles = JU.PT.rep (smiles, "@@SP", "@SP");
+smiles = JU.PT.rep (smiles, "@@OH", "@OH");
+smiles = JU.PT.rep (smiles, "@@TB", "@TB");
 return smiles;
 }, "~S");
 $_V(c$, "getSubstructureSet", 
@@ -197,7 +197,7 @@ return null;
 }, $fz.isPrivate = true, $fz), "~S,~A,~N,JU.BS,JU.BS,~B,~B,~B,~N");
 $_M(c$, "countStereo", 
 ($fz = function (s) {
-s = JU.PT.simpleReplace (s, "@@", "@");
+s = JU.PT.rep (s, "@@", "@");
 var i = s.lastIndexOf ('@') + 1;
 var n = 0;
 for (; --i >= 0; ) if (s.charAt (i) == '@') n++;

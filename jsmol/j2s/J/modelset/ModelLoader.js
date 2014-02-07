@@ -11,6 +11,7 @@ this.group3Lists = null;
 this.group3Counts = null;
 this.specialAtomIndexes = null;
 this.someModelsHaveUnitcells = false;
+this.someModelsAreModulated = false;
 this.is2D = false;
 this.isPDB = false;
 this.isTrajectory = false;
@@ -44,6 +45,7 @@ this.baseTrajectoryCount = 0;
 this.adapterModelCount = 0;
 this.adapterTrajectoryCount = 0;
 this.noAutoBond = false;
+this.modulationOn = false;
 this.$mergeGroups = null;
 this.iChain = 0;
 this.vStereo = null;
@@ -110,12 +112,14 @@ info.remove ("pdbNoHydrogens");
 info.remove ("pdbAddHydrogens");
 info.remove ("trajectorySteps");
 if (this.isTrajectory) this.modelSet.vibrationSteps = info.remove ("vibrationSteps");
-}this.noAutoBond = this.modelSet.getModelSetAuxiliaryInfoBoolean ("noAutoBond");
+}this.modulationOn = this.modelSet.getModelSetAuxiliaryInfoBoolean ("modulationOn");
+this.noAutoBond = this.modelSet.getModelSetAuxiliaryInfoBoolean ("noAutoBond");
 this.is2D = this.modelSet.getModelSetAuxiliaryInfoBoolean ("is2D");
 this.doMinimize = this.is2D && this.modelSet.getModelSetAuxiliaryInfoBoolean ("doMinimize");
 this.adapterTrajectoryCount = (this.modelSet.trajectorySteps == null ? 0 : this.modelSet.trajectorySteps.size ());
 this.modelSet.someModelsHaveSymmetry = this.modelSet.getModelSetAuxiliaryInfoBoolean ("someModelsHaveSymmetry");
 this.someModelsHaveUnitcells = this.modelSet.getModelSetAuxiliaryInfoBoolean ("someModelsHaveUnitcells");
+this.someModelsAreModulated = this.modelSet.getModelSetAuxiliaryInfoBoolean ("someModelsAreModulated");
 this.modelSet.someModelsHaveFractionalCoordinates = this.modelSet.getModelSetAuxiliaryInfoBoolean ("someModelsHaveFractionalCoordinates");
 if (this.merging) {
 this.modelSet.isPDB = new Boolean (this.modelSet.isPDB | this.mergeModelSet.isPDB).valueOf ();
@@ -584,6 +588,7 @@ return bond;
 }, $fz.isPrivate = true, $fz), "~O,~O,~N");
 $_M(c$, "initializeUnitCellAndSymmetry", 
 ($fz = function () {
+if (this.someModelsAreModulated && this.modelSet.bsModulated == null) this.modelSet.bsModulated =  new JU.BS ();
 if (this.someModelsHaveUnitcells) {
 this.modelSet.unitCells =  new Array (this.modelSet.modelCount);
 this.modelSet.haveUnitCells = true;
@@ -612,8 +617,10 @@ for (var i = this.baseAtomIndex; i < this.modelSet.atomCount; i++) {
 if (atoms[i].modelIndex != modelIndex) {
 modelIndex = atoms[i].modelIndex;
 c = this.modelSet.getUnitCell (modelIndex);
-}if (c != null && c.getCoordinatesAreFractional ()) c.toCartesian (c.toSupercell (atoms[i]), false);
-}
+}if (c != null && c.getCoordinatesAreFractional ()) {
+c = atoms[i].getUnitCell ();
+c.toCartesian (c.toSupercell (atoms[i]), false);
+}}
 for (var imodel = this.baseModelIndex; imodel < this.modelSet.modelCount; imodel++) {
 if (this.modelSet.isTrajectory (imodel)) {
 c = this.modelSet.getUnitCell (imodel);
@@ -646,10 +653,11 @@ var doBond = (forceAutoBond || doAutoBond && (modelBondCount == 0 || modelIsPDB 
 if (!doBond) continue;
 autoBonding = true;
 if (this.merging || modelCount > 1) {
-if (bs == null) bs = J.util.BSUtil.newBitSet (this.modelSet.atomCount);
+if (bs == null) bs = JU.BS.newN (this.modelSet.atomCount);
 if (i == this.baseModelIndex || !this.isTrajectory) bs.or (models[i].bsAtoms);
 }}
 if (autoBonding) {
+if (this.modulationOn) this.modelSet.setModulation (null, true, null, false);
 this.modelSet.autoBondBs4 (bs, bs, bsExclude, null, this.modelSet.defaultCovalentMad, this.viewer.getBoolean (603979874));
 J.util.Logger.info ("ModelSet: autobonding; use  autobond=false  to not generate bonds automatically");
 } else {
@@ -736,7 +744,7 @@ if (ret.length > 0) J.util.Logger.info (ret);
 $_M(c$, "findElementsPresent", 
 ($fz = function () {
 this.modelSet.elementsPresent =  new Array (this.modelSet.modelCount);
-for (var i = 0; i < this.modelSet.modelCount; i++) this.modelSet.elementsPresent[i] = J.util.BSUtil.newBitSet (64);
+for (var i = 0; i < this.modelSet.modelCount; i++) this.modelSet.elementsPresent[i] = JU.BS.newN (64);
 
 for (var i = this.modelSet.atomCount; --i >= 0; ) {
 var n = this.modelSet.atoms[i].getAtomicAndIsotopeNumber ();
@@ -767,7 +775,7 @@ this.vStereo = null;
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "set2dZ", 
 ($fz = function (iatom1, iatom2) {
-var atomlist = J.util.BSUtil.newBitSet (iatom2);
+var atomlist = JU.BS.newN (iatom2);
 var bsBranch =  new JU.BS ();
 var v =  new JU.V3 ();
 var v0 = JU.V3.new3 (0, 1, 0);
@@ -781,7 +789,7 @@ atomlist.or (bsBranch);
 }, $fz.isPrivate = true, $fz), "~N,~N");
 $_M(c$, "getBranch2dZ", 
 ($fz = function (atomIndex, atomIndexNot, bs0, bsBranch, v, v0, v1) {
-var bs = J.util.BSUtil.newBitSet (this.modelSet.atomCount);
+var bs = JU.BS.newN (this.modelSet.atomCount);
 if (atomIndex < 0) return bs;
 var bsToTest =  new JU.BS ();
 bsToTest.or (bs0);
@@ -886,7 +894,7 @@ if (J.util.Logger.debugging) J.util.Logger.debug ("atomIndex = " + i + ": " + at
 modelSet.setAtomCoord (i, xyz.x, xyz.y, xyz.z);
 continue;
 }pt.setT (xyz);
-var bs = J.util.BSUtil.newBitSet (modelSet.atomCount);
+var bs = JU.BS.newN (modelSet.atomCount);
 modelSet.getAtomsWithin (tolerance, pt, bs, -1);
 bs.and (bsSelected);
 if (loadAllData) {

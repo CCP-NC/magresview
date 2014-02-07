@@ -44,17 +44,10 @@ this.atomSetCollection.newAtomSet ();
 while (this.readLine () != null && this.line.indexOf ("*****") < 0) {
 if (this.line.charAt (14) == ' ') continue;
 var tokens = this.getTokens ();
-var atomName = tokens[1];
 var atomicNumber = Clazz.floatToInt (this.parseFloatStr (tokens[2]));
-var x = this.parseFloatStr (tokens[3]);
-var y = this.parseFloatStr (tokens[4]);
-var z = this.parseFloatStr (tokens[5]);
-if (Float.isNaN (x) || Float.isNaN (y) || Float.isNaN (z)) break;
-var atom = this.atomSetCollection.addNewAtom ();
-atom.atomName = atomName;
-this.setAtomCoordXYZ (atom, x * 0.5291772, y * 0.5291772, z * 0.5291772);
+var atom = this.setAtomCoordScaled (null, tokens, 3, 0.5291772);
 atom.elementSymbol = J.adapter.smarter.AtomSetCollectionReader.getElementSymbol (atomicNumber);
-this.atomNames.addLast (atomName);
+this.atomNames.addLast (atom.atomName = tokens[1]);
 }
 });
 $_V(c$, "fixShellTag", 

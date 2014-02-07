@@ -56,13 +56,8 @@ this.nAtoms = Integer.parseInt (atomStr[0]);
 this.setFractionalCoordinates (false);
 var counter = 0;
 while (counter < this.nAtoms && this.readLine () != null) {
-var atom = this.atomSetCollection.addNewAtom ();
 var tokens = this.getTokens ();
-atom.atomName = J.adapter.smarter.AtomSetCollectionReader.getElementSymbol (Integer.parseInt (tokens[0]));
-var x = this.parseFloatStr (tokens[1]);
-var y = this.parseFloatStr (tokens[2]);
-var z = this.parseFloatStr (tokens[3]);
-this.setAtomCoordXYZ (atom, x, y, z);
+this.addAtomXYZSymName (tokens, 1, null, J.adapter.smarter.AtomSetCollectionReader.getElementSymbol (Integer.parseInt (tokens[0])));
 counter++;
 }
 this.atomSetCollection.setAtomSetName (this.animation ? "Structure " + (this.animationStep++) : "Initial coordinates");

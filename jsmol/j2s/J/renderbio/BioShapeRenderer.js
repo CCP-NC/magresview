@@ -426,7 +426,7 @@ this.mat.setAA (this.aa);
 }this.pt1.setT (this.controlHermites[p]);
 var theta = (isFlatMesh ? 0 : angle);
 for (var k = 0; k < nPer; k++, theta += angle) {
-if (useMat && k > 0) this.mat.transform (this.wing);
+if (useMat && k > 0) this.mat.rotate (this.wing);
 switch (mode) {
 case 1:
 this.wingT.setT (this.wing1);

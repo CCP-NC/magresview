@@ -58,8 +58,8 @@ this.viewer = viewer;
 this.atomCount = atomCount;
 this.mads = mads;
 this.geodesicCount = J.util.Geodesic.getVertexCount (3);
-this.geodesicMap = J.util.BSUtil.newBitSet (this.geodesicCount);
-this.mapT = J.util.BSUtil.newBitSet (this.geodesicCount);
+this.geodesicMap = JU.BS.newN (this.geodesicCount);
+this.mapT = JU.BS.newN (this.geodesicCount);
 J.geodesic.EnvelopeCalculation.EMPTY_SET = J.util.BSUtil.emptySet;
 return this;
 }, "J.atomdata.AtomDataServer,~N,~A");
@@ -120,7 +120,7 @@ if (map == null || map.isEmpty ()) continue;
 var bsNew =  new JU.BS ();
 for (var j = map.nextSetBit (0); j >= 0; j = map.nextSetBit (j + 1)) {
 pt.setT (J.util.Geodesic.getVertexVector (j));
-m.transform (pt);
+m.rotate (pt);
 bsNew.set (J.util.Normix.getNormixV (pt, this.bsTemp));
 }
 this.dotsConvexMaps[i] = bsNew;

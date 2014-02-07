@@ -181,18 +181,13 @@ return J.adapter.smarter.Resolver.specialTags[23][0];
 c$.getReaderFromType = $_M(c$, "getReaderFromType", 
 ($fz = function (type) {
 type = type.toLowerCase ();
-var base = null;
-if ((base = J.adapter.smarter.Resolver.checkType (J.adapter.smarter.Resolver.specialTags, type)) != null) return base;
-if ((base = J.adapter.smarter.Resolver.checkType (J.adapter.smarter.Resolver.fileStartsWithRecords, type)) != null) return base;
-if ((base = J.adapter.smarter.Resolver.checkType (J.adapter.smarter.Resolver.lineStartsWithRecords, type)) != null) return base;
-return J.adapter.smarter.Resolver.checkType (J.adapter.smarter.Resolver.headerContainsRecords, type);
-}, $fz.isPrivate = true, $fz), "~S");
-c$.checkType = $_M(c$, "checkType", 
-($fz = function (typeTags, type) {
-for (var i = 0; i < typeTags.length; ++i) if (typeTags[i][0].toLowerCase ().equals (type)) return typeTags[i][0];
-
+var key = ";" + type + ";";
+for (var i = J.adapter.smarter.Resolver.readerSets.length; --i >= 0; ) {
+var pt = J.adapter.smarter.Resolver.readerSets[i].toLowerCase ().indexOf (key);
+if (pt >= 0) return J.adapter.smarter.Resolver.readerSets[i].substring (pt + 1, J.adapter.smarter.Resolver.readerSets[i].indexOf (";", pt + 2));
+}
 return null;
-}, $fz.isPrivate = true, $fz), "~A,~S");
+}, $fz.isPrivate = true, $fz), "~S");
 c$.checkSpecial = $_M(c$, "checkSpecial", 
 ($fz = function (nLines, lines, isEnd) {
 if (isEnd) {
@@ -258,7 +253,7 @@ c$.checkCrystal = $_M(c$, "checkCrystal",
 var s = lines[1].trim ();
 if (s.equals ("SLAB") || s.equals ("MOLECULE") || s.equals ("CRYSTAL") || s.equals ("POLYMER") || (s = lines[3]).equals ("SLAB") || s.equals ("MOLECULE") || s.equals ("POLYMER")) return true;
 for (var i = 0; i < lines.length; i++) {
-if (lines[i].trim ().equals ("OPTGEOM")) return true;
+if (lines[i].trim ().equals ("OPTGEOM") || lines[i].trim ().equals ("FREQCALC") || lines[i].contains ("DOVESI") || lines[i].contains ("TORINO") || lines[i].contains ("http://www.crystal.unito.it") || lines[i].contains ("Pcrystal") || lines[i].contains ("MPPcrystal") || lines[i].contains ("crystal executable")) return true;
 }
 return false;
 }, $fz.isPrivate = true, $fz), "~A");
@@ -384,7 +379,7 @@ return false;
 }, $fz.isPrivate = true, $fz), "~A");
 Clazz.defineStatics (c$,
 "classBase", "J.adapter.readers.");
-c$.readerSets = c$.prototype.readerSets = ["cif.", ";Cif;", "molxyz.", ";Mol3D;Mol;Xyz;", "more.", ";BinaryDcd;Gromacs;Jcampdx;MdCrd;MdTop;Mol2;Pqr;P2n;TlsDataOnly;", "quantum.", ";Adf;Csf;Dgrid;GamessUK;GamessUS;Gaussian;GausianWfn;Jaguar;Molden;MopacGraphf;GenNBO;NWChem;Odyssey;Psi;Qchem;Spartan;SpartanSmol;WebMO;", "pdb.", ";Pdb;", "pymol.", ";PyMOL;", "simple.", ";Alchemy;Ampac;Cube;FoldingXyz;GhemicalMM;HyperChem;Jme;Mopac;MopacArchive;ZMatrix;JSON;", "xtal.", ";Abinit;Aims;Castep;Crystal;Dmol;Espresso;Gulp;Jana;Magres;Shelx;Siesta;VaspOutcar;VaspPoscar;Wien2k;Xcrysden;"];
+c$.readerSets = c$.prototype.readerSets = ["cif.", ";Cif;", "molxyz.", ";Mol3D;Mol;Xyz;", "more.", ";BinaryDcd;Gromacs;Jcampdx;MdCrd;MdTop;Mol2;TlsDataOnly;", "quantum.", ";Adf;Csf;Dgrid;GamessUK;GamessUS;Gaussian;GausianWfn;Jaguar;Molden;MopacGraphf;GenNBO;NWChem;Odyssey;Psi;Qchem;Spartan;SpartanSmol;WebMO;", "pdb.", ";Pdb;Pqr;P2n;", "pymol.", ";PyMOL;", "simple.", ";Alchemy;Ampac;Cube;FoldingXyz;GhemicalMM;HyperChem;Jme;JSON;Mopac;MopacArchive;Tinker;ZMatrix;", "xtal.", ";Abinit;Aims;Castep;Crystal;Dmol;Espresso;Gulp;Jana;Magres;Shelx;Siesta;VaspOutcar;VaspPoscar;Wien2k;Xcrysden;"];
 Clazz.defineStatics (c$,
 "CML_NAMESPACE_URI", "http://www.xml-cml.org/schema",
 "SPECIAL_JME", 0,
@@ -464,7 +459,7 @@ Clazz.defineStatics (c$,
 "psiContainsRecords", ["Psi", "    PSI  3", "PSI3:"],
 "nwchemContainsRecords", ["NWChem", " argument  1 = "],
 "uicrcifContainsRecords", ["Cif", "Crystallographic Information File"],
-"crystalContainsRecords", ["Crystal", "*                                CRYSTAL"],
+"crystalContainsRecords", ["Crystal", "*                                CRYSTAL", "TORINO", "DOVESI"],
 "espressoContainsRecords", ["Espresso", "Program PWSCF", "Program PHONON"],
 "siestaContainsRecords", ["Siesta", "MD.TypeOfRun", "SolutionMethod", "MeshCutoff", "WELCOME TO SIESTA"],
 "xcrysDenContainsRecords", ["Xcrysden", "PRIMVEC", "CONVVEC", "PRIMCOORD", "ANIMSTEP"],

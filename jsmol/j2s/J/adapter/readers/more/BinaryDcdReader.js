@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.more");
-Clazz.load (["J.adapter.readers.more.BinaryReader"], "J.adapter.readers.more.BinaryDcdReader", ["JU.P3", "$.SB", "J.util.BSUtil", "$.Escape", "$.Logger"], function () {
+Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.more.BinaryDcdReader", ["JU.BS", "$.P3", "$.SB", "J.util.Escape", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.nModels = 0;
 this.nAtoms = 0;
@@ -9,12 +9,17 @@ this.xAll = null;
 this.yAll = null;
 this.zAll = null;
 Clazz.instantialize (this, arguments);
-}, J.adapter.readers.more, "BinaryDcdReader", J.adapter.readers.more.BinaryReader);
+}, J.adapter.readers.more, "BinaryDcdReader", J.adapter.smarter.AtomSetCollectionReader);
+$_V(c$, "setup", 
+function (fullPath, htParams, reader) {
+this.isBinary = true;
+this.setupASCR (fullPath, htParams, reader);
+}, "~S,java.util.Map,~O");
 $_V(c$, "initializeReader", 
 function () {
 this.initializeTrajectoryFile ();
 });
-$_V(c$, "readDocument", 
+$_V(c$, "processBinaryDocument", 
 function () {
 var bytes =  Clazz.newByteArray (40, 0);
 var n = this.binaryDoc.readInt ();
@@ -47,7 +52,7 @@ n = this.binaryDoc.readInt ();
 this.nFree = this.nAtoms - nFixed;
 if (nFixed != 0) {
 this.binaryDoc.readInt ();
-this.bsFree = J.util.BSUtil.newBitSet (this.nFree);
+this.bsFree = JU.BS.newN (this.nFree);
 for (var i = 0; i < this.nFree; i++) this.bsFree.set (this.binaryDoc.readInt () - 1);
 
 n = Clazz.doubleToInt (this.binaryDoc.readInt () / 4);

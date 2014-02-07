@@ -68,7 +68,7 @@ return sb.toString ();
 $_M(c$, "setSelected", 
 function (bs) {
 if (bs == null) {
-bs = J.util.BSUtil.newBitSet (this.jmolAtomCount);
+bs = JU.BS.newN (this.jmolAtomCount);
 bs.setBits (0, this.jmolAtomCount);
 }this.bsSelected = bs;
 }, "JU.BS");
@@ -247,7 +247,7 @@ this.aromaticDouble = ((this.flags & 16) != 0);
 if (J.util.Logger.debugging && !this.isSilent) J.util.Logger.debug ("SmilesSearch processing " + this.pattern);
 if (this.vReturn == null && (this.asVector || this.getMaps)) this.vReturn =  new JU.List ();
 if (this.bsSelected == null) {
-this.bsSelected = J.util.BSUtil.newBitSet (this.jmolAtomCount);
+this.bsSelected = JU.BS.newN (this.jmolAtomCount);
 this.bsSelected.setBits (0, this.jmolAtomCount);
 }this.selectedAtomCount = this.bsSelected.cardinality ();
 if (this.subSearches != null) {

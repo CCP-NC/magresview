@@ -1,15 +1,19 @@
 Clazz.declarePackage ("J.i18n");
-Clazz.load (["java.util.Hashtable", "J.i18n.Language", "$.Resource"], "J.i18n.GT", ["java.text.MessageFormat", "J.util.Logger"], function () {
+Clazz.load (["J.api.Translator", "java.util.Hashtable", "J.i18n.Language", "$.Resource"], "J.i18n.GT", ["java.text.MessageFormat", "J.util.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.resources = null;
 this.resourceCount = 0;
 this.doTranslate = true;
 this.language = null;
 Clazz.instantialize (this, arguments);
-}, J.i18n, "GT");
+}, J.i18n, "GT", null, J.api.Translator);
 Clazz.makeConstructor (c$, 
 function () {
 });
+$_V(c$, "translate", 
+function (s) {
+return J.i18n.GT._ (s);
+}, "~S");
 Clazz.makeConstructor (c$, 
 function (viewer, langCode) {
 J.i18n.GT.viewer = viewer;

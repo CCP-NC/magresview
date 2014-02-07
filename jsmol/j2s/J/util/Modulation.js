@@ -15,7 +15,7 @@ Clazz.instantialize (this, arguments);
 }, J.util, "Modulation");
 Clazz.makeConstructor (c$, 
 function (axis, type, params, utens, qCoefs) {
-if (J.util.Logger.debuggingHigh) J.util.Logger.debug ("MOD create " + J.util.Escape.eP (qCoefs) + " axis=" + axis + " type=" + type + " params=" + params + " utens=" + utens);
+if (J.util.Logger.debuggingHigh) J.util.Logger.debug ("MOD create " + J.util.Escape.e (qCoefs) + " axis=" + axis + " type=" + type + " params=" + J.util.Escape.e (params) + " utens=" + utens);
 this.axis = axis;
 this.type = type;
 this.utens = utens;
@@ -25,48 +25,50 @@ switch (type) {
 case 'f':
 case 'o':
 case 'u':
-this.a1 = params.x;
-this.a2 = params.y;
+this.a1 = params[0];
+this.a2 = params[1];
 break;
 case 's':
 case 'c':
-this.center = params.x;
-var width = params.y;
+this.center = params[0];
+var width = params[1];
 if (width > 1) width = 1;
 this.left = this.center - width / 2;
 this.right = this.center + width / 2;
 if (this.left < 0) this.left += 1;
 if (this.right > 1) this.right -= 1;
 if (this.left >= this.right && this.left - this.right < 0.01) this.left = this.right + 0.01;
-this.a1 = 2 * params.z / params.y;
+this.a1 = 2 * params[2] / params[1];
 break;
 }
-}, "~S,~S,JU.P3,~S,JU.P3");
+}, "~S,~S,~A,~S,~A");
 $_M(c$, "apply", 
-function (ms, x456) {
-var x = this.qCoefs.dot (x456);
+function (ms, t) {
+var nt = 0;
+for (var i = this.qCoefs.length; --i >= 0; ) nt += this.qCoefs[i] * t[i][0];
+
 var v = 0;
 switch (this.type) {
 case 'f':
 case 'o':
 case 'u':
-var theta = 6.283185307179586 * x;
+var theta = 6.283185307179586 * nt;
 if (this.a1 != 0) v += this.a1 * Math.cos (theta);
 if (this.a2 != 0) v += this.a2 * Math.sin (theta);
-if (J.util.Logger.debuggingHigh) J.util.Logger.debug ("MOD " + ms.id + " " + J.util.Escape.eP (this.qCoefs) + " axis=" + this.axis + " v=" + v + " ccos,csin=" + this.a1 + "," + this.a2 + " / theta=" + theta);
+if (J.util.Logger.debuggingHigh) J.util.Logger.debug ("MOD " + ms.id + " " + J.util.Escape.e (this.qCoefs) + " axis=" + this.axis + " v=" + v + " ccos,csin=" + this.a1 + "," + this.a2 + " / theta=" + theta);
 break;
 case 'c':
-x -= Math.floor (x);
-ms.vOcc = (this.range (x) ? 1 : 0);
+nt -= Math.floor (nt);
+ms.vOcc = (this.range (nt) ? 1 : 0);
 ms.vOcc0 = NaN;
 return;
 case 's':
-x -= Math.floor (x);
-if (!this.range (x)) return;
+nt -= Math.floor (nt);
+if (!this.range (nt)) return;
 if (this.left > this.right) {
-if (x < this.left && this.left < this.center) x += 1;
- else if (x > this.right && this.right > this.center) x -= 1;
-}v = this.a1 * (x - this.center);
+if (nt < this.left && this.left < this.center) nt += 1;
+ else if (nt > this.right && this.right > this.center) nt -= 1;
+}v = this.a1 * (nt - this.center);
 break;
 }
 switch (this.axis) {
@@ -86,7 +88,7 @@ default:
 if (Float.isNaN (ms.vOcc)) ms.vOcc = 0;
 ms.vOcc += v;
 }
-}, "J.util.ModulationSet,JU.T3");
+}, "J.util.ModulationSet,~A");
 $_M(c$, "range", 
 ($fz = function (x4) {
 return (this.left < this.right ? this.left <= x4 && x4 <= this.right : this.left <= x4 || x4 <= this.right);
@@ -94,8 +96,7 @@ return (this.left < this.right ? this.left <= x4 && x4 <= this.right : this.left
 $_M(c$, "getInfo", 
 function () {
 var info =  new java.util.Hashtable ();
-var t = (0 + this.type.charCodeAt (0)) * 3;
-info.put ("type", "DF DS OF OC UF".substring (t, t + 2).trim () + this.axis);
+info.put ("type", "" + this.type + this.axis);
 info.put ("params", this.params);
 info.put ("qCoefs", this.qCoefs);
 if (this.utens != null) info.put ("Utens", this.utens);
@@ -103,7 +104,6 @@ return info;
 });
 Clazz.defineStatics (c$,
 "TWOPI", 6.283185307179586,
-"typeNames", "DF DS OF OC UF",
 "TYPE_DISP_FOURIER", 'f',
 "TYPE_DISP_SAWTOOTH", 's',
 "TYPE_OCC_FOURIER", 'o',

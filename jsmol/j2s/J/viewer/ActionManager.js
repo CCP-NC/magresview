@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.viewer");
-Clazz.load (["javajs.api.EventManager", "J.util.Rectangle", "J.viewer.MouseState"], "J.viewer.ActionManager", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.List", "$.P3", "$.PT", "J.i18n.GT", "J.thread.HoverWatcherThread", "J.util.BSUtil", "$.Escape", "$.Logger", "$.Point3fi", "J.viewer.binding.Binding", "$.JmolBinding"], function () {
+Clazz.load (["javajs.api.EventManager", "J.util.Rectangle", "J.viewer.MouseState"], "J.viewer.ActionManager", ["java.lang.Character", "$.Float", "JU.P3", "$.PT", "J.i18n.GT", "J.thread.HoverWatcherThread", "J.util.BSUtil", "$.Escape", "$.Logger", "$.Point3fi", "J.viewer.binding.Binding", "$.JmolBinding"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.viewer = null;
 this.haveMultiTouchInput = false;
@@ -248,24 +248,6 @@ if (this.binding !== this.jmolBinding) this.setBinding (this.jmolBinding);
 }
 if (!this.binding.name.equals ("drag")) this.predragBinding = this.binding;
 }, "~N");
-$_M(c$, "getMouseInfo", 
-function () {
-var info =  new java.util.Hashtable ();
-var vb =  new JU.List ();
-for (var obj, $obj = this.binding.getBindings ().values ().iterator (); $obj.hasNext () && ((obj = $obj.next ()) || true);) {
-if (Clazz.instanceOf (obj, Boolean)) continue;
-if (JU.PT.isAI (obj)) {
-var binding = obj;
-obj = [J.viewer.binding.Binding.getMouseActionName (binding[0], false), J.viewer.ActionManager.getActionName (binding[1])];
-}vb.addLast (obj);
-}
-info.put ("bindings", vb);
-info.put ("bindingName", this.binding.name);
-info.put ("actionNames", J.viewer.ActionManager.actionNames);
-info.put ("actionInfo", J.viewer.ActionManager.actionInfo);
-info.put ("bindingInfo", JU.PT.split (this.getBindingInfo (null), "\n"));
-return info;
-});
 $_M(c$, "setGestureSwipeFactor", 
 function (factor) {
 this.gestureSwipeFactor = factor;
@@ -320,13 +302,13 @@ case 21:
 this.measuresEnabled = false;
 return;
 }
-this.exitMeasurementMode ();
+this.exitMeasurementMode (null);
 });
 $_M(c$, "clearMouseInfo", 
 function () {
 this.pressedCount = this.clickedCount = 0;
 this.dragGesture.setAction (0, 0);
-this.exitMeasurementMode ();
+this.exitMeasurementMode (null);
 });
 $_M(c$, "isMTClient", 
 function () {
@@ -390,6 +372,10 @@ this.moved.modifiers |= 1;
 break;
 case 17:
 this.moved.modifiers |= 2;
+break;
+case 27:
+this.exitMeasurementMode ("escape");
+break;
 }
 var action = 16 | 256 | 8192 | this.moved.modifiers;
 if (!this.labelMode && !this.binding.isUserAction (action)) this.checkMotionRotateZoom (action, this.current.x, 0, 0, false);
@@ -435,10 +421,8 @@ break;
 $_V(c$, "mouseEnterExit", 
 function (time, x, y, isExit) {
 this.setCurrent (time, x, y, 0);
-if (isExit && this.measurementPending != null) {
-this.exitMeasurementMode ();
-this.viewer.refresh (3, "mouseExit");
-}}, "~N,~N,~N,~B");
+if (isExit) this.exitMeasurementMode ("mouseExit");
+}, "~N,~N,~N,~B");
 $_M(c$, "setMouseActions", 
 ($fz = function (count, buttonMods, isRelease) {
 this.pressAction = J.viewer.binding.Binding.getMouseAction (count, buttonMods, isRelease ? 5 : 4);
@@ -483,7 +467,7 @@ var deltaX = x - this.dragged.x;
 var deltaY = y - this.dragged.y;
 this.setCurrent (time, x, y, buttonMods);
 this.dragged.setCurrent (this.current, -1);
-if (this.atomPickingMode != 32) this.exitMeasurementMode ();
+if (this.atomPickingMode != 32) this.exitMeasurementMode (null);
 this.dragGesture.add (this.dragAction, x, y, time);
 this.checkDragWheelAction (this.dragAction, x, y, deltaX, deltaY, time, 1);
 return;
@@ -640,7 +624,7 @@ return;
 this.viewer.translateXYBy (deltaX, deltaY);
 return;
 }if (this.dragSelectedMode && this.haveSelection && (this.isBound (dragWheelAction, 13) || this.isBound (dragWheelAction, 27))) {
-var iatom = this.viewer.getSelectionSet (false).nextSetBit (0);
+var iatom = this.viewer.getSelectedAtoms ().nextSetBit (0);
 if (iatom < 0) return;
 if (this.dragGesture.getPointCount () == 1) this.viewer.undoMoveActionClear (iatom, 2, true);
  else this.viewer.moveSelected (2147483647, 0, -2147483648, -2147483648, -2147483648, null, false, false);
@@ -800,25 +784,25 @@ var script = (obj)[1];
 var nearestPoint = null;
 if (script.indexOf ("_ATOM") >= 0) {
 var iatom = this.findNearestAtom (x, y, null, true);
-script = JU.PT.simpleReplace (script, "_ATOM", "({" + (iatom >= 0 ? "" + iatom : "") + "})");
-if (iatom >= 0) script = JU.PT.simpleReplace (script, "_POINT", J.util.Escape.eP (this.viewer.getModelSet ().atoms[iatom]));
+script = JU.PT.rep (script, "_ATOM", "({" + (iatom >= 0 ? "" + iatom : "") + "})");
+if (iatom >= 0) script = JU.PT.rep (script, "_POINT", J.util.Escape.eP (this.viewer.getModelSet ().atoms[iatom]));
 }if (!this.drawMode && (script.indexOf ("_POINT") >= 0 || script.indexOf ("_OBJECT") >= 0 || script.indexOf ("_BOND") >= 0)) {
 var t = this.viewer.checkObjectClicked (x, y, mouseAction);
 if (t != null && (nearestPoint = t.get ("pt")) != null) {
 var isBond = t.get ("type").equals ("bond");
-if (isBond) script = JU.PT.simpleReplace (script, "_BOND", "[{" + t.get ("index") + "}]");
-script = JU.PT.simpleReplace (script, "_POINT", J.util.Escape.eP (nearestPoint));
-script = JU.PT.simpleReplace (script, "_OBJECT", J.util.Escape.escapeMap (t));
-}script = JU.PT.simpleReplace (script, "_BOND", "[{}]");
-script = JU.PT.simpleReplace (script, "_OBJECT", "{}");
-}script = JU.PT.simpleReplace (script, "_POINT", "{}");
-script = JU.PT.simpleReplace (script, "_ACTION", "" + mouseAction);
-script = JU.PT.simpleReplace (script, "_X", "" + x);
-script = JU.PT.simpleReplace (script, "_Y", "" + (this.viewer.getScreenHeight () - y));
-script = JU.PT.simpleReplace (script, "_DELTAX", "" + deltaX);
-script = JU.PT.simpleReplace (script, "_DELTAY", "" + deltaY);
-script = JU.PT.simpleReplace (script, "_TIME", "" + time);
-script = JU.PT.simpleReplace (script, "_MODE", "" + mode);
+if (isBond) script = JU.PT.rep (script, "_BOND", "[{" + t.get ("index") + "}]");
+script = JU.PT.rep (script, "_POINT", J.util.Escape.eP (nearestPoint));
+script = JU.PT.rep (script, "_OBJECT", J.util.Escape.escapeMap (t));
+}script = JU.PT.rep (script, "_BOND", "[{}]");
+script = JU.PT.rep (script, "_OBJECT", "{}");
+}script = JU.PT.rep (script, "_POINT", "{}");
+script = JU.PT.rep (script, "_ACTION", "" + mouseAction);
+script = JU.PT.rep (script, "_X", "" + x);
+script = JU.PT.rep (script, "_Y", "" + (this.viewer.getScreenHeight () - y));
+script = JU.PT.rep (script, "_DELTAX", "" + deltaX);
+script = JU.PT.rep (script, "_DELTAY", "" + deltaY);
+script = JU.PT.rep (script, "_TIME", "" + time);
+script = JU.PT.rep (script, "_MODE", "" + mode);
 if (script.startsWith ("+:")) {
 passThrough = true;
 script = script.substring (2);
@@ -909,7 +893,7 @@ this.measurementQueued = this.measurementPending;
 $_M(c$, "addToMeasurement", 
 ($fz = function (atomIndex, nearestPoint, dblClick) {
 if (atomIndex == -1 && nearestPoint == null || this.measurementPending == null) {
-this.exitMeasurementMode ();
+this.exitMeasurementMode (null);
 return 0;
 }var measurementCount = this.measurementPending.count;
 if (this.measurementPending.traceX != -2147483648 && measurementCount == 2) this.measurementPending.setCount (measurementCount = 1);
@@ -917,21 +901,22 @@ return (measurementCount == 4 && !dblClick ? measurementCount : this.measurement
 }, $fz.isPrivate = true, $fz), "~N,J.util.Point3fi,~B");
 $_M(c$, "resetMeasurement", 
 ($fz = function () {
-this.exitMeasurementMode ();
+this.exitMeasurementMode (null);
 this.measurementQueued = this.viewer.getMP ();
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "exitMeasurementMode", 
-($fz = function () {
+($fz = function (refreshWhy) {
 if (this.measurementPending == null) return;
 this.viewer.setPendingMeasurement (this.measurementPending = null);
 this.viewer.setCursor (0);
-}, $fz.isPrivate = true, $fz));
+if (refreshWhy != null) this.viewer.refresh (3, refreshWhy);
+}, $fz.isPrivate = true, $fz), "~S");
 $_M(c$, "getSequence", 
 ($fz = function () {
 var a1 = this.measurementQueued.getAtomIndex (1);
 var a2 = this.measurementQueued.getAtomIndex (2);
 if (a1 < 0 || a2 < 0) return;
-var sequence = this.viewer.getSmiles (a1, a2, null, true, false, false, false);
+var sequence = this.viewer.getSmilesOpt (null, a1, a2, false, true, false, false, false);
 this.viewer.setStatusMeasuring ("measureSequence", -2, sequence, 0);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "minimize", 
@@ -1132,8 +1117,7 @@ if (this.measurementPending.count == 2) {
 this.viewer.undoMoveActionClear (-1, 4146, true);
 this.runScript ("assign connect " + this.measurementPending.getMeasurementScript (" ", false));
 } else if (this.pickAtomAssignType.equals ("Xx")) {
-this.exitMeasurementMode ();
-this.viewer.refresh (3, "bond dropped");
+this.exitMeasurementMode ("bond dropped");
 } else {
 if (this.pressed.inRange (this.xyRange, this.dragged.x, this.dragged.y)) {
 var s = "assign atom ({" + this.dragAtomIndex + "}) \"" + this.pickAtomAssignType + "\"";
@@ -1152,7 +1136,7 @@ this.runScript ("assign atom ({" + this.dragAtomIndex + "}) \"X\"");
 var ptNew = JU.P3.new3 (x, y, a.sZ);
 this.viewer.unTransformPoint (ptNew, ptNew);
 this.runScript ("assign atom ({" + this.dragAtomIndex + "}) \"" + this.pickAtomAssignType + "\" " + J.util.Escape.eP (ptNew));
-}}}this.exitMeasurementMode ();
+}}}this.exitMeasurementMode (null);
 }, $fz.isPrivate = true, $fz), "~N,~N");
 $_M(c$, "bondPicked", 
 ($fz = function (index) {
@@ -1229,7 +1213,7 @@ $_M(c$, "toggleMeasurement",
 if (this.measurementPending == null) return;
 var measurementCount = this.measurementPending.count;
 if (measurementCount >= 2 && measurementCount <= 4) this.runScript ("!measure " + this.measurementPending.getMeasurementScript (" ", true));
-this.exitMeasurementMode ();
+this.exitMeasurementMode (null);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "zoomTo", 
 ($fz = function (atomIndex) {

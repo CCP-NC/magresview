@@ -53,9 +53,7 @@ if (tokens.length < 5) {
 J.util.Logger.warn ("cannot read line with FHI-aims line: " + this.line);
 return;
 }if (this.isFractional != isFractional) this.setFractionalCoordinates (this.isFractional = isFractional);
-var atom = this.atomSetCollection.addNewAtom ();
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[1]), this.parseFloatStr (tokens[2]), this.parseFloatStr (tokens[3]));
-atom.elementSymbol = tokens[4];
+this.addAtomXYZSymName (tokens, 1, tokens[4], null);
 }, $fz.isPrivate = true, $fz), "~A,~B");
 $_M(c$, "readMultipole", 
 ($fz = function (tokens) {
@@ -67,8 +65,6 @@ if (order > 0) {
 J.util.Logger.warn ("multipole line ignored since only monopoles are currently supported: " + this.line);
 return;
 }if (this.isFractional) this.setFractionalCoordinates (this.isFractional = false);
-var atom = this.atomSetCollection.addNewAtom ();
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[1]), this.parseFloatStr (tokens[2]), this.parseFloatStr (tokens[3]));
-atom.partialCharge = this.parseFloatStr (tokens[5]);
+this.addAtomXYZSymName (tokens, 1, null, null).partialCharge = this.parseFloatStr (tokens[5]);
 }, $fz.isPrivate = true, $fz), "~A");
 });

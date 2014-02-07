@@ -156,7 +156,7 @@ continue;
 }
 this.meshData.getSurfaceSet ();
 var nSets = this.meshData.nSets;
-var pocketSet = J.util.BSUtil.newBitSet (nSets);
+var pocketSet = JU.BS.newN (nSets);
 var ss;
 for (var i = 0; i < nSets; i++) if ((ss = this.meshData.surfaceSet[i]) != null) for (var j = ss.nextSetBit (0); j >= 0; j = ss.nextSetBit (j + 1)) if (Float.isNaN (this.meshData.vertexValues[j])) {
 pocketSet.set (i);
@@ -215,7 +215,7 @@ this.meshData =  new J.jvxl.data.MeshData ();
 });
 $_M(c$, "generateSolventCavity", 
 ($fz = function () {
-var bs = J.util.BSUtil.newBitSet (this.nPointsX * this.nPointsY * this.nPointsZ);
+var bs = JU.BS.newN (this.nPointsX * this.nPointsY * this.nPointsZ);
 var i = 0;
 var nDots = this.dots.length;
 var n = 0;

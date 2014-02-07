@@ -47,7 +47,7 @@ $_V(c$, "toHTML",
 function (sb, id, selectedRows) {
 if (this.data == null || this.data[0] == null || this.data[0].length == 0) return;
 var nrows = this.data.length;
-var ncols = this.data[0].length;
+var ncols = this.columnNames.length;
 for (var i = -1; i < nrows; i++) {
 var rowid = id + "_" + i;
 sb.append ("\n<tr id='" + rowid + "' class='JTable_" + (i == -1 ? "header" : "row") + "' style='height:25px'>");

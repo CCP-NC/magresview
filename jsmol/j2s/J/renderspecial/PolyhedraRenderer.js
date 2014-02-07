@@ -16,7 +16,7 @@ this.g3d.addRenderer (1073742182);
 var colixes = polyhedra.colixes;
 var needTranslucent = false;
 for (var i = polyhedra.polyhedronCount; --i >= 0; ) {
-var iAtom = polyhedrons[i].centralAtom.getIndex ();
+var iAtom = polyhedrons[i].centralAtom.index;
 var colix = (colixes == null || iAtom >= colixes.length ? 0 : polyhedra.colixes[iAtom]);
 if (this.render1 (polyhedrons[i], colix)) needTranslucent = true;
 }

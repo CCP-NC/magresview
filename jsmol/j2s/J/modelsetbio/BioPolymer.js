@@ -222,7 +222,7 @@ function (xMouse, yMouse, closest, mads, myVisibilityFlag, bsNot) {
 for (var i = this.monomerCount; --i >= 0; ) {
 if ((this.monomers[i].shapeVisibilityFlags & myVisibilityFlag) == 0) continue;
 var a = this.monomers[i].getLeadAtom ();
-if (!a.isVisible (0) || bsNot != null && bsNot.get (a.index)) continue;
+if (!a.checkVisible () || bsNot != null && bsNot.get (a.index)) continue;
 if (mads[i] > 0 || mads[i + 1] > 0) this.monomers[i].findNearestAtomIndex (xMouse, yMouse, closest, mads[i], mads[i + 1]);
 }
 }, "~N,~N,~A,~A,~N,JU.BS");
@@ -394,7 +394,7 @@ z = monomer.getGroupParameter (1112539144);
 if (z < -90) z += 360;
 z -= 180;
 if (Float.isNaN (x) || Float.isNaN (y) || Float.isNaN (z)) {
-if (bsAtoms != null) bsAtoms.clear (a.getIndex ());
+if (bsAtoms != null) bsAtoms.clear (a.index);
 continue;
 }var angledeg = (writeRamachandranStraightness ? p.calculateRamachandranHelixAngle (m, qtype) : 0);
 var straightness = (calcRamachandranStraightness || writeRamachandranStraightness ? J.modelsetbio.BioPolymer.getStraightness (Math.cos (angledeg / 2 / 180 * 3.141592653589793)) : 0);
@@ -451,7 +451,7 @@ q = null;
 q = dq.rightDifference (dqprev);
 val1 = J.modelsetbio.BioPolymer.getQuaternionStraightness (id, dqprev, dq);
 val2 = J.modelsetbio.BioPolymer.get3DStraightness (id, dqprev, dq);
-aprev.getGroup ().setGroupParameter (1112539150, useQuaternionStraightness ? val1 : val2);
+(aprev.getGroup ()).setGroupParameter (1112539150, useQuaternionStraightness ? val1 : val2);
 }dqprev = dq;
 }aprev = anext;
 qprev = qnext;

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shape");
-Clazz.load (["J.shape.FontLineShape", "JU.P3", "$.V3"], "J.shape.Axes", ["java.lang.Boolean", "JU.SB", "J.constant.EnumAxesMode", "J.util.Escape", "J.viewer.JC"], function () {
+Clazz.load (["J.shape.FontLineShape", "JU.P3", "$.V3"], "J.shape.Axes", ["java.lang.Boolean", "JU.PT", "$.SB", "J.constant.EnumAxesMode", "J.util.Escape", "J.viewer.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.axisXY = null;
 this.scale = 0;
@@ -114,7 +114,7 @@ if (this.fixedOrigin != null) sb.append ("  axes center ").append (J.util.Escape
 if (this.axisXY.z != 0) sb.append ("  axes position [").appendI (Clazz.floatToInt (this.axisXY.x)).append (" ").appendI (Clazz.floatToInt (this.axisXY.y)).append (" ").append (this.axisXY.z < 0 ? " %" : "").append ("];\n");
 if (this.labels != null) {
 sb.append ("  axes labels ");
-for (var i = 0; i < this.labels.length; i++) if (this.labels[i] != null) sb.append (J.util.Escape.eS (this.labels[i])).append (" ");
+for (var i = 0; i < this.labels.length; i++) if (this.labels[i] != null) sb.append (JU.PT.esc (this.labels[i])).append (" ");
 
 sb.append (";\n");
 }return Clazz.superCall (this, J.shape.Axes, "getShapeState", []) + sb;

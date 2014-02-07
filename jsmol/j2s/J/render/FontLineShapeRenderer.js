@@ -113,9 +113,7 @@ var ptRef = this.tickInfo.reference;
 if (ptRef == null) {
 this.pointT3.setT (this.viewer.getBoundBoxCenter ());
 if (this.viewer.getAxesMode () === J.constant.EnumAxesMode.BOUNDBOX) {
-this.pointT3.x += 1.0;
-this.pointT3.y += 1.0;
-this.pointT3.z += 1.0;
+this.pointT3.add3 (1, 1, 1);
 }} else {
 this.pointT3.setT (ptRef);
 }this.viewer.transformPtScr (this.pointT3, this.pt2i);

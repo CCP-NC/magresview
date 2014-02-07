@@ -33,10 +33,10 @@ this.viewerOptions.put ("fullName", this.fullName);
 this.haveDocumentAccess = "true".equalsIgnoreCase ("" + this.getValue ("allowjavascript", "true"));
 this.mayScript = true;
 });
-$_V(c$, "getParameter", 
+$_V(c$, "getJmolParameter", 
 function (paramName) {
 var o = this.htParams.get (paramName.toLowerCase ());
-return (o == null ? null :  String.instantialize (o.toString ()));
+return (o == null ? null : "" + o);
 }, "~S");
 $_V(c$, "doSendJsTextStatus", 
 function (message) {

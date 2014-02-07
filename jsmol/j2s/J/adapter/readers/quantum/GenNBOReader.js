@@ -63,7 +63,7 @@ var fileName = this.htParams.get ("fullPathName");
 var pt = fileName.lastIndexOf (".");
 if (pt < 0) pt = fileName.length;
 fileName = fileName.substring (0, pt) + ext;
-var data = this.viewer.getFileAsString (fileName);
+var data = this.viewer.getFileAsString (fileName, false);
 if (data.length == 0 || data.indexOf ("java.io.FileNotFound") >= 0) throw  new Exception (" supplemental file " + fileName + " was not found");
 return data;
 }, $fz.isPrivate = true, $fz), "~S");
@@ -102,7 +102,7 @@ var z = this.parseIntStr (tokens[0]);
 if (z < 0) continue;
 var atom = this.atomSetCollection.addNewAtom ();
 atom.elementNumber = z;
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[1]), this.parseFloatStr (tokens[2]), this.parseFloatStr (tokens[3]));
+this.setAtomCoordTokens (atom, tokens, 1);
 }
 this.shells =  new JU.List ();
 this.gaussians = JU.AU.newFloat2 (this.gaussianCount);

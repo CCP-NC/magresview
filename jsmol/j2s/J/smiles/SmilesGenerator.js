@@ -5,6 +5,7 @@ this.atoms = null;
 this.atomCount = 0;
 this.bsSelected = null;
 this.bsAromatic = null;
+this.explicitH = false;
 this.ringSets = null;
 this.vTemp = null;
 this.nPairs = 0;
@@ -26,14 +27,15 @@ this.htRingsSequence =  new java.util.Hashtable ();
 this.htRings =  new java.util.Hashtable ();
 });
 $_M(c$, "getSmiles", 
-function (atoms, atomCount, bsSelected) {
+function (atoms, atomCount, bsSelected, explicitH) {
 var i = bsSelected.nextSetBit (0);
 if (i < 0) return "";
 this.atoms = atoms;
 this.atomCount = atomCount;
 this.bsSelected = bsSelected = J.util.BSUtil.copy (bsSelected);
+this.explicitH = explicitH;
 return this.getSmilesComponent (atoms[i], bsSelected, false);
-}, "~A,~N,JU.BS");
+}, "~A,~N,JU.BS,~B");
 $_M(c$, "getBioSmiles", 
 function (atoms, atomCount, bsSelected, allowUnmatchedRings, addCrossLinks, comment) {
 this.atoms = atoms;
@@ -134,11 +136,11 @@ sb.append (J.util.Elements.elementNameFromNumber (a.getElementNumber ()));
 }, $fz.isPrivate = true, $fz), "JU.SB,J.util.JmolNode,~S");
 $_M(c$, "getSmilesComponent", 
 ($fz = function (atom, bs, allowConnectionsToOutsideWorld) {
-if (atom.getElementNumber () == 1 && atom.getEdges ().length > 0) atom = this.atoms[atom.getBondedAtomIndex (0)];
+if (!this.explicitH && atom.getElementNumber () == 1 && atom.getEdges ().length > 0) atom = this.atoms[atom.getBondedAtomIndex (0)];
 this.bsSelected = J.util.JmolMolecule.getBranchBitSet (this.atoms, atom.getIndex (), J.util.BSUtil.copy (bs), null, -1, true, false);
 bs.andNot (this.bsSelected);
 this.bsIncludingH = J.util.BSUtil.copy (this.bsSelected);
-for (var j = this.bsSelected.nextSetBit (0); j >= 0; j = this.bsSelected.nextSetBit (j + 1)) {
+if (!this.explicitH) for (var j = this.bsSelected.nextSetBit (0); j >= 0; j = this.bsSelected.nextSetBit (j + 1)) {
 var a = this.atoms[j];
 if (a.getElementNumber () == 1 && a.getIsotopeNumber () == 0) this.bsSelected.clear (j);
 }
@@ -158,10 +160,10 @@ this.bsAromatic =  new JU.BS ();
 }this.bsToDo = J.util.BSUtil.copy (this.bsSelected);
 var sb =  new JU.SB ();
 for (var i = this.bsToDo.nextSetBit (0); i >= 0; i = this.bsToDo.nextSetBit (i + 1)) if (this.atoms[i].getCovalentBondCount () > 4) {
-this.getSmiles (sb, this.atoms[i], allowConnectionsToOutsideWorld, false);
+this.getSmiles (sb, this.atoms[i], allowConnectionsToOutsideWorld, false, this.explicitH);
 atom = null;
 }
-if (atom != null) while ((atom = this.getSmiles (sb, atom, allowConnectionsToOutsideWorld, true)) != null) {
+if (atom != null) while ((atom = this.getSmiles (sb, atom, allowConnectionsToOutsideWorld, true, this.explicitH)) != null) {
 }
 while (this.bsToDo.cardinality () > 0 || !this.htRings.isEmpty ()) {
 var e = this.htRings.values ().iterator ();
@@ -173,7 +175,7 @@ atom = this.atoms[this.bsToDo.nextSetBit (0)];
 }sb.append (".");
 this.prevSp2Atoms = null;
 this.prevAtom = null;
-while ((atom = this.getSmiles (sb, atom, allowConnectionsToOutsideWorld, true)) != null) {
+while ((atom = this.getSmiles (sb, atom, allowConnectionsToOutsideWorld, true, this.explicitH)) != null) {
 }
 }
 if (!this.htRings.isEmpty ()) {
@@ -249,7 +251,7 @@ J.util.Logger.error ("BOND STEREOCHEMISTRY ERROR");
 }
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "getSmiles", 
-($fz = function (sb, atom, allowConnectionsToOutsideWorld, allowBranches) {
+($fz = function (sb, atom, allowConnectionsToOutsideWorld, allowBranches, explicitH) {
 var atomIndex = atom.getIndex ();
 if (!this.bsToDo.get (atomIndex)) return null;
 this.bsToDo.clear (atomIndex);
@@ -277,7 +279,7 @@ var index1 = atom1.getIndex ();
 if (index1 == prevIndex) {
 bondPrev = bonds[i];
 continue;
-}var isH = (atom1.getElementNumber () == 1 && atom1.getIsotopeNumber () == 0);
+}var isH = !explicitH && (atom1.getElementNumber () == 1 && atom1.getIsotopeNumber () == 0);
 if (!this.bsIncludingH.get (index1)) {
 if (!isH && allowConnectionsToOutsideWorld && this.bsSelected.get (atomIndex)) this.bsToDo.set (index1);
  else continue;
@@ -300,7 +302,7 @@ var bsBranches =  new JU.BS ();
 if (allowBranches) for (var i = 0; i < v.size (); i++) {
 var bond = v.get (i);
 var a = bond.getOtherAtomNode (atom);
-var n = a.getCovalentBondCount () - a.getCovalentHydrogenCount ();
+var n = a.getCovalentBondCount () - (explicitH ? 0 : a.getCovalentHydrogenCount ());
 var order = bond.getCovalentOrder ();
 if (order == 1 && n == 1 && i < v.size () - (bond0 == null ? 1 : 0)) {
 bsBranches.set (bond.index);
@@ -329,7 +331,7 @@ s2.append ("(");
 this.prevAtom = atom;
 this.prevSp2Atoms = null;
 var bond0t = bond0;
-this.getSmiles (s2, a, allowConnectionsToOutsideWorld, allowBranches);
+this.getSmiles (s2, a, allowConnectionsToOutsideWorld, allowBranches, explicitH);
 bond0 = bond0t;
 s2.append (")");
 if (sMore.indexOf (s2.toString ()) >= 0) stereoFlag = 10;
@@ -388,7 +390,7 @@ nSp2Atoms = 0;
 }this.prevSp2Atoms = sp2Atoms;
 this.prevAtom = atom;
 return atomNext;
-}, $fz.isPrivate = true, $fz), "JU.SB,J.util.JmolNode,~B,~B");
+}, $fz.isPrivate = true, $fz), "JU.SB,J.util.JmolNode,~B,~B,~B");
 $_M(c$, "sortInorganic", 
 ($fz = function (atom, v) {
 var atomIndex = atom.getIndex ();
@@ -486,7 +488,7 @@ $_M(c$, "addStereoCheck",
 ($fz = function (atomIndex, stereo, i, s) {
 var n = stereo[i].getAtomicAndIsotopeNumber ();
 var nx = stereo[i].getCovalentBondCount ();
-var nh = (n == 6 ? stereo[i].getCovalentHydrogenCount () : 0);
+var nh = (n == 6 && !this.explicitH ? stereo[i].getCovalentHydrogenCount () : 0);
 if (n == 6 ? nx != 4 || nh != 3 : nx > 1) return s;
 var sa = ";" + n + "/" + nh + "/" + nx + ",";
 if (s.indexOf (sa) >= 0) {

@@ -100,7 +100,7 @@ this.b = this.b.getGroup ().getLeadAtomOr (this.b);
 } else if (this.hbondsBackbone && J.modelset.Bond.isOrderH (order)) {
 this.a = this.a.getGroup ().getLeadAtomOr (this.a);
 this.b = this.b.getGroup ().getLeadAtomOr (this.b);
-}}if (!this.isPass2 && (!this.a.isInFrame () || !this.b.isInFrame () || !this.g3d.isInDisplayRange (this.a.sX, this.a.sY) || !this.g3d.isInDisplayRange (this.b.sX, this.b.sY) || this.modelSet.isAtomHidden (this.a.getIndex ()) || this.modelSet.isAtomHidden (this.b.getIndex ()))) return false;
+}}if (!this.isPass2 && (!this.a.isVisible (9) || !this.b.isVisible (9) || !this.g3d.isInDisplayRange (this.a.sX, this.a.sY) || !this.g3d.isInDisplayRange (this.b.sX, this.b.sY))) return false;
 if (this.slabbing) {
 if (this.g3d.isClippedZ (this.a.sZ) && this.g3d.isClippedZ (this.b.sZ)) return false;
 if (this.slabByAtom && (this.g3d.isClippedZ (this.a.sZ) || this.g3d.isClippedZ (this.b.sZ))) return false;
@@ -275,7 +275,7 @@ this.yAxis2 += this.dyStep;
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "getAromaticDottedBondMask", 
 ($fz = function () {
-var atomC = this.b.findAromaticNeighbor (this.a.getIndex ());
+var atomC = this.b.findAromaticNeighbor (this.a.index);
 if (atomC == null) return 1;
 var dxAC = atomC.sX - this.xA;
 var dyAC = atomC.sY - this.yA;

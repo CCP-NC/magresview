@@ -251,7 +251,7 @@ var z = JU.V3.new3 (0, 0, 1);
 ecc.add (z);
 ecc.normalize ();
 if (Float.isNaN (ecc.x)) ecc.set (1, 0, 0);
-this.eccentricityMatrix = JU.M3.newM (null);
+this.eccentricityMatrix = JU.M3.newM3 (null);
 this.eccentricityMatrix.setAA (JU.A4.newVA (ecc, 3.141592653589793));
 this.eccentricityMatrixInverse =  new JU.M3 ();
 this.eccentricityMatrixInverse.invertM (this.eccentricityMatrix);

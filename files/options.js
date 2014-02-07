@@ -153,6 +153,35 @@ function opt_transl_handler(evt)
 
 }
 
+function opt_type_handler(evt)
+{
+	var type = document.getElementById("opt_type").value;
+	var transl_text = document.getElementById("opt_transl");
+	
+	var typescript = ""
+	
+	switch (type) {
+		case "fill":
+			typescript = "set ellipsoidarcs false; set ellipsoidaxes false; set ellipsoidball true";
+			transl_text.value = "0.4";
+			transl_text.disabled = false;
+			break;
+		case "axearcs":
+			typescript = "set ellipsoidarcs true; set ellipsoidaxes true; set ellipsoidball false";
+			transl_text.value = "0.0";
+			transl_text.disabled = true;
+			break;
+		case "axes":
+			typescript = "set ellipsoidarcs false; set ellipsoidaxes true; set ellipsoidball false";
+			transl_text.value = "0.0";
+			transl_text.disabled = true;
+			break;
+	}
+	
+	Jmol.script(mainJmol, typescript);
+	plot_update();
+}
+
 function opt_width_handler(evt)
 {
 	//Compatibility code - see console.js for details

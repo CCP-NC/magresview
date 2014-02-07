@@ -38,6 +38,10 @@ this.aaRet = null;
 if (!Clazz.isClassDefined ("J.modelset.AtomCollection.AtomSorter")) {
 J.modelset.AtomCollection.$AtomCollection$AtomSorter$ ();
 }
+this.bsVisible = null;
+this.bsClickable = null;
+this.haveBSVisible = false;
+this.haveBSClickable = false;
 this.bsModulated = null;
 Clazz.instantialize (this, arguments);
 }, J.modelset, "AtomCollection");
@@ -45,6 +49,8 @@ Clazz.prepareFields (c$, function () {
 this.bsHidden =  new JU.BS ();
 this.bsEmpty =  new JU.BS ();
 this.bsFoundRectangle =  new JU.BS ();
+this.bsVisible =  new JU.BS ();
+this.bsClickable =  new JU.BS ();
 });
 $_M(c$, "releaseModelSet", 
 function () {
@@ -269,7 +275,7 @@ $_M(c$, "getBfactor100Lo",
 function () {
 if (!this.hasBfactorRange) {
 if (this.viewer.global.rangeSelected) {
-this.calcBfactorRange (this.viewer.getSelectionSet (false));
+this.calcBfactorRange (this.viewer.getSelectedAtoms ());
 } else {
 this.calcBfactorRange (null);
 }}return this.bfactor100Lo;
@@ -406,9 +412,7 @@ $_M(c$, "setAtomCoordRelative",
 function (atomIndex, x, y, z) {
 if (atomIndex < 0 || atomIndex >= this.atomCount) return;
 var a = this.atoms[atomIndex];
-a.x += x;
-a.y += y;
-a.z += z;
+a.add3 (x, y, z);
 this.fixTrajectory (a);
 this.taintAtom (atomIndex, 2);
 }, "~N,~N,~N,~N");
@@ -486,7 +490,7 @@ case 1114638362:
 if (this.setHydrophobicity (i, fValue)) this.taintAtom (i, 5);
 break;
 case 1826248715:
-case 1288701960:
+case 1288701959:
 this.viewer.setAtomLabel (sValue, i);
 break;
 case 1129318401:
@@ -657,7 +661,7 @@ this.loadCoordinates (dataString, true, true);
 return;
 case 14:
 fData =  Clazz.newFloatArray (this.atomCount, 0);
-bs = J.util.BSUtil.newBitSet (this.atomCount);
+bs = JU.BS.newN (this.atomCount);
 break;
 }
 var lines = J.util.Parser.markLines (dataString, ';');
@@ -786,7 +790,7 @@ $_M(c$, "taintAtom",
 function (atomIndex, type) {
 if (!this.preserveState) return;
 if (this.tainted == null) this.tainted =  new Array (14);
-if (this.tainted[type] == null) this.tainted[type] = J.util.BSUtil.newBitSet (this.atomCount);
+if (this.tainted[type] == null) this.tainted[type] = JU.BS.newN (this.atomCount);
 this.tainted[type].set (atomIndex);
 if (type == 2) this.validateBspfForModel ((this).models[this.atoms[atomIndex].modelIndex].trajectoryBaseIndex, false);
 }, "~N,~N");
@@ -804,7 +808,7 @@ if (this.tainted == null) return;
 this.tainted[type] = null;
 return;
 }if (this.tainted == null) this.tainted =  new Array (14);
-if (this.tainted[type] == null) this.tainted[type] = J.util.BSUtil.newBitSet (this.atomCount);
+if (this.tainted[type] == null) this.tainted[type] = JU.BS.newN (this.atomCount);
 J.util.BSUtil.copy2 (bs, this.tainted[type]);
 }, "JU.BS,~N");
 $_M(c$, "unTaintAtoms", 
@@ -833,7 +837,7 @@ function (rect, bsModels) {
 this.bsFoundRectangle.and (this.bsEmpty);
 for (var i = this.atomCount; --i >= 0; ) {
 var atom = this.atoms[i];
-if (bsModels.get (atom.modelIndex) && atom.isVisible (0) && rect.contains (atom.sX, atom.sY)) this.bsFoundRectangle.set (i);
+if (bsModels.get (atom.modelIndex) && atom.checkVisible () && rect.contains (atom.sX, atom.sY)) this.bsFoundRectangle.set (i);
 }
 return this.bsFoundRectangle;
 }, "J.util.Rectangle,JU.BS");
@@ -1196,9 +1200,9 @@ x.scaleAdd2 (2.828, x, z);
 if (pt != 3) {
 x.normalize ();
 var a = JU.A4.new4 (z.x, z.y, z.z, (pt == 2 ? 1 : -1) * 2.09439507);
-var m = JU.M3.newM (null);
+var m = JU.M3.newM3 (null);
 m.setAA (a);
-m.transform (x);
+m.rotate (x);
 }z.setT (x);
 x.cross (vTemp, z);
 break;
@@ -1475,7 +1479,7 @@ if (doSort) java.util.Arrays.sort (attached, Clazz.innerTypeInstance (J.modelset
 }, $fz.isPrivate = true, $fz), "J.modelset.Atom,~N,~B");
 $_M(c$, "findNotAttached", 
 ($fz = function (nAttached, angles, ptrs, nPtrs) {
-var bs = J.util.BSUtil.newBitSet (nAttached);
+var bs = JU.BS.newN (nAttached);
 bs.setBits (0, nAttached);
 for (var i = 0; i < nAttached; i++) for (var j = 0; j < nPtrs; j++) {
 var a = angles[ptrs[j]];
@@ -1587,13 +1591,13 @@ case 1073741824:
 return this.getIdentifierOrNull (specInfo);
 case 1048608:
 var atomSpec = (specInfo).toUpperCase ();
-if (atomSpec.indexOf ("\\?") >= 0) atomSpec = JU.PT.simpleReplace (atomSpec, "\\?", "\1");
+if (atomSpec.indexOf ("\\?") >= 0) atomSpec = JU.PT.rep (atomSpec, "\\?", "\1");
 for (i = this.atomCount; --i >= 0; ) if (this.isAtomNameMatch (this.atoms[i], atomSpec, false)) bs.set (i);
 
 break;
 case 1048607:
 var spec = specInfo;
-for (i = this.atomCount; --i >= 0; ) if (this.atoms[i].isAlternateLocationMatch (spec)) bs.set (i);
+for (i = this.atomCount; --i >= 0; ) if (this.atoms[i].isAltLoc (spec)) bs.set (i);
 
 break;
 case 1048612:
@@ -1667,7 +1671,7 @@ return bs;
 $_M(c$, "getIdentifierOrNull", 
 ($fz = function (identifier) {
 var bs = this.getSpecNameOrNull (identifier, false);
-if (identifier.indexOf ("\\?") >= 0) identifier = JU.PT.simpleReplace (identifier, "\\?", "\1");
+if (identifier.indexOf ("\\?") >= 0) identifier = JU.PT.rep (identifier, "\\?", "\1");
 if (bs != null || identifier.indexOf ("?") > 0) return bs;
 if (identifier.indexOf ("*") > 0) return this.getSpecNameOrNull (identifier, true);
 var len = identifier.length;
@@ -1715,18 +1719,18 @@ $_M(c$, "getSpecNameOrNull",
 ($fz = function (name, checkStar) {
 var bs = null;
 name = name.toUpperCase ();
-if (name.indexOf ("\\?") >= 0) name = JU.PT.simpleReplace (name, "\\?", "\1");
+if (name.indexOf ("\\?") >= 0) name = JU.PT.rep (name, "\\?", "\1");
 for (var i = this.atomCount; --i >= 0; ) {
 var g3 = this.atoms[i].getGroup3 (true);
 if (g3 != null && g3.length > 0) {
 if (J.util.Txt.isMatch (g3, name, checkStar, true)) {
-if (bs == null) bs = J.util.BSUtil.newBitSet (i + 1);
+if (bs == null) bs = JU.BS.newN (i + 1);
 bs.set (i);
 while (--i >= 0 && this.atoms[i].getGroup3 (true).equals (g3)) bs.set (i);
 
 i++;
 }} else if (this.isAtomNameMatch (this.atoms[i], name, checkStar)) {
-if (bs == null) bs = J.util.BSUtil.newBitSet (i + 1);
+if (bs == null) bs = JU.BS.newN (i + 1);
 bs.set (i);
 }}
 return bs;
@@ -1766,7 +1770,7 @@ function (chainID) {
 var caseSensitive = chainID < 256 && this.viewer.getBoolean (603979822);
 if (!caseSensitive) chainID = J.modelset.AtomCollection.chainToUpper (chainID);
 var bs =  new JU.BS ();
-var bsDone = J.util.BSUtil.newBitSet (this.atomCount);
+var bsDone = JU.BS.newN (this.atomCount);
 var id;
 for (var i = bsDone.nextClearBit (0); i < this.atomCount; i = bsDone.nextClearBit (i + 1)) {
 var chain = this.atoms[i].getChain ();
@@ -1815,19 +1819,31 @@ break;
 }
 return bsResult;
 }, "~N,~A,JU.BS");
+$_M(c$, "getRenderable", 
+function (bsAtoms) {
+bsAtoms.clearAll ();
+this.haveBSVisible = false;
+this.haveBSClickable = false;
+for (var i = this.atomCount; --i >= 0; ) if (this.atoms[i].isVisible (1)) bsAtoms.set (i);
+
+}, "JU.BS");
 $_M(c$, "getVisibleSet", 
 function () {
-var bs =  new JU.BS ();
-for (var i = this.atomCount; --i >= 0; ) if (this.atoms[i].isVisible (0)) bs.set (i);
+if (this.haveBSVisible) return this.bsVisible;
+this.bsVisible.clearAll ();
+for (var i = this.atomCount; --i >= 0; ) if (this.atoms[i].checkVisible ()) this.bsVisible.set (i);
 
-return bs;
+this.haveBSVisible = true;
+return this.bsVisible;
 });
 $_M(c$, "getClickableSet", 
 function () {
-var bs =  new JU.BS ();
-for (var i = this.atomCount; --i >= 0; ) if (this.atoms[i].isClickable ()) bs.set (i);
+if (this.haveBSClickable) return this.bsClickable;
+this.bsClickable.clearAll ();
+for (var i = this.atomCount; --i >= 0; ) if (this.atoms[i].isClickable ()) this.bsClickable.set (i);
 
-return bs;
+this.haveBSClickable = true;
+return this.bsClickable;
 });
 $_M(c$, "isModulated", 
 function (i) {

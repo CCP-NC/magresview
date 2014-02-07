@@ -1,10 +1,10 @@
 Clazz.declarePackage ("javajs.swing");
-Clazz.load (["javajs.swing.JComponent"], "javajs.swing.JComboBox", ["JU.SB"], function () {
+Clazz.load (["javajs.swing.AbstractButton"], "javajs.swing.JComboBox", ["JU.SB"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.info = null;
 this.selectedIndex = 0;
 Clazz.instantialize (this, arguments);
-}, javajs.swing, "JComboBox", javajs.swing.JComponent);
+}, javajs.swing, "JComboBox", javajs.swing.AbstractButton);
 Clazz.makeConstructor (c$, 
 function (info) {
 Clazz.superConstructor (this, javajs.swing.JComboBox, ["cmbJCB"]);

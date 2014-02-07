@@ -93,9 +93,7 @@ function () {
 if (this.useOriginStepsPoints) {
 this.xyzMin = JU.P3.newP (this.params.origin);
 this.xyzMax = JU.P3.newP (this.params.origin);
-this.xyzMax.x += (this.params.points.x - 1) * this.params.steps.x;
-this.xyzMax.y += (this.params.points.y - 1) * this.params.steps.y;
-this.xyzMax.z += (this.params.points.z - 1) * this.params.steps.z;
+this.xyzMax.add3 ((this.params.points.x - 1) * this.params.steps.x, (this.params.points.y - 1) * this.params.steps.y, (this.params.points.z - 1) * this.params.steps.z);
 } else if (this.params.boundingBox == null) {
 this.getAtoms (this.params.bsSelected, false, true, false, false, false, false, this.params.mep_marginAngstroms);
 if (this.xyzMin == null) {

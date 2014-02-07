@@ -563,9 +563,7 @@ v.add2 (op.normalOrAxis, this.center);
 sb.append ("draw pgvp").append (m).appendI (j + 1).append ("ring width 0.05 scale ").appendF (scaleFactor * this.radius * 2).append (" arc ").append (J.util.Escape.eP (v));
 v.scaleAdd2 (-2, op.normalOrAxis, v);
 sb.append (J.util.Escape.eP (v));
-v.x += 0.011;
-v.y += 0.012;
-v.z += 0.013;
+v.add3 (0.011, 0.012, 0.013);
 sb.append (J.util.Escape.eP (v)).append ("{0 360 0.5} color ").append (this.principalPlane != null && op.index == this.principalPlane.index ? "red" : "blue").append (";\n");
 }
 sb.append ("# name=").append (this.name);

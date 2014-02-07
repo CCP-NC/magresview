@@ -1,5 +1,5 @@
 Clazz.declarePackage ("javajs.swing");
-Clazz.load (["javajs.swing.JComponent"], "javajs.swing.JSplitPane", ["javajs.swing.JContainer", "JU.SB"], function () {
+Clazz.load (["javajs.swing.JComponent"], "javajs.swing.JSplitPane", ["javajs.swing.JComponentImp", "JU.SB"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.isH = true;
 this.split = 1;
@@ -15,15 +15,15 @@ this.isH = (split == 1);
 }, "~N");
 $_M(c$, "setRightComponent", 
 function (r) {
-this.right =  new javajs.swing.JContainer (null);
+this.right =  new javajs.swing.JComponentImp (null);
 this.right.add (r);
 }, "javajs.swing.JComponent");
 $_M(c$, "setLeftComponent", 
 function (l) {
-this.left =  new javajs.swing.JContainer (null);
+this.left =  new javajs.swing.JComponentImp (null);
 this.left.add (l);
 }, "javajs.swing.JComponent");
-$_V(c$, "getSubcomponentWidth", 
+$_M(c$, "getSubcomponentWidth", 
 function () {
 var w = this.width;
 if (w == 0) {
@@ -34,7 +34,7 @@ if (this.isH) w = wleft + wright;
  else w = Math.max (wleft, wright);
 }}return w;
 });
-$_V(c$, "getSubcomponentHeight", 
+$_M(c$, "getSubcomponentHeight", 
 function () {
 var h = this.height;
 if (h == 0) {
@@ -55,10 +55,10 @@ var sb =  new JU.SB ();
 sb.append ("<div id='" + this.id + "' class='JSplitPane' style='" + this.getCSSstyle (100) + "'>");
 if (isH) sb.append ("<div id='" + this.id + "_left' style='width:50%;height:100%;position:absolute;top:0%;left:0%'>");
  else sb.append ("<div id='" + this.id + "_top' style='width:100%;height:50%;position:absolute;top:0%;left:0%'>");
-sb.append (this.left.list.get (0).toHTML ());
+sb.append (this.left.getComponents ()[0].toHTML ());
 if (isH) sb.append ("</div><div id='" + this.id + "_right' style='width:50%;height:100%;position:absolute;top:0%;left:50%'>");
  else sb.append ("</div><div id='" + this.id + "_bottom' style='width:100%;height:50%;position:absolute;top:50%;left:0%'>");
-sb.append (this.right.list.get (0).toHTML ());
+sb.append (this.right.getComponents ()[0].toHTML ());
 sb.append ("</div></div>\n");
 return sb.toString ();
 });

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("javajs.swing");
-Clazz.load (["javajs.swing.JContainer"], "javajs.swing.JDialog", ["javajs.awt.Color", "javajs.swing.JContentPane", "JU.SB"], function () {
+Clazz.load (["javajs.swing.JComponent"], "javajs.swing.JDialog", ["javajs.awt.Color", "javajs.swing.JContentPane", "JU.SB"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.defaultWidth = 600;
 this.defaultHeight = 300;
@@ -9,7 +9,7 @@ this.html = null;
 this.zIndex = 9000;
 this.loc = null;
 Clazz.instantialize (this, arguments);
-}, javajs.swing, "JDialog", javajs.swing.JContainer);
+}, javajs.swing, "JDialog", javajs.swing.JComponent);
 $_M(c$, "setZIndex", 
 function (zIndex) {
 this.zIndex = zIndex;

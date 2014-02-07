@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.util");
-Clazz.load (["J.util.Elements"], "J.util.JmolMolecule", ["JU.AU", "$.BS", "J.util.BSUtil"], function () {
+Clazz.load (["J.util.Elements"], "J.util.JmolMolecule", ["JU.AU", "$.BS"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.nodes = null;
 this.moleculeIndex = 0;
@@ -49,7 +49,7 @@ return J.util.JmolMolecule.allocateArray (molecules, moleculeCount);
 }, "~A,~A,JU.List,JU.BS");
 c$.getBranchBitSet = $_M(c$, "getBranchBitSet", 
 function (atoms, atomIndex, bsToTest, biobranches, atomIndexNot, allowCyclic, allowBioResidue) {
-var bs = J.util.BSUtil.newBitSet (atoms.length);
+var bs = JU.BS.newN (atoms.length);
 if (atomIndex < 0) return bs;
 if (atomIndexNot >= 0) bsToTest.clear (atomIndexNot);
 return (J.util.JmolMolecule.getCovalentlyConnectedBitSet (atoms, atoms[atomIndex], bsToTest, allowCyclic, allowBioResidue, biobranches, bs) ? bs :  new JU.BS ());

@@ -27,7 +27,7 @@ var c1 = name.charAt (0);
 var c2 = ' ';
 var nChar = (name.length == 2 && (J.adapter.smarter.Atom.isValidElementSymbol2 (c1, c2 = Character.toLowerCase (name.charAt (1))) || name.equals ("Du")) ? 2 : 1);
 atom.elementSymbol = (nChar == 1 ? "" + c1 : "" + c1 + c2);
-this.setAtomCoordXYZ (atom, this.parseFloatStr (tokens[2]), this.parseFloatStr (tokens[3]), this.parseFloatStr (tokens[4]));
+this.setAtomCoordTokens (atom, tokens, 2);
 atom.partialCharge = (tokens.length >= 6 ? this.parseFloatStr (tokens[5]) : 0);
 this.atomSetCollection.addAtomWithMappedSerialNumber (atom);
 }

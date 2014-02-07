@@ -215,12 +215,12 @@ function (graphSets, doSplit) {
 if (doSplit && this.isSplittable) {
 this.nSplit = this.nSpectra;
 this.showAllStacked = false;
-this.setSpectrumClicked (0);
+this.setSpectrumClicked (this.iSpectrumSelected);
 } else {
 this.nSplit = 1;
 this.splitPointers[0] = 0;
 this.showAllStacked = this.allowStacking && !doSplit;
-this.setSpectrumClicked (-1);
+this.setSpectrumClicked (this.iSpectrumSelected);
 }this.stackSelected = false;
 JSV.common.GraphSet.setFractionalPositions (this.pd, graphSets, JSV.common.PanelData.LinkMode.NONE);
 }, "JU.List,~B");
@@ -938,7 +938,7 @@ for (var i = this.viewList.size (); --i >= 1; ) this.viewList.remove (i);
 
 });
 $_M(c$, "drawAll", 
-($fz = function (gMain, gTop, iSplit, needNewPins, doAll) {
+($fz = function (gMain, gFront, gRear, iSplit, needNewPins, doAll) {
 this.g2d = this.pd.g2d;
 this.gMain = gMain;
 var subIndex = this.getSpectrumAt (0).getSubIndex ();
@@ -961,6 +961,7 @@ if (n++ == 0) continue;
 doYScale = new Boolean (doYScale & this.viewData.areYScalesSame (i - 1, i)).valueOf ();
 }
 }}var iSpecForFrame = (this.nSpectra == 1 ? 0 : !this.showAllStacked ? this.iSpectrumMovedTo : this.iSpectrumSelected);
+var g2 = (gRear === gMain ? gFront : gRear);
 if (doAll) {
 var addCurrentBox = (!this.isLinked && (this.isSplittable) && (!this.isSplittable || this.nSplit == 1 || this.pd.currentSplitPoint == iSplit));
 var drawUpDownArrows = (this.pd.isCurrentGraphSet (this) && this.zoomEnabled && this.spectra.get (0).isScalable () && (addCurrentBox || this.nSpectra == 1) && (this.nSplit == 1 || this.pd.currentSplitPoint == this.iSpectrumMovedTo) && !this.isDrawNoSpectra ());
@@ -983,12 +984,12 @@ iSpectrumForScale = i;
 var doDraw1DY = (doDrawWidgets && this.$haveSelectedSpectrum && i == iSpectrumForScale);
 if (doDrawWidgets) {
 this.resetPinsFromView ();
-this.drawWidgets (gTop, subIndex, needNewPins, doDraw1DObjects, doDraw1DY, false);
+this.drawWidgets (gFront, g2, subIndex, needNewPins, doDraw1DObjects, doDraw1DY, false);
 }if (this.haveSingleYScale && i == iSpectrumForScale && doAll) {
 this.drawGrid (gMain);
 if (this.pd.isPrinting && this.nSplit > 1) this.drawSpectrumSource (gMain, i);
-}if (doDrawWidgets) this.drawWidgets (gTop, subIndex, false, doDraw1DObjects, doDraw1DY, true);
-if (this.haveSingleYScale && !this.isDrawNoSpectra () && i == iSpectrumForScale && (this.nSpectra == 1 || this.iSpectrumSelected >= 0)) this.drawHighlightsAndPeakTabs (gTop, i);
+}if (doDrawWidgets) this.drawWidgets (gFront, g2, subIndex, false, doDraw1DObjects, doDraw1DY, true);
+if (this.haveSingleYScale && !this.isDrawNoSpectra () && i == iSpectrumForScale && (this.nSpectra == 1 || this.iSpectrumSelected >= 0)) this.drawHighlightsAndPeakTabs (gFront, g2, i);
 if (doAll) {
 if (n == 1 && this.iSpectrumSelected < 0 || this.iSpectrumSelected == i && this.pd.isCurrentGraphSet (this)) {
 if (this.pd.titleOn && !this.pd.titleDrawn) {
@@ -998,10 +999,10 @@ this.pd.titleDrawn = true;
 if (this.pd.getBoolean (JSV.common.ScriptToken.YSCALEON)) this.drawYScale (gMain, this);
 if (this.pd.getBoolean (JSV.common.ScriptToken.YUNITSON)) this.drawYUnits (gMain);
 }this.drawSpectrum (gMain, i, offset, isGrey, ig);
-}this.drawMeasurements (gTop, i);
-if (this.pendingMeasurement != null && this.pendingMeasurement.spec === spec) this.drawMeasurement (gTop, this.pendingMeasurement);
+}this.drawMeasurements (gFront, i);
+if (this.pendingMeasurement != null && this.pendingMeasurement.spec === spec) this.drawMeasurement (gFront, this.pendingMeasurement);
 if ((this.nSplit > 1 ? i == this.iSpectrumMovedTo : this.isLinked || i == iSpectrumForScale) && !this.pd.isPrinting && this.xPixelMovedTo >= 0 && spec.isContinuous ()) {
-this.drawSpectrumPointer (gTop, spec, ig);
+this.drawSpectrumPointer (gFront, spec, offset, ig);
 }if (this.nSpectra > 1 && this.nSplit == 1 && this.pd.isCurrentGraphSet (this) && doAll) {
 this.haveLeftRightArrows = true;
 if (!this.pd.isPrinting) {
@@ -1031,10 +1032,10 @@ if (doAll) {
 if (this.pd.getBoolean (JSV.common.ScriptToken.XSCALEON)) this.drawXScale (gMain, this.imageView);
 if (this.pd.getBoolean (JSV.common.ScriptToken.YSCALEON)) this.drawYScale (gMain, this.imageView);
 if (subIndex >= 0) this.draw2DUnits (gMain);
-}this.drawWidgets (gTop, subIndex, needNewPins, doDraw1DObjects, true, false);
-this.drawWidgets (gTop, subIndex, needNewPins, doDraw1DObjects, true, true);
-}if (this.annotations != null) this.drawAnnotations (gTop, this.annotations, null);
-}, $fz.isPrivate = true, $fz), "~O,~O,~N,~B,~B");
+}this.drawWidgets (gFront, g2, subIndex, needNewPins, doDraw1DObjects, true, false);
+this.drawWidgets (gFront, g2, subIndex, needNewPins, doDraw1DObjects, true, true);
+}if (this.annotations != null) this.drawAnnotations (gFront, this.annotations, null);
+}, $fz.isPrivate = true, $fz), "~O,~O,~O,~N,~B,~B");
 $_M(c$, "drawSpectrumSource", 
 ($fz = function (g, i) {
 this.pd.printFilePath (g, this.pd.thisWidth - this.pd.right, this.yPixel0, this.spectra.get (i).getFilePath ());
@@ -1046,7 +1047,7 @@ var ok = (this.showAllStacked || this.iSpectrumSelected == -1 || this.iSpectrumS
 return (this.nSplit > 1 ? i == iSplit : ok && (!this.pd.isPrinting || !isGrey));
 }, $fz.isPrivate = true, $fz), "~N,~N");
 $_M(c$, "drawSpectrumPointer", 
-($fz = function (g, spec, ig) {
+($fz = function (g, spec, yOffset, ig) {
 this.setColorFromToken (g, JSV.common.ScriptToken.PEAKTABCOLOR);
 var iHandle = this.pd.integralShiftMode;
 if (ig != null) {
@@ -1067,10 +1068,10 @@ this.g2d.drawLine (g, this.xPixelMovedTo, this.yPixel0, this.xPixelMovedTo, this
 if (this.xPixelMovedTo2 >= 0) this.g2d.drawLine (g, this.xPixelMovedTo2, this.yPixel0, this.xPixelMovedTo2, this.yPixel1);
 this.yValueMovedTo = NaN;
 } else {
-var y = (ig == null ? this.toPixelY (this.yValueMovedTo) : this.toPixelYint (this.yValueMovedTo / 100));
+var y = (ig == null ? yOffset + this.toPixelY (this.yValueMovedTo) : this.toPixelYint (this.yValueMovedTo / 100));
 if (y == this.fixY (y)) this.g2d.drawLine (g, this.xPixelMovedTo, y - 10, this.xPixelMovedTo, y + 10);
 }if (ig != null) this.g2d.setStrokeBold (g, false);
-}, $fz.isPrivate = true, $fz), "~O,JSV.common.JDXSpectrum,JSV.common.IntegralData");
+}, $fz.isPrivate = true, $fz), "~O,JSV.common.JDXSpectrum,~N,JSV.common.IntegralData");
 $_M(c$, "setScale", 
 function (i) {
 this.viewData.setScale (i, this.xPixels, this.yPixels, this.spectra.get (i).isInverted ());
@@ -1084,20 +1085,20 @@ this.drawUnits (g, nucleusX, this.imageView.xPixel1 + 5 * this.pd.scalingFactor,
 this.drawUnits (g, nucleusY, this.imageView.xPixel0 - 5 * this.pd.scalingFactor, this.yPixel0, 1, 0);
 }, $fz.isPrivate = true, $fz), "~O");
 $_M(c$, "drawPeakTabs", 
-($fz = function (g, spec) {
+($fz = function (gFront, g2, spec) {
 var list = (this.nSpectra == 1 || this.iSpectrumSelected >= 0 ? spec.getPeakList () : null);
 if (list != null && list.size () > 0) {
 if (this.piMouseOver != null && this.piMouseOver.spectrum === spec && this.pd.isMouseUp ()) {
-this.g2d.setGraphicsColor (g, this.g2d.getColor4 (240, 240, 240, 140));
-this.drawPeak (g, this.piMouseOver, true);
+this.g2d.setGraphicsColor (g2, this.g2d.getColor4 (240, 240, 240, 140));
+this.drawPeak (g2, this.piMouseOver, true);
 spec.setHighlightedPeak (this.piMouseOver);
 } else {
 spec.setHighlightedPeak (null);
-}this.setColorFromToken (g, JSV.common.ScriptToken.PEAKTABCOLOR);
+}this.setColorFromToken (gFront, JSV.common.ScriptToken.PEAKTABCOLOR);
 for (var i = list.size (); --i >= 0; ) {
-this.drawPeak (g, list.get (i), false);
+this.drawPeak (gFront, list.get (i), false);
 }
-}}, $fz.isPrivate = true, $fz), "~O,JSV.common.JDXSpectrum");
+}}, $fz.isPrivate = true, $fz), "~O,~O,JSV.common.JDXSpectrum");
 $_M(c$, "drawPeak", 
 ($fz = function (g, pi, isFull) {
 if (this.pd.isPrinting) return;
@@ -1107,20 +1108,20 @@ if (xMin != xMax) {
 this.drawBar (g, pi, xMin, xMax, null, isFull);
 }}, $fz.isPrivate = true, $fz), "~O,JSV.common.PeakInfo,~B");
 $_M(c$, "drawWidgets", 
-($fz = function (g, subIndex, needNewPins, doDraw1DObjects, doDraw1DY, postGrid) {
+($fz = function (gFront, g2, subIndex, needNewPins, doDraw1DObjects, doDraw1DY, postGrid) {
 this.setWidgets (needNewPins, subIndex, doDraw1DObjects);
 if (this.pd.isPrinting && (this.imageView == null ? !this.cur1D2Locked : this.sticky2Dcursor)) return;
 if (!this.pd.isPrinting && !postGrid) {
 if (doDraw1DObjects) {
-this.fillBox (g, this.xPixel0, this.pin1Dx0.yPixel1, this.xPixel1, this.pin1Dx1.yPixel1 + 2, JSV.common.ScriptToken.GRIDCOLOR);
-this.fillBox (g, this.pin1Dx0.xPixel0, this.pin1Dx0.yPixel1, this.pin1Dx1.xPixel0, this.pin1Dx1.yPixel1 + 2, JSV.common.ScriptToken.PLOTCOLOR);
+this.fillBox (gFront, this.xPixel0, this.pin1Dx0.yPixel1, this.xPixel1, this.pin1Dx1.yPixel1 + 2, JSV.common.ScriptToken.GRIDCOLOR);
+this.fillBox (gFront, this.pin1Dx0.xPixel0, this.pin1Dx0.yPixel1, this.pin1Dx1.xPixel0, this.pin1Dx1.yPixel1 + 2, JSV.common.ScriptToken.PLOTCOLOR);
 } else {
-this.fillBox (g, this.imageView.xPixel0, this.pin2Dx0.yPixel1, this.imageView.xPixel1, this.pin2Dx0.yPixel1 + 2, JSV.common.ScriptToken.GRIDCOLOR);
-this.fillBox (g, this.pin2Dx0.xPixel0, this.pin2Dx0.yPixel1, this.pin2Dx1.xPixel0, this.pin2Dx1.yPixel1 + 2, JSV.common.ScriptToken.PLOTCOLOR);
-this.fillBox (g, this.pin2Dy0.xPixel1, this.yPixel1, this.pin2Dy1.xPixel1 + 2, this.yPixel0, JSV.common.ScriptToken.GRIDCOLOR);
-this.fillBox (g, this.pin2Dy0.xPixel1, this.pin2Dy0.yPixel1, this.pin2Dy1.xPixel1 + 2, this.pin2Dy1.yPixel0, JSV.common.ScriptToken.PLOTCOLOR);
-}this.fillBox (g, this.pin1Dy0.xPixel1, this.yPixel1, this.pin1Dy1.xPixel1 + 2, this.yPixel0, JSV.common.ScriptToken.GRIDCOLOR);
-if (doDraw1DY) this.fillBox (g, this.pin1Dy0.xPixel1, this.pin1Dy0.yPixel1, this.pin1Dy1.xPixel1 + 2, this.pin1Dy1.yPixel0, JSV.common.ScriptToken.PLOTCOLOR);
+this.fillBox (gFront, this.imageView.xPixel0, this.pin2Dx0.yPixel1, this.imageView.xPixel1, this.pin2Dx0.yPixel1 + 2, JSV.common.ScriptToken.GRIDCOLOR);
+this.fillBox (gFront, this.pin2Dx0.xPixel0, this.pin2Dx0.yPixel1, this.pin2Dx1.xPixel0, this.pin2Dx1.yPixel1 + 2, JSV.common.ScriptToken.PLOTCOLOR);
+this.fillBox (gFront, this.pin2Dy0.xPixel1, this.yPixel1, this.pin2Dy1.xPixel1 + 2, this.yPixel0, JSV.common.ScriptToken.GRIDCOLOR);
+this.fillBox (gFront, this.pin2Dy0.xPixel1, this.pin2Dy0.yPixel1, this.pin2Dy1.xPixel1 + 2, this.pin2Dy1.yPixel0, JSV.common.ScriptToken.PLOTCOLOR);
+}this.fillBox (gFront, this.pin1Dy0.xPixel1, this.yPixel1, this.pin1Dy1.xPixel1 + 2, this.yPixel0, JSV.common.ScriptToken.GRIDCOLOR);
+if (doDraw1DY) this.fillBox (gFront, this.pin1Dy0.xPixel1, this.pin1Dy0.yPixel1, this.pin1Dy1.xPixel1 + 2, this.pin1Dy1.yPixel0, JSV.common.ScriptToken.PLOTCOLOR);
 }for (var i = 0; i < this.widgets.length; i++) {
 var pw = this.widgets[i];
 if (pw == null || !pw.isPinOrCursor && !this.zoomEnabled) continue;
@@ -1134,14 +1135,14 @@ if ((this.imageView != null && doDraw1DObjects == isPin1Dy) || isPin1Dy && !doDr
 if (!this.isLinked || this.imageView != null) continue;
 }}if (this.pd.isPrinting && !isLockedCursor) continue;
 if (pw.isPinOrCursor) {
-this.setColorFromToken (g, pw.color);
-this.g2d.drawLine (g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
+this.setColorFromToken (gFront, pw.color);
+this.g2d.drawLine (gFront, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1);
 pw.isVisible = true;
-if (pw.isPin) this.drawHandle (g, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
+if (pw.isPin) this.drawHandle (gFront, pw.xPixel0, pw.yPixel0, !pw.isEnabled);
 } else if (pw.xPixel1 != pw.xPixel0) {
-this.fillBox (g, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, pw === this.zoomBox1D && this.pd.shiftPressed ? JSV.common.ScriptToken.ZOOMBOXCOLOR2 : JSV.common.ScriptToken.ZOOMBOXCOLOR);
+this.fillBox (g2, pw.xPixel0, pw.yPixel0, pw.xPixel1, pw.yPixel1, pw === this.zoomBox1D && this.pd.shiftPressed ? JSV.common.ScriptToken.ZOOMBOXCOLOR2 : JSV.common.ScriptToken.ZOOMBOXCOLOR);
 }}
-}, $fz.isPrivate = true, $fz), "~O,~N,~B,~B,~B,~B");
+}, $fz.isPrivate = true, $fz), "~O,~O,~N,~B,~B,~B,~B");
 $_M(c$, "drawBar", 
 ($fz = function (g, pi, startX, endX, whatColor, isFullHeight) {
 var x1 = this.toPixelX (startX);
@@ -1156,11 +1157,14 @@ if (x2 - x1 < 3) {
 x1 -= 2;
 x2 += 2;
 }if (pi != null) pi.setPixelRange (x1, x2);
-this.fillBox (g, x1, this.yPixel0, x2, this.yPixel0 + (isFullHeight ? this.yPixels : 5), whatColor);
-if (pi != null && !isFullHeight) {
+if (isFullHeight) {
+this.fillBox (g, x1, this.yPixel0, x2, this.yPixel0 + this.yPixels, whatColor);
+} else {
+this.fillBox (g, x1, this.yPixel0, x2, this.yPixel0 + 5, whatColor);
+if (pi != null) {
 x1 = Clazz.doubleToInt ((x1 + x2) / 2);
 this.fillBox (g, x1 - 1, this.yPixel0, x1 + 1, this.yPixel0 + 7, whatColor);
-}}, $fz.isPrivate = true, $fz), "~O,JSV.common.PeakInfo,~N,~N,JSV.common.ScriptToken,~B");
+}}}, $fz.isPrivate = true, $fz), "~O,JSV.common.PeakInfo,~N,~N,JSV.common.ScriptToken,~B");
 $_M(c$, "drawSpectrum", 
 ($fz = function (g, index, yOffset, isGrey, ig) {
 var spec = this.spectra.get (index);
@@ -1215,8 +1219,9 @@ this.setColorFromToken (g, JSV.common.ScriptToken.INTEGRALPLOTCOLOR);
 this.g2d.drawLine (g, x1, y0, x1, y1);
 this.setPlotColor (g, iColor);
 continue;
-}if (y1 == y2 && (y1 == this.yPixel0 || y1 == this.yPixel1)) continue;
-if (bsDraw != null && bsDraw.get (i) != plotOn) {
+}if (y1 == y2 && (y1 == this.yPixel0)) {
+continue;
+}if (bsDraw != null && bsDraw.get (i) != plotOn) {
 plotOn = bsDraw.get (i);
 if (!this.pd.isPrinting && this.pd.integralShiftMode != 0) this.setPlotColor (g, 0);
  else if (plotOn) this.setColorFromToken (g, JSV.common.ScriptToken.INTEGRALPLOTCOLOR);
@@ -1401,35 +1406,35 @@ var units = this.spectra.get (0).getAxisLabel (false);
 if (units != null) this.drawUnits (g, units, (this.pd.isPrinting ? 30 : 5) * this.pd.scalingFactor, this.yPixel0 + (this.pd.isPrinting ? 0 : 5) * this.pd.scalingFactor, 0, -1);
 }, $fz.isPrivate = true, $fz), "~O");
 $_M(c$, "drawHighlightsAndPeakTabs", 
-($fz = function (g, iSpec) {
+($fz = function (gFront, gRear, iSpec) {
 var md = this.getMeasurements (JSV.common.Annotation.AType.PeakList, iSpec);
 var spec = this.spectra.get (iSpec);
 if (this.pd.isPrinting) {
 if (md != null) {
-this.setColorFromToken (g, JSV.common.ScriptToken.PEAKTABCOLOR);
-this.printPeakList (g, spec, md);
+this.setColorFromToken (gFront, JSV.common.ScriptToken.PEAKTABCOLOR);
+this.printPeakList (gFront, spec, md);
 }return;
 }if (md == null) {
 for (var i = 0; i < this.highlights.size (); i++) {
 var hl = this.highlights.get (i);
 if (hl.spectrum === spec) {
 this.pd.setHighlightColor (hl.color);
-this.drawBar (g, null, hl.x1, hl.x2, JSV.common.ScriptToken.HIGHLIGHTCOLOR, true);
+this.drawBar (gRear, null, hl.x1, hl.x2, JSV.common.ScriptToken.HIGHLIGHTCOLOR, true);
 }}
-this.drawPeakTabs (g, spec);
+this.drawPeakTabs (gFront, gRear, spec);
 }var y;
 if (md != null) {
 y = (spec.isInverted () ? this.yPixel1 - 10 * this.pd.scalingFactor : this.yPixel0);
-this.setColorFromToken (g, JSV.common.ScriptToken.PEAKTABCOLOR);
+this.setColorFromToken (gFront, JSV.common.ScriptToken.PEAKTABCOLOR);
 for (var i = md.size (); --i >= 0; ) {
 var m = md.get (i);
 var x = this.toPixelX (m.getXVal ());
-this.g2d.drawLine (g, x, y, x, y + 10 * this.pd.scalingFactor);
+this.g2d.drawLine (gFront, x, y, x, y + 10 * this.pd.scalingFactor);
 }
 if (this.isVisible (this.getDialog (JSV.common.Annotation.AType.PeakList, iSpec))) {
 y = this.toPixelY ((md).getThresh ());
-if (y == this.fixY (y) && !this.pd.isPrinting) this.g2d.drawLine (g, this.xPixel0, y, this.xPixel1, y);
-}}}, $fz.isPrivate = true, $fz), "~O,~N");
+if (y == this.fixY (y) && !this.pd.isPrinting) this.g2d.drawLine (gFront, this.xPixel0, y, this.xPixel1, y);
+}}}, $fz.isPrivate = true, $fz), "~O,~O,~N");
 $_M(c$, "printPeakList", 
 ($fz = function (g, spec, data) {
 var sdata = data.getMeasurementListArray (null);
@@ -1682,8 +1687,8 @@ var x2 = this.toPixelX (point2.getXVal ());
 var y1 = (isIntegral ? this.toPixelYint (point1.getYVal ()) : this.toPixelY (point1.getYVal ()));
 var y2 = (isIntegral ? this.toPixelYint (point2.getYVal ()) : this.toPixelY (point2.getYVal ()));
 if (y1 == -2147483648 || y2 == -2147483648) continue;
-y1 = yOffset + this.fixY (y1);
-y2 = yOffset + this.fixY (y2);
+y1 = this.fixY (y1) - yOffset;
+y2 = this.fixY (y2) - yOffset;
 if (JSV.common.GraphSet.isOnLine (xPixel, yPixel, x1, y1, x2, y2)) return true;
 }
 } else {
@@ -1824,7 +1829,7 @@ if (xMin == null || xMax == null) return;
 var x1 = JU.PT.parseFloat (xMin);
 var x2 = JU.PT.parseFloat (xMax);
 if (Float.isNaN (x1) || Float.isNaN (x2)) return;
-this.pd.addHighlight (this, x1, x2, spec, 200, 200, 200, 200);
+this.pd.addHighlight (this, x1, x2, spec, 200, 200, 200, 100);
 spec.setSelectedPeak (peakInfo);
 if (this.getScale ().isInRangeX (x1) || this.getScale ().isInRangeX (x2) || x1 < this.getScale ().minX && this.getScale ().maxX < x2) {
 } else {
@@ -2006,7 +2011,7 @@ J.util.Logger.info ("JSVGraphSet " + (i + 1) + " nSpectra = " + graphSets.get (i
 return graphSets;
 }, "JSV.common.PanelData,JSV.api.JSVPanel,JU.List,~N,~N,JSV.common.PanelData.LinkMode");
 $_M(c$, "drawGraphSet", 
-function (gMain, gTop, width, height, left, right, top, bottom, isResized, taintedAll) {
+function (gMain, gFront, gRear, width, height, left, right, top, bottom, isResized, taintedAll) {
 this.zoomEnabled = this.pd.getBoolean (JSV.common.ScriptToken.ENABLEZOOM);
 this.height = height * this.pd.scalingFactor;
 this.width = width * this.pd.scalingFactor;
@@ -2021,11 +2026,11 @@ if (!this.pd.isPrinting && this.widgets != null) for (var j = 0; j < this.widget
 
 for (var iSplit = 0; iSplit < this.nSplit; iSplit++) {
 this.setPositionForFrame (iSplit);
-this.drawAll (gMain, gTop, iSplit, isResized || this.nSplit > 1, taintedAll);
+this.drawAll (gMain, gFront, gRear, iSplit, isResized || this.nSplit > 1, taintedAll);
 }
 this.setPositionForFrame (this.nSplit > 1 ? this.pd.currentSplitPoint : 0);
 if (this.pd.isPrinting) return;
-}, "~O,~O,~N,~N,~N,~N,~N,~N,~B,~B");
+}, "~O,~O,~O,~N,~N,~N,~N,~N,~N,~B,~B");
 $_M(c$, "escapeKeyPressed", 
 function (isDEL) {
 if (this.zoomBox1D != null) this.zoomBox1D.xPixel0 = this.zoomBox1D.xPixel1 = 0;
@@ -2286,12 +2291,12 @@ if (this.nSpectra > 1 && !haveFound && this.iSpectrumSelected >= 0 && !this.pd.i
 return haveFound;
 }, "~S,~S,~S");
 $_M(c$, "selectPeakByFileIndex", 
-function (filePath, index) {
+function (filePath, index, atomKey) {
 var pi;
-for (var i = this.spectra.size (); --i >= 0; ) if ((pi = this.getSpectrumAt (i).selectPeakByFileIndex (filePath, index)) != null) return pi;
+for (var i = this.spectra.size (); --i >= 0; ) if ((pi = this.getSpectrumAt (i).selectPeakByFileIndex (filePath, index, atomKey)) != null) return pi;
 
 return null;
-}, "~S,~S");
+}, "~S,~S,~S");
 $_M(c$, "setSelected", 
 function (i) {
 if (i < 0) {
