@@ -133,10 +133,12 @@ function ms_color_handler()
 {
 	var ms_plot_on = document.getElementById("ms_check_3").checked;
 	
-    var shielding_ref = 0;
+	var shielding_ref = 0;
 	
 	var l_type_radios = document.getElementsByName("ms_ltype");
 	var l_type = 0;
+	
+	var conv = document.getElementById("t_conv_choice").value;
 	
 	var ms_plot_jmol_script = "";
 
@@ -146,12 +148,11 @@ function ms_color_handler()
 		 	{
 		 		shielding_ref = document.getElementById("ms_shield_ref").value;
 		 		l_type = -1;
-		 		ms_plot_jmol_script += "{all}.property_cs = {all}.tensor(\"ms\", \"isotropy\").mul(-1).add(" + shielding_ref + ");";
 		 	}
 		 	else
 		 	{
-		     l_type = parseInt(l_type_radios[i].value);
-		   }
+				l_type = parseInt(l_type_radios[i].value);
+			}
 		 }
 	}
 	
@@ -165,32 +166,45 @@ function ms_color_handler()
 	}
 
 	//Color all atoms in a bleak tone 
-	
 
 	if(ms_plot_on)
 	{
-		ms_plot_jmol_script += "color {displayed} {200, 200, 200}; color {selected} ";
+		ms_plot_jmol_script += "color {displayed} {200, 200, 200}; {all}.property_ms_colorscale = NaN; {selected}.property_ms_colorscale = {selected}.";
 		switch(l_type)
 		{
 			case 0:
-				ms_plot_jmol_script += "property_ms_iso;";
+				ms_plot_jmol_script += "tensor('ms', 'isotropy');";
 				break; 
 			case 1:
-				ms_plot_jmol_script += "property_ms_aniso;";
+				if (conv == "haeb") {
+					ms_plot_jmol_script += "tensor('ms', 'anisotropy');";
+				}
+				else
+				{
+					ms_plot_jmol_script += "tensor('ms', 'span');";					
+				}
 				break; 
 			case 2:
-				ms_plot_jmol_script += "property_ms_asymm;";
+				if (conv == "haeb") {
+					ms_plot_jmol_script += "tensor('ms', 'asymmetry');";
+				}
+				else
+				{
+					ms_plot_jmol_script += "tensor('ms', 'skew');";					
+				}
 				break; 
 			case -1:
-				ms_plot_jmol_script += "property_cs;";
+				ms_plot_jmol_script += ".tensor(\"ms\", \"isotropy\").mul(-1).add(" + shielding_ref + ")";;
 				break;
 		}
+		ms_plot_jmol_script += "color {selected} property_ms_colorscale;";
 	}
 	else
 	{
 		ms_plot_jmol_script += "color {displayed} none;"
 	}
-			
+	
+	
 	Jmol.script(mainJmol, ms_plot_jmol_script);
 }
 
