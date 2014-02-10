@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.script");
-Clazz.load (null, "J.script.ScriptMathProcessor", ["java.lang.Float", "java.util.Arrays", "$.Hashtable", "JU.A4", "$.AU", "$.CU", "$.DF", "$.List", "$.M3", "$.M4", "$.P3", "$.P4", "$.PT", "$.V3", "J.modelset.BondSet", "J.script.SV", "$.T", "J.util.BSUtil", "$.Escape", "$.Logger", "$.Quaternion"], function () {
+Clazz.load (null, "J.script.ScriptMathProcessor", ["java.lang.Float", "java.util.Arrays", "$.Hashtable", "JU.A4", "$.AU", "$.BS", "$.CU", "$.DF", "$.List", "$.M3", "$.M4", "$.P3", "$.P4", "$.PT", "$.V3", "J.modelset.BondSet", "J.script.SV", "$.T", "J.util.BSUtil", "$.Escape", "$.Logger", "$.Quaternion"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.chk = false;
 this.wasSyntaxCheck = false;
@@ -57,7 +57,10 @@ for (var i = 0; i <= this.xPt; i++) result.addLast (J.script.SV.selectItemVar (t
 return J.script.SV.newV (135198, result);
 }if (this.xPt == 0) {
 var x = this.xStack[0];
-if (x.tok == 10 || x.tok == 7 || x.tok == 4 || x.tok == 11 || x.tok == 12) x = J.script.SV.selectItemVar (x);
+if (this.chk) {
+if (this.asBitSet) return J.script.SV.newV (10,  new JU.BS ());
+return x;
+}if (x.tok == 10 || x.tok == 7 || x.tok == 4 || x.tok == 11 || x.tok == 12) x = J.script.SV.selectItemVar (x);
 if (this.asBitSet && x.tok == 7) x = J.script.SV.newV (10, J.script.SV.unEscapeBitSetArray (x.value, false));
 return x;
 }}if (!allowUnderflow && (this.xPt >= 0 || this.oPt >= 0)) {
@@ -286,7 +289,7 @@ this.incrementX = (op.tok == 269484226 ? 1 : -1);
 if (this.ptid == this.ptx) {
 if (this.chk) return true;
 var x = this.xStack[this.xPt];
-this.xStack[this.xPt] = J.script.SV.newS ("").setv (x, false);
+this.xStack[this.xPt] = J.script.SV.newS ("").setv (x);
 return x.increment (this.incrementX);
 }break;
 case 269484192:
@@ -838,7 +841,7 @@ var f2;
 switch (x1.tok) {
 case 2:
 if (x2.tok == 2 && x2.intValue != 0) return this.addXInt (Clazz.doubleToInt (x1.intValue / x2.intValue));
-var n = (this.isDecimal (x2) ? x2.asInt () : 0);
+var n = (this.isDecimal (x2) ? 0 : x2.asInt ());
 if (n != 0) return this.addXInt (Clazz.doubleToInt (x1.intValue / n));
 break;
 case 4:

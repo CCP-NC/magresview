@@ -1070,7 +1070,7 @@ return atom.getIdentity (true);
 case 1087373322:
 ch = atom.getInsertionCode ();
 return (ch == '\0' ? "" : "" + ch);
-case 1826248715:
+case 1826248716:
 case 1288701959:
 var s = atom.group.chain.model.modelSet.getAtomLabel (atom.index);
 if (s == null) s = "";

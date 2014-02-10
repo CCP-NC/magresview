@@ -173,37 +173,36 @@ function ms_color_handler()
 		switch(l_type)
 		{
 			case 0:
-				ms_plot_jmol_script += "tensor('ms', 'isotropy');";
+				ms_plot_jmol_script += "tensor('ms', 'isotropy')";
 				break; 
 			case 1:
 				if (conv == "haeb") {
-					ms_plot_jmol_script += "tensor('ms', 'anisotropy');";
+					ms_plot_jmol_script += "tensor('ms', 'anisotropy')";
 				}
 				else
 				{
-					ms_plot_jmol_script += "tensor('ms', 'span');";					
+					ms_plot_jmol_script += "tensor('ms', 'span')";					
 				}
 				break; 
 			case 2:
 				if (conv == "haeb") {
-					ms_plot_jmol_script += "tensor('ms', 'asymmetry');";
+					ms_plot_jmol_script += "tensor('ms', 'asymmetry')";
 				}
 				else
 				{
-					ms_plot_jmol_script += "tensor('ms', 'skew');";					
+					ms_plot_jmol_script += "tensor('ms', 'skew')";					
 				}
 				break; 
 			case -1:
-				ms_plot_jmol_script += ".tensor(\"ms\", \"isotropy\").mul(-1).add(" + shielding_ref + ")";;
+				ms_plot_jmol_script += "tensor('ms', 'isotropy').mul(-1).add(" + shielding_ref + ")";
 				break;
 		}
-		ms_plot_jmol_script += "color {selected} property_ms_colorscale;";
+		ms_plot_jmol_script += ".mul(-1); color {selected} property_ms_colorscale;";
 	}
 	else
 	{
 		ms_plot_jmol_script += "color {displayed} none;"
 	}
-	
 	
 	Jmol.script(mainJmol, ms_plot_jmol_script);
 }

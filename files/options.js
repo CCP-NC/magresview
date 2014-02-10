@@ -266,11 +266,7 @@ function t_conv_choice_handler()
 		document.getElementById("efg_par_2").innerHTML = "Skew";
 	}
 
-	if (document.getElementById("ms_check_2").checked == true)
-		ms_label_handler();
-	
-	if (document.getElementById("efg_check_2").checked == true)
-		efg_label_handler();
+	plot_update();
 }
 
 function snap_handler()

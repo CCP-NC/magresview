@@ -99,5 +99,5 @@ function iso_drop_handler()
 {
 	Jmol.script(mainJmol, "{selected}.element = \"" + iso_drop.value + "\"");
 	load_data_asproperty();
-	efg_label_handler();
+	plot_update();
 }

@@ -231,7 +231,7 @@ return sb;
 }, "J.viewer.Viewer,J.script.ScriptContext,JU.SB,~B");
 $_V(c$, "setDebugging", 
 function () {
-this.debugScript = this.viewer.getBoolean (603979824);
+this.debugScript = this.viewer.getBoolean (603979825);
 this.logMessages = (this.debugScript && J.util.Logger.debugging);
 });
 $_M(c$, "getExecutionWalltime", 
@@ -587,9 +587,15 @@ this.ignoreError = false;
 i = this.iToken;
 break;
 case 1048586:
-if (this.tokAt (i + 1) == 4) v = this.getHash (i);
- else v = this.getPointOrPlane (i, false, true, true, false, 3, 4);
-i = this.iToken;
+if (this.tokAt (i + 1) == 4) {
+if (this.tokAt (i + 2) == 1048590) {
+v = (this.chk ?  new JU.BS () : this.getAtomBitSet (this.stringParameter (i + 1)));
+i += 2;
+break;
+}v = this.getHash (i);
+} else {
+v = this.getPointOrPlane (i, false, true, true, false, 3, 4);
+}i = this.iToken;
 break;
 case 1048577:
 if (this.tokAt (i + 1) == 1048578) {
@@ -699,11 +705,15 @@ if (result == null) {
 if (!this.chk) rpn.dumpStacks ("null result");
 this.error (13);
 }if (result.tok == 135198) return result.value;
+if (this.chk) {
+if (returnBoolean) return Boolean.TRUE;
+if (returnString) return "";
+} else {
 if (returnBoolean) return Boolean.$valueOf (result.asBoolean ());
 if (returnString) {
 if (result.tok == 4) result.intValue = 2147483647;
 return result.asString ();
-}switch (result.tok) {
+}}switch (result.tok) {
 case 1048589:
 case 1048588:
 return Boolean.$valueOf (result.intValue == 1);
@@ -1188,7 +1198,7 @@ break;
 }
 this.setShapePropertyBs (0, prop, value, bs);
 return;
-case 1826248715:
+case 1826248716:
 case 1288701959:
 if (tokenValue.tok != 7) sValue = J.script.SV.sValue (tokenValue);
 break;
@@ -1632,7 +1642,7 @@ fixed[j] = J.script.T.tv (2, (v).intValue (), v);
 } else if (Clazz.instanceOf (v, Float)) {
 fixed[j] = J.script.T.tv (3, J.script.ScriptEvaluator.getFloatEncodedInt ("" + v), v);
 } else if (Clazz.instanceOf (v, String)) {
-if (!forceString) {
+if (!forceString && !isExpression) {
 if ((tok != 1085443 || j > 1 && this.st[1].tok != 537022465) && J.script.T.tokAttr (tok, 36864)) {
 v = this.getParameter (v, 1073742190);
 }if (Clazz.instanceOf (v, String)) {
@@ -2534,7 +2544,7 @@ case 1613758476:
 case 3145730:
 case 1115297793:
 case 1613758488:
-case 137363468:
+case 137363467:
 case 3145735:
 case 3145736:
 case 3145738:
@@ -2655,8 +2665,7 @@ break;
 }if (Clazz.instanceOf (val, String)) val = this.getStringObjectAsVariable (val, null);
 if (Clazz.instanceOf (val, JU.List)) {
 var bs = J.script.SV.unEscapeBitSetArray (val, true);
-if (bs == null) val = value;
- else val = bs;
+val = (bs == null ? "" : val);
 }if (Clazz.instanceOf (val, String)) val = this.lookupIdentifierValue (value);
 rpn.addXObj (val);
 break;
@@ -2708,7 +2717,7 @@ $_M(c$, "compareString",
 var bs =  new JU.BS ();
 var atoms = this.viewer.modelSet.atoms;
 var atomCount = this.viewer.getAtomCount ();
-var isCaseSensitive = (tokWhat == 1087373316 && this.viewer.getBoolean (603979822));
+var isCaseSensitive = (tokWhat == 1087373316 && this.viewer.getBoolean (603979823));
 if (!isCaseSensitive) comparisonString = comparisonString.toLowerCase ();
 for (var i = atomCount; --i >= 0; ) {
 var propertyString = J.modelset.Atom.atomPropertyString (this.viewer, atoms[i], tokWhat);
@@ -4145,7 +4154,7 @@ break;
 case 135180:
 iShape = 24;
 break;
-case 1826248715:
+case 1826248716:
 iShape = 5;
 break;
 case 135182:
@@ -4232,7 +4241,7 @@ case 1113200651:
 case 1113200652:
 this.setAtomShapeSize (iShape, (tok == 1113200646 ? -1.0 : 1));
 return;
-case 1826248715:
+case 1826248716:
 this.label (1);
 return;
 case 135198:
@@ -4359,18 +4368,23 @@ if (!this.chk) this.pc = pt - 1;
 if (this.slen > 1) this.intParameter (this.checkLast (1));
 break;
 case 135369224:
-var token = this.theToken;
+var cmdToken = this.theToken;
 var pts =  Clazz.newIntArray (2, 0);
 var j = 0;
 var bsOrList = null;
+var key = null;
 for (var i = 1, nSkip = 0; i < this.slen && j < 2; i++) {
-switch (this.tokAt (i)) {
+switch (tok = this.tokAt (i)) {
 case 1048591:
 if (nSkip > 0) nSkip--;
  else pts[j++] = i;
 break;
 case 1073741980:
-nSkip -= 2;
+key = this.parameterAsString (i - 1);
+if (isForCheck) {
+i = this.slen;
+continue;
+}nSkip -= 2;
 if (this.tokAt (++i) == 1048577 || this.tokAt (i) == 10) {
 bsOrList = this.atomExpressionAt (i);
 if (this.isBondSet) bsOrList =  new J.modelset.BondSet (bsOrList);
@@ -4395,44 +4409,39 @@ nSkip += 2;
 break;
 }
 }
+var isMinusMinus = false;
+if (key == null) {
 if (isForCheck) {
 j = (bsOrList == null ? pts[1] + 1 : 2);
 } else {
-this.pushContext (token, "FOR");
+this.pushContext (cmdToken, "FOR");
 j = 2;
 }if (this.tokAt (j) == 36868) j++;
-var key = this.parameterAsString (j);
-var isMinusMinus = key.equals ("--") || key.equals ("++");
-if (isMinusMinus) {
-key = this.parameterAsString (++j);
+key = this.parameterAsString (j);
+isMinusMinus = key.equals ("--") || key.equals ("++");
+if (isMinusMinus) key = this.parameterAsString (++j);
 }var v = null;
-if (J.script.T.tokAttr (this.tokAt (j), 1073741824) || (v = this.getContextVariableAsVariable (key)) != null) {
-if (bsOrList == null && !isMinusMinus && this.getToken (++j).tok != 269484436) this.invArg ();
-if (bsOrList == null) {
+if (tok == 1073741980 || J.script.T.tokAttr (this.tokAt (j), 1073741824) || (v = this.getContextVariableAsVariable (key)) != null) {
+if (tok != 1073741980 && !isMinusMinus && this.getToken (++j).tok != 269484436) this.invArg ();
+if (tok == 1073741980) {
+isOK = true;
+if (!isForCheck) this.pushContext (cmdToken, "FOR");
+var t = this.getForVar (key);
+v = this.getForVar (key + "/value");
+if (isForCheck) {
+if (t.isModified ()) isOK = false;
+ else if (v.tok == 7) isOK = (++v.intValue <= v.getList ().size ());
+ else if ((v.value).nextSetBit ((j = (v.value).nextSetBit (0)) + 1) < 0) isOK = false;
+ else (v.value).clear (j);
+} else {
+v.setv (J.script.SV.getVariable (Clazz.instanceOf (bsOrList, JU.BS) ? J.util.BSUtil.copy (bsOrList) : bsOrList));
+v.intValue = 1;
+t.setModified (false);
+}if (isOK) t.setv (J.script.SV.selectItemVar (v));
+} else {
 if (isMinusMinus) j -= 2;
 this.setVariable (++j, this.slen - 1, key, 0);
-} else {
-isOK = true;
-var key_incr = (key + "_incr");
-if (v == null) v = this.getContextVariableAsVariable (key_incr);
-if (v == null) {
-if (key.startsWith ("_")) this.invArg ();
-v = this.viewer.getOrSetNewVariable (key_incr, true);
-}if (!isForCheck || v.tok != 10 && v.tok != 7 || v.intValue == 2147483647) {
-if (isForCheck) {
-isOK = false;
-} else {
-v.setv (J.script.SV.getVariable (bsOrList), false);
-v.intValue = 1;
-}} else {
-v.intValue++;
-}isOK = isOK && (Clazz.instanceOf (bsOrList, JU.BS) ? J.script.SV.bsSelectVar (v).cardinality () == 1 : v.intValue <= v.getList ().size ());
-if (isOK) {
-v = J.script.SV.selectItemVar (v);
-var t = this.getContextVariableAsVariable (key);
-if (t == null) t = this.viewer.getOrSetNewVariable (key, true);
-t.setv (v, false);
-}}}if (bsOrList == null) isOK = this.parameterExpressionBoolean (pts[0] + 1, pts[1]);
+}}if (tok != 1073741980) isOK = this.parameterExpressionBoolean (pts[0] + 1, pts[1]);
 pt++;
 if (!isOK) this.popContext (true, false);
 isForCheck = false;
@@ -4469,6 +4478,15 @@ break;
 if (!isOK && !this.chk) this.pc = Math.abs (pt) - 1;
 return isForCheck;
 }, $fz.isPrivate = true, $fz), "~N,~B,JU.List");
+$_M(c$, "getForVar", 
+($fz = function (key) {
+var t = this.getContextVariableAsVariable (key);
+if (t == null) {
+if (key.startsWith ("_")) this.invArg ();
+if (key.indexOf ("/") >= 0) this.contextVariables.put (key, t = J.script.SV.newI (0));
+ else t = this.viewer.getOrSetNewVariable (key, true);
+}return t;
+}, $fz.isPrivate = true, $fz), "~S");
 $_M(c$, "gotoCmd", 
 ($fz = function (strTo) {
 var pcTo = (strTo == null ? this.aatoken.length - 1 : -1);
@@ -6306,7 +6324,7 @@ case 4160:
 translation = JU.V3.newV (this.centerParameter (++i));
 isMolecular = isSelected = true;
 break;
-case 137363468:
+case 137363467:
 helicalPath = true;
 continue;
 case 1297090050:
@@ -7900,7 +7918,7 @@ return;
 case 1610616855:
 this.history (2);
 return;
-case 1826248715:
+case 1826248716:
 this.label (2);
 return;
 case 1614417948:
@@ -8517,7 +8535,7 @@ break;
 case 135280132:
 str = "atom";
 break;
-case 1826248715:
+case 1826248716:
 str = "label";
 break;
 case 1678770178:
@@ -8649,7 +8667,7 @@ if (key.startsWith ("_")) this.errorStr (22, key);
 t = this.viewer.getOrSetNewVariable (key, true);
 isUserVariable = true;
 }if (isArrayItem) {
-var tnew = J.script.SV.newS ("").setv (tv, false);
+var tnew = J.script.SV.newS ("").setv (tv);
 var nParam = Clazz.doubleToInt (v.size () / 2);
 for (var i = 0; i < nParam; i++) {
 var isLast = (i + 1 == nParam);
@@ -8703,7 +8721,8 @@ return;
 }this.setBitsetProperty (bs, tokProperty, tv.asInt (), tv.asFloat (), tv);
 return;
 }if (isUserVariable) {
-t.setv (tv, false);
+t.setv (tv);
+t.setModified (true);
 return;
 }var vv = J.script.SV.oValue (tv);
 if (key.startsWith ("property_")) {
@@ -8743,7 +8762,7 @@ return;
 case 1073742138:
 this.setFloatProperty ("axesScale", this.floatParameter (this.checkLast (++index)));
 return;
-case 1826248715:
+case 1826248716:
 switch (tok = this.tokAt (index + 1)) {
 case 1048588:
 case 1048589:

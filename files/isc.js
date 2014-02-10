@@ -107,11 +107,10 @@ function isc_info_eval(a_name, tag)
 	var isc_info_raw = Jmol.evaluate(mainJmol, "measure({" + a_name + " and unitcell} {unitcell}, \"" + tag + "_hz\")").split('\n');
 	var isc_info = []
 
-	for (j in isc_info_raw)
+	for (var j = 0; j < isc_info_raw.length; ++j)
 	{
 		if (isc_info_raw[j] == '')
 			continue;
-
 		isc_line = isc_info_raw[j].split('\t');
 		if (parseFloat(isc_line[1]) == 0.0)
 			continue;

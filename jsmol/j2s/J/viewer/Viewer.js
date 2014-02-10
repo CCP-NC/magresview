@@ -911,9 +911,9 @@ function (pointAngstroms, pointScreen) {
 this.tm.transformPoint2 (pointAngstroms, pointScreen);
 }, "JU.P3,JU.P3");
 $_M(c$, "transformPoints", 
-function (pointsAngstroms, pointsScreens) {
-this.tm.transformPoints (pointsAngstroms.length, pointsAngstroms, pointsScreens);
-}, "~A,~A");
+function (count, pointsAngstroms, pointsScreens) {
+this.tm.transformPoints (count, pointsAngstroms, pointsScreens);
+}, "~N,~A,~A");
 $_M(c$, "transformVector", 
 function (vectorAngstroms, vectorTransformed) {
 this.tm.transformVector (vectorAngstroms, vectorTransformed);
@@ -3849,15 +3849,17 @@ case 603979819:
 return this.global.cartoonFancy;
 case 603979820:
 return this.global.cartoonLadders;
+case 603979821:
+return this.global.cartoonRibose;
 case 603979818:
 return this.global.cartoonRockets;
-case 603979822:
+case 603979823:
 return this.global.chainCaseSensitive || this.chainList.size () > 0;
-case 603979824:
-return this.global.debugScript;
 case 603979825:
-return this.global.defaultStructureDSSP;
+return this.global.debugScript;
 case 603979826:
+return this.global.defaultStructureDSSP;
+case 603979827:
 return this.global.disablePopupMenu;
 case 603979828:
 return this.global.displayCellParameters;
@@ -4599,6 +4601,10 @@ $_M(c$, "setBooleanPropertyTok",
 ($fz = function (key, tok, value) {
 var doRepaint = true;
 switch (tok) {
+case 603979821:
+this.global.cartoonRibose = value;
+if (value && this.getBoolean (603979817)) this.setBooleanPropertyTok ("cartoonBaseEdges", 603979817, false);
+break;
 case 603979837:
 this.global.ellipsoidArrows = value;
 break;
@@ -4613,7 +4619,7 @@ var b = this.global.twistedSheets;
 this.global.twistedSheets = value;
 if (b != value) this.checkCoordinatesChanged ();
 break;
-case 603979821:
+case 603979822:
 this.global.celShading = value;
 this.gdata.setCel (value);
 break;
@@ -4635,7 +4641,7 @@ break;
 case 603979874:
 this.global.legacyAutoBonding = value;
 break;
-case 603979825:
+case 603979826:
 this.global.defaultStructureDSSP = value;
 break;
 case 603979834:
@@ -4942,6 +4948,7 @@ this.global.ribbonBorder = value;
 break;
 case 603979817:
 this.global.cartoonBaseEdges = value;
+if (value && this.getBoolean (603979821)) this.setBooleanPropertyTok ("cartoonRibose", 603979821, false);
 break;
 case 603979818:
 this.global.cartoonRockets = value;
@@ -4967,10 +4974,10 @@ return;
 case 603979806:
 this.setAxesOrientationRasmol (value);
 return;
-case 603979823:
+case 603979824:
 this.setStringPropertyTok ("defaultcolorscheme", 545259545, value ? "rasmol" : "jmol");
 return;
-case 603979824:
+case 603979825:
 this.setDebugScript (value);
 return;
 case 603979893:
@@ -5015,7 +5022,7 @@ case 603979954:
 doRepaint = false;
 this.statusManager.setAllowStatusReporting (value);
 break;
-case 603979822:
+case 603979823:
 doRepaint = false;
 this.global.chainCaseSensitive = value;
 break;
@@ -5023,7 +5030,7 @@ case 603979858:
 doRepaint = false;
 this.global.hideNameInPopup = value;
 break;
-case 603979826:
+case 603979827:
 doRepaint = false;
 this.global.disablePopupMenu = value;
 break;

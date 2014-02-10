@@ -537,7 +537,7 @@ break;
 case 1073742102:
 this.pointGroup ();
 return false;
-case 137363468:
+case 137363467:
 case 135270418:
 case 1052714:
 this.plot (this.st);
@@ -2743,7 +2743,7 @@ type = this.eval.optParameterAsString (--pt).toLowerCase ();
 type = "ramachandran" + (isRamachandranRelative ? " r" : "") + (tokCmd == 135176 ? " draw" : "");
 break;
 case 135270418:
-case 137363468:
+case 137363467:
 qFrame = " \"" + this.viewer.getQuaternionFrame () + "\"";
 stateScript = "set quaternionFrame" + qFrame + ";\n  ";
 isQuaternion = true;
@@ -2845,7 +2845,7 @@ this.viewer.setFrameTitle (modelCount - 1, "ramachandran plot for model " + this
 script = "frame 0.0; frame last; reset;select visible; color structure; spacefill 3.0; wireframe 0;draw ramaAxisX" + modelCount + " {100 0 0} {-100 0 0} \"phi\";" + "draw ramaAxisY" + modelCount + " {0 100 0} {0 -100 0} \"psi\";";
 break;
 case 135270418:
-case 137363468:
+case 137363467:
 this.viewer.setFrameTitle (modelCount - 1, type.$replace ('w', ' ') + qFrame + " for model " + this.viewer.getModelNumberDotted (modelIndex));
 var color = (J.util.C.getHexCode (this.viewer.getColixBackgroundContrast ()));
 script = "frame 0.0; frame last; reset;select visible; wireframe 0; spacefill 3.0; isosurface quatSphere" + modelCount + " color " + color + " sphere 100.0 mesh nofill frontonly translucent 0.8;" + "draw quatAxis" + modelCount + "X {100 0 0} {-100 0 0} color red \"x\";" + "draw quatAxis" + modelCount + "Y {0 100 0} {0 -100 0} color green \"y\";" + "draw quatAxis" + modelCount + "Z {0 0 100} {0 0 -100} color blue \"z\";" + "color structure;" + "draw quatCenter" + modelCount + "{0 0 0} scale 0.02;";
@@ -3921,7 +3921,15 @@ case 1073741929:
 case 1073741879:
 this.checkLength (tok == 1073741879 ? 3 : 2);
 if (this.chk) return;
+try {
 msg = this.viewer.getSmiles (null);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+msg = e.getMessage ();
+} else {
+throw e;
+}
+}
 switch (tok) {
 case 1073741929:
 if (msg.length > 0) {
@@ -4020,8 +4028,8 @@ break;
 case 553648150:
 value = "" + J.util.Logger.getLogLevel ();
 break;
-case 603979824:
-value = "" + this.viewer.getBoolean (603979824);
+case 603979825:
+value = "" + this.viewer.getBoolean (603979825);
 break;
 case 553648178:
 msg = "set strandCountForStrands " + this.viewer.getStrandCount (12) + "; set strandCountForMeshRibbon " + this.viewer.getStrandCount (13);
@@ -4411,7 +4419,7 @@ case 1073741915:
 asDSSP = true;
 break;
 case 0:
-asDSSP = this.viewer.getBoolean (603979825);
+asDSSP = this.viewer.getBoolean (603979826);
 break;
 default:
 this.invArg ();
@@ -4544,7 +4552,7 @@ if (Clazz.exceptionOf (e$$, Exception)) {
 var e = e$$;
 {
 this.viewer.setSelectionSubset (bsSubset);
-this.eval.errorStr (-1, "Error: " + e.toString ());
+this.eval.errorStr (-1, "Error: " + e.getMessage ());
 }
 } else if (Clazz.exceptionOf (e$$, Error)) {
 var er = e$$;
@@ -4910,7 +4918,15 @@ this.showString ("RMSD = " + retStddev[0] + " degrees");
 } else {
 var m4 =  new JU.M4 ();
 center =  new JU.P3 ();
-if ("*".equals (strSmiles) && bsFrom != null) strSmiles = this.viewer.getSmiles (bsFrom);
+if ("*".equals (strSmiles) && bsFrom != null) try {
+strSmiles = this.viewer.getSmiles (bsFrom);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+this.eval.evalError (e.getMessage (), null);
+} else {
+throw e;
+}
+}
 if (isFlexFit) {
 var list;
 if (bsFrom == null || bsTo == null || (list = this.getFlexFitList (bsFrom, bsTo, strSmiles, !isSmiles)) == null) return;
@@ -4990,7 +5006,16 @@ var smarts = this.stringParameter (this.slen == 3 ? 2 : 4);
 if (this.chk) return;
 var atoms = this.viewer.modelSet.atoms;
 var atomCount = this.viewer.getAtomCount ();
-var maps = this.viewer.getSmilesMatcher ().getCorrelationMaps (smarts, atoms, atomCount, this.viewer.getSelectedAtoms (), true, false);
+var maps = null;
+try {
+maps = this.viewer.getSmilesMatcher ().getCorrelationMaps (smarts, atoms, atomCount, this.viewer.getSelectedAtoms (), true, false);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+eval.evalError (e.getMessage (), null);
+} else {
+throw e;
+}
+}
 if (maps == null) return;
 this.setShapeProperty (6, "maps", maps);
 return;
@@ -5307,7 +5332,7 @@ return lowestStdDev;
 
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
-this.eval.evalError (e.toString (), null);
+this.eval.evalError (e.getMessage (), null);
 } else {
 throw e;
 }
@@ -5321,20 +5346,31 @@ if (asOneBitset) return  new JU.BS ();
 return ["({})"];
 }if (pattern.length == 0 || pattern.equals ("H")) {
 var isBioSmiles = (!asOneBitset);
-var ret = this.viewer.getSmilesOpt (bsSelected, 0, 0, pattern.equals ("H"), isBioSmiles, false, true, true);
-if (ret == null) this.eval.evalError (this.viewer.getSmilesMatcher ().getLastException (), null);
-return ret;
+try {
+return this.viewer.getSmilesOpt (bsSelected, 0, 0, pattern.equals ("H"), isBioSmiles, false, true, true);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+this.eval.evalError (e.getMessage (), null);
+} else {
+throw e;
+}
+}
 }var asAtoms = true;
 var b;
 if (bsMatch3D == null) {
 asAtoms = (smiles == null);
+try {
 if (asAtoms) b = this.viewer.getSmilesMatcher ().getSubstructureSetArray (pattern, this.viewer.modelSet.atoms, this.viewer.getAtomCount (), bsSelected, null, isSmarts, false);
  else b = this.viewer.getSmilesMatcher ().find (pattern, smiles, isSmarts, false);
-if (b == null) {
-this.eval.showStringPrint (this.viewer.getSmilesMatcher ().getLastException (), false);
-if (!asAtoms && !isSmarts) return Integer.$valueOf (-1);
-return "?";
-}} else {
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+this.eval.evalError (e.getMessage (), null);
+return null;
+} else {
+throw e;
+}
+}
+} else {
 var vReturn =  new JU.List ();
 var stddev = this.getSmilesCorrelation (bsMatch3D, bsSelected, pattern, null, null, null, vReturn, isSmarts, false, null, null, false, false);
 if (Float.isNaN (stddev)) {
@@ -5411,11 +5447,11 @@ return this.evaluateFind (mp, args);
 case 135368713:
 return this.evaluateUserFunction (mp, op.value, args, op.intValue, op.tok == 269484241);
 case 1288701959:
-case 1826248715:
+case 1826248716:
 return this.evaluateLabel (mp, op.intValue, args);
 case 1276121098:
 return this.evaluateGetProperty (mp, args, op.tok == 269484241);
-case 137363468:
+case 137363467:
 return this.evaluateHelix (mp, args);
 case 135267841:
 case 135266319:
@@ -5524,10 +5560,19 @@ if (bs1 == null || bs2 == null) return false;
 if (args.length != 4) return false;
 smiles1 = J.script.SV.sValue (args[2]);
 isSmiles = smiles1.equalsIgnoreCase ("SMILES");
+try {
 if (isSmiles) smiles1 = this.viewer.getSmiles (bs1);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+this.eval.evalError (e.getMessage (), null);
+} else {
+throw e;
+}
+}
 var data = this.getFlexFitList (bs1, bs2, smiles1, !isSmiles);
 return (data == null ? mp.addXStr ("") : mp.addXAF (data));
-}if (isIsomer) {
+}try {
+if (isIsomer) {
 if (args.length != 3) return false;
 if (bs1 == null && bs2 == null) return mp.addXStr (this.viewer.getSmilesMatcher ().getRelationship (smiles1, smiles2).toUpperCase ());
 var mf1 = (bs1 == null ? this.viewer.getSmilesMatcher ().getMolecularFormula (smiles1, false) : J.util.JmolMolecule.getMolecularFormula (this.viewer.getModelSet ().atoms, bs1, false));
@@ -5596,6 +5641,14 @@ ptsA = this.eval.getPointVector (args[0], 0);
 ptsB = this.eval.getPointVector (args[1], 0);
 if (ptsA != null && ptsB != null) stddev = J.util.Measure.getTransformMatrix4 (ptsA, ptsB, m, null, false);
 }return (isStdDev || Float.isNaN (stddev) ? mp.addXFloat (stddev) : mp.addXM4 (m));
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+this.eval.evalError (e.getMessage () == null ? e.toString () : e.getMessage (), null);
+return false;
+} else {
+throw e;
+}
+}
 }, $fz.isPrivate = true, $fz), "J.script.ScriptMathProcessor,~A");
 $_M(c$, "evaluateContact", 
 ($fz = function (mp, args) {
@@ -5692,7 +5745,7 @@ tok = 12;
 } else if (desc.equalsIgnoreCase ("array") || desc.equalsIgnoreCase ("list")) {
 tok = 1073742001;
 } else if (desc.equalsIgnoreCase ("description")) {
-tok = 1826248715;
+tok = 1826248716;
 } else if (desc.equalsIgnoreCase ("xyz")) {
 tok = 1073741982;
 } else if (desc.equalsIgnoreCase ("translation")) {
@@ -5964,6 +6017,7 @@ var isSequence = sFind.equalsIgnoreCase ("SEQUENCE");
 var isSmiles = sFind.equalsIgnoreCase ("SMILES");
 var isSearch = sFind.equalsIgnoreCase ("SMARTS");
 var isMF = sFind.equalsIgnoreCase ("MF");
+try {
 if (isSmiles || isSearch || x1.tok == 10) {
 var iPt = (isSmiles || isSearch ? 2 : 1);
 var bs2 = (iPt < args.length && args[iPt].tok == 10 ? args[iPt++].value : null);
@@ -5976,7 +6030,6 @@ var smiles = J.script.SV.sValue (x1);
 if (bs2 != null) return false;
 if (flags.equalsIgnoreCase ("mf")) {
 ret = this.viewer.getSmilesMatcher ().getMolecularFormula (smiles, isSearch);
-if (ret == null) this.eval.evalError (this.viewer.getSmilesMatcher ().getLastException (), null);
 } else {
 ret = this.getSmilesMatches (flags, smiles, null, null, isSearch, !isAll);
 }break;
@@ -5994,7 +6047,14 @@ ret = this.getSmilesMatches (sFind, null, x1.value, bsMatch3D, !isSmiles, !isAll
 }
 if (ret == null) this.eval.error (22);
 return mp.addXObj (ret);
-}var isReverse = (flags.indexOf ("v") >= 0);
+}} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+this.eval.evalError (e.getMessage (), null);
+} else {
+throw e;
+}
+}
+var isReverse = (flags.indexOf ("v") >= 0);
 var isCaseInsensitive = (flags.indexOf ("i") >= 0);
 var asMatch = (flags.indexOf ("m") >= 0);
 var isList = (x1.tok == 7);
@@ -6757,7 +6817,7 @@ var plane = null;
 switch (i) {
 case 1:
 switch (tok) {
-case 137363468:
+case 137363467:
 case 3145760:
 case 1679429641:
 return mp.addXBs (this.viewer.getAtomBits (tok, null));
@@ -6923,10 +6983,10 @@ var bs =  new JU.BS ();
 var pattern = J.script.SV.sValue (args[0]);
 if (pattern.length > 0) try {
 var bsSelected = (args.length == 2 && args[1].tok == 10 ? J.script.SV.bsSelectVar (args[1]) : null);
-bs = this.viewer.getSmilesMatcher ().getSubstructureSet (pattern, this.viewer.getModelSet ().atoms, this.viewer.getAtomCount (), bsSelected, tok != 135267336 && tok != 1238369286, false);
+bs = this.viewer.getSmilesMatcher ().getSubstructureSet (pattern, this.viewer.getModelSet ().atoms, this.viewer.getAtomCount (), bsSelected, tok != 135267336, false);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
-this.eval.evalError (e.toString (), null);
+this.eval.evalError (e.getMessage (), null);
 } else {
 throw e;
 }

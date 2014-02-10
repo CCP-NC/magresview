@@ -197,12 +197,12 @@ J.util.SimpleUnitCell.ijkToPoint3f (Clazz.floatToInt (this.unitCellMultiplier.x)
 J.util.SimpleUnitCell.ijkToPoint3f (Clazz.floatToInt (this.unitCellMultiplier.y), cell1, 0);
 cell1.sub (cell0);
 }for (var i = 0; i < 8; i++) {
-pts[i] = JU.P3.newP (J.util.BoxInfo.unitCubePoints[i]);
+var pt = pts[i] = JU.P3.newP (J.util.BoxInfo.unitCubePoints[i]);
 if (cell0 != null) {
 scale *= this.unitCellMultiplier.z;
-pts[i].add3 (cell0.x + cell1.x * pts[i].x, cell0.y + cell1.y * pts[i].y, cell0.z + cell1.z * pts[i].z);
-}this.matrixFractionalToCartesian.rotTrans (pts[i]);
-if (withOffset) pts[i].add (this.cartesianOffset);
+pts[i].add3 (cell0.x + cell1.x * pt.x, cell0.y + cell1.y * pt.y, cell0.z + cell1.z * pt.z);
+}this.matrixFractionalToCartesian.rotTrans (pt);
+if (!withOffset) pt.sub (this.cartesianOffset);
 }
 return J.util.BoxInfo.getCanonicalCopy (pts, scale);
 }, "~N,~B");

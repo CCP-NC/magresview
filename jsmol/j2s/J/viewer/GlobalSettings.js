@@ -112,6 +112,7 @@ this.cartoonBaseEdges = false;
 this.cartoonRockets = false;
 this.cartoonFancy = false;
 this.cartoonLadders = false;
+this.cartoonRibose = false;
 this.chainCaseSensitive = false;
 this.hermiteLevel = 0;
 this.highResolutionFlag = false;
@@ -392,6 +393,7 @@ this.setF ("cameraDepth", this.defaultCameraDepth);
 this.setB ("cartoonBaseEdges", this.cartoonBaseEdges);
 this.setB ("cartoonFancy", this.cartoonFancy);
 this.setB ("cartoonLadders", this.cartoonLadders);
+this.setB ("cartoonLadders", this.cartoonRibose);
 this.setB ("cartoonRockets", this.cartoonRockets);
 this.setB ("chainCaseSensitive", this.chainCaseSensitive);
 this.setB ("celShading", this.celShading);
@@ -635,7 +637,7 @@ $_M(c$, "setUserVariable",
 function (key, $var) {
 if ($var == null) return null;
 key = key.toLowerCase ();
-this.htUserVariables.put (key, $var.setName (key).setGlobal ());
+this.htUserVariables.put (key, $var.setName (key));
 return $var;
 }, "~S,J.script.SV");
 $_M(c$, "unsetUserVariable", 

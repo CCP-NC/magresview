@@ -9,7 +9,6 @@ this.width = 0;
 this.height = 0;
 this.id = null;
 this.parent = null;
-this.actionListener = null;
 this.mouseListener = null;
 this.bgcolor = null;
 this.minWidth = 30;
@@ -52,10 +51,6 @@ function (dimension) {
 this.width = dimension.width;
 this.height = dimension.height;
 }, "javajs.awt.Dimension");
-$_M(c$, "addActionListener", 
-function (listener) {
-this.actionListener = listener;
-}, "~O");
 $_M(c$, "addMouseListener", 
 function (listener) {
 this.mouseListener = listener;

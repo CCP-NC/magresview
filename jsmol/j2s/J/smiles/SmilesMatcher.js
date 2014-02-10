@@ -7,35 +7,17 @@ return J.smiles.InvalidSmilesException.getLastError ();
 });
 $_V(c$, "getMolecularFormula", 
 function (pattern, isSmarts) {
-J.smiles.InvalidSmilesException.setLastError (null);
-try {
+J.smiles.InvalidSmilesException.clear ();
 var search = J.smiles.SmilesParser.getMolecule (pattern, isSmarts);
 search.createTopoMap (null);
 search.nodes = search.jmolAtoms;
 return search.getMolecularFormula (!isSmarts);
-} catch (e) {
-if (Clazz.exceptionOf (e, J.smiles.InvalidSmilesException)) {
-if (J.smiles.InvalidSmilesException.getLastError () == null) J.smiles.InvalidSmilesException.setLastError (e.toString ());
-return null;
-} else {
-throw e;
-}
-}
 }, "~S,~B");
 $_V(c$, "getSmiles", 
 function (atoms, atomCount, bsSelected, asBioSmiles, bioAllowUnmatchedRings, bioAddCrossLinks, bioComment, explicitH) {
-J.smiles.InvalidSmilesException.setLastError (null);
-try {
+J.smiles.InvalidSmilesException.clear ();
 if (asBioSmiles) return ( new J.smiles.SmilesGenerator ()).getBioSmiles (atoms, atomCount, bsSelected, bioAllowUnmatchedRings, bioAddCrossLinks, bioComment);
 return ( new J.smiles.SmilesGenerator ()).getSmiles (atoms, atomCount, bsSelected, explicitH);
-} catch (e) {
-if (Clazz.exceptionOf (e, J.smiles.InvalidSmilesException)) {
-if (J.smiles.InvalidSmilesException.getLastError () == null) J.smiles.InvalidSmilesException.setLastError (e.toString ());
-return null;
-} else {
-throw e;
-}
-}
 }, "~A,~N,JU.BS,~B,~B,~B,~S,~B");
 $_M(c$, "areEqual", 
 function (smiles1, smiles2) {
@@ -49,19 +31,9 @@ return (ret != null && ret.length == 1);
 }, "~S,J.smiles.SmilesSearch");
 $_M(c$, "find", 
 function (pattern, smiles, isSmarts, firstMatchOnly) {
-J.smiles.InvalidSmilesException.setLastError (null);
-try {
+J.smiles.InvalidSmilesException.clear ();
 var search = J.smiles.SmilesParser.getMolecule (smiles, false);
 return this.find (pattern, search, isSmarts, !isSmarts, firstMatchOnly);
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-if (J.smiles.InvalidSmilesException.getLastError () == null) J.smiles.InvalidSmilesException.setLastError (e.toString ());
-System.out.println (e.toString ());
-return null;
-} else {
-throw e;
-}
-}
 }, "~S,~S,~B,~B");
 $_V(c$, "getRelationship", 
 function (smiles1, smiles2) {
@@ -70,8 +42,8 @@ var mf1 = this.getMolecularFormula (smiles1, false);
 var mf2 = this.getMolecularFormula (smiles2, false);
 if (!mf1.equals (mf2)) return "none";
 var check;
-var n1 = this.countStereo (smiles1);
-var n2 = this.countStereo (smiles2);
+var n1 = J.smiles.SmilesMatcher.countStereo (smiles1);
+var n2 = J.smiles.SmilesMatcher.countStereo (smiles2);
 check = (n1 == n2 && this.areEqual (smiles2, smiles1) > 0);
 if (!check) {
 var s = smiles1 + smiles2;
@@ -101,10 +73,9 @@ return this.match (pattern, atoms, atomCount, bsSelected, null, isSmarts, false,
 }, "~S,~A,~N,JU.BS,~B,~B");
 $_V(c$, "getSubstructureSets", 
 function (smarts, atoms, atomCount, flags, bsSelected, ret, vRings) {
-J.smiles.InvalidSmilesException.setLastError (null);
+J.smiles.InvalidSmilesException.clear ();
 var sp =  new J.smiles.SmilesParser (true);
 var search = null;
-try {
 search = sp.parse ("");
 search.firstMatchOnly = false;
 search.matchAllAtoms = false;
@@ -115,33 +86,18 @@ search.getRingData (true, flags, vRings);
 search.asVector = false;
 search.subSearches =  new Array (1);
 search.getSelections ();
-} catch (e) {
-if (Clazz.exceptionOf (e, J.smiles.InvalidSmilesException)) {
-} else {
-throw e;
-}
-}
 var bsDone =  new JU.BS ();
 for (var i = 0; i < smarts.length; i++) {
 if (smarts[i] == null || smarts[i].length == 0 || smarts[i].startsWith ("#")) {
 ret.addLast (null);
 continue;
-}try {
-search.clear ();
+}search.clear ();
 var ss = sp.getSearch (search, J.smiles.SmilesParser.cleanPattern (smarts[i]), flags);
 search.subSearches[0] = ss;
 var bs = J.util.BSUtil.copy (search.search (false));
 ret.addLast (bs);
 bsDone.or (bs);
 if (bsDone.cardinality () == atomCount) return;
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-if (J.smiles.InvalidSmilesException.getLastError () == null) J.smiles.InvalidSmilesException.setLastError (e.toString ());
-System.out.println (e.toString ());
-} else {
-throw e;
-}
-}
 }
 }, "~A,~A,~N,~N,JU.BS,JU.List,~A");
 $_V(c$, "getSubstructureSetArray", 
@@ -160,7 +116,7 @@ return this.match (pattern, search.jmolAtoms, -search.jmolAtoms.length, null, bs
 }, $fz.isPrivate = true, $fz), "~S,J.smiles.SmilesSearch,~B,~B,~B");
 $_M(c$, "match", 
 ($fz = function (pattern, atoms, atomCount, bsSelected, bsAromatic, isSmarts, matchAllAtoms, firstMatchOnly, mode) {
-J.smiles.InvalidSmilesException.setLastError (null);
+J.smiles.InvalidSmilesException.clear ();
 try {
 var search = J.smiles.SmilesParser.getMolecule (pattern, isSmarts);
 search.jmolAtoms = atoms;
@@ -187,15 +143,15 @@ return vl.toArray (JU.AU.newInt2 (vl.size ()));
 }
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
-if (J.smiles.InvalidSmilesException.getLastError () == null) J.smiles.InvalidSmilesException.setLastError (e.toString ());
-System.out.println (e.toString ());
+if (J.smiles.InvalidSmilesException.getLastError () == null) J.smiles.InvalidSmilesException.clear ();
+throw  new J.smiles.InvalidSmilesException (J.smiles.InvalidSmilesException.getLastError ());
 } else {
 throw e;
 }
 }
 return null;
 }, $fz.isPrivate = true, $fz), "~S,~A,~N,JU.BS,JU.BS,~B,~B,~B,~N");
-$_M(c$, "countStereo", 
+c$.countStereo = $_M(c$, "countStereo", 
 ($fz = function (s) {
 s = JU.PT.rep (s, "@@", "@");
 var i = s.lastIndexOf ('@') + 1;

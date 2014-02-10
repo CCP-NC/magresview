@@ -916,8 +916,16 @@ $_M(c$, "getSequence",
 var a1 = this.measurementQueued.getAtomIndex (1);
 var a2 = this.measurementQueued.getAtomIndex (2);
 if (a1 < 0 || a2 < 0) return;
+try {
 var sequence = this.viewer.getSmilesOpt (null, a1, a2, false, true, false, false, false);
 this.viewer.setStatusMeasuring ("measureSequence", -2, sequence, 0);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+J.util.Logger.error (e.toString ());
+} else {
+throw e;
+}
+}
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "minimize", 
 ($fz = function (dragDone) {

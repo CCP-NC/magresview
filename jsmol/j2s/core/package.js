@@ -68,13 +68,9 @@ for (var i = 0; i < Jmol._coreFiles.length; i++)
 	]);
 
 	ClazzLoader.jarClasspath (base + "coremenu.z.js",	[
-		"J.awtjs2d.JSmolPopup",		
-		"$.JSPopup",
-		"$.JSmolPopup",
-		"J.popup.JmolAbstractMenu",
-		"$.GenericPopup",
-		"$.PopupResource",
-		"$.MainPopupResourceBundle"
+		"J.awtjs2d.JmolJSPopup",	
+		"J.popup.MainPopupResourceBundle",
+		"$.JmolGenericPopup"
 	]);
 
 	ClazzLoader.jarClasspath (base + "corebinary.z.js",	[
@@ -188,7 +184,10 @@ for (var i = 0; i < Jmol._coreFiles.length; i++)
 	]);
 
 	ClazzLoader.jarClasspath (base + "corejsvmenu.z.js",	[
-          	"JSV.js2d.JsPopup"
+          	"JSV.js2d.JsPopup",
+          	"JSV.popup.JSVGenericPopup",
+          	"JSV.popup.JSVPopupResourceBundle"
+          	
   ]);
 
 	ClazzLoader.jarClasspath (base + "corejsvexport.z.js",	[
@@ -206,6 +205,7 @@ for (var i = 0; i < Jmol._coreFiles.length; i++)
 	]);
 
 	ClazzLoader.jarClasspath (base + "coreswing.z.js",	[
+				"javajs.api.SC", 
         "javajs.awt.BorderLayout",
         "$.Component",
         "$.Container",
@@ -244,7 +244,11 @@ for (var i = 0; i < Jmol._coreFiles.length; i++)
         "$.ListSelectionModel",
         "$.SwingConstants",
         "$.TableCellRenderer",
-        "$.TableColumn"
+        "$.TableColumn",
+		"J.popup.GenericSwingPopup",
+		"$.PopupHelper",
+		"$.JSSwingPopupHelper",
+		"$.PopupResource"
 	]);
 
 

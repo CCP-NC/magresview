@@ -737,7 +737,7 @@ this.currentChain = null;
 if (!this.isPDB || this.isPyMOLsession) {
 this.modelSet.freezeModels ();
 return;
-}var asDSSP = this.viewer.getBoolean (603979825);
+}var asDSSP = this.viewer.getBoolean (603979826);
 var ret = this.modelSet.calculateStructuresAllExcept (this.structuresDefinedInFile, asDSSP, false, true, true, asDSSP);
 if (ret.length > 0) J.util.Logger.info (ret);
 }, $fz.isPrivate = true, $fz));

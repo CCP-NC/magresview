@@ -341,7 +341,7 @@ info.put ("spaceGroupInfo", data);
 }, "J.modelset.ModelSet,~N,~S,~N,JU.P3,JU.P3,~S");
 $_V(c$, "getSymmetryInfo", 
 function (modelSet, iModel, iAtom, uc, xyz, op, pt, pt2, id, type) {
-if (pt2 != null) return modelSet.getSymmetryInfoString (iModel, null, op, pt, pt2, (id == null ? "sym" : id), type == 1826248715);
+if (pt2 != null) return modelSet.getSymmetryInfoString (iModel, null, op, pt, pt2, (id == null ? "sym" : id), type == 1826248716);
 var symTemp = modelSet.getSymTemp (false);
 var isBio = uc.isBio ();
 var sym = uc;
@@ -380,7 +380,7 @@ return sinfo;
 case 1073741982:
 return info[0];
 default:
-case 1826248715:
+case 1826248716:
 return info[2];
 case 135176:
 return info[3];

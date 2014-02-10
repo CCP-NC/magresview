@@ -69,7 +69,7 @@ return this.getAtomFromOffsetIndex (5);
 });
 $_M(c$, "getC4P", 
 function () {
-return this.getAtomFromOffsetIndex (26);
+return this.getAtomFromOffsetIndex (27);
 });
 $_M(c$, "getN1", 
 function () {
@@ -108,15 +108,22 @@ function () {
 return this.getAtomFromOffsetIndex (J.modelsetbio.Monomer.have (this.offsets, 20) ? 20 : 21);
 });
 $_M(c$, "getBaseRing6Points", 
-function (ring6Points) {
-for (var i = 6; --i >= 0; ) ring6Points[i] = this.getAtomFromOffsetIndex (J.modelsetbio.NucleicMonomer.ring6OffsetIndexes[i]);
-
+function (pts) {
+this.getPoints (J.modelsetbio.NucleicMonomer.ring6OffsetIndexes, pts);
 }, "~A");
-$_M(c$, "maybeGetBaseRing5Points", 
-function (ring5Points) {
-if (this.$isPurine) for (var i = 5; --i >= 0; ) ring5Points[i] = this.getAtomFromOffsetIndex (J.modelsetbio.NucleicMonomer.ring5OffsetIndexes[i]);
+$_M(c$, "getPoints", 
+($fz = function (a, pts) {
+for (var i = a.length; --i >= 0; ) pts[i] = this.getAtomFromOffsetIndex (a[i]);
 
+}, $fz.isPrivate = true, $fz), "~A,~A");
+$_M(c$, "maybeGetBaseRing5Points", 
+function (pts) {
+if (this.$isPurine) this.getPoints (J.modelsetbio.NucleicMonomer.ring5OffsetIndexes, pts);
 return this.$isPurine;
+}, "~A");
+$_M(c$, "getRiboseRing5Points", 
+function (pts) {
+this.getPoints (J.modelsetbio.NucleicMonomer.riboseOffsetIndexes, pts);
 }, "~A");
 $_V(c$, "isConnectedAfter", 
 function (possiblyPreviousMonomer) {
@@ -325,16 +332,20 @@ Clazz.defineStatics (c$,
 "N6", 16,
 "N2", 17,
 "H5T", 18,
-"O5Pr", 19,
+"O5P", 19,
 "H3T", 20,
-"O3Pr", 21,
-"C3Pr", 22,
+"O3P", 21,
+"C3P", 22,
 "O1P", 23,
 "O2P", 24,
 "C1P", 25,
-"C4P", 26,
-"interestingNucleicAtomIDs", [-14, 37, -80, 36, 32, 33, 34, 35, -39, -40, -41, -42, -48, -47, -43, -14, -45, -44, -73, -7, -89, 10, 9, -75, -77, -13, -9],
+"C2P", 26,
+"C4P", 27,
+"O4P", 28,
+"C5P", 29,
+"interestingNucleicAtomIDs", [-14, 37, -80, 36, 32, 33, 34, 35, -39, -40, -41, -42, -48, -47, -43, -14, -45, -44, -73, -7, -89, 10, 9, -75, -77, -13, -12, -9, -79, -8],
 "ring6OffsetIndexes", [3, 1, 4, 5, 6, 7],
 "ring5OffsetIndexes", [3, 9, 10, 11, 7],
+"riboseOffsetIndexes", [25, 26, 22, 27, 28, 21, 29, 19, 0],
 "heavyAtomIndexes", [3, 1, 4, 5, 6, 7, 11, 10, 9, 16, 14, 8, 12, 17, 13]);
 });

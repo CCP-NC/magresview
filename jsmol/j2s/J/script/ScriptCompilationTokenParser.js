@@ -42,7 +42,7 @@ Clazz.instantialize (this, arguments);
 $_M(c$, "compileExpressions", 
 function () {
 var isScriptExpression = (this.tokCommand == 135271429 && this.tokAt (2) == 269484048);
-this.isEmbeddedExpression = isScriptExpression || (this.tokCommand != 0 && (this.tokCommand != 135368713 && this.tokCommand != 102436 && this.tokCommand != 364558 && this.tokCommand != 102412 || this.tokenCommand.intValue != 2147483647) && this.tokCommand != 1150985 && !J.script.T.tokAttrOr (this.tokCommand, 12288, 20480));
+this.isEmbeddedExpression = (isScriptExpression || (this.tokCommand != 0 && (this.tokCommand != 135368713 && this.tokCommand != 102436 && this.tokCommand != 364558 && this.tokCommand != 102412 || this.tokenCommand.intValue != 2147483647) && this.tokCommand != 1150985 && !J.script.T.tokAttr (this.tokCommand, 12288) && (this.nTokens > 2 || !J.script.T.tokAttr (this.tokCommand, 20480))));
 this.isMathExpressionCommand = (this.tokCommand == 1073741824 || isScriptExpression || J.script.T.tokAttr (this.tokCommand, 36864));
 var checkExpression = this.isEmbeddedExpression || (J.script.T.tokAttr (this.tokCommand, 12288));
 if (this.tokAt (1) == 1048583 && J.script.T.tokAttr (this.tokCommand, 12288)) checkExpression = false;
@@ -280,7 +280,7 @@ return this.error (4);
 case 1048579:
 case 10:
 case 269484208:
-case 137363468:
+case 137363467:
 case 3145736:
 case 3145735:
 case 3145738:
@@ -473,7 +473,7 @@ case 1087373316:
 case 1048582:
 case 1087375365:
 case 1087373318:
-case 137363468:
+case 137363467:
 case 1095766030:
 case 1095761936:
 case 135266319:

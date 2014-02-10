@@ -489,7 +489,7 @@ break;
 case 1114638362:
 if (this.setHydrophobicity (i, fValue)) this.taintAtom (i, 5);
 break;
-case 1826248715:
+case 1826248716:
 case 1288701959:
 this.viewer.setAtomLabel (sValue, i);
 break;
@@ -1545,9 +1545,9 @@ case 3145764:
 for (i = this.atomCount; --i >= 0; ) if (this.atoms[i].isCarbohydrate ()) bs.set (i);
 
 break;
-case 137363468:
+case 137363467:
 case 3145760:
-var type = (tokType == 137363468 ? J.constant.EnumStructure.HELIX : J.constant.EnumStructure.SHEET);
+var type = (tokType == 137363467 ? J.constant.EnumStructure.HELIX : J.constant.EnumStructure.SHEET);
 for (i = this.atomCount; --i >= 0; ) if (this.atoms[i].isWithinStructure (type)) bs.set (i);
 
 break;
@@ -1767,7 +1767,7 @@ return (!isEmpty || returnEmpty ? bs : null);
 }, "~N,~B");
 $_M(c$, "getChainBits", 
 function (chainID) {
-var caseSensitive = chainID < 256 && this.viewer.getBoolean (603979822);
+var caseSensitive = chainID < 256 && this.viewer.getBoolean (603979823);
 if (!caseSensitive) chainID = J.modelset.AtomCollection.chainToUpper (chainID);
 var bs =  new JU.BS ();
 var bsDone = JU.BS.newN (this.atomCount);

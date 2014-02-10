@@ -188,7 +188,7 @@ Copy of the license can be found as a text file in the /jmol folder
     }
     
     a.hidden {
-      display: none;
+      visibility: hidden;
     }
     
     </style>
@@ -610,6 +610,8 @@ Copy of the license can be found as a text file in the /jmol folder
 							<input type="button" id="eultab_butt" onclick="eultab_calculate()" value="Generate table" disabled="true">
 							<div class="ctrl_right">
 							<input type="checkbox" id="eultab_check" autocomplete="off">Output in a new tab
+							<br><br>
+							<a id="eul_file_download" href="" class="hidden" target="_blank" download="">Download</a>
 							</div>
 							</div>
 							</div>					

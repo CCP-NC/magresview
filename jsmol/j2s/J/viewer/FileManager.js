@@ -99,7 +99,7 @@ if (names.length == 1) return names[0];
 var fullPathName = names[0];
 var fileName = names[1];
 htParams.put ("fullPathName", (fileType == null ? "" : fileType + "::") + fullPathName.$replace ('\\', '/'));
-if (this.viewer.getBoolean (603979880) && this.viewer.getBoolean (603979824)) this.viewer.scriptStatus ("Requesting " + fullPathName);
+if (this.viewer.getBoolean (603979880) && this.viewer.getBoolean (603979825)) this.viewer.scriptStatus ("Requesting " + fullPathName);
 var fileReader =  new J.io.FileReader (this, this.viewer, fileName, fullPathName, nameAsGiven, fileType, null, htParams, isAppend);
 fileReader.run ();
 return fileReader.getAtomSetCollection ();

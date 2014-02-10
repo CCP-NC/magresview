@@ -1278,7 +1278,7 @@ var seqcodeA = info[0];
 var seqcodeB = info[1];
 var chainID = info[2];
 bs =  new JU.BS ();
-var caseSensitive = this.viewer.getBoolean (603979822);
+var caseSensitive = this.viewer.getBoolean (603979823);
 if (chainID >= 0 && chainID < 256 && !caseSensitive) chainID = J.modelset.AtomCollection.chainToUpper (chainID);
 for (var i = this.modelCount; --i >= 0; ) if (this.models[i].isBioModel) this.models[i].selectSeqcodeRange (seqcodeA, seqcodeB, chainID, bs, caseSensitive);
 

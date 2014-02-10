@@ -107,8 +107,7 @@ if (len > 0) end = ".\n";
 }
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
-System.out.println (e.toString ());
-return "";
+throw  new J.smiles.InvalidSmilesException ("//* error: " + e.getMessage () + " *//");
 } else {
 throw e;
 }

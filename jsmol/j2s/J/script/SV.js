@@ -37,6 +37,14 @@ var sv = J.script.SV.newV (tok, value);
 sv.intValue = intValue;
 return sv;
 }, "~N,~N,~O");
+$_M(c$, "setv", 
+function (v) {
+this.index = v.index;
+this.intValue = v.intValue;
+this.tok = v.tok;
+this.value = v.value;
+return this;
+}, "J.script.SV");
 c$.sizeOf = $_M(c$, "sizeOf", 
 function (x) {
 switch (x == null ? 0 : x.tok) {
@@ -211,38 +219,21 @@ for (var i = 0; i < ix.length; i++) objects.addLast (J.script.SV.newI (ix[i]));
 
 return J.script.SV.newV (7, objects);
 }, "~A");
-$_M(c$, "setv", 
-function (v, asCopy) {
-this.index = v.index;
-this.intValue = v.intValue;
-this.tok = v.tok;
-this.value = v.value;
-if (asCopy) {
-switch (this.tok) {
-case 6:
-this.value =  new java.util.Hashtable (v.value);
-break;
-case 7:
-var o2 =  new JU.List ();
-var o1 = v.getList ();
-for (var i = 0; i < o1.size (); i++) o2.addLast (o1.get (i));
-
-this.value = o2;
-break;
-}
-}return this;
-}, "J.script.SV,~B");
 $_M(c$, "setName", 
 function (name) {
 this.myName = name;
 this.flags |= 1;
 return this;
 }, "~S");
-$_M(c$, "setGlobal", 
+$_M(c$, "isModified", 
 function () {
-this.flags &= -3;
-return this;
+return J.script.T.tokAttr (this.flags, 2);
 });
+$_M(c$, "setModified", 
+function (tf) {
+if (tf) this.flags |= 2;
+ else this.flags &= -3;
+}, "~B");
 $_M(c$, "canIncrement", 
 function () {
 return J.script.T.tokAttr (this.flags, 1);
@@ -644,14 +635,19 @@ if (isInputSelected) {
 if (i1 > 1) bs.clearAll ();
 break;
 }if (isOne) {
-isOne = (--i1 >= 0 && bs.get (i1));
+if (i1 == len) {
+i2 = bs.length () - 1;
+} else if (i1 == 1) {
+i2 = bs.nextSetBit (0);
+}if (i2 >= -1) {
 bs.clearAll ();
-if (isOne) bs.set (i1);
-} else {
-var n = 0;
+if (i2 >= 0) bs.set (i2);
+break;
+}i2 = i1;
+}var n = 0;
 for (var j = bs.nextSetBit (0); j >= 0; j = bs.nextSetBit (j + 1)) if (++n < i1 || n > i2) bs.clear (j);
 
-}break;
+break;
 case 4:
 tokenOut.value = (--i1 < 0 || i1 >= len ? "" : isOne ? s.substring (i1, i1 + 1) : s.substring (i1, Math.min (i2, len)));
 break;
@@ -660,8 +656,8 @@ if (--i1 < 0 || i1 >= len) return J.script.SV.newV (4, "");
 if (isOne) return (tokenIn).getList ().get (i1);
 var o2 =  new JU.List ();
 var o1 = (tokenIn).getList ();
-var n = Math.min (i2, len) - i1;
-for (var i = 0; i < n; i++) o2.addLast (J.script.SV.newT (o1.get (i + i1)));
+var nn = Math.min (i2, len) - i1;
+for (var i = 0; i < nn; i++) o2.addLast (J.script.SV.newT (o1.get (i + i1)));
 
 tokenOut.value = o2;
 break;
@@ -865,7 +861,7 @@ $_M(c$, "pushPop",
 function (o) {
 var x = this.getList ();
 if (o == null || x == null) return (x == null || x.size () == 0 ? J.script.SV.newS ("") : x.remove (x.size () - 1));
-x.addLast (J.script.SV.getVariable (J.script.SV.selectItemVar (o).value));
+x.addLast (J.script.SV.newI (0).setv (o));
 return this;
 }, "J.script.SV");
 $_M(c$, "unEscapeBitSetArray", 
@@ -1009,6 +1005,6 @@ c$.vT = c$.prototype.vT = J.script.SV.newSV (1048589, 1, "true");
 c$.vF = c$.prototype.vF = J.script.SV.newSV (1048588, 0, "false");
 Clazz.defineStatics (c$,
 "FLAG_CANINCREMENT", 1,
-"FLAG_LOCALVAR", 2);
+"FLAG_MODIFIED", 2);
 c$.pt0 = c$.prototype.pt0 =  new JU.P3 ();
 });

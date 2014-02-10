@@ -84,7 +84,7 @@ this.viewer.setBooleanProperty ("translucent", true);
 $_M(c$, "setJmolDefaults", 
 function () {
 this.setCommonDefaults ();
-this.viewer.setStringProperty ("ColorScheme", "Jmol");
+this.viewer.setStringProperty ("defaultColorScheme", "Jmol");
 this.viewer.setBooleanProperty ("axesOrientationRasmol", false);
 this.viewer.setBooleanProperty ("zeroBasedXyzRasmol", false);
 this.viewer.setIntProperty ("percentVdwAtom", 23);

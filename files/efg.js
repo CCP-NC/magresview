@@ -169,38 +169,37 @@ function efg_color_handler()
 		switch(l_type)
 		{
 			case 0:
-				efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"value\");";
+				efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"value\")";
 				break; 
 			case 1:
 				if (conv == "haeb") {
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"anisotropy\");";					
+					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"anisotropy\")";					
 				}
 				else
 				{
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"span\");";										
+					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"span\")";										
 				}
 				break; 
 			case 2:
 				if (conv == "haeb") {
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"asymmetry\");";
+					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"asymmetry\")";
 				}
 				else
 				{
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"skew\");";										
+					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"skew\")";										
 				}
 				break; 
 			case 3:
-				efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"chi\");";
+				efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"chi\")";
 				break;
 		}
 		
-		efg_plot_jmol_script += "color {selected} property_efg_colorscale";
+		efg_plot_jmol_script += ".mul(-1); color {selected} property_efg_colorscale;";
 	}
 	else
 	{
 		efg_plot_jmol_script += "color {displayed} none;"
 	}
-	
 	
 	Jmol.script(mainJmol, efg_plot_jmol_script);
 }

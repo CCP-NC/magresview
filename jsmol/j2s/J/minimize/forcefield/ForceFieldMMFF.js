@@ -493,7 +493,15 @@ smarts[i] = at.smartsCode;
 nUsed++;
 }
 J.util.Logger.info (nUsed + " SMARTS matches used");
+try {
 smartsMatcher.getSubstructureSets (smarts, atoms, atoms.length, 20, bsConnected, bitSets, vRings);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+J.util.Logger.error (e.toString ());
+} else {
+throw e;
+}
+}
 var bsDone =  new JU.BS ();
 for (var j = 0; j < bitSets.size (); j++) {
 var bs = bitSets.get (j);

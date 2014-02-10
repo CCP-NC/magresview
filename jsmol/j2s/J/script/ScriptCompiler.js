@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.script");
-Clazz.load (["J.script.ScriptCompilationTokenParser", "JU.List"], "J.script.ScriptCompiler", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M34", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.BondSet", "$.Group", "J.script.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptEvaluator", "$.ScriptFlowContext", "$.ScriptFunction", "$.T", "J.util.Escape", "$.Logger", "$.Txt", "J.viewer.Viewer"], function () {
+Clazz.load (["J.script.ScriptCompilationTokenParser", "JU.List"], "J.script.ScriptCompiler", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M34", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.BondSet", "$.Group", "J.script.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptEvaluator", "$.ScriptFlowContext", "$.ScriptFunction", "$.T", "J.util.Escape", "$.Logger", "J.viewer.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.filename = null;
 this.isSilent = false;
@@ -709,9 +709,10 @@ return 2;
 }this.cchToken = pt;
 }}break;
 }
+this.implicitString = new Boolean (this.implicitString & (this.nTokens == 1)).valueOf ();
 if (this.implicitString && !(this.tokCommand == 135271429 && this.iHaveQuotedString) && this.lookingAtImpliedString (true, true, true)) {
 var str = this.script.substring (this.ichToken, this.ichToken + this.cchToken);
-if (this.tokCommand == 1826248715 && JU.PT.isOneOf (str.toLowerCase (), "on;off;hide;display")) this.addTokenToPrefix (J.script.T.getTokenFromName (str.toLowerCase ()));
+if (this.tokCommand == 1826248716 && JU.PT.isOneOf (str.toLowerCase (), "on;off;hide;display")) this.addTokenToPrefix (J.script.T.getTokenFromName (str.toLowerCase ()));
  else this.addTokenToPrefix (J.script.T.o (4, str));
 return 2;
 }if (this.lookingAtObjectID ()) {
@@ -1550,13 +1551,11 @@ $_M(c$, "lookingAtImpliedString",
 var ichT = this.ichToken;
 var ch = this.script.charAt (ichT);
 var isID = (this.lastToken.tok == 1074790550);
-var parseVariables = (isID || !J.script.T.tokAttr (this.tokCommand, 20480) && (this.tokCommand & 1) == 1);
+var passVariableToString = (J.script.T.tokAttr (this.tokCommand, 20480) && (this.tokCommand & 1) == 1);
 var isVariable = (ch == '@');
 var isMath = (isVariable && ichT + 3 < this.cchScript && this.script.charAt (ichT + 1) == '{');
-if (isMath && parseVariables) {
-ichT = J.util.Txt.ichMathTerminator (this.script, this.ichToken + 1, this.cchScript);
-return (!isID && ichT != this.cchScript && (this.cchToken = ichT + 1 - this.ichToken) > 0);
-}var ptSpace = -1;
+if (isMath && (isID || !passVariableToString)) return false;
+var ptSpace = -1;
 var ptLastChar = -1;
 var isOK = true;
 var parenpt = 0;
@@ -1581,8 +1580,7 @@ parenpt--;
 if (parenpt < 0 && (this.braceCount > 0 || this.iBrace > 0)) {
 isOK = false;
 continue;
-}break;
-default:
+}default:
 if (Character.isWhitespace (ch)) {
 if (ptSpace < 0) ptSpace = ichT;
 } else {

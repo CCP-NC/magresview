@@ -290,8 +290,6 @@ function euldiff_butt_handler()
 	if (atom1 == atom2 && type1 == type2)
 		return;
 	
-	alert("(" + quat1 + " \\ " + quat2 + ")" + conv_table[eul_conv]);
-
 	eul = Jmol.evaluate(mainJmol, "(" + quat1 + " \\ " + quat2 + ")" + conv_table[eul_conv]).split('\n');
 
 	euldiff_out_window(atom1, type1, atom2, type2, eul);
@@ -342,6 +340,9 @@ function eultab_calculate()
 			file_str: "",
 			write: function(s) {
 				this.file_str += s;
+			},
+			close: function(s) {
+				this.file_str = "";
 			}
 		}
 	}
@@ -360,7 +361,7 @@ function eultab_calculate()
 
 	file_destination.write('Atom\tAlpha\tBeta\tGamma\n');	
 
-	for (ea in eul_angs)
+	for (var ea=0; ea < eul_angs.length; ++ea)
 	{
 		if (eul_angs[ea] == '')
 			continue;
@@ -376,10 +377,17 @@ function eultab_calculate()
 		out_window.focus();
 	}
 	else
-	{	
-		var savefile_script = "data \"label\"\n" + file_destination.file_str + "\nend \"label\";";
-		savefile_script += "x = data(\"label\"); write var x ?.eul; data clear; x = null;";
-		Jmol.script(mainJmol, savefile_script);
+	{
+		if (current_framework == "Java") {
+			var savefile_script = "data \"label\"\n" + file_destination.file_str + "\nend \"label\";";
+			savefile_script += "x = data(\"label\"); write var x ?.eul; data clear; x = null;";
+			Jmol.script(mainJmol, savefile_script);
+		}
+		else
+		{
+			$("#eul_file_download").attr("href", "data:text/plain," + file_destination.file_str.replace(/\n/g, '%0A').replace(/\t/g, '%09'));
+			$("#eul_file_download").removeClass("hidden");
+		}
 	}
 
 }

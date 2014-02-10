@@ -1011,7 +1011,14 @@ function compile_data_set(ds, ac, use_all)
 			}
 			else
 			{
-				var isos = Jmol.getPropertyAsJavaObject(mainJmol, "NMRinfo", a_el).toArray();
+				try
+				{
+					var isos = Jmol.getPropertyAsJavaObject(mainJmol, "NMRinfo", a_el).toArray();					
+				}
+				catch(err)
+				{
+					return false;
+				}
 				for (var iso = 0; iso < isos.length; ++iso)
 				{
 					if (isos[iso][0] < 0)

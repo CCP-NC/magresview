@@ -1,9 +1,17 @@
 Clazz.declarePackage ("J.adapter.readers.simple");
 Clazz.load (["J.adapter.smarter.AtomSetCollectionReader"], "J.adapter.readers.simple.FoldingXyzReader", ["java.util.Hashtable", "JU.AU", "$.PT", "J.adapter.smarter.Atom"], function () {
-c$ = Clazz.declareType (J.adapter.readers.simple, "FoldingXyzReader", J.adapter.smarter.AtomSetCollectionReader);
+c$ = Clazz.decorateAsClass (function () {
+this.haveBonds = false;
+Clazz.instantialize (this, arguments);
+}, J.adapter.readers.simple, "FoldingXyzReader", J.adapter.smarter.AtomSetCollectionReader);
 $_V(c$, "initializeReader", 
 function () {
-this.atomSetCollection.setNoAutoBond ();
+});
+$_V(c$, "finalizeReader", 
+function () {
+if (this.haveBonds) this.atomSetCollection.setNoAutoBond ();
+this.isTrajectory = false;
+this.finalizeReaderASCR ();
 });
 $_V(c$, "checkLine", 
 function () {
@@ -12,10 +20,10 @@ var token = JU.PT.parseTokenNext (this.line, next);
 if (token == null) return true;
 var addAtoms = this.doGetModel (++this.modelNumber, null);
 var modelAtomCount = this.parseIntStr (token);
-var tokens = this.getTokens ();
 if (addAtoms) {
 this.atomSetCollection.newAtomSet ();
-this.atomSetCollection.setAtomSetName (tokens.length == 2 ? "Protein " + tokens[1] : this.line.substring (next[0]));
+var tokens = this.getTokens ();
+this.atomSetCollection.setAtomSetName (tokens.length == 2 ? "Protein " + tokens[1] : this.line.substring (next[0]).trim ());
 }var readLine = this.readAtoms (modelAtomCount + 1, addAtoms);
 this.continuing = !addAtoms || !this.isLastModel (this.modelNumber);
 return readLine;
@@ -33,20 +41,28 @@ for (var i = 0; i < atomCount; i++) {
 this.discardLinesUntilNonBlank ();
 if (this.line == null) break;
 var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (this.line);
-if (tokens[0].equals (lastAtom)) {
+var sIndex = tokens[0];
+if (sIndex.equals (lastAtom)) {
 readNextLine = false;
 break;
-}lastAtom = tokens[0];
+}lastAtom = sIndex;
 if (!addAtoms) continue;
-this.addAtomXYZSymName (tokens, 2, this.getElement (tokens[1]), tokens[1]);
+var atom =  new J.adapter.smarter.Atom ();
+atom.atomName = tokens[1];
+atom.elementSymbol = this.getElement (tokens[1]);
+atom.atomSerial = this.parseIntStr (sIndex);
+if (!this.filterAtom (atom, i)) continue;
+this.setAtomCoordTokens (atom, tokens, 2);
+this.atomSetCollection.addAtomWithMappedSerialNumber (atom);
 var n = tokens.length - 5;
-bonds[i] =  Clazz.newIntArray (n, 0);
+bonds[i] =  Clazz.newIntArray (n + 1, 0);
+bonds[i][n] = atom.atomSerial;
 for (var j = 0; j < n; j++) {
 var t = tokens[j + 5];
-var i2 = this.parseIntStr (t) - 1;
+var i2 = this.parseIntStr (t);
 bonds[i][j] = i2;
 if (checking) {
-if (n == 0 || i2 == i || i2 < 0 || i2 >= atomCount) {
+if (n == 0 || t.equals (sIndex) || i2 <= 0 || i2 > atomCount) {
 haveAtomTypes = (n > 0);
 checking = false;
 } else {
@@ -55,8 +71,10 @@ if (count == null) htBondCounts.put (t, count =  Clazz.newIntArray (1, 0));
 if (++count[0] > 10) haveAtomTypes = !(checking = false);
 }}}
 }
-if (addAtoms) this.makeBonds (i0, bonds, !checking && haveAtomTypes);
-return readNextLine;
+if (addAtoms) {
+this.makeBonds (i0, bonds, !checking && haveAtomTypes);
+this.applySymmetryAndSetTrajectory ();
+}return readNextLine;
 }, "~N,~B");
 $_M(c$, "makeBonds", 
 ($fz = function (i0, bonds, haveAtomTypes) {
@@ -64,10 +82,10 @@ var atoms = this.atomSetCollection.atoms;
 for (var i = bonds.length; --i >= 0; ) {
 var b = bonds[i];
 if (b == null) continue;
-var a = atoms[i0 + i];
+var a1 = atoms[this.atomSetCollection.getAtomIndexFromSerial (b[b.length - 1])];
 var b0 = 0;
-if (haveAtomTypes) a.atomName += "\0" + (b[b0++] + 1);
-for (var j = b.length; --j >= b0; ) if (b[j] > i) this.atomSetCollection.addNewBondWithOrder (i0 + i, i0 + b[j], 1);
+if (haveAtomTypes) a1.atomName += "\0" + (b[b0++]);
+for (var j = b.length - 1; --j >= b0; ) if (b[j] > i && this.atomSetCollection.addNewBondWithOrder (a1.index, this.atomSetCollection.getAtomIndexFromSerial (b[j]), 1) != null) this.haveBonds = true;
 
 }
 }, $fz.isPrivate = true, $fz), "~N,~A,~B");

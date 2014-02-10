@@ -361,7 +361,8 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		t_conv_choice_handler();
 
 		//Just to make sure that no one downloads a file belonging to another system
-		$("#file_download").addClass("hidden");		
+		$("#file_download").addClass("hidden");
+		$("#eul_file_download").addClass("hidden");
 	}
 }
 
