@@ -267,6 +267,7 @@ function get_atom_info()
 		//If the file was a magres file, we can rely on the fact that Jmol will use the naming convention label_site
 	
 		var atomnames = Jmol.evaluate(mainJmol, "{" + default_displaygroup + "}.atomname.all").split('\n');
+		
 
 		//Espunge possible duplicates
 

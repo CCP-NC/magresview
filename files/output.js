@@ -714,6 +714,17 @@ function table_file_gen(out)
 		i_to_info[data_set.atoms.atom[i].id].push(el);
 	}
 	
+	//Header lines
+	
+	var system_stochiometry = "";
+	
+	for (var i = 0; i < atom_set.atom_species_labels.length; ++i) {
+		l = atom_set.atom_species_labels[i];
+		system_stochiometry += l + "_" + atom_set.atom_species_sites[l].length + " ";
+	}
+	
+	out.write("Tabulated NMR data for " + system_stochiometry + "\n");
+	
 	//If present, print isotropic magnetic shielding tensors
 	if ("ms" in data_set.magres)
 	{
