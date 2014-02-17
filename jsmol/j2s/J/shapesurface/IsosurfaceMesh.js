@@ -573,7 +573,7 @@ return ipt;
 }, $fz.isPrivate = true, $fz), "J.util.MeshSurface,~N,~N,~A");
 $_V(c$, "getUnitCell", 
 function () {
-return (this.spanningVectors == null ? null : (J.api.Interface.getOptionInterface ("symmetry.Symmetry")).getUnitCell (this.spanningVectors, true));
+return (this.spanningVectors == null ? null : J.api.Interface.getSymmetry ().getUnitCell (this.spanningVectors, true));
 });
 $_V(c$, "slabBrillouin", 
 function (unitCellPoints) {

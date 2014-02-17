@@ -40,19 +40,10 @@ $_M(c$, "selectReaderAndGo",
 this.atomSetCollection =  new J.adapter.smarter.AtomSetCollection (this.readerName, this, null, null);
 var className = null;
 var thisReader = null;
-try {
 var pt = this.readerName.indexOf ("(");
 var name = (pt < 0 ? this.readerName : this.readerName.substring (0, pt));
 className = J.adapter.smarter.Resolver.getReaderClassBase (name);
-var atomSetCollectionReaderClass = Class.forName (className);
-thisReader = atomSetCollectionReaderClass.newInstance ();
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-return "File reader was not found: " + className;
-} else {
-throw e;
-}
-}
+if ((thisReader = J.api.Interface.getInterface (className)) == null) return "File reader was not found: " + className;
 try {
 thisReader.processXml (this, saxReader);
 } catch (e) {

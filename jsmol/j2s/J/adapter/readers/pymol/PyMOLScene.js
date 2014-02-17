@@ -85,6 +85,7 @@ this.bsStickBonds = null;
 this.thisState = 0;
 this.currentAtomSetIndex = 0;
 this.surfaceInfoName = null;
+this.haveMultipleBonds = false;
 Clazz.instantialize (this, arguments);
 }, J.adapter.readers.pymol, "PyMOLScene", null, J.api.JmolSceneGenerator);
 Clazz.prepareFields (c$, function () {
@@ -454,7 +455,10 @@ this.bsUniqueBonds = this.bsStickBonds = this.bsLineBonds = null;
 $_M(c$, "finalizeObjects", 
 ($fz = function () {
 this.viewer.setStringProperty ("defaults", "PyMOL");
-for (var i = 0; i < this.jmolObjects.size (); i++) {
+if (this.haveMultipleBonds) {
+this.viewer.setFloatProperty ("multipleBondSpacing", 0.15);
+this.viewer.setFloatProperty ("multipleBondRadiusFactor", 0.4);
+}for (var i = 0; i < this.jmolObjects.size (); i++) {
 try {
 var obj = this.jmolObjects.get (i);
 obj.finalizeObject (this, this.viewer.modelSet, this.mepList, this.doCache);
@@ -1221,7 +1225,7 @@ rad = this.getUniqueFloatDef (id, 21, NaN);
 if (c != 2147483647) c = J.adapter.readers.pymol.PyMOL.getRGB (c);
 var valence = this.getUniqueFloatDef (id, 64, NaN);
 var t = this.getUniqueFloatDef (id, 198, NaN);
-this.viewer.setBondParameters (this.thisState - 1, i, null, rad, valence, c, t);
+this.viewer.modelSet.setBondParameters (this.thisState - 1, i, rad, valence, c, t);
 }
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "addMesh", 

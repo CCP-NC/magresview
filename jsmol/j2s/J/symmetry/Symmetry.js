@@ -261,9 +261,8 @@ return this.unitCell.getUnitCellVectors ();
 });
 $_V(c$, "getUnitCell", 
 function (points, setRelative) {
-var sym =  new J.symmetry.Symmetry ();
-sym.unitCell = J.symmetry.UnitCell.newP (points, setRelative);
-return sym;
+this.unitCell = J.symmetry.UnitCell.newP (points, setRelative);
+return this;
 }, "~A,~B");
 $_V(c$, "isSupercell", 
 function () {

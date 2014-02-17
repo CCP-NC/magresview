@@ -62,10 +62,11 @@ $_M(c$, "addItems",
 function (itemPairs) {
 var previous = "";
 for (var i = 0; i < itemPairs.length; i++) {
-var str = itemPairs[i][1];
+var pair = itemPairs[i];
+var str = pair[1];
 if (str == null) str = previous;
 previous = str;
-this.structure.setProperty (itemPairs[i][0], str);
+this.structure.setProperty (pair[0], str);
 }
 }, "~A");
 $_M(c$, "localize", 

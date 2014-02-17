@@ -90,17 +90,8 @@ this.modelSet.modelSetAuxiliaryInfo = info;
 this.modelSet.modelSetProperties = this.modelSet.getModelSetAuxiliaryInfoValue ("properties");
 this.isPDB = this.modelSet.isPDB = this.modelSet.getModelSetAuxiliaryInfoBoolean ("isPDB");
 if (this.isPDB) {
-try {
-var shapeClass = Class.forName ("J.modelsetbio.Resolver");
-this.jbr = shapeClass.newInstance ();
+this.jbr = J.api.Interface.getOptionInterface ("modelsetbio.Resolver");
 this.jbr.initialize (this);
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-J.util.Logger.error ("developer error: J.modelsetbio.Resolver could not be found");
-} else {
-throw e;
-}
-}
 }this.jmolData = this.modelSet.getModelSetAuxiliaryInfoValue ("jmolData");
 this.fileHeader = this.modelSet.getModelSetAuxiliaryInfoValue ("fileHeader");
 this.modelSet.trajectorySteps = this.modelSet.getModelSetAuxiliaryInfoValue ("trajectorySteps");
@@ -597,7 +588,7 @@ for (var i = 0; i < this.modelSet.modelCount; i++) {
 if (haveMergeCells && i < this.baseModelCount) {
 this.modelSet.unitCells[i] = this.mergeModelSet.unitCells[i];
 } else {
-this.modelSet.unitCells[i] = J.api.Interface.getOptionInterface ("symmetry.Symmetry");
+this.modelSet.unitCells[i] = J.api.Interface.getSymmetry ();
 this.modelSet.unitCells[i].setSymmetryInfo (i, this.modelSet.getModelAuxiliaryInfo (i));
 }}
 }if (this.appendNew && this.modelSet.someModelsHaveSymmetry) {

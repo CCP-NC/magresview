@@ -1833,8 +1833,7 @@ return bsResult;
 }, "~N,~N,~N,JU.BS");
 $_M(c$, "getSymTemp", 
 function (forceNew) {
-if (this.symTemp == null || forceNew) this.symTemp = J.api.Interface.getOptionInterface ("symmetry.Symmetry");
-return this.symTemp;
+return (this.symTemp == null || forceNew ? (this.symTemp = J.api.Interface.getSymmetry ()) : this.symTemp);
 }, "~B");
 $_M(c$, "createModels", 
 function (n) {

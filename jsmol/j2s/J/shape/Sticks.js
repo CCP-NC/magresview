@@ -138,7 +138,7 @@ map.put ("modelIndex", Integer.$valueOf (modelIndex));
 map.put ("model", this.viewer.getModelNumberDotted (modelIndex));
 map.put ("type", "bond");
 map.put ("info", info);
-this.viewer.setStatusAtomPicked (-3, "[\"bond\",\"" + bond.getIdentity () + "\"," + pt.x + "," + pt.y + "," + pt.z + "]");
+this.viewer.setStatusAtomPicked (-3, "[\"bond\",\"" + bond.getIdentity () + "\"," + pt.x + "," + pt.y + "," + pt.z + "]", map);
 return map;
 }, "~N,~N,~N,JU.BS,~B");
 $_M(c$, "findPickedBond", 

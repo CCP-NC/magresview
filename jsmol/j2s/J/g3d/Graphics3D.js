@@ -582,7 +582,7 @@ function (objImage, x, y, z, zSlab, bgcolix, width, height) {
 if (objImage == null || width == 0 || height == 0 || this.isClippedZ (zSlab)) return;
 this.plotImage (x, y, z, objImage, null, bgcolix, width, height);
 }, "~O,~N,~N,~N,~N,~N,~N,~N");
-$_M(c$, "plotImage", 
+$_V(c$, "plotImage", 
 function (x, y, z, image, jmolRenderer, bgcolix, width, height) {
 this.setColix (bgcolix);
 if (!this.$isPass2) this.translucencyMask = -1;

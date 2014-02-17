@@ -154,7 +154,7 @@ function vvleck_eval(is_iso)
 
 	couplings = couplings.split('\n');
 
-	for(c in couplings)
+	for(var c=0; c < couplings.length; ++c)
 	{
 		if (couplings[c] == '')
 			continue;

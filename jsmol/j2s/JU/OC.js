@@ -26,6 +26,10 @@ $_M(c$, "getFileName",
 function () {
 return this.fileName;
 });
+$_M(c$, "getName", 
+function () {
+return (this.fileName == null ? null : this.fileName.substring (this.fileName.lastIndexOf ("/") + 1));
+});
 $_M(c$, "getByteCount", 
 function () {
 return this.byteCount;

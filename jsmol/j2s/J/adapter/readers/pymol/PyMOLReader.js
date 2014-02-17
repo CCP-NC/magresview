@@ -115,7 +115,7 @@ $_M(c$, "process",
 ($fz = function (map) {
 this.pymolVersion = (map.get ("version")).intValue ();
 this.appendLoadNote ("PyMOL version: " + this.pymolVersion);
-var settings = J.adapter.readers.pymol.PyMOLReader.getMapList (map, "settings");
+var settings = this.fixSettings (J.adapter.readers.pymol.PyMOLReader.getMapList (map, "settings"));
 this.sceneOrder = J.adapter.readers.pymol.PyMOLReader.getMapList (map, "scene_order");
 this.haveScenes = this.getFrameScenes (map);
 var file = this.listAt (settings, 440);
@@ -225,6 +225,19 @@ this.addJmolScript (this.pymolScene.getViewScript (J.adapter.readers.pymol.PyMOL
 }if (this.$atomCount == 0) this.atomSetCollection.setAtomSetCollectionAuxiliaryInfo ("dataOnly", Boolean.TRUE);
 this.pymolScene.offsetObjects ();
 }, $fz.isPrivate = true, $fz), "java.util.Map");
+$_M(c$, "fixSettings", 
+($fz = function (settings) {
+var n = settings.size ();
+for (var i = 0; i < n; i++) {
+var i2 = J.adapter.readers.pymol.PyMOLReader.intAt (settings.get (i), 0);
+while (i < i2) {
+J.util.Logger.info ("PyMOL reader adding null settings #" + i);
+settings.add (i++,  new JU.List ());
+n++;
+}
+}
+return settings;
+}, $fz.isPrivate = true, $fz), "JU.List");
 $_M(c$, "getFrameScenes", 
 ($fz = function (map) {
 if (this.sceneOrder == null) return false;
@@ -520,7 +533,9 @@ var order = J.adapter.readers.pymol.PyMOLReader.intAt (b, 2);
 if (order < 1 || order > 3) order = 1;
 var ia = J.adapter.readers.pymol.PyMOLReader.intAt (b, 0);
 var ib = J.adapter.readers.pymol.PyMOLReader.intAt (b, 1);
-var bond =  new J.adapter.smarter.Bond (ia, ib, order | asSingle);
+order = order | asSingle;
+if (order > 1) this.pymolScene.haveMultipleBonds = true;
+var bond =  new J.adapter.smarter.Bond (ia, ib, order);
 bond.uniqueID = (b.size () > 6 && J.adapter.readers.pymol.PyMOLReader.intAt (b, 6) != 0 ? J.adapter.readers.pymol.PyMOLReader.intAt (b, 5) : -1);
 bondList.addLast (bond);
 }

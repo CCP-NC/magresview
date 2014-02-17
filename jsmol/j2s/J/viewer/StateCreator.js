@@ -335,7 +335,7 @@ if (frames != null) {
 J.viewer.StateCreator.appendCmd (commands, "anim frames " + J.util.Escape.eAI (frames));
 var i = am.getCurrentFrameIndex ();
 J.viewer.StateCreator.appendCmd (commands, "frame " + (i + 1));
-showModel = (am.getCurrentModelIndex () != am.modelIndexForFrame (i));
+showModel = (am.currentModelIndex != am.modelIndexForFrame (i));
 }if (showModel) J.viewer.StateCreator.appendCmd (commands, "model " + am.getModelSpecial (0));
 J.viewer.StateCreator.appendCmd (commands, "animation " + (!am.animationOn ? "OFF" : am.currentDirection == 1 ? "PLAY" : "PLAYREV"));
 if (am.animationOn && am.animationPaused) J.viewer.StateCreator.appendCmd (commands, "animation PAUSE");
@@ -358,8 +358,7 @@ var value = global.htNonbooleanParameterValues.get (key);
 if (key.charAt (0) == '=') {
 key = key.substring (1);
 } else {
-if (key.indexOf ("default") == 0) key = " set " + key;
- else key = "set " + key;
+key = (key.indexOf ("default") == 0 ? " " : "") + "set " + key;
 value = J.util.Escape.e (value);
 }list[n++] = key + " " + value;
 }

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.i18n");
-Clazz.load (null, "J.i18n.Resource", ["java.util.Hashtable", "JU.PT", "J.i18n.GT", "J.util.Logger", "J.viewer.Viewer"], function () {
+Clazz.load (null, "J.i18n.Resource", ["java.util.Hashtable", "JU.PT", "J.api.Interface", "J.i18n.GT", "J.util.Logger", "J.viewer.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.resource = null;
 this.resourceMap = null;
@@ -18,31 +18,9 @@ var fname = J.viewer.Viewer.appletIdiomaBase + "/" + name + ".po";
 J.util.Logger.info ("Loading language resource " + fname);
 poData = J.i18n.GT.viewer.getFileAsString (fname, false);
 return J.i18n.Resource.getResourceFromPO (poData);
-}var bundleClass = null;
-className += name + ".Messages_" + name;
-try {
-bundleClass = Class.forName (className);
-} catch (e) {
-J.util.Logger.error ("GT could not find the class " + className);
-}
-try {
-if (bundleClass != null && java.util.ResourceBundle.isAssignableFrom (bundleClass)) return  new J.i18n.Resource (bundleClass.newInstance (), className);
-} catch (e$$) {
-if (Clazz.exceptionOf (e$$, IllegalAccessException)) {
-var e = e$$;
-{
-J.util.Logger.warn ("Illegal Access Exception: " + e.toString ());
-}
-} else if (Clazz.exceptionOf (e$$, InstantiationException)) {
-var e = e$$;
-{
-J.util.Logger.warn ("Instantiation Exception: " + e.toString ());
-}
-} else {
-throw e$$;
-}
-}
-return null;
+}className += name + ".Messages_" + name;
+var o = J.api.Interface.getInterface (className);
+return (o == null ? null :  new J.i18n.Resource (o, className));
 }, "~S,~S");
 $_M(c$, "getString", 
 function (string) {

@@ -44,6 +44,7 @@ this.isComment = false;
 this.isUserToken = false;
 this.implicitString = false;
 this.tokInitialPlusPlus = 0;
+this.afterWhite = 0;
 this.vPush = null;
 this.pushCount = 0;
 this.chFirst = '\0';
@@ -270,7 +271,9 @@ while (J.script.ScriptCompiler.isSpaceOrTab (this.charAt (ichT))) ++ichT;
 
 if (this.isLineContinuation (ichT, true)) ichT += 1 + this.nCharNewLine (ichT + 1);
 this.cchToken = ichT - this.ichToken;
-return this.cchToken > 0;
+if (this.cchToken == 0) return false;
+this.afterWhite = ichT;
+return true;
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "isLineContinuation", 
 ($fz = function (ichT, checkMathop) {
@@ -721,12 +724,12 @@ this.addTokenToPrefix (J.script.T.o (1073741824, this.script.substring (this.ich
 return 2;
 }var value;
 if (!Float.isNaN (value = this.lookingAtExponential ())) {
-this.addTokenToPrefix (J.script.T.o (3, Float.$valueOf (value)));
+this.addNumber (3, 2147483647, Float.$valueOf (value));
 return 2;
 }if (this.lookingAtDecimal ()) {
 value = JU.PT.fVal (this.script.substring (this.ichToken, this.ichToken + this.cchToken));
 var intValue = (J.script.ScriptEvaluator.getFloatEncodedInt (this.script.substring (this.ichToken, this.ichToken + this.cchToken)));
-this.addTokenToPrefix (J.script.T.tv (3, intValue, Float.$valueOf (value)));
+this.addNumber (3, intValue, Float.$valueOf (value));
 return 2;
 }if (this.lookingAtSeqcode ()) {
 ch = this.script.charAt (this.ichToken);
@@ -756,7 +759,7 @@ var f = (this.flowContext == null ? null : this.flowContext.getBreakableContext 
 if (f == null) return this.ERROR (1, this.tokenCommand.value);
 this.tokenAt (0).intValue = f.pt0;
 }if (val == 0 && intString.equals ("-0")) this.addTokenToPrefix (J.script.T.tokenMinus);
-this.addTokenToPrefix (J.script.T.tv (2, val, intString));
+this.addNumber (2, val, intString);
 return 2;
 }if (!this.isMathExpressionCommand && this.parenCount == 0 || this.lastToken.tok != 1073741824 && !J.script.ScriptCompilationTokenParser.tokenAttr (this.lastToken, 135266304)) {
 var isBondOrMatrix = (this.script.charAt (this.ichToken) == '[');
@@ -771,6 +774,10 @@ this.addTokenToPrefix (J.script.T.o ((Clazz.instanceOf (m, JU.M4) ? 12 : 11), m)
 return 2;
 }}}return 0;
 }, $fz.isPrivate = true, $fz));
+$_M(c$, "addNumber", 
+($fz = function (tok, i, v) {
+this.addTokenToPrefix (this.afterWhite == this.ichToken ? J.script.SV.newSV (tok, i, v) : J.script.T.tv (tok, i, v));
+}, $fz.isPrivate = true, $fz), "~N,~N,~O");
 $_M(c$, "lookingAtMatrix", 
 ($fz = function () {
 var ipt;

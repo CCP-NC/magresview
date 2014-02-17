@@ -34,7 +34,6 @@ var htBondCounts =  new java.util.Hashtable ();
 var bonds = JU.AU.newInt2 (atomCount);
 var haveAtomTypes = true;
 var checking = true;
-var i0 = this.atomSetCollection.atomCount;
 var lastAtom = null;
 var readNextLine = true;
 for (var i = 0; i < atomCount; i++) {
@@ -72,12 +71,12 @@ if (++count[0] > 10) haveAtomTypes = !(checking = false);
 }}}
 }
 if (addAtoms) {
-this.makeBonds (i0, bonds, !checking && haveAtomTypes);
+this.makeBonds (bonds, !checking && haveAtomTypes);
 this.applySymmetryAndSetTrajectory ();
 }return readNextLine;
 }, "~N,~B");
 $_M(c$, "makeBonds", 
-($fz = function (i0, bonds, haveAtomTypes) {
+($fz = function (bonds, haveAtomTypes) {
 var atoms = this.atomSetCollection.atoms;
 for (var i = bonds.length; --i >= 0; ) {
 var b = bonds[i];
@@ -88,7 +87,7 @@ if (haveAtomTypes) a1.atomName += "\0" + (b[b0++]);
 for (var j = b.length - 1; --j >= b0; ) if (b[j] > i && this.atomSetCollection.addNewBondWithOrder (a1.index, this.atomSetCollection.getAtomIndexFromSerial (b[j]), 1) != null) this.haveBonds = true;
 
 }
-}, $fz.isPrivate = true, $fz), "~N,~A,~B");
+}, $fz.isPrivate = true, $fz), "~A,~B");
 $_M(c$, "getElement", 
 ($fz = function (name) {
 var n = name.length;

@@ -767,11 +767,13 @@ var v = this.pickedMesh.vertices[this.pickedMesh.polygonIndexes[this.pickedModel
 var modelIndex = this.pickedMesh.modelIndex;
 var bs = (this.pickedMesh).modelFlags;
 if (modelIndex < 0 && bs != null && J.util.BSUtil.cardinalityOf (bs) == 1) modelIndex = bs.nextSetBit (0);
+var map = null;
+if (action != 0) map = this.getPickedPoint (v, modelIndex);
 if (drawPicking && !isPickingMode) {
-if (action != 0) this.setStatusPicked (-2, v);
+if (action != 0) this.setStatusPicked (-2, v, map);
 return this.getPickedPoint (v, modelIndex);
 }if (action == 0 || this.pickedMesh.polygonIndexes[this.pickedModel][0] == this.pickedMesh.polygonIndexes[this.pickedModel][1]) {
-return (action == 0 ? this.getPickedPoint (v, modelIndex) : null);
+return map;
 }var isClockwise = this.viewer.isBound (action, 42);
 if (this.pickedVertex == 0) {
 this.viewer.startSpinningAxis (this.pickedMesh.vertices[this.pickedMesh.polygonIndexes[this.pickedModel][1]], this.pickedMesh.vertices[this.pickedMesh.polygonIndexes[this.pickedModel][0]], isClockwise);

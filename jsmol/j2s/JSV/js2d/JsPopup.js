@@ -14,7 +14,7 @@ this.initialize (viewer, bundle, menu);
 $_V(c$, "menuShowPopup", 
 function (popup, x, y) {
 try {
-(popup).show (this.viewer.getApplet (), x, y);
+(popup).show (this.isTainted ? this.viewer.getApplet () : null, x, y);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 } else {

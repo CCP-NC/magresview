@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.render");
-Clazz.load (["J.api.JmolRepaintManager", "JU.BS"], "J.render.RepaintManager", ["J.util.Logger", "J.viewer.JC"], function () {
+Clazz.load (["J.api.JmolRepaintManager", "JU.BS"], "J.render.RepaintManager", ["J.api.Interface", "J.util.Logger", "J.viewer.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.viewer = null;
 this.shapeManager = null;
@@ -74,19 +74,10 @@ $_M(c$, "getRenderer",
 ($fz = function (shapeID) {
 if (this.renderers[shapeID] != null) return this.renderers[shapeID];
 var className = J.viewer.JC.getShapeClassName (shapeID, true) + "Renderer";
-try {
-var shapeClass = Class.forName (className);
-var renderer = shapeClass.newInstance ();
+var renderer;
+if ((renderer = J.api.Interface.getInterface (className)) == null) return null;
 renderer.setViewerG3dShapeID (this.viewer, shapeID);
 return this.renderers[shapeID] = renderer;
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-J.util.Logger.errorEx ("Could not instantiate renderer:" + className, e);
-return null;
-} else {
-throw e;
-}
-}
 }, $fz.isPrivate = true, $fz), "~N");
 $_V(c$, "render", 
 function (gdata, modelSet, isFirstPass, minMax) {
@@ -126,12 +117,12 @@ var isOK;
 var logTime = this.viewer.getBoolean (603979934);
 this.viewer.finalizeTransformParameters ();
 this.shapeManager.finalizeAtoms (null, null);
-var g3dExport = this.viewer.initializeExporter (params);
-isOK = (g3dExport != null);
+var exporter3D = this.viewer.initializeExporter (params);
+isOK = (exporter3D != null);
 if (!isOK) {
 J.util.Logger.error ("Cannot export " + params.get ("type"));
 return null;
-}g3dExport.renderBackground (g3dExport);
+}exporter3D.renderBackground (exporter3D);
 if (this.renderers == null) this.renderers =  new Array (36);
 var msg = null;
 for (var i = 0; i < 36; ++i) {
@@ -140,10 +131,10 @@ if (shape == null) continue;
 if (logTime) {
 msg = "rendering " + J.viewer.JC.getShapeClassName (i, false);
 J.util.Logger.startTimer (msg);
-}this.getRenderer (i).renderShape (g3dExport, modelSet, shape);
+}this.getRenderer (i).renderShape (exporter3D, modelSet, shape);
 if (logTime) J.util.Logger.checkTimer (msg, false);
 }
-g3dExport.renderAllStrings (g3dExport);
-return g3dExport.finalizeOutput ();
+exporter3D.renderAllStrings (exporter3D);
+return exporter3D.finalizeOutput ();
 }, "J.util.GData,J.modelset.ModelSet,java.util.Map");
 });

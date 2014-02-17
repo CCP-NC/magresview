@@ -75,7 +75,7 @@ return (this.isMovie ? this.lastFramePainted == this.currentAnimationFrame : thi
 });
 $_M(c$, "currentFrameIs", 
 function (f) {
-var i = this.getCurrentModelIndex ();
+var i = this.currentModelIndex;
 return (this.morphCount == 0 ? i == f : Math.abs (this.currentMorphModel - f) < 0.001);
 }, "~N");
 $_M(c$, "clear", 
@@ -99,7 +99,7 @@ i = this.firstFrameIndex;
 break;
 case 0:
 if (this.morphCount > 0) return "-" + (1 + this.currentMorphModel);
-i = this.getCurrentModelIndex ();
+i = this.currentModelIndex;
 break;
 case 1:
 i = this.lastFrameIndex;

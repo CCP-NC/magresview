@@ -471,8 +471,7 @@ if (this.unitCellOffsetFractional) this.symmetry.toCartesian (this.fileOffset, f
 }}, $fz.isPrivate = true, $fz));
 $_M(c$, "getNewSymmetry", 
 function () {
-this.symmetry = J.api.Interface.getOptionInterface ("symmetry.Symmetry");
-return this.symmetry;
+return (this.symmetry = J.api.Interface.getSymmetry ());
 });
 $_M(c$, "setFractionalCoordinates", 
 function (TF) {

@@ -387,9 +387,9 @@ mesh.visibilityFlags = (mesh.visible && mesh.isValid && (mesh.modelIndex < 0 || 
 }
 }, "JU.BS");
 $_M(c$, "setStatusPicked", 
-function (flag, v) {
-this.viewer.setStatusAtomPicked (flag, "[\"" + this.myType + "\"," + JU.PT.esc (this.pickedMesh.thisID) + "," + +this.pickedModel + "," + this.pickedVertex + "," + v.x + "," + v.y + "," + v.z + "," + (this.pickedMesh.title == null ? "\"\"" : JU.PT.esc (this.pickedMesh.title[0])) + "]");
-}, "~N,JU.P3");
+function (flag, v, map) {
+this.viewer.setStatusAtomPicked (flag, "[\"" + this.myType + "\"," + JU.PT.esc (this.pickedMesh.thisID) + "," + +this.pickedModel + "," + this.pickedVertex + "," + v.x + "," + v.y + "," + v.z + "," + (this.pickedMesh.title == null ? "\"\"" : JU.PT.esc (this.pickedMesh.title[0])) + "]", map);
+}, "~N,JU.P3,java.util.Map");
 $_M(c$, "getPickedPoint", 
 function (v, modelIndex) {
 var map =  new java.util.Hashtable ();

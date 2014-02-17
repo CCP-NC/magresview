@@ -370,7 +370,7 @@ bytes = J.io.JmolBinary.getCachedPngjBytes (this, name);
 if (bytes != null && htParams != null) htParams.put ("sourcePNGJ", Boolean.TRUE);
 }var fullName = name;
 if (name.indexOf ("|") >= 0) {
-subFileList = JU.PT.split (name, "|");
+subFileList = JU.PT.split (name.$replace ('\\', '/'), "|");
 if (bytes == null) J.util.Logger.info ("FileManager opening 3 " + name);
 name = subFileList[0];
 }var t = (bytes == null ? this.getBufferedInputStreamOrErrorMessageFromName (name, fullName, true, false, null, !forceInputStream) : J.io.JmolBinary.getBIS (bytes));
@@ -386,7 +386,7 @@ return J.io.JmolBinary.getBR (doc.getAllDataFiles ("Molecule", "Input").toString
 bis = J.io.JmolBinary.checkPngZipStream (bis);
 if (J.io.JmolBinary.isZipS (bis)) {
 if (allowZipStream) return J.io.JmolBinary.newZipInputStream (bis);
-var o = J.io.JmolBinary.getZipFileContents (bis, subFileList, 1, forceInputStream);
+var o = J.io.JmolBinary.getZipFileDirectory (bis, subFileList, 1, forceInputStream);
 return (Clazz.instanceOf (o, String) ? J.io.JmolBinary.getBR (o) : o);
 }return (forceInputStream ? bis : J.io.JmolBinary.getBufferedReader (bis, null));
 } catch (ioe) {

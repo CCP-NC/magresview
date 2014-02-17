@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.viewer");
-Clazz.load (["JU.BS"], "J.viewer.ShapeManager", ["java.lang.Boolean", "JU.P3", "J.constant.EnumPalette", "$.EnumVdw", "J.modelset.Atom", "J.util.BSUtil", "$.Logger", "J.viewer.JC"], function () {
+Clazz.load (["JU.BS"], "J.viewer.ShapeManager", ["java.lang.Boolean", "JU.P3", "J.api.Interface", "J.constant.EnumPalette", "$.EnumVdw", "J.modelset.Atom", "J.util.BSUtil", "J.viewer.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.gdata = null;
 this.modelSet = null;
@@ -63,21 +63,12 @@ if (this.shapes == null) return null;
 if (this.shapes[shapeID] != null) return this.shapes[shapeID];
 if (shapeID == 2 || shapeID == 3 || shapeID == 4) return null;
 var className = J.viewer.JC.getShapeClassName (shapeID, false);
-try {
-var shapeClass = Class.forName (className);
-var shape = shapeClass.newInstance ();
+var shape;
+if ((shape = J.api.Interface.getInterface (className)) == null) return null;
 this.viewer.setShapeErrorState (shapeID, "allocate");
 shape.initializeShape (this.viewer, this.gdata, this.modelSet, shapeID);
 this.viewer.setShapeErrorState (-1, null);
 return this.shapes[shapeID] = shape;
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-J.util.Logger.errorEx ("Could not instantiate shape:" + className, e);
-return null;
-} else {
-throw e;
-}
-}
 }, "~N");
 $_M(c$, "refreshShapeTrajectories", 
 function (baseModel, bs, mat) {
@@ -131,7 +122,7 @@ $_M(c$, "checkObjectClicked",
 function (x, y, modifiers, bsVisible, drawPicking) {
 var shape;
 var map = null;
-if (modifiers != 0 && this.viewer.getBondPicking () && (map = this.shapes[1].checkObjectClicked (x, y, modifiers, bsVisible, drawPicking)) != null) return map;
+if (modifiers != 0 && this.viewer.getBondPicking () && (map = this.shapes[1].checkObjectClicked (x, y, modifiers, bsVisible, false)) != null) return map;
 for (var i = 0; i < J.viewer.ShapeManager.clickableMax; i++) if ((shape = this.shapes[J.viewer.ShapeManager.hoverable[i]]) != null && (map = shape.checkObjectClicked (x, y, modifiers, bsVisible, drawPicking)) != null) return map;
 
 return null;

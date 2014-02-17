@@ -68,7 +68,7 @@ return null;
 }, "~S,JU.List");
 c$.findNodeById = $_M(c$, "findNodeById", 
 function (id, panelNodes) {
-if (id != null) for (var i = panelNodes.size (); --i >= 0; ) if (id.equals (panelNodes.get (i).id)) return panelNodes.get (i);
+if (id != null) for (var i = panelNodes.size (); --i >= 0; ) if (id.equals (panelNodes.get (i).id) || id.equals (panelNodes.get (i).frameTitle)) return panelNodes.get (i);
 
 return null;
 }, "~S,JU.List");
@@ -82,17 +82,18 @@ c$.getSpectrumListAsString = $_M(c$, "getSpectrumListAsString",
 function (panelNodes) {
 var sb =  new JU.SB ();
 for (var i = 0; i < panelNodes.size (); i++) {
-var id = panelNodes.get (i).id;
-sb.append (" ").append (id);
+var node = panelNodes.get (i);
+if (!node.isView) sb.append (" ").append (node.id);
 }
 return sb.toString ().trim ();
 }, "JU.List");
 c$.isOpen = $_M(c$, "isOpen", 
 function (panelNodes, filePath) {
+var pt = -1;
 if (filePath != null) for (var i = panelNodes.size (); --i >= 0; ) {
-if (filePath.equals (panelNodes.get (i).source.getFilePath ()) || filePath.equals (panelNodes.get (i).frameTitle)) return true;
+if (filePath.equals (panelNodes.get (i).source.getFilePath ()) || filePath.equals (panelNodes.get (i).frameTitle)) return pt;
 }
-return false;
+return -1;
 }, "JU.List,~S");
 $_M(c$, "setFrameTitle", 
 function (name) {

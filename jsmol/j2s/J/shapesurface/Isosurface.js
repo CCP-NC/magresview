@@ -1081,8 +1081,9 @@ var iFace = this.pickedVertex = (pickFront ? jminz : jmaxz);
 var ptRet =  new JU.P3 ();
 ptRet.setT ((pickFront ? this.pickedMesh.vertices[this.pickedVertex] : (this.pickedMesh).centers[iFace]));
 this.pickedModel = this.pickedMesh.modelIndex;
-this.setStatusPicked (-4, ptRet);
-return this.getPickedPoint (ptRet, this.pickedModel);
+var map = this.getPickedPoint (ptRet, this.pickedModel);
+this.setStatusPicked (-4, ptRet, map);
+return map;
 }, "~N,~N,~N,JU.BS,~B");
 $_M(c$, "isPickable", 
 ($fz = function (m, bsVisible) {

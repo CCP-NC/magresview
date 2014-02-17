@@ -19,6 +19,7 @@ this.isSyntaxCheck = false;
 this.listCommands = false;
 this.mustRender = false;
 this.htmlName = "";
+this.appletName = "";
 this.insertedCommand = "";
 this.gdata = null;
 this.applet = null;
@@ -48,8 +49,6 @@ this.display = null;
 this.modelAdapter = null;
 this.access = null;
 this.commandHistory = null;
-this.symmetry = null;
-this.smilesMatcher = null;
 this.modelManager = null;
 this.stateManager = null;
 this.scriptManager = null;
@@ -61,6 +60,8 @@ this.mouseEnabled = true;
 this.noneSelected = false;
 this.ligandModels = null;
 this.ligandModelSet = null;
+this.minimizer = null;
+this.smilesMatcher = null;
 this.sc = null;
 this.bsFrameOffsets = null;
 this.frameOffsets = null;
@@ -111,7 +112,6 @@ this.currentShapeState = null;
 this.localFunctions = null;
 this.privateKey = 0;
 this.$isKiosk = false;
-this.minimizer = null;
 this.executor = null;
 this.displayLoadErrors = true;
 this.$isParallel = false;
@@ -204,21 +204,10 @@ function () {
 if (this.modelAdapter == null) this.modelAdapter =  new J.adapter.smarter.SmarterJmolAdapter ();
 return this.modelAdapter;
 });
-$_M(c$, "getSymmetry", 
-function () {
-if (this.symmetry == null) this.symmetry = J.api.Interface.getOptionInterface ("symmetry.Symmetry");
-return this.symmetry;
-});
 $_M(c$, "getSymmetryInfo", 
 function (bsAtoms, xyz, op, pt, pt2, id, type) {
 return this.getPropertyManager ().getSymmetryInfo (bsAtoms, xyz, op, pt, pt2, id, type);
 }, "JU.BS,~S,~N,JU.P3,JU.P3,~S,~N");
-$_M(c$, "getSmilesMatcher", 
-function () {
-if (this.smilesMatcher == null) {
-this.smilesMatcher = J.api.Interface.getOptionInterface ("smiles.SmilesMatcher");
-}return this.smilesMatcher;
-});
 $_V(c$, "getSmartsMatch", 
 function (smarts, bsSelected) {
 if (bsSelected == null) bsSelected = this.getSelectedAtoms ();
@@ -246,6 +235,7 @@ J.viewer.Viewer.appletDocumentBase = (o == null ? "" : o.toString ());
 o = info.get ("options");
 this.commandOptions = (o == null ? "" : o.toString ());
 if (info.containsKey ("debug") || this.commandOptions.indexOf ("-debug") >= 0) J.util.Logger.setLogLevel (5);
+if (this.$isApplet && info.containsKey ("maximumSize")) this.setMaximumSize ((info.get ("maximumSize")).intValue ());
 this.isJNLP = this.checkOption2 ("isJNLP", "-jnlp");
 if (this.isJNLP) J.util.Logger.info ("setting JNLP mode TRUE");
 this.$isSignedApplet = this.isJNLP || this.checkOption2 ("signedApplet", "-signed");
@@ -253,15 +243,9 @@ this.$isApplet = this.$isSignedApplet || this.checkOption2 ("applet", "-applet")
 this.allowScripting = !this.checkOption2 ("noscripting", "-noscripting");
 var i = this.fullName.indexOf ("__");
 this.htmlName = (i < 0 ? this.fullName : this.fullName.substring (0, i));
+this.appletName = JU.PT.split (this.htmlName + "_", "_")[0];
 this.syncId = (i < 0 ? "" : this.fullName.substring (i + 2, this.fullName.length - 2));
-if (this.$isApplet) {
-{
-if(self.Jmol) {
-this.applet = Jmol._applets[this.htmlName.split("_object")[0]];
-this.strJavaVersion = J.viewer.Viewer.strJavaVersion = Jmol._version;
-}
-}if (info.containsKey ("maximumSize")) this.setMaximumSize ((info.get ("maximumSize")).intValue ());
-}this.access = (this.checkOption2 ("access:READSPT", "-r") ? J.viewer.Viewer.ACCESS.READSPT : this.checkOption2 ("access:NONE", "-R") ? J.viewer.Viewer.ACCESS.NONE : J.viewer.Viewer.ACCESS.ALL);
+this.access = (this.checkOption2 ("access:READSPT", "-r") ? J.viewer.Viewer.ACCESS.READSPT : this.checkOption2 ("access:NONE", "-R") ? J.viewer.Viewer.ACCESS.NONE : J.viewer.Viewer.ACCESS.ALL);
 this.$isPreviewOnly = info.containsKey ("previewOnly");
 if (this.$isPreviewOnly) info.remove ("previewOnly");
 this.isPrintOnly = this.checkOption2 ("printOnly", "-p");
@@ -273,7 +257,13 @@ o = (this.commandOptions.contains ("platform=") ? this.commandOptions.substring 
 platform = o;
 this.isWebGL = (platform.indexOf (".awtjs.") >= 0);
 this.isJS = this.isWebGL || (platform.indexOf (".awtjs2d.") >= 0);
-o = J.api.Interface.getInterface (platform);
+{
+if(self.Jmol) {
+this.applet = Jmol._applets[this.htmlName.split("_object")[0]];
+this.strJavaVersion = J.viewer.Viewer.strJavaVersion = Jmol._version;
+this.strJavaVendor = J.viewer.Viewer.strJavaVendor = "Java2Script " + (this.isWebGL ? "(WebGL)" : "(HTML5)");
+}
+}o = J.api.Interface.getInterface (platform);
 }this.apiPlatform = o;
 this.display = info.get ("display");
 this.isSingleThreaded = this.apiPlatform.isSingleThreaded ();
@@ -290,7 +280,7 @@ document.getElementById(this.display);
 this.display = null;
 }this.apiPlatform.setViewer (this, this.display);
 o = info.get ("graphicsAdapter");
-if (o == null && !this.isWebGL) o = J.api.Interface.getInterface ("J.g3d.Graphics3D");
+if (o == null && !this.isWebGL) o = J.api.Interface.getOptionInterface ("g3d.Graphics3D");
 this.gdata = (o == null ?  new J.util.GData () : o);
 this.gdata.initialize (this.apiPlatform);
 this.stateManager =  new J.viewer.StateManager (this);
@@ -505,7 +495,7 @@ this.stateManager.restoreOrientation (saveName, timeSeconds, false);
 }, "~S,~N");
 $_M(c$, "saveModelOrientation", 
 function () {
-this.modelSet.saveModelOrientation (this.animationManager.currentModelIndex, this.stateManager.getOrientation ());
+this.modelSet.saveModelOrientation (this.getCurrentModelIndex (), this.stateManager.getOrientation ());
 });
 $_M(c$, "getOrientation", 
 function () {
@@ -575,10 +565,28 @@ $_M(c$, "getRotationQuaternion",
 function () {
 return this.tm.getRotationQuaternion ();
 });
+$_M(c$, "getGLmolView", 
+function () {
+var tm = this.tm;
+{
+return {
+center:tm.fixedRotationCenter,
+quaternion:tm.getRotationQuaternion(),
+xtrans:tm.xTranslationFraction,
+ytrans:tm.yTranslationFraction,
+scale:tm.scalePixelsPerAngstrom,
+zoom:tm.zoomPercent,
+cameraDistance:tm.cameraDistance,
+pixelCount:tm.screenPixelCount,
+perspective:tm.perspectiveDepth,
+width:tm.width,
+height:tm.height
+};
+}});
 $_M(c$, "setRotationRadius", 
 function (angstroms, doAll) {
 if (doAll) angstroms = this.tm.setRotationRadius (angstroms, false);
-if (this.modelSet.setRotationRadius (this.animationManager.currentModelIndex, angstroms)) this.global.setF ("rotationRadius", angstroms);
+if (this.modelSet.setRotationRadius (this.getCurrentModelIndex (), angstroms)) this.global.setF ("rotationRadius", angstroms);
 }, "~N,~B");
 $_M(c$, "getRotationCenter", 
 function () {
@@ -1898,16 +1906,21 @@ $_M(c$, "setEchoStateActive",
 function (TF) {
 this.modelSet.setEchoStateActive (TF);
 }, "~B");
+$_M(c$, "getMinimizer", 
+function (createNew) {
+return (this.minimizer == null && createNew ? (this.minimizer = J.api.Interface.getOptionInterface ("minimize.Minimizer")).setProperty ("viewer", this) : this.minimizer);
+}, "~B");
+$_M(c$, "getSmilesMatcher", 
+function () {
+return (this.smilesMatcher == null ? (this.smilesMatcher = J.api.Interface.getOptionInterface ("smiles.SmilesMatcher")) : this.smilesMatcher);
+});
 $_M(c$, "clearModelDependentObjects", 
 ($fz = function () {
 this.setFrameOffsets (null);
 this.stopMinimization ();
 this.minimizer = null;
-if (this.smilesMatcher != null) {
 this.smilesMatcher = null;
-}if (this.symmetry != null) {
-this.symmetry = null;
-}}, $fz.isPrivate = true, $fz));
+}, $fz.isPrivate = true, $fz));
 $_M(c$, "zap", 
 function (notify, resetUndo, zapModelKit) {
 this.clearThreads ();
@@ -2009,8 +2022,7 @@ return (c == null ? "not applicable" : c.getUnitCellInfo ());
 $_M(c$, "getUnitCellInfo", 
 function (infoType) {
 var symmetry = this.getCurrentUnitCell ();
-if (symmetry == null) return NaN;
-return symmetry.getUnitCellInfoType (infoType);
+return (symmetry == null ? NaN : symmetry.getUnitCellInfoType (infoType));
 }, "~N");
 $_M(c$, "getSpaceGroupInfo", 
 function (spaceGroup) {
@@ -2091,7 +2103,7 @@ this.modelSet.setBoundBox (pt1, pt2, byCorner, scale);
 }, "JU.P3,JU.P3,~B,~N");
 $_V(c$, "getBoundBoxCenter", 
 function () {
-return this.modelSet.getBoundBoxCenter (this.animationManager.currentModelIndex);
+return this.modelSet.getBoundBoxCenter (this.getCurrentModelIndex ());
 });
 $_M(c$, "getAverageAtomPoint", 
 function () {
@@ -2108,7 +2120,7 @@ return this.modelSet.getBoxInfo (bs, scale);
 }, "JU.BS,~N");
 $_M(c$, "calcRotationRadius", 
 function (center) {
-return this.modelSet.calcRotationRadius (this.animationManager.currentModelIndex, center);
+return this.modelSet.calcRotationRadius (this.getCurrentModelIndex (), center);
 }, "JU.P3");
 $_M(c$, "calcRotationRadiusBs", 
 function (bs) {
@@ -2148,7 +2160,7 @@ return this.modelSet.getSymmetryInfoAsString ();
 });
 $_M(c$, "getSymmetryOperation", 
 function (spaceGroup, symop, pt1, pt2, labelOnly) {
-return this.modelSet.getSymmetryInfoString (this.animationManager.currentModelIndex, spaceGroup, symop, pt1, pt2, null, labelOnly);
+return this.modelSet.getSymmetryInfoString (this.getCurrentModelIndex (), spaceGroup, symop, pt1, pt2, null, labelOnly);
 }, "~S,~N,JU.P3,JU.P3,~B");
 $_V(c$, "getModelSetProperties", 
 function () {
@@ -2305,7 +2317,7 @@ this.modelSet.setModelCage (this.getCurrentModelIndex (), data[1]);
 }, "~S");
 $_M(c$, "setCurrentCagePts", 
 function (points) {
-this.modelSet.setModelCage (this.getCurrentModelIndex (), this.getSymmetry ().getUnitCell (points, true));
+this.modelSet.setModelCage (this.getCurrentModelIndex (), J.api.Interface.getSymmetry ().getUnitCell (points, true));
 }, "~A");
 $_M(c$, "setCurrentUnitCellOffset", 
 function (pt, ijk) {
@@ -2414,11 +2426,11 @@ this.modelSet.calcSelectedMoleculesCount (this.getSelectedAtoms ());
 });
 $_M(c$, "getFileHeader", 
 function () {
-return this.modelSet.getFileHeader (this.animationManager.currentModelIndex);
+return this.modelSet.getFileHeader (this.getCurrentModelIndex ());
 });
 $_M(c$, "getFileData", 
 function () {
-return this.modelSet.getFileData (this.animationManager.currentModelIndex);
+return this.modelSet.getFileData (this.getCurrentModelIndex ());
 });
 $_M(c$, "getCifData", 
 function (modelIndex) {
@@ -2429,7 +2441,7 @@ return J.io.CifDataReader.readCifData (J.io.JmolBinary.getBR (data));
 }, "~N");
 $_M(c$, "getPDBHeader", 
 function () {
-return this.modelSet.getPDBHeader (this.animationManager.currentModelIndex);
+return this.modelSet.getPDBHeader (this.getCurrentModelIndex ());
 });
 $_M(c$, "getChimeInfo", 
 function (tok) {
@@ -2531,7 +2543,8 @@ return this.modelSet.getPartialCharges () != null;
 $_M(c$, "getCurrentUnitCell", 
 function () {
 if (this.animationManager.currentAtomIndex >= 0) return this.modelSet.getUnitCellForAtom (this.animationManager.currentAtomIndex);
-if (this.animationManager.currentModelIndex >= 0) return this.modelSet.getUnitCell (this.animationManager.currentModelIndex);
+var m = this.getCurrentModelIndex ();
+if (m >= 0) return this.modelSet.getUnitCell (m);
 var models = this.getVisibleFramesBitSet ();
 var ucLast = null;
 for (var i = models.nextSetBit (0); i >= 0; i = models.nextSetBit (i + 1)) {
@@ -2704,7 +2717,7 @@ $_M(c$, "setCurrentModelIndex",
 function (modelIndex) {
 if (modelIndex == -2147483648) {
 this.prevFrame = -2147483648;
-this.setCurrentModelIndexClear (this.animationManager.currentModelIndex, true);
+this.setCurrentModelIndexClear (this.getCurrentModelIndex (), true);
 return;
 }this.animationManager.setModel (modelIndex, true);
 }, "~N");
@@ -2751,7 +2764,7 @@ return this.animationManager.currentModelIndex;
 });
 $_V(c$, "getDisplayModelIndex", 
 function () {
-return this.animationManager.currentModelIndex;
+return this.getCurrentModelIndex ();
 });
 $_M(c$, "haveFileSet", 
 function () {
@@ -2820,14 +2833,8 @@ if (this.isWebGL) {
 if (mode == 2 || mode == 7) {
 this.tm.finalizeTransformParameters ();
 {
-if (!self.Jmol) return;
-if(Jmol._refresh) Jmol._refresh(this.applet, mode, strWhy,
-[this.transformManager.fixedRotationCenter,
-this.transformManager.getRotationQuaternion(),
-this.transformManager.xTranslationFraction,
-this.transformManager.yTranslationFraction,
-this.transformManager.scalePixelsPerAngstrom,
-this.transformManager.zoomPercent ]);
+if (!this.applet) return;
+this.applet._refresh();
 }}} else {
 if (mode > 0 && mode != 7) this.repaintManager.repaintIfReady ("refresh " + mode + " " + strWhy);
 }if (mode == 7) return;
@@ -3517,22 +3524,21 @@ $_M(c$, "setStatusFrameChanged",
 function (isVib, doNotify) {
 if (isVib) {
 this.prevFrame = -2147483648;
-}var frameNo = this.animationManager.getCurrentModelIndex ();
-this.tm.setVibrationPeriod (NaN);
+}this.tm.setVibrationPeriod (NaN);
 var firstIndex = this.animationManager.firstFrameIndex;
 var lastIndex = this.animationManager.lastFrameIndex;
 var isMovie = this.isMovie ();
-var modelIndex = this.animationManager.currentModelIndex;
+var modelIndex = this.getCurrentModelIndex ();
 if (firstIndex == lastIndex && !isMovie) modelIndex = firstIndex;
 var frameID = this.getModelFileNumber (modelIndex);
-var currentFrame = this.animationManager.getCurrentModelIndex ();
+var currentFrame = this.animationManager.currentModelIndex;
 var fileNo = frameID;
 var modelNo = frameID % 1000000;
 var firstNo = (isMovie ? firstIndex : this.getModelFileNumber (firstIndex));
 var lastNo = (isMovie ? lastIndex : this.getModelFileNumber (lastIndex));
 var strModelNo;
 if (isMovie) {
-strModelNo = "" + (frameNo + 1);
+strModelNo = "" + (currentFrame + 1);
 } else if (fileNo == 0) {
 strModelNo = this.getModelNumberDotted (firstIndex);
 if (firstIndex != lastIndex) strModelNo += " - " + this.getModelNumberDotted (lastIndex);
@@ -3557,13 +3563,13 @@ if (currentFrame == this.prevFrame) return;
 this.prevFrame = currentFrame;
 var entryName;
 if (isMovie) {
-entryName = "" + (this.animationManager.getCurrentModelIndex () + 1);
+entryName = "" + (currentFrame + 1);
 } else {
-entryName = this.getModelName (frameNo);
-var script = "" + this.getModelNumberDotted (frameNo);
+entryName = this.getModelName (currentFrame);
+var script = "" + this.getModelNumberDotted (currentFrame);
 if (!entryName.equals (script)) entryName = script + ": " + entryName;
 if (entryName.length > 50) entryName = entryName.substring (0, 45) + "...";
-}this.statusManager.setStatusFrameChanged (frameNo, fileNo, modelNo, (this.animationManager.animationDirection < 0 ? -firstNo : firstNo), (this.animationManager.currentDirection < 0 ? -lastNo : lastNo), currentFrame, entryName);
+}this.statusManager.setStatusFrameChanged (fileNo, modelNo, (this.animationManager.animationDirection < 0 ? -firstNo : firstNo), (this.animationManager.currentDirection < 0 ? -lastNo : lastNo), currentFrame, entryName);
 if (this.doHaveJDX ()) this.getJSV ().setModel (modelIndex);
 if (this.isJS) this.updateJSView (modelIndex, -1);
 }, "~B,~B");
@@ -3646,18 +3652,18 @@ var ff = this.getParameter ("_minimizationForceField");
 this.statusManager.notifyMinimizationStatus (this.getParameter ("_minimizationStatus"), Clazz.instanceOf (step, String) ? Integer.$valueOf (0) : step, this.getParameter ("_minimizationEnergy"), (step.toString ().equals ("0") ? Float.$valueOf (0) : this.getParameter ("_minimizationEnergyDiff")), ff);
 });
 $_M(c$, "setStatusAtomPicked", 
-function (atomIndex, info) {
+function (atomIndex, info, map) {
 if (info == null) {
 info = this.global.pickLabel;
-if (info.length == 0) info = this.getAtomInfoXYZ (atomIndex, this.global.messageStyleChime);
- else info = this.modelSet.getAtomInfo (atomIndex, info);
+info = (info.length == 0 ? this.getAtomInfoXYZ (atomIndex, this.global.messageStyleChime) : this.modelSet.getAtomInfo (atomIndex, info));
 }this.global.setPicked (atomIndex);
 this.global.setS ("_pickinfo", info);
-this.statusManager.setStatusAtomPicked (atomIndex, info);
+this.statusManager.setStatusAtomPicked (atomIndex, info, map);
+if (atomIndex < 0) return;
 var syncMode = this.statusManager.getSyncMode ();
 if (syncMode == 1 && this.doHaveJDX ()) this.getJSV ().atomPicked (atomIndex);
 if (this.isJS) this.updateJSView (this.getAtomModelIndex (atomIndex), atomIndex);
-}, "~N,~S");
+}, "~N,~S,java.util.Map");
 $_M(c$, "setStatusResized", 
 function (width, height) {
 this.statusManager.setStatusResized (width, height);
@@ -5568,18 +5574,6 @@ $_M(c$, "isStereoDouble",
 function () {
 return this.tm.stereoMode === J.constant.EnumStereoMode.DOUBLE;
 });
-$_V(c$, "getOperatingSystemName", 
-function () {
-return J.viewer.Viewer.strOSName + (!this.isJS ? "" : this.isWebGL ? "(WebGL)" : "(HTML5)");
-});
-$_V(c$, "getJavaVendor", 
-function () {
-return J.viewer.Viewer.strJavaVendor;
-});
-$_V(c$, "getJavaVersion", 
-function () {
-return J.viewer.Viewer.strJavaVersion;
-});
 $_M(c$, "getGraphicsData", 
 function () {
 return this.gdata;
@@ -5712,20 +5706,20 @@ return;
 }, "JU.P3,JU.P3,~B");
 $_M(c$, "getModelDipole", 
 function () {
-return this.modelSet.getModelDipole (this.animationManager.currentModelIndex);
+return this.modelSet.getModelDipole (this.getCurrentModelIndex ());
 });
 $_M(c$, "calculateMolecularDipole", 
 function () {
-return this.modelSet.calculateMolecularDipole (this.animationManager.currentModelIndex);
+return this.modelSet.calculateMolecularDipole (this.getCurrentModelIndex ());
 });
 $_M(c$, "getAtomIdentityInfo", 
 function (atomIndex, info) {
 this.modelSet.getAtomIdentityInfo (atomIndex, info);
 }, "~N,java.util.Map");
 $_M(c$, "setDefaultLattice", 
-function (ptLattice) {
-this.global.setDefaultLattice (ptLattice);
-this.global.setS ("defaultLattice", J.util.Escape.eP (ptLattice));
+function (p) {
+if (!Float.isNaN (p.x + p.y + p.z)) this.global.ptDefaultLattice.setT (p);
+this.global.setS ("defaultLattice", J.util.Escape.eP (p));
 }, "JU.P3");
 $_M(c$, "getDefaultLattice", 
 function () {
@@ -5770,7 +5764,7 @@ return this.modelSet.isJmolDataFrameForModel (modelIndex);
 }, "~N");
 $_M(c$, "isJmolDataFrame", 
 function () {
-return this.modelSet.isJmolDataFrameForModel (this.animationManager.currentModelIndex);
+return this.modelSet.isJmolDataFrameForModel (this.getCurrentModelIndex ());
 });
 $_M(c$, "getJmolDataFrameIndex", 
 function (modelIndex, type) {
@@ -5791,7 +5785,7 @@ this.modelSet.setFrameTitle (this.getVisibleFramesBitSet (), title);
 }, "~O");
 $_M(c$, "getFrameTitle", 
 function () {
-return this.modelSet.getFrameTitle (this.animationManager.currentModelIndex);
+return this.modelSet.getFrameTitle (this.getCurrentModelIndex ());
 });
 $_M(c$, "getJmolFrameType", 
 function (modelIndex) {
@@ -6486,13 +6480,6 @@ $_M(c$, "setFocus",
 function () {
 if (this.haveDisplay && !this.apiPlatform.hasFocus (this.display)) this.apiPlatform.requestFocusInWindow (this.display);
 });
-$_M(c$, "getMinimizer", 
-function (createNew) {
-if (this.minimizer == null && createNew) {
-this.minimizer = J.api.Interface.getOptionInterface ("minimize.Minimizer");
-this.minimizer.setProperty ("viewer", this);
-}return this.minimizer;
-}, "~B");
 $_M(c$, "stopMinimization", 
 function () {
 if (this.minimizer != null) {
@@ -6879,30 +6866,18 @@ this.stateScriptVersionInt = 2147483647;
 $_M(c$, "initializeExporter", 
 function (params) {
 var isJS = params.get ("type").equals ("JS");
-var cname;
 if (isJS) {
 if (this.jsExporter3D != null) {
 this.jsExporter3D.initializeOutput (this, this.privateKey, this.gdata, params);
 return this.jsExporter3D;
-}cname = "J.exportjs.Export3D";
-} else {
+}} else {
 var fileName = params.get ("fileName");
 var fullPath = params.get ("fullPath");
 var out = this.getOutputChannel (fileName, fullPath);
 if (out == null) return null;
 params.put ("outputChannel", out);
-cname = "J.export.Export3D";
-}var export3D = null;
-try {
-var export3Dclass = Class.forName (cname);
-export3D = export3Dclass.newInstance ();
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-return null;
-} else {
-throw e;
-}
-}
+}var export3D = J.api.Interface.getOptionInterface ("export.Export3D");
+if (export3D == null) return null;
 var exporter = export3D.initializeExporter (this, this.privateKey, this.gdata, params);
 if (isJS && exporter != null) this.jsExporter3D = export3D;
 return (exporter == null ? null : export3D);
@@ -7246,10 +7221,6 @@ throw e;
 }
 }
 });
-$_M(c$, "setBondParameters", 
-function (modelIndex, i, bsBonds, rad, pymolValence, argb, trans) {
-this.modelSet.setBondParametersBS (modelIndex, i, bsBonds, rad, pymolValence, argb, trans);
-}, "~N,~N,JU.BS,~N,~N,~N,~N");
 $_M(c$, "getDihedralMap", 
 function (atoms) {
 return this.modelSet.getDihedralMap (atoms);
@@ -7405,14 +7376,17 @@ Clazz.defineEnumConstant (c$, "NONE", 0, []);
 Clazz.defineEnumConstant (c$, "READSPT", 1, []);
 Clazz.defineEnumConstant (c$, "ALL", 2, []);
 c$ = Clazz.p0p ();
-Clazz.defineStatics (c$,
+{
+{
+self.Jmol && Jmol.extend && Jmol.extend("viewer", J.viewer.Viewer.prototype);
+}}Clazz.defineStatics (c$,
 "appletDocumentBase", "",
 "appletCodeBase", "",
 "appletIdiomaBase", null,
 "jsDocumentBase", "");
-c$.strJavaVendor = c$.prototype.strJavaVendor = System.getProperty ("java.vendor", "j2s");
-c$.strOSName = c$.prototype.strOSName = System.getProperty ("os.name", "j2s");
-c$.strJavaVersion = c$.prototype.strJavaVersion = System.getProperty ("java.version", "0.0");
+c$.strJavaVendor = c$.prototype.strJavaVendor = "Java: " + System.getProperty ("java.vendor", "j2s");
+c$.strOSName = c$.prototype.strOSName = System.getProperty ("os.name", "");
+c$.strJavaVersion = c$.prototype.strJavaVersion = "Java " + System.getProperty ("java.version", "");
 Clazz.defineStatics (c$,
 "version_date", null,
 "SYNC_GRAPHICS_MESSAGE", "GET_GRAPHICS",

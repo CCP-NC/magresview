@@ -191,10 +191,12 @@ return (bytes.length >= 4 && bytes[0] == 0x50 && bytes[1] == 0x4B && bytes[2] ==
 }, "~A");
 c$.isPngZipStream = $_M(c$, "isPngZipStream", 
 function (is) {
-if (J.io.JmolBinary.isZipS (is)) return false;
-var abMagic = J.io.JmolBinary.getMagic (is, 55);
-return (abMagic[51] == 0x50 && abMagic[52] == 0x4E && abMagic[53] == 0x47 && abMagic[54] == 0x4A);
+return (!J.io.JmolBinary.isZipS (is) && J.io.JmolBinary.isPngZipB (J.io.JmolBinary.getMagic (is, 55)));
 }, "java.io.InputStream");
+c$.isPngZipB = $_M(c$, "isPngZipB", 
+function (bytes) {
+return (bytes[51] == 0x50 && bytes[52] == 0x4E && bytes[53] == 0x47 && bytes[54] == 0x4A);
+}, "~A");
 c$.getZipRoot = $_M(c$, "getZipRoot", 
 function (fileName) {
 var pt = fileName.indexOf ("|");
@@ -246,9 +248,9 @@ c$.newZipInputStream = $_M(c$, "newZipInputStream",
 function ($in) {
 return J.io.JmolBinary.getJzu ().newZipInputStream ($in);
 }, "java.io.InputStream");
-c$.getZipFileContents = $_M(c$, "getZipFileContents", 
+c$.getZipFileDirectory = $_M(c$, "getZipFileDirectory", 
 function (bis, subFileList, listPtr, asBufferedInputStream) {
-return J.io.JmolBinary.getJzu ().getZipFileContents (bis, subFileList, listPtr, asBufferedInputStream);
+return J.io.JmolBinary.getJzu ().getZipFileDirectory (bis, subFileList, listPtr, asBufferedInputStream);
 }, "java.io.BufferedInputStream,~A,~N,~B");
 c$.getZipDirectoryAndClose = $_M(c$, "getZipDirectoryAndClose", 
 function (t, addManifest) {

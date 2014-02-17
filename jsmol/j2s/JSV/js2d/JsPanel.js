@@ -81,7 +81,7 @@ this.viewer.applet._showStatus(msg, title);
 }, "~S,~S");
 $_V(c$, "getFocusNow", 
 function (asThread) {
-if (this.pd != null) this.pd.dialogsToFront ();
+if (this.pd != null) this.pd.dialogsToFront (null);
 }, "~B");
 $_V(c$, "getFontFaceID", 
 function (name) {

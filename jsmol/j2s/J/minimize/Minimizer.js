@@ -39,32 +39,35 @@ function () {
 });
 $_V(c$, "setProperty", 
 function (propertyName, value) {
-if (propertyName.equals ("ff")) {
+switch (("ff        cancel    clear     constraintfixed     stop      viewer    ").indexOf (propertyName)) {
+case 0:
 if (!this.ff.equals (value)) {
 this.setProperty ("clear", null);
 this.ff = value;
-}return;
-}if (propertyName.equals ("cancel")) {
+}break;
+case 10:
 this.stopMinimization (false);
-return;
-}if (propertyName.equals ("clear")) {
+break;
+case 20:
 if (this.minAtoms != null) {
 this.stopMinimization (false);
 this.clear ();
-}return;
-}if (propertyName.equals ("constraint")) {
+}break;
+case 30:
 this.addConstraint (value);
-return;
-}if (propertyName.equals ("fixed")) {
+break;
+case 40:
 this.bsFixedDefault = value;
-return;
-}if (propertyName.equals ("stop")) {
+break;
+case 50:
 this.stopMinimization (true);
-return;
-}if (propertyName.equals ("viewer")) {
+break;
+case 60:
 this.viewer = value;
-return;
-}}, "~S,~O");
+break;
+}
+return this;
+}, "~S,~O");
 $_V(c$, "getProperty", 
 function (propertyName, param) {
 if (propertyName.equals ("log")) {

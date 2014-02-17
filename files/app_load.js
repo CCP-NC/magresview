@@ -56,7 +56,11 @@ var main_info = {
  pickCallback: "pick_callback",
  src: null,
  use: "noWebGL HTML5 noImage",
-}   
+}
+
+//This line prevents drag-and-dropping on the Jmol applet
+
+Jmol._Applet.prototype._setDragDrop = function(){};
 
 //These "safe" functions allow to extract information from the Jmol applet safely - i.e. without the applet lagging behind the javascript and causing weird behaviour
 

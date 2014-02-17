@@ -572,10 +572,6 @@ this.setB ("zoomLarge", this.zoomLarge);
 this.setI ("zShadePower", this.zShadePower);
 this.setI ("zSlab", this.zSlab);
 }, "J.viewer.GlobalSettings,~B");
-$_M(c$, "setDefaultLattice", 
-function (p) {
-if (!Float.isNaN (p.x + p.y + p.z)) this.ptDefaultLattice.setT (p);
-}, "JU.P3");
 $_M(c$, "setUnits", 
 function (units) {
 var mu = this.measureDistanceUnits;

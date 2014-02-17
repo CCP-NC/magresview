@@ -28,10 +28,28 @@ if (pt >= 0) type = type.substring (0, pt);
 pt = ";iso........;adp........;tls-u......;tls-r......;ms.........;efg........;isc........;charge.....;quadrupole.".indexOf (";" + type.toLowerCase () + ".");
 return (pt < 0 ? -1 : Clazz.doubleToInt (pt / 11));
 }, $fz.isPrivate = true, $fz), "~S");
+c$.getInfoIndex = $_M(c$, "getInfoIndex", 
+($fz = function (infoType) {
+if (infoType.charAt (0) != ';') infoType = ";" + infoType + ".";
+return Clazz.doubleToInt (";.............;eigenvalues..;eigenvectors.;asymmatrix...;symmatrix....;value........;isotropy.....;anisotropy...;asymmetry....;eulerzyz.....;eulerzxz.....;quaternion...;indices......;string.......;type.........;id...........;span.........;skew.........".indexOf (infoType) / 14);
+}, $fz.isPrivate = true, $fz), "~S");
+c$.isFloatInfo = $_M(c$, "isFloatInfo", 
+function (infoType) {
+switch (J.util.Tensor.getInfoIndex (infoType)) {
+default:
+return false;
+case 5:
+case 6:
+case 7:
+case 8:
+case 16:
+case 17:
+return true;
+}
+}, "~S");
 $_M(c$, "getInfo", 
 function (infoType) {
-if (infoType.charAt (0) != ';') infoType = ";" + infoType + ".";
-switch (Clazz.doubleToInt (";.............;eigenvalues..;eigenvectors.;asymmatrix...;symmatrix....;value........;isotropy.....;anisotropy...;asymmetry....;eulerzyz.....;eulerzxz.....;quaternion...;indices......;string.......;type.........;id...........;span.........;skew.........".indexOf (infoType) / 14)) {
+switch (J.util.Tensor.getInfoIndex (infoType)) {
 default:
 var info =  new java.util.Hashtable ();
 var s = JU.PT.getTokens (JU.PT.replaceWithCharacter (";.............;eigenvalues..;eigenvectors.;asymmatrix...;symmatrix....;value........;isotropy.....;anisotropy...;asymmetry....;eulerzyz.....;eulerzxz.....;quaternion...;indices......;string.......;type.........;id...........;span.........;skew.........", ";.", ' ').trim ());

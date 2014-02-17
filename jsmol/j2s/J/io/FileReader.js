@@ -44,6 +44,7 @@ this.reader = t;
 } else if (Clazz.instanceOf (t, javajs.api.ZInputStream)) {
 var name = this.fullPathNameIn;
 var subFileList = null;
+name = name.$replace ('\\', '/');
 if (name.indexOf ("|") >= 0 && !name.endsWith (".zip")) {
 subFileList = JU.PT.split (name, "|");
 name = subFileList[0];

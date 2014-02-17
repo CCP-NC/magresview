@@ -531,11 +531,11 @@ break;
 case 1048591:
 break out;
 case 3:
-rpn.addXNum (J.script.SV.newV (3, this.theToken.value));
+rpn.addXNum (this.theToken);
 break;
 case 1048614:
 case 2:
-rpn.addXNum (J.script.SV.newI (this.theToken.intValue));
+rpn.addXNum (this.theToken);
 break;
 case 135266319:
 if (this.tokAt (this.iToken + 1) == 269484048) {
@@ -2519,14 +2519,14 @@ case 1048609:
 rpn.addXBs (this.getAtomBits (instruction.tok, Integer.$valueOf (instruction.intValue)));
 break;
 case 1048614:
-if (isInMath) rpn.addXNum (J.script.SV.newI (instruction.intValue));
+if (isInMath) rpn.addXNum (instruction);
  else rpn.addXBs (this.getAtomBits (1048614, Integer.$valueOf (J.script.ScriptEvaluator.getSeqCode (instruction))));
 break;
 case 1048615:
 if (isInMath) {
-rpn.addXNum (J.script.SV.newI (instruction.intValue));
+rpn.addXNum (instruction);
 rpn.addOp (J.script.T.tokenMinus);
-rpn.addXNum (J.script.SV.newI (code[++pc].intValue));
+rpn.addXNum (code[++pc]);
 break;
 }var chainID = (pc + 3 < code.length && code[pc + 2].tok == 269484160 && code[pc + 3].tok == 1048609 ? code[pc + 3].intValue : -1);
 rpn.addXBs (this.getAtomBits (1048615, [J.script.ScriptEvaluator.getSeqCode (instruction), J.script.ScriptEvaluator.getSeqCode (code[++pc]), chainID]));
@@ -2642,7 +2642,7 @@ rpn.addXBs (isIntProperty ? this.compareInt (tokWhat, tokOperator, comparisonVal
 break;
 case 3:
 case 2:
-rpn.addXNum (J.script.SV.newT (instruction));
+rpn.addXNum (instruction);
 break;
 case 10:
 var bs1 = J.util.BSUtil.copy (value);
@@ -8027,8 +8027,8 @@ var pt;
 var $var = this.parameterExpressionToken (2);
 if ($var.tok == 8) pt = $var.value;
  else {
+pt =  new JU.P3 ();
 var ijk = $var.asInt ();
-pt = JU.P3.new3 (1, 1, 1);
 if (ijk >= 100) J.util.SimpleUnitCell.ijkToPoint3f (ijk, pt, -1);
 }if (!this.chk) this.viewer.setDefaultLattice (pt);
 }break;
@@ -8291,12 +8291,11 @@ case 269484096:
 case 1073742195:
 propertyName = "xypos";
 propertyValue = this.xypParameter (--pt);
-if (propertyValue == null) pt--;
- else pt = this.iToken + 1;
+if (propertyValue == null) this.invArg ();
+pt = this.iToken + 1;
 break;
 case 2:
-pt--;
-var posx = this.intParameter (pt++);
+var posx = this.intParameter (pt - 1);
 var namex = "xpos";
 if (this.tokAt (pt) == 269484210) {
 namex = "%xpos";

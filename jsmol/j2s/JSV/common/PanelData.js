@@ -253,7 +253,7 @@ $_M(c$, "selectSpectrum",
 function (filePath, type, model, andCurrent) {
 if (andCurrent) this.currentGraphSet.selectSpectrum (filePath, type, model);
 if ("ID".equals (type)) {
-this.jumpToSpectrum (this.getCurrentSpectrumIndex (), true);
+this.jumpToSpectrumIndex (this.getCurrentSpectrumIndex (), true);
 return;
 }for (var i = 0; i < this.graphSets.size (); i += 1) if (this.graphSets.get (i) !== this.currentGraphSet) this.graphSets.get (i).selectSpectrum (filePath, type, model);
 
@@ -396,13 +396,18 @@ if (isNewSet || gs.nSplit > 1 && isNewSplitPoint) this.setSpectrum (this.current
 if (!isNewSet) {
 isNewSet = gs.checkSpectrumClickedEvent (this.mouseX, this.mouseY, clickCount);
 if (!isNewSet) return;
-}this.jumpToSpectrum (splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
+}this.jumpToSpectrumIndex (splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
 }, $fz.isPrivate = true, $fz), "JSV.common.GraphSet,~N,~N");
 $_M(c$, "jumpToSpectrum", 
+function (spec) {
+var index = this.currentGraphSet.getSpectrumIndex (spec);
+this.jumpToSpectrumIndex (index, true);
+}, "JSV.common.JDXSpectrum");
+$_M(c$, "jumpToSpectrumIndex", 
 function (index, doSetSpec) {
 if (index < 0 || index >= this.currentGraphSet.nSpectra) return;
 this.currentSplitPoint = index;
-if (doSetSpec) this.setSpectrum (this.currentSplitPoint, true);
+if (doSetSpec) this.setSpectrum (this.currentSplitPoint, this.currentGraphSet.nSplit > 1);
 var spec = this.getSpectrum ();
 this.notifySubSpectrumChange (spec.getSubIndex (), spec);
 }, "~N,~B");
@@ -450,7 +455,7 @@ $_M(c$, "getSpectrum",
 function () {
 return this.currentGraphSet.getSpectrum ();
 });
-$_M(c$, "setSpectrum", 
+$_M(c$, "setSpecForIRMode", 
 function (spec) {
 this.taintedAll = true;
 var spec0 = this.currentGraphSet.getSpectrum ();
@@ -778,9 +783,9 @@ if (gs !== graphSet) gs.set2DXY (x, y, isLocked);
 }
 }, "JSV.common.GraphSet,~N,~N,~B");
 $_M(c$, "dialogsToFront", 
-function () {
-this.currentGraphSet.dialogsToFront ();
-});
+function (spec) {
+this.currentGraphSet.dialogsToFront (spec);
+}, "JSV.common.JDXSpectrum");
 $_M(c$, "setColor", 
 function (st, color) {
 if (color != null) this.options.put (st, JU.CU.toRGBHexString (color));

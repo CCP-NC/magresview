@@ -127,7 +127,7 @@ script = "STACKOFFSETY " + this.viewer.parameters.viewOffset;
 this.viewer.execView (sb.toString ().trim (), false);
 this.layoutDialog ();
 } else {
-this.viewer.setNode (thisNode, true);
+this.viewer.setNode (thisNode);
 }if (script != null) this.viewer.runScript (script);
 });
 $_M(c$, "closeSelected", 

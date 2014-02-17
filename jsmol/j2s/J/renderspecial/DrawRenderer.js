@@ -279,7 +279,7 @@ headDiameter = Math.round (this.vTemp.length () * .5);
 this.diameter = Clazz.doubleToInt (headDiameter / 5);
 }if (this.diameter < 1) this.diameter = 1;
 if (headDiameter > 2) this.g3d.fillConeScreen (2, headDiameter, this.pt1i, this.pt2i, isBarb);
-if (withShaft) this.g3d.fillCylinderScreen3I (4, this.diameter, this.pt0i, this.pt1i, null, null, this.mad / 2000);
+if (withShaft) this.g3d.fillCylinderScreen3I (4, this.diameter, this.pt0i, this.pt1i, null, null, 0);
 }, $fz.isPrivate = true, $fz), "JU.P3,JU.P3,~N,~B,~B,~B");
 $_M(c$, "getArrowScale", 
 ($fz = function () {

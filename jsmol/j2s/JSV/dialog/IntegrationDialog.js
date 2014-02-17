@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JSV.dialog");
-Clazz.load (["JSV.dialog.JSVDialog"], "JSV.dialog.IntegrationDialog", ["java.lang.Double", "JSV.common.Annotation"], function () {
+Clazz.load (["JSV.dialog.JSVDialog"], "JSV.dialog.IntegrationDialog", ["java.lang.Double", "JU.DF", "JSV.common.Annotation"], function () {
 c$ = Clazz.declareType (JSV.dialog, "IntegrationDialog", JSV.dialog.JSVDialog);
 Clazz.makeConstructor (c$, 
 function () {
@@ -28,10 +28,21 @@ $_V(c$, "callback",
 function (id, msg) {
 var val;
 try {
-if (!id.equals ("windowClosing") && (id.equals ("btnAuto") || this.xyData == null || this.xyData.size () == 0)) {
+if (id.equals ("SHOWSELECTION")) {
+for (var i = 0; i < this.xyData.size (); i++) if (JU.DF.formatDecimalDbl (this.xyData.get (i).getXVal (), 2).equals (msg)) {
+this.iSelected = i;
+this.jsvp.getPanelData ().setXPointers (this.$spec, this.xyData.get (i).getXVal (), this.$spec, this.xyData.get (i).getXVal2 ());
+this.jsvp.doRepaint (true);
+break;
+}
+return true;
+}if (!id.equals ("windowClosing") && !id.equals ("FOCUS")) {
+if (id.equals ("btnAuto") || this.xyData == null || this.xyData.size () == 0) {
 this.viewer.runScript ("integrate auto");
 this.eventApply ();
-} else if (id.equals ("btnDelete")) {
+return true;
+}this.setFocus (true);
+}if (id.equals ("btnDelete")) {
 this.deleteIntegral ();
 } else if (id.equals ("btnNormalize")) {
 if (!this.checkSelectedIntegral ()) return true;

@@ -58,11 +58,12 @@ var type = (params.get ("type")).toUpperCase ();
 var fileName = params.get ("fileName");
 var scripts = params.get ("scripts");
 var objImage = params.get ("image");
+var rgbbuf = params.get ("rgbbuf");
 var out = params.get ("outputChannel");
 var asBytes = (out == null && fileName == null);
 var closeChannel = (out == null && fileName != null);
 var releaseImage = (objImage == null);
-var image = (objImage == null ? this.viewer.getScreenImageBuffer (null, true) : objImage);
+var image = (rgbbuf != null ? rgbbuf : objImage != null ? objImage : this.viewer.getScreenImageBuffer (null, true));
 var isOK = false;
 try {
 if (image == null) return errMsg = this.viewer.getErrorMessage ();
@@ -88,7 +89,7 @@ if (isPngj) {
 var outTemp = this.getOutputChannel (null, null);
 this.getWrappedState (fileName, scripts, image, outTemp);
 stateData = outTemp.toByteArray ();
-} else if (!asBytes) {
+} else if (rgbbuf == null && !asBytes) {
 stateData = (this.getWrappedState (null, scripts, image, null)).getBytes ();
 }if (stateData != null) {
 params.put ("applicationData", stateData);
@@ -132,7 +133,7 @@ return s;
 $_M(c$, "createTheImage", 
 ($fz = function (objImage, type, out, params, errRet) {
 type = type.substring (0, 1) + type.substring (1).toLowerCase ();
-var ie = J.api.Interface.getInterface ("J.image." + type + "Encoder");
+var ie = J.api.Interface.getOptionInterface ("image." + type + "Encoder");
 if (ie == null) {
 errRet[0] = "Image encoder type " + type + " not available";
 return false;

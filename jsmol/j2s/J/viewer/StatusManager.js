@@ -120,12 +120,12 @@ this.setStatusChanged ("atomMoved", -1, bsMoved, false);
 if (this.notifyEnabled (J.constant.EnumCallback.ATOMMOVED)) this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.ATOMMOVED, [sJmol, bsMoved]);
 }, "JU.BS");
 $_M(c$, "setStatusAtomPicked", 
-function (atomIndex, strInfo) {
+function (atomIndex, strInfo, map) {
 var sJmol = this.jmolScriptCallback (J.constant.EnumCallback.PICK);
 J.util.Logger.info ("setStatusAtomPicked(" + atomIndex + "," + strInfo + ")");
 this.setStatusChanged ("atomPicked", atomIndex, strInfo, false);
-if (this.notifyEnabled (J.constant.EnumCallback.PICK)) this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.PICK, [sJmol, strInfo, Integer.$valueOf (atomIndex)]);
-}, "~N,~S");
+if (this.notifyEnabled (J.constant.EnumCallback.PICK)) this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.PICK, [sJmol, strInfo, Integer.$valueOf (atomIndex), map]);
+}, "~N,~S,java.util.Map");
 $_M(c$, "setStatusClicked", 
 function (x, y, action, clickCount, mode) {
 var sJmol = this.jmolScriptCallback (J.constant.EnumCallback.CLICK);
@@ -164,16 +164,15 @@ if (name.length != 0) fileName = name;
 this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.LOADSTRUCT, [sJmol, fullPathName, fileName, modelName, errorMsg, Integer.$valueOf (ptLoad), this.viewer.getParameter ("_modelNumber"), this.viewer.getModelNumberDotted (this.viewer.getModelCount () - 1), isAsync]);
 }}, "~S,~S,~S,~S,~N,~B,Boolean");
 $_M(c$, "setStatusFrameChanged", 
-function (frameNo, fileNo, modelNo, firstNo, lastNo, currentFrame, entryName) {
+function (fileNo, modelNo, firstNo, lastNo, currentFrame, entryName) {
 if (this.viewer.getModelSet () == null) return;
 var animating = this.viewer.isAnimationOn ();
-this.setStatusChanged ("frameChanged", frameNo, (frameNo >= 0 ? this.viewer.getModelNumberDotted (frameNo) : ""), false);
+var frameNo = (animating ? -2 - currentFrame : currentFrame);
+this.setStatusChanged ("frameChanged", frameNo, (currentFrame >= 0 ? this.viewer.getModelNumberDotted (currentFrame) : ""), false);
 var sJmol = this.jmolScriptCallback (J.constant.EnumCallback.ANIMFRAME);
-if (animating) frameNo = -2 - frameNo;
-if (this.notifyEnabled (J.constant.EnumCallback.ANIMFRAME)) {
-this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.ANIMFRAME, [sJmol, [frameNo, fileNo, modelNo, firstNo, lastNo, currentFrame], entryName]);
-}if (this.viewer.jmolpopup != null && !animating) this.viewer.jmolpopup.jpiUpdateComputedMenus ();
-}, "~N,~N,~N,~N,~N,~N,~S");
+if (this.notifyEnabled (J.constant.EnumCallback.ANIMFRAME)) this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.ANIMFRAME, [sJmol, [frameNo, fileNo, modelNo, firstNo, lastNo, currentFrame], entryName]);
+if (this.viewer.jmolpopup != null && !animating) this.viewer.jmolpopup.jpiUpdateComputedMenus ();
+}, "~N,~N,~N,~N,~N,~S");
 $_M(c$, "setScriptEcho", 
 function (strEcho, isScriptQueued) {
 if (strEcho == null) return;
@@ -283,7 +282,7 @@ this.drivingSync = false;
 this.isSynced = false;
 }
 if (J.util.Logger.debugging) {
-J.util.Logger.debug (this.viewer.getHtmlName () + " sync mode=" + syncMode + "; synced? " + this.isSynced + "; driving? " + this.drivingSync + "; disabled? " + this.syncDisabled);
+J.util.Logger.debug (this.viewer.appletName + " sync mode=" + syncMode + "; synced? " + this.isSynced + "; driving? " + this.drivingSync + "; disabled? " + this.syncDisabled);
 }}, "~N");
 $_M(c$, "syncSend", 
 function (script, appletName, port) {

@@ -70,7 +70,17 @@ this.eval.error (22);
 $_M(c$, "putX", 
 ($fz = function (x) {
 if (this.skipping) return;
-if (++this.xPt == this.xStack.length) this.xStack = JU.AU.doubleLength (this.xStack);
+if (this.wasX) {
+try {
+this.addOp (J.script.T.tokenComma);
+} catch (e) {
+if (Clazz.exceptionOf (e, J.script.ScriptException)) {
+System.out.println ("Error adding comma");
+} else {
+throw e;
+}
+}
+}if (++this.xPt == this.xStack.length) this.xStack = JU.AU.doubleLength (this.xStack);
 if (this.logMessages) {
 J.util.Logger.debug ("\nputX: " + x);
 }this.xStack[this.xPt] = x;
@@ -157,22 +167,31 @@ return this.wasX = true;
 }, "JU.P4");
 $_M(c$, "addXNum", 
 function (x) {
-if (this.wasX) switch (x.tok) {
-case 2:
-if (x.intValue < 0) {
-this.addOp (J.script.T.tokenMinus);
-x = J.script.SV.newI (-x.intValue);
-}break;
+var v;
+if (Clazz.instanceOf (x, J.script.SV)) {
+v = x;
+} else {
+switch (x.tok) {
 case 3:
+if (this.wasX) {
 var f = (x.value).floatValue ();
 if (f < 0 || f == 0 && 1 / f == -Infinity) {
 this.addOp (J.script.T.tokenMinus);
-x = J.script.SV.newV (3, Float.$valueOf (-f));
-}break;
+v = J.script.SV.newV (3, Float.$valueOf (-f));
+break;
+}}v = J.script.SV.newV (3, x.value);
+break;
+default:
+var iv = x.intValue;
+if (this.wasX && iv < 0) {
+this.addOp (J.script.T.tokenMinus);
+iv = -iv;
+}v = J.script.SV.newI (iv);
+break;
 }
-this.putX (x);
+}this.putX (v);
 return this.wasX = true;
-}, "J.script.SV");
+}, "J.script.T");
 $_M(c$, "addXAV", 
 function (x) {
 this.putX (J.script.SV.getVariableAV (x));
@@ -309,8 +328,11 @@ if (!isDotSelector && this.wasX && !isArgument) return false;
 newOp = op;
 isLeftOp = true;
 break;
-}if (this.wasX == isLeftOp && tok0 != 269484241) return false;
-break;
+}if (this.wasX == isLeftOp && tok0 != 269484241) {
+if (this.wasX && allowMathFunc) {
+if (this.addOp (J.script.T.tokenComma)) return this.addOp (op);
+}return false;
+}break;
 }
 while (this.oPt >= 0 && tok0 != 269484066 && (!isLeftOp || tok0 == 269484241 && (op.tok == 269484241 || op.tok == 269484096)) && J.script.T.getPrecedence (tok0) >= J.script.T.getPrecedence (op.tok)) {
 if (this.logMessages) {
@@ -450,6 +472,7 @@ function () {
 if (this.xPt < 0) this.eval.error (13);
 var v = J.script.SV.selectItemVar (this.xStack[this.xPt]);
 this.xStack[this.xPt--] = null;
+this.wasX = false;
 return v;
 });
 $_M(c$, "evaluateFunction", 

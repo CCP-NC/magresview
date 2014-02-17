@@ -214,7 +214,7 @@ this.atomSetCollection.getXSymmetry ().applySymmetryBio (this.thisBiomolecule, t
 this.vTlsModels = null;
 this.atomSetCollection.xtalSymmetry = null;
 }}if (this.vTlsModels != null) {
-symmetry = J.api.Interface.getOptionInterface ("symmetry.Symmetry");
+symmetry = J.api.Interface.getSymmetry ();
 var n = this.atomSetCollection.atomSetCount;
 if (n == this.vTlsModels.size ()) {
 for (var i = n; --i >= 0; ) this.setTlsGroups (i, i, symmetry);

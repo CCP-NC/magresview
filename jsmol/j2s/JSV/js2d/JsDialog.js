@@ -41,13 +41,15 @@ $_M(c$, "onFocus",
 function () {
 this.setFront ();
 });
+$_V(c$, "setFocus", 
+function (tf) {
+if (tf) {
+this.setFront ();
+}}, "~B");
 $_M(c$, "setFront", 
 ($fz = function () {
 {
-if (this.zIndex != Jmol._z.dialog)
-this.zIndex = ++Jmol._z.dialog;
-if (this.container)
-this.container.style.zIndex = this.zIndex;
+SwingController.setFront(this);
 }}, $fz.isPrivate = true, $fz));
 $_V(c$, "addButton", 
 function (name, text) {

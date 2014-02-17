@@ -938,7 +938,7 @@ this.viewer.minimize (2147483647, 0, bs, null, 0, false, false, false, false);
 $_M(c$, "queueAtom", 
 ($fz = function (atomIndex, ptClicked) {
 var n = this.measurementQueued.addPoint (atomIndex, ptClicked, true);
-if (atomIndex >= 0) this.viewer.setStatusAtomPicked (atomIndex, "Atom #" + n + ":" + this.viewer.getAtomInfo (atomIndex));
+if (atomIndex >= 0) this.viewer.setStatusAtomPicked (atomIndex, "Atom #" + n + ":" + this.viewer.getAtomInfo (atomIndex), null);
 return n;
 }, $fz.isPrivate = true, $fz), "~N,J.util.Point3fi");
 $_M(c$, "setMotion", 
@@ -1037,12 +1037,12 @@ var bs;
 switch (mode) {
 case 1:
 if (!this.drawMode && !this.labelMode && this.isBound (this.clickAction, 1)) this.zoomTo (atomIndex);
- else if (this.isBound (this.clickAction, 17)) this.viewer.setStatusAtomPicked (atomIndex, null);
+ else if (this.isBound (this.clickAction, 17)) this.viewer.setStatusAtomPicked (atomIndex, null, null);
 return;
 case 2:
 if (this.isBound (this.clickAction, 19)) {
 this.runScript ("set labeltoggle {atomindex=" + atomIndex + "}");
-this.viewer.setStatusAtomPicked (atomIndex, null);
+this.viewer.setStatusAtomPicked (atomIndex, null, null);
 }return;
 case 31:
 if (this.isBound (this.clickAction, 0)) {
@@ -1075,13 +1075,13 @@ bs.clear (imax);
 }
 this.viewer.undoMoveActionClear (atomIndex, 2, true);
 this.viewer.invertSelected (null, null, atomIndex, bs);
-this.viewer.setStatusAtomPicked (atomIndex, "inverted: " + J.util.Escape.eBS (bs));
+this.viewer.setStatusAtomPicked (atomIndex, "inverted: " + J.util.Escape.eBS (bs), null);
 }return;
 case 7:
 if (this.isBound (this.clickAction, 4)) {
 bs = J.util.BSUtil.newAndSetBit (atomIndex);
 this.viewer.deleteAtoms (bs, false);
-this.viewer.setStatusAtomPicked (atomIndex, "deleted: " + J.util.Escape.eBS (bs));
+this.viewer.setStatusAtomPicked (atomIndex, "deleted: " + J.util.Escape.eBS (bs), null);
 }return;
 }
 var spec = "atomindex=" + atomIndex;
@@ -1117,7 +1117,7 @@ this.selectAtoms ("visible and within(site, " + spec + ")");
 break;
 }
 this.viewer.clearClickCount ();
-this.viewer.setStatusAtomPicked (atomIndex, null);
+this.viewer.setStatusAtomPicked (atomIndex, null, null);
 }, $fz.isPrivate = true, $fz), "~N,J.util.Point3fi");
 $_M(c$, "assignNew", 
 ($fz = function (x, y) {
@@ -1226,7 +1226,7 @@ this.exitMeasurementMode (null);
 $_M(c$, "zoomTo", 
 ($fz = function (atomIndex) {
 this.runScript ("zoomTo (atomindex=" + atomIndex + ")");
-this.viewer.setStatusAtomPicked (atomIndex, null);
+this.viewer.setStatusAtomPicked (atomIndex, null, null);
 }, $fz.isPrivate = true, $fz), "~N");
 $_V(c$, "keyTyped", 
 function (keyChar, modifiers) {

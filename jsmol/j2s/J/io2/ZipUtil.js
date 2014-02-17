@@ -59,10 +59,11 @@ for (var i = 0; i < bytes.length; i++) ret.append (Integer.toHexString (bytes[i]
 
 return ret.toString ();
 }, $fz.isPrivate = true, $fz), "~A");
-$_V(c$, "getZipFileContents", 
+$_V(c$, "getZipFileDirectory", 
 function (bis, list, listPtr, asBufferedInputStream) {
 var ret;
 if (list == null || listPtr >= list.length) return this.getZipDirectoryAsStringAndClose (bis);
+bis = J.io.JmolBinary.checkPngZipStream (bis);
 var fileName = list[listPtr];
 var zis =  new java.util.zip.ZipInputStream (bis);
 var ze;
@@ -79,13 +80,14 @@ return (asBufferedInputStream ? J.io.JmolBinary.getBIS (str.getBytes ()) : str);
 }var pt = fileName.indexOf (":asBinaryString");
 var asBinaryString = (pt > 0);
 if (asBinaryString) fileName = fileName.substring (0, pt);
+fileName = fileName.$replace ('\\', '/');
 while ((ze = zis.getNextEntry ()) != null && !fileName.equals (ze.getName ())) {
 }
 var bytes = (ze == null ? null : J.io.JmolBinary.getStreamBytes (zis, ze.getSize ()));
 ze = null;
 zis.close ();
 if (bytes == null) return "";
-if (J.io.JmolBinary.isZipB (bytes)) return this.getZipFileContents (J.io.JmolBinary.getBIS (bytes), list, ++listPtr, asBufferedInputStream);
+if (J.io.JmolBinary.isZipB (bytes) || J.io.JmolBinary.isPngZipB (bytes)) return this.getZipFileDirectory (J.io.JmolBinary.getBIS (bytes), list, ++listPtr, asBufferedInputStream);
 if (asBufferedInputStream) return J.io.JmolBinary.getBIS (bytes);
 if (asBinaryString) {
 ret =  new JU.SB ();
@@ -113,7 +115,7 @@ var ze;
 while ((ze = zis.getNextEntry ()) != null) {
 if (!fileName.equals (ze.getName ())) continue;
 var bytes = J.io.JmolBinary.getStreamBytes (zis, ze.getSize ());
-return (J.io.JmolBinary.isZipB (bytes) && ++listPtr < list.length ? this.getZipFileContentsAsBytes (J.io.JmolBinary.getBIS (bytes), list, listPtr) : bytes);
+return ((J.io.JmolBinary.isZipB (bytes) || J.io.JmolBinary.isPngZipB (bytes)) && ++listPtr < list.length ? this.getZipFileContentsAsBytes (J.io.JmolBinary.getBIS (bytes), list, listPtr) : bytes);
 }
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
@@ -288,7 +290,7 @@ if (subFileName != null) htParams.put ("subFileName", subFileName);
 if (J.io2.ZipUtil.isJmolManifest (thisEntry) || haveManifest && exceptFiles == manifest.indexOf ("|" + thisEntry + "|") >= 0) continue;
 var bytes = J.io.JmolBinary.getStreamBytes (zis, ze.getSize ());
 if (J.io.JmolBinary.isGzipB (bytes)) bytes = J.io.JmolBinary.getStreamBytes (J.io2.ZipUtil.getUnGzippedInputStream (bytes), -1);
-if (J.io.JmolBinary.isZipB (bytes)) {
+if (J.io.JmolBinary.isZipB (bytes) || J.io.JmolBinary.isPngZipB (bytes)) {
 var bis = J.io.JmolBinary.getBIS (bytes);
 var zipDir2 = J.io.JmolBinary.getZipDirectoryAndClose (bis, true);
 bis = J.io.JmolBinary.getBIS (bytes);
@@ -313,7 +315,7 @@ return bis;
 } else {
 var sData;
 if (J.io.JmolBinary.isCompoundDocumentB (bytes)) {
-var jd = J.api.Interface.getInterface ("jmol.util.CompoundDocument");
+var jd = J.api.Interface.getOptionInterface ("util.CompoundDocument");
 jd.setStream (J.io.JmolBinary.getBIS (bytes), true);
 sData = jd.getAllDataFiles ("Molecule", "Input").toString ();
 } else {

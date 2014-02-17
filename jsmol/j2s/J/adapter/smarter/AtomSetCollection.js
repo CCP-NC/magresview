@@ -516,7 +516,7 @@ return atom.anisoBorU;
 }, "J.adapter.smarter.Atom");
 $_M(c$, "getXSymmetry", 
 function () {
-if (this.xtalSymmetry == null) this.xtalSymmetry = (J.api.Interface.getInterface ("J.adapter.smarter.XtalSymmetry")).set (this);
+if (this.xtalSymmetry == null) this.xtalSymmetry = (J.api.Interface.getOptionInterface ("adapter.smarter.XtalSymmetry")).set (this);
 return this.xtalSymmetry;
 });
 $_M(c$, "getSymmetry", 

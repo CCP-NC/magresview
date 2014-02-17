@@ -527,12 +527,6 @@ if (!isDisplay) this.haveHiddenBonds = true;
 for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) if (i < this.bondCount && this.bonds[i].mad != 0) this.bonds[i].setShapeVisibility (isDisplay);
 
 }, "J.modelset.BondSet,~B");
-$_M(c$, "setBondParametersBS", 
-function (modelIndex, iBond, bsBonds, rad, pymolValence, argb, trans) {
-if (bsBonds == null) this.setBondParameters (modelIndex, iBond, rad, pymolValence, argb, trans);
- else for (var i = bsBonds.nextSetBit (0); i >= 0; i = bsBonds.nextSetBit (i + 1)) this.setBondParameters (modelIndex, i, rad, pymolValence, argb, trans);
-
-}, "~N,~N,JU.BS,~N,~N,~N,~N");
 $_M(c$, "setBondParameters", 
 function (modelIndex, i, rad, pymolValence, argb, trans) {
 if (i < 0 || i >= this.bondCount) return;

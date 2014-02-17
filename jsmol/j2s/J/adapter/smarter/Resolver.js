@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.smarter");
-Clazz.load (null, "J.adapter.smarter.Resolver", ["java.lang.Character", "$.Float", "java.util.StringTokenizer", "JU.PT", "J.adapter.smarter.AtomSetCollectionReader", "$.SmarterJmolAdapter", "J.api.JmolDocument", "J.io.LimitedLineReader", "J.util.Logger"], function () {
+Clazz.load (null, "J.adapter.smarter.Resolver", ["java.lang.Character", "$.Float", "java.util.StringTokenizer", "JU.PT", "J.adapter.smarter.AtomSetCollectionReader", "$.SmarterJmolAdapter", "J.api.Interface", "$.JmolDocument", "J.io.LimitedLineReader", "J.util.Logger"], function () {
 c$ = Clazz.declareType (J.adapter.smarter, "Resolver");
 c$.getReaderClassBase = $_M(c$, "getReaderClassBase", 
 function (type) {
@@ -49,57 +49,27 @@ return errMsg;
 if (ptFile <= 0) htParams.put ("readerName", readerName);
 if (readerName.indexOf ("Xml") == 0) readerName = "Xml";
 var className = null;
-var atomSetCollectionReaderClass;
 var err = null;
-try {
-try {
 className = J.adapter.smarter.Resolver.getReaderClassBase (readerName);
-atomSetCollectionReaderClass = Class.forName (className);
-atomSetCollectionReader = atomSetCollectionReaderClass.newInstance ();
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
+if ((atomSetCollectionReader = J.api.Interface.getInterface (className)) == null) {
 err = "File reader was not found:" + className;
 J.util.Logger.error (err);
 return err;
-} else {
-throw e;
-}
-}
-return atomSetCollectionReader;
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-err = "uncaught error in file loading for " + className;
-J.util.Logger.error (err);
-System.out.println (e.getMessage ());
-return err;
-} else {
-throw e;
-}
-}
+}return atomSetCollectionReader;
 }, "~S,~S,~O,java.util.Map,~N");
 c$.DOMResolve = $_M(c$, "DOMResolve", 
 function (DOMNode, htParams) {
 var className = null;
-var atomSetCollectionReaderClass;
 var atomSetCollectionReader;
 var atomSetCollectionReaderName = J.adapter.smarter.Resolver.getXmlType (htParams.get ("nameSpaceInfo"));
 if (J.util.Logger.debugging) {
 J.util.Logger.debug ("The Resolver thinks " + atomSetCollectionReaderName);
 }htParams.put ("readerName", atomSetCollectionReaderName);
-try {
 className = "J.adapter.readers.xml.XmlReader";
-atomSetCollectionReaderClass = Class.forName (className);
-atomSetCollectionReader = atomSetCollectionReaderClass.newInstance ();
-return atomSetCollectionReader;
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
+if ((atomSetCollectionReader = J.api.Interface.getInterface (className)) != null) return atomSetCollectionReader;
 var err = "File reader was not found:" + className;
-J.util.Logger.errorEx (err, e);
+J.util.Logger.error (err);
 return err;
-} else {
-throw e;
-}
-}
 }, "~O,java.util.Map");
 c$.determineAtomSetCollectionReader = $_M(c$, "determineAtomSetCollectionReader", 
 ($fz = function (readerOrDocument, returnLines) {

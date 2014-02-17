@@ -200,11 +200,11 @@ function (index) {
 return this.spectra.get (index);
 }, "~N");
 $_M(c$, "getSpectrumIndex", 
-($fz = function (spec) {
+function (spec) {
 for (var i = this.spectra.size (); --i >= 0; ) if (this.spectra.get (i) === spec) return i;
 
 return -1;
-}, $fz.isPrivate = true, $fz), "JSV.common.JDXSpectrum");
+}, "JSV.common.JDXSpectrum");
 $_M(c$, "addSpec", 
 ($fz = function (spec) {
 this.spectra.addLast (spec);
@@ -438,7 +438,7 @@ $_M(c$, "findNearestMaxMin",
 if (this.nSpectra > 1 && this.iSpectrumClicked < 0) return false;
 this.xValueMovedTo = this.getSpectrum ().findXForPeakNearest (this.xValueMovedTo);
 this.setXPixelMovedTo (this.xValueMovedTo, 1.7976931348623157E308, 0, 0);
-return true;
+return !Double.isNaN (this.xValueMovedTo);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "setXPixelMovedTo", 
 function (x1, x2, xPixel1, xPixel2) {
@@ -492,23 +492,30 @@ break;
 case 1:
 case -2:
 case -3:
-if (this.pendingMeasurement == null) return;
+var isOK = (this.pendingMeasurement != null && this.isVisible (this.getDialog (JSV.common.Annotation.AType.Measurements, -1)));
+while (isOK) {
 this.setScale (this.getSpectrumIndex (this.pendingMeasurement.spec));
-if (clickCount != 3 && this.findNearestMaxMin ()) {
-xPixel = this.xPixelMovedTo;
+if (clickCount != 3) {
+if (!this.findNearestMaxMin ()) {
+isOK = false;
+break;
+}xPixel = this.xPixelMovedTo;
 }x = this.toX (xPixel);
 y = this.toY (yPixel);
 this.pendingMeasurement.setPt2 (x, y);
 if (this.pendingMeasurement.text.length == 0) {
-this.pendingMeasurement = null;
-} else {
-this.setMeasurement (this.pendingMeasurement);
-if (clickCount == 1) {
-this.setSpectrumClicked (this.getSpectrumIndex (this.pendingMeasurement.spec));
+isOK = false;
+break;
+}this.setMeasurement (this.pendingMeasurement);
+if (clickCount != 1) {
+isOK = false;
+break;
+}this.setSpectrumClicked (this.getSpectrumIndex (this.pendingMeasurement.spec));
 this.pendingMeasurement =  new JSV.common.Measurement ().setM1 (x, y, this.pendingMeasurement.spec);
-} else {
-this.pendingMeasurement = null;
-}}this.pd.repaint ();
+break;
+}
+if (!isOK) this.pendingMeasurement = null;
+this.pd.repaint ();
 break;
 case 5:
 if (this.findNearestMaxMin ()) {
@@ -963,8 +970,8 @@ doYScale = new Boolean (doYScale & this.viewData.areYScalesSame (i - 1, i)).valu
 }}var iSpecForFrame = (this.nSpectra == 1 ? 0 : !this.showAllStacked ? this.iSpectrumMovedTo : this.iSpectrumSelected);
 var g2 = (gRear === gMain ? gFront : gRear);
 if (doAll) {
-var addCurrentBox = (!this.isLinked && (this.isSplittable) && (!this.isSplittable || this.nSplit == 1 || this.pd.currentSplitPoint == iSplit));
-var drawUpDownArrows = (this.pd.isCurrentGraphSet (this) && this.zoomEnabled && this.spectra.get (0).isScalable () && (addCurrentBox || this.nSpectra == 1) && (this.nSplit == 1 || this.pd.currentSplitPoint == this.iSpectrumMovedTo) && !this.isDrawNoSpectra ());
+var addCurrentBox = (!this.isLinked && this.isSplittable && (this.nSplit == 1 || this.pd.currentSplitPoint == iSplit));
+var drawUpDownArrows = (this.zoomEnabled && !this.isDrawNoSpectra () && this.pd.isCurrentGraphSet (this) && this.spectra.get (0).isScalable () && (addCurrentBox || this.nSpectra == 1) && (this.nSplit == 1 || this.pd.currentSplitPoint == this.iSpectrumMovedTo));
 var addSplitBox = this.isSplittable;
 this.drawFrame (gMain, iSpecForFrame, addCurrentBox, addSplitBox, drawUpDownArrows);
 }if (this.pd.isCurrentGraphSet (this) && iSplit == this.pd.currentSplitPoint && (n < 2 || this.iSpectrumSelected >= 0)) this.$haveSelectedSpectrum = true;
@@ -1532,7 +1539,7 @@ $_M(c$, "drawMeasurement",
 ($fz = function (g, m) {
 if (m.text.length == 0 && m !== this.pendingMeasurement) return;
 this.pd.setFont (g, this.xPixels, 1, 12, false);
-this.g2d.setGraphicsColor (g, (m === this.pendingMeasurement ? this.pd.getColor (JSV.common.ScriptToken.HIGHLIGHTCOLOR) : this.pd.BLACK));
+this.g2d.setGraphicsColor (g, (m === this.pendingMeasurement ? this.pd.getColor (JSV.common.ScriptToken.PEAKTABCOLOR) : this.pd.BLACK));
 var x1 = this.toPixelX (m.getXVal ());
 var y1 = this.toPixelY (m.getYVal ());
 var x2 = this.toPixelX (m.getXVal2 ());
@@ -1852,7 +1859,6 @@ if (clickCount == 0) {
 var isOnIntegral = this.isOnSpectrum (xPixel, yPixel, -1);
 this.pd.integralShiftMode = (isOnIntegral ? this.getShiftMode (xPixel, yPixel) : 0);
 this.pd.isIntegralDrag = (this.pd.integralShiftMode == 0 && (isOnIntegral || this.haveIntegralDisplayed (-1) && this.findMeasurement (this.getIntegrationGraph (-1), xPixel, yPixel, 0) != null));
-System.out.println ("pd.isIntegralDrag set in checkSPelick " + this.pd.isIntegralDrag);
 if (this.pd.integralShiftMode != 0) return false;
 }if (!this.showAllStacked) return false;
 this.stackSelected = false;
@@ -2379,13 +2385,14 @@ return true;
 }, "JSV.common.Parameters,~S");
 $_M(c$, "setSpectrum", 
 function (iSpec, fromSplit) {
-if (fromSplit) {
+if (fromSplit && this.nSplit > 1) {
 if (this.nSplit > 1) this.setSpectrumClicked (iSpec);
 } else {
 this.setSpectrumClicked (iSpec);
 this.stackSelected = false;
 this.showAllStacked = false;
-}}, "~N,~B");
+}if (iSpec >= 0) this.dialogsToFront (this.getSpectrum ());
+}, "~N,~B");
 $_M(c$, "setSpectrumJDX", 
 function (spec) {
 var pt = this.getFixedSelectedSpectrumIndex ();
@@ -2625,13 +2632,16 @@ if (this.gs2dLinkedY != null) this.cur1D2x2.setX (y, this.toPixelX (y));
 this.cur1D2Locked = isLocked;
 }, "~N,~N,~B");
 $_M(c$, "dialogsToFront", 
-function () {
+function (spec) {
 if (this.dialogs == null) return;
+if (spec == null) spec = this.getSpectrum ();
 for (var e, $e = this.dialogs.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 var ad = e.getValue ();
-if (this.isVisible (ad)) (ad).setVisible (true);
-}
-});
+if (this.isVisible (ad)) {
+if (spec == null) (ad).setVisible (true);
+ else (ad).setFocus (ad.getSpectrum () === spec);
+}}
+}, "JSV.common.JDXSpectrum");
 $_M(c$, "setPlotColors", 
 function (oColors) {
 var colors = oColors;

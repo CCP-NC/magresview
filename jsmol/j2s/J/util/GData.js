@@ -381,7 +381,7 @@ function () {
 });
 $_M(c$, "plotImage", 
 function (x, y, z, image, jmolRenderer, bgcolix, width, height) {
-}, "~N,~N,~N,java.awt.Image,J.api.JmolRendererInterface,~N,~N,~N");
+}, "~N,~N,~N,~O,J.api.JmolRendererInterface,~N,~N,~N");
 $_M(c$, "plotText", 
 function (x, y, z, colorArgbOrGray, bgColor, text, font3d, jmolRenderer) {
 }, "~N,~N,~N,~N,~N,~S,javajs.awt.Font,J.api.JmolRendererInterface");

@@ -89,7 +89,7 @@ for (var ipt = 0; ipt < 6; ipt++) this.setUnitCellItem (ipt, this.parseFloat ())
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "ndim", 
 ($fz = function () {
-this.ms = J.api.Interface.getInterface ("J.adapter.readers.cif.MSReader");
+this.ms = J.api.Interface.getOptionInterface ("adapter.readers.cif.MSReader");
 this.modDim = this.ms.initialize (this, "" + (this.parseIntStr (this.getTokens ()[1]) - 3));
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "qi", 

@@ -156,22 +156,32 @@ this.iHaveUnitCell = true;
 for (var i = 0; i < this.symops.size (); i++) this.setSymmetryOperator (this.symops.get (i));
 
 }if (this.lastSpaceGroupName != null) this.setSpaceGroupName (this.lastSpaceGroupName);
+} else if (this.key.equals (J.adapter.readers.cif.CifReader.singleAtomID)) {
+this.readSingleAtom ();
 } else if (this.pr != null) {
 this.pr.processEntry ();
 } else if (this.mr != null) {
 this.mr.processEntry ();
 }}return true;
 }, $fz.isPrivate = true, $fz));
+$_M(c$, "readSingleAtom", 
+($fz = function () {
+var atom =  new J.adapter.smarter.Atom ();
+atom.set (0, 0, 0);
+var s = atom.atomName = this.tokenizer.fullTrim (this.data);
+atom.elementSymbol = s.length == 1 ? s : s.substring (0, 1) + s.substring (1, 2).toLowerCase ();
+this.atomSetCollection.addAtom (atom);
+}, $fz.isPrivate = true, $fz));
 $_M(c$, "initializeMMCIF", 
 ($fz = function () {
 this.isPDBX = true;
 this.lookingForPDB = false;
-if (this.pr == null) this.pr = J.api.Interface.getInterface ("J.adapter.readers.cif.MMCifReader");
+if (this.pr == null) this.pr = J.api.Interface.getOptionInterface ("adapter.readers.cif.MMCifReader");
 this.isCourseGrained = this.pr.initialize (this);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "initializeMSCIF", 
 ($fz = function (data) {
-if (this.mr == null) this.ms = this.mr = J.api.Interface.getInterface ("J.adapter.readers.cif.MSCifReader");
+if (this.mr == null) this.ms = this.mr = J.api.Interface.getOptionInterface ("adapter.readers.cif.MSCifReader");
 this.modulated = (this.mr.initialize (this, data) > 0);
 }, $fz.isPrivate = true, $fz), "~S");
 $_M(c$, "fixKey", 
@@ -966,7 +976,9 @@ Clazz.defineStatics (c$,
 "SUBSYS_ID", 60,
 "SITE_MULT", 61,
 "THERMAL_TYPE", 62,
-"atomFields", ["_atom_site_type_symbol", "_atom_site_label", "_atom_site_auth_atom_id", "_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z", "_atom_site_cartn_x", "_atom_site_cartn_y", "_atom_site_cartn_z", "_atom_site_occupancy", "_atom_site_b_iso_or_equiv", "_atom_site_auth_comp_id", "_atom_site_auth_asym_id", "_atom_site_auth_seq_id", "_atom_site_pdbx_pdb_ins_code", "_atom_site_label_alt_id", "_atom_site_group_pdb", "_atom_site_pdbx_pdb_model_num", "_atom_site_calc_flag", "_atom_site_disorder_group", "_atom_site_aniso_label", "_atom_site_anisotrop_id", "_atom_site_aniso_u_11", "_atom_site_aniso_u_22", "_atom_site_aniso_u_33", "_atom_site_aniso_u_12", "_atom_site_aniso_u_13", "_atom_site_aniso_u_23", "_atom_site_anisotrop_u[1][1]", "_atom_site_anisotrop_u[2][2]", "_atom_site_anisotrop_u[3][3]", "_atom_site_anisotrop_u[1][2]", "_atom_site_anisotrop_u[1][3]", "_atom_site_anisotrop_u[2][3]", "_atom_site_u_iso_or_equiv", "_atom_site_aniso_b_11", "_atom_site_aniso_b_22", "_atom_site_aniso_b_33", "_atom_site_aniso_b_12", "_atom_site_aniso_b_13", "_atom_site_aniso_b_23", "_atom_site_aniso_beta_11", "_atom_site_aniso_beta_22", "_atom_site_aniso_beta_33", "_atom_site_aniso_beta_12", "_atom_site_aniso_beta_13", "_atom_site_aniso_beta_23", "_atom_site_adp_type", "_chem_comp_atom_comp_id", "_chem_comp_atom_atom_id", "_chem_comp_atom_type_symbol", "_chem_comp_atom_charge", "_chem_comp_atom_model_cartn_x", "_chem_comp_atom_model_cartn_y", "_chem_comp_atom_model_cartn_z", "_chem_comp_atom_pdbx_model_cartn_x_ideal", "_chem_comp_atom_pdbx_model_cartn_y_ideal", "_chem_comp_atom_pdbx_model_cartn_z_ideal", "_atom_site_disorder_assembly", "_atom_site_label_asym_id", "_atom_site_subsystem_code", "_atom_site_symmetry_multiplicity", "_atom_site_thermal_displace_type"],
+"atomFields", ["_atom_site_type_symbol", "_atom_site_label", "_atom_site_auth_atom_id", "_atom_site_fract_x", "_atom_site_fract_y", "_atom_site_fract_z", "_atom_site_cartn_x", "_atom_site_cartn_y", "_atom_site_cartn_z", "_atom_site_occupancy", "_atom_site_b_iso_or_equiv", "_atom_site_auth_comp_id", "_atom_site_auth_asym_id", "_atom_site_auth_seq_id", "_atom_site_pdbx_pdb_ins_code", "_atom_site_label_alt_id", "_atom_site_group_pdb", "_atom_site_pdbx_pdb_model_num", "_atom_site_calc_flag", "_atom_site_disorder_group", "_atom_site_aniso_label", "_atom_site_anisotrop_id", "_atom_site_aniso_u_11", "_atom_site_aniso_u_22", "_atom_site_aniso_u_33", "_atom_site_aniso_u_12", "_atom_site_aniso_u_13", "_atom_site_aniso_u_23", "_atom_site_anisotrop_u[1][1]", "_atom_site_anisotrop_u[2][2]", "_atom_site_anisotrop_u[3][3]", "_atom_site_anisotrop_u[1][2]", "_atom_site_anisotrop_u[1][3]", "_atom_site_anisotrop_u[2][3]", "_atom_site_u_iso_or_equiv", "_atom_site_aniso_b_11", "_atom_site_aniso_b_22", "_atom_site_aniso_b_33", "_atom_site_aniso_b_12", "_atom_site_aniso_b_13", "_atom_site_aniso_b_23", "_atom_site_aniso_beta_11", "_atom_site_aniso_beta_22", "_atom_site_aniso_beta_33", "_atom_site_aniso_beta_12", "_atom_site_aniso_beta_13", "_atom_site_aniso_beta_23", "_atom_site_adp_type", "_chem_comp_atom_comp_id", "_chem_comp_atom_atom_id", "_chem_comp_atom_type_symbol", "_chem_comp_atom_charge", "_chem_comp_atom_model_cartn_x", "_chem_comp_atom_model_cartn_y", "_chem_comp_atom_model_cartn_z", "_chem_comp_atom_pdbx_model_cartn_x_ideal", "_chem_comp_atom_pdbx_model_cartn_y_ideal", "_chem_comp_atom_pdbx_model_cartn_z_ideal", "_atom_site_disorder_assembly", "_atom_site_label_asym_id", "_atom_site_subsystem_code", "_atom_site_symmetry_multiplicity", "_atom_site_thermal_displace_type"]);
+c$.singleAtomID = c$.prototype.singleAtomID = J.adapter.readers.cif.CifReader.atomFields[48];
+Clazz.defineStatics (c$,
 "CITATION_ID", 0,
 "CITATION_TITLE", 1,
 "citationFields", ["_citation_id", "_citation_title"],

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.quantum");
-Clazz.load (["J.api.JmolNMRInterface", "java.util.Hashtable"], "J.quantum.NMRCalculation", ["java.lang.Character", "$.Double", "$.Float", "$.NullPointerException", "JU.BS", "$.List", "$.PT", "$.V3", "J.io.JmolBinary", "J.util.Escape", "$.Logger"], function () {
+Clazz.load (["J.api.JmolNMRInterface", "java.util.Hashtable"], "J.quantum.NMRCalculation", ["java.lang.Character", "$.Double", "$.Float", "$.NullPointerException", "JU.BS", "$.List", "$.PT", "$.V3", "J.io.JmolBinary", "J.util.Escape", "$.Logger", "$.Tensor"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.viewer = null;
 this.isotopeData = null;
@@ -258,6 +258,7 @@ data.addLast (list1);
 }
 if (tensorType != null) return data;
 }var isChi = tensorType != null && tensorType.startsWith ("efg") && infoType.equals (";chi.");
+var isFloat = (isChi || J.util.Tensor.isFloatInfo (infoType));
 for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
 if (tensorType == null) {
 var a = this.viewer.modelSet.getAtomTensorList (i);
@@ -265,7 +266,7 @@ if (a != null) for (var j = 0; j < a.length; j++) data.addLast ((a[j]).getInfo (
 
 } else {
 var t = this.viewer.modelSet.getAtomTensor (i, tensorType);
-if (t != null) data.addLast (isChi ? Float.$valueOf (this.getQuadrupolarConstant (t)) : t.getInfo (infoType));
+data.addLast (t == null ? (isFloat ? Float.$valueOf (0) : "") : isChi ? Float.$valueOf (this.getQuadrupolarConstant (t)) : t.getInfo (infoType));
 }}
 return data;
 }, "~S,~S,JU.BS");

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JSV.popup");
-Clazz.load (["JSV.api.JSVPopupMenu", "J.popup.GenericSwingPopup"], "JSV.popup.JSVGenericPopup", ["JU.PT", "JSV.common.Annotation", "$.JSVersion", "JSV.popup.JSVPopupResourceBundle"], function () {
+Clazz.load (["JSV.api.JSVPopupMenu", "J.popup.GenericSwingPopup"], "JSV.popup.JSVGenericPopup", ["JU.PT", "JSV.common.JSVersion", "JSV.popup.JSVPopupResourceBundle"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.viewer = null;
 this.updateMode = 0;
@@ -46,7 +46,7 @@ this.updateFileTypeDependentMenus ();
 this.updateMode = 1;
 this.updateAboutSubmenu ();
 });
-$_V(c$, "appCheckItems", 
+$_V(c$, "appCheckItem", 
 function (item, newMenu) {
 }, "~S,javajs.api.SC");
 $_V(c$, "appCheckSpecialMenu", 
@@ -182,7 +182,7 @@ var spec0 = (this.pd == null ? null : this.pd.getSpectrum ());
 var isOverlaid = this.pd != null && this.pd.isShowAllStacked ();
 var isSingle = this.pd != null && this.pd.haveSelectedSpectrum ();
 this.setItemEnabled ("Integration", this.pd != null && this.pd.getSpectrum ().canIntegrate ());
-this.setItemEnabled ("Measurements", this.pd != null && this.pd.hasCurrentMeasurements (JSV.common.Annotation.AType.Measurements));
+this.setItemEnabled ("Measurements", true);
 this.setItemEnabled ("Peaks", this.pd != null && this.pd.getSpectrum ().is1D ());
 this.setItemEnabled ("Predicted_Solution_Colour", isSingle && spec0.canShowSolutionColor ());
 this.setItemEnabled ("Toggle_Trans/Abs", isSingle && spec0.canConvertTransAbs ());

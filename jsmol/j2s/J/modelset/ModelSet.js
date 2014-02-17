@@ -243,7 +243,7 @@ bs = this.viewer.getModelUndeletedAtomsBitSet (modelIndex);
 iAtom = bs.nextSetBit (0);
 }var obj = this.viewer.getShapePropertyIndex (18, "mad", iAtom);
 var haveVibration = (obj != null && (obj).intValue () != 0 || this.viewer.isVibrationOn ());
-var symmetry = J.api.Interface.getOptionInterface ("symmetry.Symmetry");
+var symmetry = J.api.Interface.getSymmetry ();
 this.pointGroup = symmetry.setPointGroup (this.pointGroup, this.atoms, bs, haveVibration, this.viewer.getFloat (570425382), this.viewer.getFloat (570425384));
 if (!doAll && !asInfo) return this.pointGroup.getPointGroupName ();
 var ret = this.pointGroup.getPointGroupInfo (modelIndex, asDraw, asInfo, type, index, scale);

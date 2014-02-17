@@ -38,7 +38,7 @@ this.selectedPath = newTreePath;
 this.valueChanged ();
 }, $fz.isPrivate = true, $fz), "JSV.api.JSVTreePath");
 $_V(c$, "createTree", 
-function (si, source, panels) {
+function (fileCount, source, panels) {
 var tree = this.viewer.spectraTree;
 var rootNode = tree.getRootNode ();
 var panelNodes = this.viewer.panelNodes;
@@ -47,12 +47,10 @@ var panelNode =  new JSV.common.PanelNode (null, fileName, source, null);
 var fileNode =  new JSV.tree.SimpleTreeNode (fileName, panelNode);
 panelNode.setTreeNode (fileNode);
 tree.spectraTreeModel.insertNodeInto (fileNode, rootNode, rootNode.getChildCount ());
-var fileCount = si.siGetFileCount () + 1;
-si.siSetFileCount (fileCount);
 for (var i = 0; i < panels.length; i++) {
 var jsvp = panels[i];
 var id = fileCount + "." + (i + 1);
-panelNode = si.siGetNewPanelNode (id, fileName, source, jsvp);
+panelNode =  new JSV.common.PanelNode (id, fileName, source, jsvp);
 var treeNode =  new JSV.tree.SimpleTreeNode (panelNode.toString (), panelNode);
 panelNode.setTreeNode (treeNode);
 panelNodes.addLast (panelNode);
@@ -60,7 +58,7 @@ tree.spectraTreeModel.insertNodeInto (treeNode, fileNode, fileNode.getChildCount
 }
 this.viewer.selectFrameNode (panels[0]);
 return fileNode;
-}, "JSV.api.ScriptInterface,JSV.source.JDXSource,~A");
+}, "~N,JSV.source.JDXSource,~A");
 $_V(c$, "setPath", 
 function (path) {
 this.setSelectionPath (path);

@@ -110,7 +110,9 @@ this.dialog.setVisible (this.defaultVisible);
 });
 $_M(c$, "callbackAD", 
 function (id, msg) {
-if (id.equals ("tableSelect")) {
+if (id.equals ("FOCUS")) {
+this.eventFocus ();
+} else if (id.equals ("tableSelect")) {
 this.tableSelect (msg);
 } else if (id.equals ("btnClear")) {
 this.clear ();
@@ -236,6 +238,11 @@ case JSV.common.Annotation.AType.Views:
 break;
 }
 });
+$_M(c$, "setFocus", 
+function (tf) {
+System.out.println ("setFocus " + this.$spec);
+this.dialog.setFocus (tf);
+}, "~B");
 $_M(c$, "update", 
 function (clicked, xRange, yOffset) {
 this.selectTableRow (-1);
@@ -404,6 +411,30 @@ var key = this.optionKey + "_format";
 var format = this.options.get (key);
 if (format == null) this.options.put (key, format = Integer.$valueOf (this.formatOptions[this.unitPtr == null ? 0 : this.unitPtr.intValue ()]));
 }, $fz.isPrivate = true, $fz));
+$_M(c$, "eventFocus", 
+function () {
+System.out.println ("eventFocus on " + this.$spec);
+if (this.$spec != null) this.jsvp.getPanelData ().jumpToSpectrum (this.$spec);
+switch (this.type) {
+case JSV.common.Annotation.AType.Integration:
+if (this.iRowSelected >= 0) {
+var i = this.iRowSelected++;
+this.tableCellSelect (-1, -1);
+}break;
+case JSV.common.Annotation.AType.Measurements:
+break;
+case JSV.common.Annotation.AType.NONE:
+break;
+case JSV.common.Annotation.AType.PeakList:
+this.createData ();
+this.skipCreate = true;
+break;
+case JSV.common.Annotation.AType.OverlayLegend:
+break;
+case JSV.common.Annotation.AType.Views:
+break;
+}
+});
 $_M(c$, "eventApply", 
 function () {
 switch (this.type) {
@@ -461,20 +492,21 @@ this.applyFromFields ();
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "tableCellSelect", 
 ($fz = function (iRow, iCol) {
-var value = this.tableData[iRow][1];
-var icolrow = this.iRowSelected * 1000 + this.iColSelected;
+System.out.println (iRow + " jSVDial " + iCol);
+if (iRow < 0) {
+iRow = Clazz.doubleToInt (this.iRowColSelected / 1000);
+iCol = this.iRowColSelected % 1000;
+this.iRowColSelected = -1;
+}var value = this.tableData[iRow][1];
+var icolrow = iRow * 1000 + iCol;
 if (icolrow == this.iRowColSelected) return;
 this.iRowColSelected = icolrow;
+System.out.println ("Setting rc = " + this.iRowColSelected + " " + this.$spec);
 this.selectTableRow (this.iRowSelected);
 try {
 switch (this.type) {
 case JSV.common.Annotation.AType.Integration:
-for (var i = 0; i < this.xyData.size (); i++) if (JU.DF.formatDecimalDbl (this.xyData.get (i).getXVal (), 2).equals (value)) {
-this.iSelected = i;
-this.jsvp.getPanelData ().setXPointers (this.$spec, this.xyData.get (i).getXVal (), this.$spec, this.xyData.get (i).getXVal2 ());
-this.jsvp.doRepaint (true);
-break;
-}
+this.callback ("SHOWSELECTION", value.toString ());
 this.checkEnables ();
 break;
 case JSV.common.Annotation.AType.Measurements:
@@ -601,6 +633,7 @@ $_M(c$, "tableSelect",
 var isAdjusting = "true".equals (this.getField (url, "adjusting"));
 if (isAdjusting) {
 this.iColSelected = this.iRowSelected = -1;
+System.out.println ("adjusting" + url);
 return;
 }var index = JU.PT.parseInt (this.getField (url, "index"));
 switch ("ROW COL ROWCOL".indexOf (this.getField (url, "selector"))) {
@@ -608,9 +641,11 @@ case 8:
 this.iColSelected = JU.PT.parseInt (this.getField (url, "index2"));
 case 0:
 this.iRowSelected = index;
+System.out.println ("r set to " + index);
 break;
 case 4:
 this.iColSelected = index;
+System.out.println ("c set to " + index);
 break;
 }
 if (this.iColSelected >= 0 && this.iRowSelected >= 0) {
