@@ -193,6 +193,21 @@ Copy of the license can be found as a text file in the /jmol folder
     
     </style>
     
+    <!-- Loading configuration parameters. Wrapped into two functions that change default error handling so that no matter what is written in mview_config.js, nothing too bad happens -->
+    
+    <script type="text/javascript" src="files.js"></script>
+    <script type="text/javascript">
+      $(window).error(function(e){
+       e.preventDefault();
+      });
+    </script>
+    <script type="text/javascript" src="mview_config.js"></script>
+    <script type="text/javascript">
+      //Back to default behaviour
+      $(window).error();
+    </script>
+    
+    
     <!-- Matrix functions -->
     
     <script type="text/javascript" src="files/matrix.js"></script>
@@ -779,7 +794,16 @@ Copy of the license can be found as a text file in the /jmol folder
 		  $("#credit_div").css("fontSize", Math.ceil(winH/70.0) + "px");
 		  $("#jmol_div").html(Jmol.getAppletHtml("mainJmol",main_info));
 		  
+		  //Handles the reloading of the page if needed because Java applet is required
+		  
+	          if (typeof(use_java_framework) == "boolean" && use_java_framework && window.location.search == "") {
+		    window.location.search = "?_USE=SIGNED";
+	          }
+		  
 		  switch_handler(false);
+		  
+		  reset_visualization_options();
+		
 		  
 		  hover_load();
 		  

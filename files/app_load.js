@@ -113,6 +113,8 @@ function jmolEvaluate_each(id, prop)
 
 function enable_NMR_controls()
 {
+	reset_visualization_options();
+	
 	document.getElementById("labels_check").disabled = false;
 
 	if (atom_set.has_ms)
@@ -185,10 +187,8 @@ function enable_NMR_controls()
 
 function disable_NMR_controls()
 {
-			document.getElementById("halos_check").checked = false;
-			document.getElementById("bonds_check").checked = true;
-			document.getElementById("sticks_check").checked = true;
-			document.getElementById("axes_check").checked = true;
+			reset_visualization_options();
+			
 			document.getElementById("labels_check").checked = false;
 			document.getElementById("labels_check").disabled = true;
 			
@@ -248,6 +248,59 @@ function disable_NMR_controls()
 			document.getElementById("sus_check").checked = false;
 			document.getElementById("sus_check").disabled = true;
 */
+}
+
+//This function embeds a few of the lines that previously were in "disable_NMR_controls". It resets the values of checkboxes etc. that have to do only with the way the model is plotted in general.
+
+function reset_visualization_options() {
+	
+			if (typeof(load_as_molecule) == "boolean") {
+				document.getElementById("ismol_check").checked = load_as_molecule;
+			}
+			else
+			{
+				document.getElementById("ismol_check").checked = false;				
+			}
+	
+			if (typeof(use_selection_halos) == "boolean") {
+				document.getElementById("halos_check").checked = use_selection_halos;
+			}
+			else
+			{
+				document.getElementById("halos_check").checked = false;
+			}
+
+			if (typeof(use_visible_bonds) == "boolean") {
+				document.getElementById("bonds_check").checked = use_visible_bonds;
+			}
+			else
+			{
+				document.getElementById("bonds_check").checked = true;
+			}
+			
+			if (typeof(use_sticks_and_balls) == "boolean") {
+				document.getElementById("sticks_check").checked = use_sticks_and_balls;
+			}
+			else
+			{
+				document.getElementById("sticks_check").checked = true;				
+			}
+			
+			if (typeof(use_axes_unitcell) == "boolean") {
+				document.getElementById("axes_check").checked = use_axes_unitcell;
+			}
+			else
+			{
+				document.getElementById("axes_check").checked = true;
+			}
+			
+			if (typeof(use_atom_labels) == "boolean") {
+				document.getElementById("labels_check").checked = use_atom_labels;
+			}
+			else
+			{
+				document.getElementById("labels_check").checked = false;
+			}
 }
 
 //This callback gets called when Jmol executes a line of script [with Jmol.script(...)]. The callback's purpose is to recognize when the script has been executed and provide the necessary actions.
@@ -462,7 +515,7 @@ function switch_handler(was_clicked) {
 	if (was_clicked) {
 		switch (current_state) {
 			case "?_USE=SIGNED":
-				window.location.search = "";
+				window.location.search = "JS";
 				current_framework = "JS";
 				break;
 			default:
