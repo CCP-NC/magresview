@@ -289,9 +289,9 @@ function (script, appletName, port) {
 if (port != 0 || this.notifyEnabled (J.constant.EnumCallback.SYNC)) this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.SYNC, [null, script, appletName, Integer.$valueOf (port)]);
 }, "~S,~S,~N");
 $_M(c$, "modifySend", 
-function (atomIndex, modelIndex, mode) {
-if (this.notifyEnabled (J.constant.EnumCallback.STRUCTUREMODIFIED)) this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.STRUCTUREMODIFIED, [null, Integer.$valueOf (mode), Integer.$valueOf (atomIndex), Integer.$valueOf (modelIndex)]);
-}, "~N,~N,~N");
+function (atomIndex, modelIndex, mode, msg) {
+if (this.notifyEnabled (J.constant.EnumCallback.STRUCTUREMODIFIED)) this.jmolCallbackListener.notifyCallback (J.constant.EnumCallback.STRUCTUREMODIFIED, [null, Integer.$valueOf (mode), Integer.$valueOf (atomIndex), Integer.$valueOf (modelIndex), msg]);
+}, "~N,~N,~N,~S");
 $_M(c$, "getSyncMode", 
 function () {
 return (!this.isSynced ? 0 : this.drivingSync ? 1 : 2);

@@ -544,7 +544,7 @@ var radius = iterBond.getRadius ();
 if (radius > 0) b.setMad (Clazz.floatToShort (radius * 2000));
 var colix = iterBond.getColix ();
 if (colix >= 0) b.setColix (colix);
-b.order |= (iOrder & 65536);
+b.order |= (iOrder & 98304);
 }}
 if (haveMultipleBonds && this.modelSet.someModelsHaveSymmetry && !this.viewer.getBoolean (603979794)) J.util.Logger.info ("ModelSet: use \"set appletSymmetryToBonds TRUE \" to apply the file-based multiple bonds to symmetry-generated atoms.");
 this.modelSet.defaultCovalentMad = mad;

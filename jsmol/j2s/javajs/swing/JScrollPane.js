@@ -9,7 +9,7 @@ this.add (component);
 $_M(c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
-sb.append ("\n<div id='" + this.id + "' class='JScrollPane' style='" + this.getCSSstyle (98) + "overflow:auto'>\n");
+sb.append ("\n<div id='" + this.id + "' class='JScrollPane' style='" + this.getCSSstyle (98, 98) + "overflow:auto'>\n");
 if (this.list != null) {
 var c = this.list.get (0);
 sb.append (c.toHTML ());

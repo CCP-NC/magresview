@@ -19,7 +19,7 @@ Clazz.superConstructor (this, JSV.popup.JSVGenericPopup, []);
 $_M(c$, "initialize", 
 function (viewer, bundle, title) {
 this.viewer = viewer;
-this.initSwing (title, bundle, viewer.isJS, viewer.isApplet, viewer.isSigned);
+this.initSwing (title, bundle, viewer.getApplet (), viewer.isJS, viewer.isSigned);
 }, "JSV.common.JSViewer,J.popup.PopupResource,~S");
 $_V(c$, "jpiDispose", 
 function () {
@@ -194,16 +194,14 @@ this.enableMenus ();
 }, $fz.isPrivate = true, $fz), "JSV.api.JSVPanel");
 $_M(c$, "setItemEnabled", 
 ($fz = function (key, TF) {
-var item = this.htMenus.get (key);
-if (item == null) return;
-this.menuEnable (item, TF);
+this.menuEnable (this.htMenus.get (key), TF);
 }, $fz.isPrivate = true, $fz), "~S,~B");
 $_V(c$, "setSelected", 
 function (key, TF) {
 var item = this.htMenus.get (key);
-if (item == null) return;
+if (item == null || item.isSelected () == TF) return;
 this.menuEnable (item, false);
-item.setEnabled (TF);
+item.setSelected (TF);
 this.menuEnable (item, true);
 }, "~S,~B");
 $_V(c$, "menuSetCheckBoxOption", 

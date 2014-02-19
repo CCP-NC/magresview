@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.script");
-Clazz.load (["J.script.ScriptCompilationTokenParser", "JU.List"], "J.script.ScriptCompiler", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M34", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.BondSet", "$.Group", "J.script.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptEvaluator", "$.ScriptFlowContext", "$.ScriptFunction", "$.T", "J.util.Escape", "$.Logger", "J.viewer.Viewer"], function () {
+Clazz.load (["J.script.ScriptCompilationTokenParser", "JU.List"], "J.script.ScriptCompiler", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M34", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.BondSet", "$.Group", "J.script.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptEvaluator", "$.ScriptFlowContext", "$.ScriptFunction", "$.ScriptManager", "$.T", "J.util.Escape", "$.Logger", "J.viewer.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.filename = null;
 this.isSilent = false;
@@ -140,7 +140,7 @@ this.ichToken = this.script.indexOf ("# Jmol state version ");
 this.isStateScript = (this.ichToken >= 0);
 if (this.isStateScript) {
 this.ptSemi = this.script.indexOf (";", this.ichToken);
-if (this.ptSemi >= this.ichToken) this.viewer.setStateScriptVersion (this.script.substring (this.ichToken + "# Jmol state version ".length, this.ptSemi).trim ());
+if (this.ptSemi >= this.ichToken) J.script.ScriptManager.setStateScriptVersion (this.viewer, this.script.substring (this.ichToken + "# Jmol state version ".length, this.ptSemi).trim ());
 }this.cchScript = this.script.length;
 this.contextVariables = null;
 this.lineNumbers = null;

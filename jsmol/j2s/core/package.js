@@ -28,8 +28,14 @@ for (var i = 0; i < Jmol._coreFiles.length; i++)
 	"J.shape.Object2dShape",
 	"$.TextShape",
 	"$.Labels",
+	"$.Measures",
 	"$.Echo",
-	"$.Hover"
+	"$.Hover",
+	"J.render.TextRenderer",
+	"$.LabelsRenderer",
+	"$.MeasuresRenderer",
+	"$.EchoRenderer",
+	"$.HoverRenderer"	
 	]);
 
 	ClazzLoader.jarClasspath (base + "corescript.z.js",	[  
@@ -250,8 +256,6 @@ for (var i = 0; i < Jmol._coreFiles.length; i++)
 		"$.JSSwingPopupHelper",
 		"$.PopupResource"
 	]);
-
-
 
 }) ();
 window["java.registered"] = true;

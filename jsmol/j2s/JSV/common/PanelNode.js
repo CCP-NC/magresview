@@ -21,7 +21,7 @@ this.fileName = fileName;
 this.isSimulation = (source.getFilePath ().indexOf ("http://SIMULATION/") >= 0);
 this.jsvp = jsvp;
 if (jsvp != null) {
-jsvp.getPanelData ().getSpectrumAt (0).setId (id);
+this.pd ().getSpectrumAt (0).setId (id);
 this.frameTitle = jsvp.getTitle ();
 }}, "~S,~S,JSV.source.JDXSource,JSV.api.JSVPanel");
 $_M(c$, "setTreeNode", 
@@ -40,9 +40,13 @@ this.source = null;
 this.jsvp = null;
 this.legend = null;
 });
+$_M(c$, "pd", 
+function () {
+return this.jsvp.getPanelData ();
+});
 $_M(c$, "getSpectrum", 
 function () {
-return this.jsvp.getPanelData ().getSpectrum ();
+return this.pd ().getSpectrum ();
 });
 $_M(c$, "setLegend", 
 function (legend) {
@@ -111,7 +115,7 @@ return (node == null ? null : node.jsvp);
 }, "JU.List");
 $_M(c$, "getInfo", 
 function (key) {
-var info = this.jsvp.getPanelData ().getInfo (false, key);
+var info = this.pd ().getInfo (false, key);
 JSV.common.Parameters.putInfo (key, info, "panelId", this.id);
 JSV.common.Parameters.putInfo (key, info, "panelFileName", this.fileName);
 JSV.common.Parameters.putInfo (key, info, "panelSource", this.source.getFilePath ());

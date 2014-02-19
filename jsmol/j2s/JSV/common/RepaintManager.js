@@ -13,7 +13,7 @@ function () {
 if (this.repaintPending) {
 return false;
 }this.repaintPending = true;
-this.viewer.selectedPanel.getPanelData ().taintedAll = true;
+this.viewer.pd ().taintedAll = true;
 {
 if (typeof Jmol != "undefined" && Jmol._repaint && this.viewer.applet)
 Jmol._repaint(this.viewer.applet, false);

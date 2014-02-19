@@ -31,6 +31,9 @@ this.thisCommand = this.eval.thisCommand;
 this.slen = this.eval.slen;
 this.st = st;
 switch (iTok) {
+case 4098:
+this.assign ();
+break;
 case 4102:
 this.calculate ();
 break;
@@ -1914,7 +1917,7 @@ propertyName = (!surfaceObjectSeen && !planeSeen && !isMapped ? "readFile" : "ma
 str = this.stringParameter (++i);
 if (str == null) this.invArg ();
 if (isPmesh) str = JU.PT.replaceWithCharacter (str, "{,}|", ' ');
-if (eval.logMessages) J.util.Logger.debug ("pmesh inline data:\n" + str);
+if (eval.debugHigh) J.util.Logger.debug ("pmesh inline data:\n" + str);
 propertyValue = (this.chk ? null : str);
 this.addShapeProperty (propertyList, "fileName", "");
 sbCommand.append (" INLINE ").append (JU.PT.esc (str));
@@ -3567,7 +3570,12 @@ tok = this.tokAt (pt);
 default:
 type = J.script.SV.sValue (this.tokenAt (pt, args)).toUpperCase ();
 }
-switch (tok) {
+if (isCommand && this.tokAt (this.slen - 2) == 1073741848) {
+type = this.parameterAsString (this.slen - 1).toUpperCase ();
+pt0 = argCount;
+argCount -= 2;
+tok = 0;
+}switch (tok) {
 case 0:
 break;
 case 135270418:
@@ -3675,6 +3683,7 @@ height = J.script.SV.iValue (this.tokenAt (pt++, args));
 }break;
 }
 if (msg == null) {
+if (pt0 < argCount) {
 val = J.script.SV.sValue (this.tokenAt (pt, args));
 if (val.equalsIgnoreCase ("clipboard")) {
 if (this.chk) return "";
@@ -3689,7 +3698,7 @@ if (pt + 1 == argCount) pt++;
 }if (type.equals ("(image)") && JU.PT.isOneOf (val.toLowerCase (), ";jpg;jpeg;jpg64;jpeg64;gif;pdf;ppm;png;pngj;pngt;scene;")) {
 type = val.toUpperCase ();
 pt++;
-}if (pt + 2 == argCount) {
+}}if (pt + 2 == argCount) {
 var s = J.script.SV.sValue (this.tokenAt (++pt, args));
 if (s.length > 0 && s.charAt (0) != '.') type = val.toUpperCase ();
 }switch (J.scriptext.ScriptExt.tokAtArray (pt, args)) {
@@ -4328,7 +4337,7 @@ if (context.contextVariables != null) {
 sb.append (this.getScriptID (context));
 sb.append (J.viewer.StateManager.getVariableList (context.contextVariables, 80, true, false));
 }} else {
-sb.append (J.script.ScriptEvaluator.getErrorLineMessage (context.functionName, context.scriptFileName, this.eval.getLinenumber (context), context.pc, J.script.ScriptEvaluator.statementAsString (this.viewer, context.statement, -9999, this.eval.logMessages)));
+sb.append (J.script.ScriptEvaluator.getErrorLineMessage (context.functionName, context.scriptFileName, this.eval.getLinenumber (context), context.pc, J.script.ScriptEvaluator.statementAsString (this.viewer, context.statement, -9999, this.eval.debugHigh)));
 }context = context.parentContext;
 }
 if (withVariables) {
@@ -4357,6 +4366,99 @@ c$.tokAtArray = $_M(c$, "tokAtArray",
 ($fz = function (i, args) {
 return (i < args.length && args[i] != null ? args[i].tok : 0);
 }, $fz.isPrivate = true, $fz), "~N,~A");
+$_M(c$, "assign", 
+($fz = function () {
+var atomsOrBonds = this.tokAt (1);
+var index = this.atomExpressionAt (2).nextSetBit (0);
+var index2 = -1;
+var type = null;
+if (index < 0) return;
+if (atomsOrBonds == 4106) {
+index2 = this.atomExpressionAt (++this.eval.iToken).nextSetBit (0);
+} else {
+type = this.parameterAsString (++this.eval.iToken);
+}var pt = (++this.eval.iToken < this.slen ? this.centerParameter (this.eval.iToken) : null);
+if (this.chk) return;
+switch (atomsOrBonds) {
+case 1141899265:
+this.eval.clearDefinedVariableAtomSets ();
+this.assignAtom (index, pt, type);
+break;
+case 1678770178:
+this.assignBond (index, (type + "p").charAt (0));
+break;
+case 4106:
+this.assignConnect (index, index2);
+}
+}, $fz.isPrivate = true, $fz));
+$_M(c$, "assignAtom", 
+($fz = function (atomIndex, pt, type) {
+if (type.equals ("X")) this.viewer.setRotateBondIndex (-1);
+var modelSet = this.viewer.modelSet;
+if (modelSet.atoms[atomIndex].modelIndex != modelSet.modelCount - 1) return;
+this.viewer.clearModelDependentObjects ();
+var atomCount = modelSet.getAtomCount ();
+if (pt == null) {
+this.viewer.statusManager.modifySend (atomIndex, modelSet.atoms[atomIndex].modelIndex, 1, this.eval.fullCommand);
+modelSet.assignAtom (atomIndex, type, true);
+if (!JU.PT.isOneOf (type, ";Mi;Pl;X;")) modelSet.setAtomNamesAndNumbers (atomIndex, -atomCount, null);
+this.viewer.statusManager.modifySend (atomIndex, modelSet.atoms[atomIndex].modelIndex, -1, "OK");
+this.viewer.refresh (3, "assignAtom");
+return;
+}var atom = modelSet.atoms[atomIndex];
+var bs = J.util.BSUtil.newAndSetBit (atomIndex);
+var pts = [pt];
+var vConnections =  new JU.List ();
+vConnections.addLast (atom);
+var modelIndex = atom.modelIndex;
+this.viewer.statusManager.modifySend (atomIndex, modelIndex, 3, this.eval.fullCommand);
+try {
+bs = this.viewer.addHydrogensInline (bs, vConnections, pts);
+atomIndex = bs.nextSetBit (0);
+modelSet.assignAtom (atomIndex, type, false);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+} else {
+throw e;
+}
+}
+modelSet.setAtomNamesAndNumbers (atomIndex, -atomCount, null);
+this.viewer.statusManager.modifySend (atomIndex, modelIndex, -3, "OK");
+}, $fz.isPrivate = true, $fz), "~N,JU.P3,~S");
+$_M(c$, "assignBond", 
+($fz = function (bondIndex, type) {
+var modelIndex = -1;
+try {
+var modelSet = this.viewer.modelSet;
+modelIndex = this.viewer.getAtomModelIndex (modelSet.bonds[bondIndex].getAtomIndex1 ());
+this.viewer.statusManager.modifySend (bondIndex, modelIndex, 2, this.eval.fullCommand);
+var bsAtoms = modelSet.setBondOrder (bondIndex, type);
+if (bsAtoms == null || type == '0') this.viewer.refresh (3, "setBondOrder");
+ else this.viewer.addHydrogens (bsAtoms, false, true);
+this.viewer.statusManager.modifySend (bondIndex, modelIndex, -2, "" + type);
+} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+J.util.Logger.error ("assignBond failed");
+this.viewer.statusManager.modifySend (bondIndex, modelIndex, -2, "ERROR " + e);
+} else {
+throw e;
+}
+}
+}, $fz.isPrivate = true, $fz), "~N,~S");
+$_M(c$, "assignConnect", 
+($fz = function (index, index2) {
+this.viewer.clearModelDependentObjects ();
+var modelSet = this.viewer.modelSet;
+var connections = JU.AU.newFloat2 (1);
+connections[0] = [index, index2];
+var modelIndex = modelSet.atoms[index].modelIndex;
+this.viewer.statusManager.modifySend (index, modelIndex, 2, this.eval.fullCommand);
+modelSet.connect (connections);
+modelSet.assignAtom (index, ".", true);
+modelSet.assignAtom (index2, ".", true);
+this.viewer.statusManager.modifySend (index, modelIndex, -2, "OK");
+this.viewer.refresh (3, "assignConnect");
+}, $fz.isPrivate = true, $fz), "~N,~N");
 $_M(c$, "calculate", 
 ($fz = function () {
 var isSurface = false;

@@ -396,6 +396,8 @@ if (isNewSet || gs.nSplit > 1 && isNewSplitPoint) this.setSpectrum (this.current
 if (!isNewSet) {
 isNewSet = gs.checkSpectrumClickedEvent (this.mouseX, this.mouseY, clickCount);
 if (!isNewSet) return;
+this.currentSplitPoint = splitPoint = gs.getCurrentSpectrumIndex ();
+this.setSpectrum (splitPoint, true);
 }this.jumpToSpectrumIndex (splitPoint, isNewSet || gs.nSplit > 1 && isNewSplitPoint);
 }, $fz.isPrivate = true, $fz), "JSV.common.GraphSet,~N,~N");
 $_M(c$, "jumpToSpectrum", 
@@ -562,7 +564,7 @@ this.jsvp.setToolTipText (s);
 }, "~S");
 $_M(c$, "setHighlightColor", 
 function (color) {
-this.jsvp.getPanelData ().setColor (JSV.common.ScriptToken.HIGHLIGHTCOLOR, color);
+this.setColor (JSV.common.ScriptToken.HIGHLIGHTCOLOR, color);
 }, "javajs.api.GenericColor");
 $_M(c$, "getInput", 
 function (message, title, sval) {
@@ -580,6 +582,7 @@ return this.currentFont = javajs.awt.Font.createFont3D (face, style, size, size,
 }, $fz.isPrivate = true, $fz), "~O,~N,~N,~N,~B");
 $_M(c$, "notifySubSpectrumChange", 
 function (isub, spec) {
+System.out.println ("notify " + isub + " " + spec);
 this.notifyListeners ( new JSV.common.SubSpecChangeEvent (isub, (spec == null ? null : spec.getTitleLabel ())));
 }, "~N,JSV.common.JDXSpectrum");
 $_M(c$, "notifyPeakPickedListeners", 

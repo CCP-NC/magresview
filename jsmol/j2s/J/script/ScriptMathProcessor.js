@@ -3,7 +3,7 @@ Clazz.load (null, "J.script.ScriptMathProcessor", ["java.lang.Float", "java.util
 c$ = Clazz.decorateAsClass (function () {
 this.chk = false;
 this.wasSyntaxCheck = false;
-this.logMessages = false;
+this.debugHigh = false;
 this.eval = null;
 this.viewer = null;
 this.oStack = null;
@@ -36,13 +36,13 @@ Clazz.makeConstructor (c$,
 function (eval, isArrayItem, asVector, asBitSet) {
 this.eval = eval;
 this.viewer = eval.viewer;
-this.logMessages = eval.logMessages;
+this.debugHigh = eval.debugHigh;
 this.chk = this.wasSyntaxCheck = eval.chk;
 this.isArrayItem = isArrayItem;
 this.asVector = asVector || isArrayItem;
 this.asBitSet = asBitSet;
 this.wasX = isArrayItem;
-if (this.logMessages) J.util.Logger.debug ("initialize RPN");
+if (this.debugHigh) J.util.Logger.debug ("initialize RPN");
 }, "J.script.ScriptEvaluator,~B,~B,~B");
 $_M(c$, "getResult", 
 function (allowUnderflow) {
@@ -81,7 +81,7 @@ throw e;
 }
 }
 }if (++this.xPt == this.xStack.length) this.xStack = JU.AU.doubleLength (this.xStack);
-if (this.logMessages) {
+if (this.debugHigh) {
 J.util.Logger.debug ("\nputX: " + x);
 }this.xStack[this.xPt] = x;
 this.ptx = ++this.ptid;
@@ -237,7 +237,7 @@ return this.addOpAllowMath (op, true);
 }, "J.script.T");
 $_M(c$, "addOpAllowMath", 
 function (op, allowMathFunc) {
-if (this.logMessages) {
+if (this.debugHigh) {
 J.util.Logger.debug ("addOp entry\naddOp: " + op);
 }var tok0 = (this.oPt >= 0 ? this.oStack[this.oPt].tok : 0);
 this.skipping = (this.ifPt >= 0 && (this.ifStack[this.ifPt] == 'F' || this.ifStack[this.ifPt] == 'X'));
@@ -334,8 +334,8 @@ if (this.addOp (J.script.T.tokenComma)) return this.addOp (op);
 }return false;
 }break;
 }
-while (this.oPt >= 0 && tok0 != 269484066 && (!isLeftOp || tok0 == 269484241 && (op.tok == 269484241 || op.tok == 269484096)) && J.script.T.getPrecedence (tok0) >= J.script.T.getPrecedence (op.tok)) {
-if (this.logMessages) {
+while (this.oPt >= 0 && tok0 != 269484066 && (!isLeftOp || tok0 == 269484241 && (op.tok == 269484241 || op.tok == 269484096)) && J.script.T.getPrecedence (tok0) >= J.script.T.getPrecedence (op.tok) && (tok0 != 269484224 || op.tok != 269484224)) {
+if (this.debugHigh) {
 J.util.Logger.debug ("\noperating, oPt=" + this.oPt + " isLeftOp=" + isLeftOp + " oStack[oPt]=" + J.script.T.nameOf (tok0) + "        prec=" + J.script.T.getPrecedence (tok0) + " pending op=\"" + J.script.T.nameOf (op.tok) + "\" prec=" + J.script.T.getPrecedence (op.tok));
 this.dumpStacks ("operating");
 }if (op.tok == 269484049 && tok0 == 269484048) {
@@ -347,13 +347,15 @@ break;
 if (this.isArrayItem && this.squareCount == 1 && this.equalCount == 0) {
 this.addXVar (J.script.SV.newT (J.script.T.tokenArraySelector));
 break;
-}if (!this.doBitsetSelect ()) return false;
+}if (!this.doSelection ()) return false;
 break;
 }if (!this.operate ()) return false;
 tok0 = (this.oPt >= 0 ? this.oStack[this.oPt].tok : 0);
 }
-if (newOp != null) this.addXVar (J.script.SV.newV (269484436, newOp));
-switch (op.tok) {
+if (newOp != null) {
+this.wasX = false;
+this.addXVar (J.script.SV.newV (269484436, newOp));
+}switch (op.tok) {
 case 269484048:
 this.parenCount++;
 this.wasX = false;
@@ -431,7 +433,7 @@ if (op.tok == 269484241 && (op.intValue & -481) == 135368713 && op.intValue != 1
 return this.evaluateFunction (0);
 }return true;
 }, "J.script.T,~B");
-$_M(c$, "doBitsetSelect", 
+$_M(c$, "doSelection", 
 ($fz = function () {
 if (this.xPt < 0 || this.xPt == 0 && !this.isArrayItem) {
 return false;
@@ -497,7 +499,7 @@ var op = this.oStack[this.oPt--];
 var pt;
 var m;
 var s;
-if (this.logMessages) {
+if (this.debugHigh) {
 this.dumpStacks ("operate: " + op);
 }if (this.isArrayItem && this.squareCount == 0 && this.equalCount == 1 && this.oPt < 0 && (op.tok == 269484436)) {
 return true;

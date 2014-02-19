@@ -92,7 +92,8 @@ Clazz.defineStatics (c$,
 "ORDER_PARTIAL23", 97,
 "ORDER_PARTIAL32", 100,
 "ORDER_UNSPECIFIED", 17,
-"ORDER_AS_SINGLE", 65536);
+"ORDER_PYMOL_SINGLE", 65536,
+"ORDER_PYMOL_MULT", 98304);
 c$.SHELL_S = c$.prototype.SHELL_S = J.constant.EnumQuantumShell.S.id;
 c$.SHELL_P = c$.prototype.SHELL_P = J.constant.EnumQuantumShell.P.id;
 c$.SHELL_SP = c$.prototype.SHELL_SP = J.constant.EnumQuantumShell.SP.id;

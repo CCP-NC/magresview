@@ -39,10 +39,10 @@ case 506:
 this.dragged (time, x, y, modifiers);
 break;
 case 504:
-this.entered (time, x, y);
+this.entry (time, x, y, false);
 break;
 case 505:
-this.exited (time, x, y);
+this.entry (time, x, y, true);
 break;
 case 503:
 this.moved (time, x, y, modifiers);
@@ -102,11 +102,11 @@ this.clicked (e.getWhen (), e.getX (), e.getY (), e.getModifiers (), e.getClickC
 }, "java.awt.event.MouseEvent");
 $_M(c$, "mouseEntered", 
 function (e) {
-this.entered (e.getWhen (), e.getX (), e.getY ());
+this.entry (e.getWhen (), e.getX (), e.getY (), false);
 }, "java.awt.event.MouseEvent");
 $_M(c$, "mouseExited", 
 function (e) {
-this.exited (e.getWhen (), e.getX (), e.getY ());
+this.entry (e.getWhen (), e.getX (), e.getY (), true);
 }, "java.awt.event.MouseEvent");
 $_M(c$, "mousePressed", 
 function (e) {
@@ -222,16 +222,11 @@ if (this.viewer.getBooleanProperty ("showKeyStrokes")) this.viewer.evalStringQui
 this.clearKeyBuffer ();
 this.viewer.evalStringQuietSync (kb, false, true);
 }, $fz.isPrivate = true, $fz));
-$_M(c$, "entered", 
-($fz = function (time, x, y) {
+$_M(c$, "entry", 
+($fz = function (time, x, y, isExit) {
 this.wheeling = false;
-this.manager.mouseEnterExit (time, x, y, false);
-}, $fz.isPrivate = true, $fz), "~N,~N,~N");
-$_M(c$, "exited", 
-($fz = function (time, x, y) {
-this.wheeling = false;
-this.manager.mouseEnterExit (time, x, y, true);
-}, $fz.isPrivate = true, $fz), "~N,~N,~N");
+this.manager.mouseEnterExit (time, x, y, isExit);
+}, $fz.isPrivate = true, $fz), "~N,~N,~N,~B");
 $_M(c$, "clicked", 
 ($fz = function (time, x, y, modifiers, clickCount) {
 this.clearKeyBuffer ();

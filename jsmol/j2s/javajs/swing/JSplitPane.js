@@ -52,7 +52,7 @@ var isH = (this.split == 1);
 if (this.width == 0) this.width = this.getSubcomponentWidth ();
 if (this.height == 0) this.height = this.getSubcomponentHeight ();
 var sb =  new JU.SB ();
-sb.append ("<div id='" + this.id + "' class='JSplitPane' style='" + this.getCSSstyle (100) + "'>");
+sb.append ("<div id='" + this.id + "' class='JSplitPane' style='" + this.getCSSstyle (100, 100) + "'>");
 if (isH) sb.append ("<div id='" + this.id + "_left' style='width:50%;height:100%;position:absolute;top:0%;left:0%'>");
  else sb.append ("<div id='" + this.id + "_top' style='width:100%;height:50%;position:absolute;top:0%;left:0%'>");
 sb.append (this.left.getComponents ()[0].toHTML ());

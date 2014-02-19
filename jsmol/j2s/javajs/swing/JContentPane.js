@@ -8,7 +8,7 @@ Clazz.superConstructor (this, javajs.swing.JContentPane, ["JCP"]);
 $_M(c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
-sb.append ("\n<div id='" + this.id + "' class='JContentPane' style='" + this.getCSSstyle (100) + "'>\n");
+sb.append ("\n<div id='" + this.id + "' class='JContentPane' style='" + this.getCSSstyle (100, 100) + "'>\n");
 if (this.list != null) for (var i = 0; i < this.list.size (); i++) sb.append (this.list.get (i).toHTML ());
 
 sb.append ("\n</div>\n");

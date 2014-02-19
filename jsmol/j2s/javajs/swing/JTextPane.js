@@ -18,7 +18,7 @@ this.text = this.text.substring (0, i) + s + this.text.substring (i);
 $_V(c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
-sb.append ("<textarea type=text id='" + this.id + "' class='JTextPane' style='" + this.getCSSstyle (98) + "'>" + this.text + "</textarea>");
+sb.append ("<textarea type=text id='" + this.id + "' class='JTextPane' style='" + this.getCSSstyle (98, 98) + "'>" + this.text + "</textarea>");
 return sb.toString ();
 });
 });

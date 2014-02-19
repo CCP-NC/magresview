@@ -188,7 +188,14 @@ function load_string(id, file_as_string)
 
 		load_script += "{" + mincell + " " + maxcell + " -1}; display " + default_displaygroup + ";";
 		
-		document.getElementById("axes_check").checked = true;
+		
+		if (typeof(use_axes_unitcell) == "boolean") {
+			document.getElementById("axes_check").checked = use_axes_unitcell;
+		}
+		else
+		{
+			document.getElementById("axes_check").checked = true;
+		}
 	}
 	else
 	{

@@ -403,7 +403,7 @@ return " " + sy;
 }, $fz.isPrivate = true, $fz), "~N");
 $_M(c$, "checkVisible", 
 ($fz = function () {
-return this.viewer.selectedPanel.getPanelData ().getShowAnnotation (this.type);
+return this.viewer.pd ().getShowAnnotation (this.type);
 }, $fz.isPrivate = true, $fz));
 $_M(c$, "getUnitOptions", 
 ($fz = function () {

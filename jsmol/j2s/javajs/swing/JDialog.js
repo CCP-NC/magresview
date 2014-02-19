@@ -70,7 +70,7 @@ this.renderHeight = this.contentPane.getSubcomponentHeight ();
 if (this.renderHeight == 0) this.renderHeight = this.defaultHeight;
 var h = this.renderHeight - 25;
 var sb =  new JU.SB ();
-sb.append ("\n<div id='" + this.id + "' class='JDialog' style='" + this.getCSSstyle (0) + "z-index:" + this.zIndex + ";position:relative;top:0px;left:0px;reize:both;'>\n");
+sb.append ("\n<div id='" + this.id + "' class='JDialog' style='" + this.getCSSstyle (0, 0) + "z-index:" + this.zIndex + ";position:relative;top:0px;left:0px;reize:both;'>\n");
 sb.append ("\n<div id='" + this.id + "_title' class='JDialogTitle' style='width:100%;height:25px;padding:5px 5px 5px 5px;height:" + 25 + "px'>" + "<span style='text-align:center;'>" + this.title + "</span><span style='position:absolute;text-align:right;right:1px;'>" + "<input type=button id='" + this.id + "_closer' onclick='SwingController.windowClosing(this)' value='x' /></span></div>\n");
 sb.append ("\n<div id='" + this.id + "_body' class='JDialogBody' style='width:100%;height:" + h + "px;" + "position: relative;left:0px;top:0px'>\n");
 sb.append (this.contentPane.toHTML ());

@@ -119,10 +119,16 @@ rowData[i++] = ["##DATA TYPE", this.dataType];
 if (addDataClass) rowData[i++] = ["##DATA CLASS", this.dataClass];
 rowData[i++] = ["##ORIGIN", this.origin];
 rowData[i++] = ["##OWNER", this.owner];
-for (var j = 0; j < this.headerTable.size (); j++) rowData[i++] = this.headerTable.get (j);
+for (var j = 0; j < this.headerTable.size (); j++) rowData[i++] = this.getRow (j);
 
 return rowData;
 }, "~B,~N");
+$_M(c$, "getRow", 
+($fz = function (j) {
+var s = this.headerTable.get (j);
+{
+return [s[0], JU.PT.rep(s[1], "<", "&lt;")];
+}}, $fz.isPrivate = true, $fz), "~N");
 Clazz.defineStatics (c$,
 "typeNames", ["ND NMR SPECTRUM   NMR", "NMR SPECTRUM      NMR", "INFRARED SPECTRUM IR", "MASS SPECTRUM     MS", "RAMAN SPECTRUM    RAMAN", "GAS CHROMATOGRAM  GC", "UV/VIS SPECTRUM   UV/VIS"]);
 });

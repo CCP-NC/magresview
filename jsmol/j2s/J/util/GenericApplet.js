@@ -281,7 +281,6 @@ case J.constant.EnumCallback.ANIMFRAME:
 case J.constant.EnumCallback.ERROR:
 case J.constant.EnumCallback.EVAL:
 case J.constant.EnumCallback.LOADSTRUCT:
-case J.constant.EnumCallback.STRUCTUREMODIFIED:
 case J.constant.EnumCallback.SCRIPT:
 return !this.isJNLP;
 case J.constant.EnumCallback.APPLETREADY:
@@ -290,6 +289,7 @@ case J.constant.EnumCallback.CLICK:
 case J.constant.EnumCallback.HOVER:
 case J.constant.EnumCallback.MINIMIZATION:
 case J.constant.EnumCallback.RESIZE:
+case J.constant.EnumCallback.STRUCTUREMODIFIED:
 break;
 }
 return (this.b$.get (type) != null);
@@ -327,6 +327,8 @@ var currentDirection = (lastNo < 0 ? -1 : 1);
 if (doCallback) {
 data = [this.htmlName, Integer.$valueOf (Math.max (frameNo, -2 - frameNo)), Integer.$valueOf (fileNo), Integer.$valueOf (modelNo), Integer.$valueOf (Math.abs (firstNo)), Integer.$valueOf (Math.abs (lastNo)), Integer.$valueOf (isAnimationRunning ? 1 : 0), Integer.$valueOf (animationDirection), Integer.$valueOf (currentDirection)];
 }break;
+case J.constant.EnumCallback.ATOMMOVED:
+break;
 case J.constant.EnumCallback.ECHO:
 var isPrivate = (data.length == 2);
 var isScriptQueued = (isPrivate || (data[2]).intValue () == 1);
@@ -371,7 +373,6 @@ doCallback = ((callback = this.b$.get ((type = J.constant.EnumCallback.MESSAGE))
 this.doShowStatus (strInfo);
 break;
 case J.constant.EnumCallback.STRUCTUREMODIFIED:
-this.notifyStructureModified ((data[1]).intValue (), (data[2]).intValue ());
 break;
 case J.constant.EnumCallback.SYNC:
 this.sendScript (strInfo, data[2], true, doCallback);
@@ -396,9 +397,6 @@ throw e;
 }
 }
 }, "J.constant.EnumCallback,~A");
-$_M(c$, "notifyStructureModified", 
-($fz = function (modelIndex, mode) {
-}, $fz.isPrivate = true, $fz), "~N,~N");
 $_M(c$, "sendScript", 
 ($fz = function (script, appletName, isSync, doCallback) {
 if (doCallback) {

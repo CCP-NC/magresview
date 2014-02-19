@@ -172,6 +172,13 @@ if (scriptItem != null) {
 scriptItem.set (5, Integer.$valueOf (0));
 this.startScriptQueue (true);
 }}});
+$_V(c$, "evalFile", 
+function (strFilename) {
+var ptWait = strFilename.indexOf (" -noqueue");
+if (ptWait >= 0) {
+return this.evalStringWaitStatusQueued ("String", strFilename.substring (0, ptWait), "", true, false, false);
+}return this.addScript (strFilename, true, false);
+}, "~S");
 $_V(c$, "evalStringWaitStatusQueued", 
 function (returnType, strScript, statusList, isScriptFile, isQuiet, isQueued) {
 if (strScript == null) return null;
@@ -197,7 +204,7 @@ this.eval.evaluateCompiledScript (this.viewer.isSyntaxCheck, this.viewer.isSynta
 } else {
 this.viewer.scriptStatus (strErrorMessage);
 this.viewer.setScriptStatus ("Jmol script terminated", strErrorMessage, 1, strErrorMessageUntranslated);
-this.viewer.setStateScriptVersion (null);
+J.script.ScriptManager.setStateScriptVersion (this.viewer, null);
 }if (strErrorMessage != null && this.viewer.autoExit) this.viewer.exitJmol ();
 if (this.viewer.isSyntaxCheck) {
 if (strErrorMessage == null) J.util.Logger.info ("--script check ok");
@@ -356,4 +363,27 @@ $_M(c$, "getZipDirectoryAsString",
 var t = this.viewer.fileManager.getBufferedInputStreamOrErrorMessageFromName (fileName, fileName, false, false, null, false);
 return J.io.JmolBinary.getZipDirectoryAsStringAndClose (t);
 }, $fz.isPrivate = true, $fz), "~S");
+c$.setStateScriptVersion = $_M(c$, "setStateScriptVersion", 
+function (viewer, version) {
+if (version != null) {
+var tokens = JU.PT.getTokens (version.$replace ('.', ' ').$replace ('_', ' '));
+try {
+var main = JU.PT.parseInt (tokens[0]);
+var sub = JU.PT.parseInt (tokens[1]);
+var minor = JU.PT.parseInt (tokens[2]);
+if (minor == -2147483648) minor = 0;
+if (main != -2147483648 && sub != -2147483648) {
+var ver = viewer.stateScriptVersionInt = main * 10000 + sub * 100 + minor;
+viewer.global.legacyAutoBonding = (ver < 110924);
+viewer.global.legacyHAddition = (ver < 130117);
+return;
+}} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+} else {
+throw e;
+}
+}
+}viewer.setBooleanProperty ("legacyautobonding", false);
+viewer.stateScriptVersionInt = 2147483647;
+}, "J.viewer.Viewer,~S");
 });

@@ -26,7 +26,7 @@ throw e;
 }
 this.isTainted = false;
 }, "javajs.api.SC,~N,~N");
-$_M(c$, "menuClickCallback", 
+$_V(c$, "menuClickCallback", 
 function (source, script) {
 if (script.equals ("clearQ")) {
 for (var item, $item = this.htCheckbox.values ().iterator (); $item.hasNext () && ((item = $item.next ()) || true);) {
@@ -34,11 +34,10 @@ if (item.getActionCommand ().indexOf (":??") < 0) continue;
 this.menuSetLabel (item, "??");
 item.setActionCommand ("_??P!:");
 item.setSelected (false);
-this.helper.taint ();
 }
 this.viewer.evalStringQuiet ("set picking assignAtom_C");
 return;
-}Clazz.superCall (this, J.awtjs2d.JSModelKitPopup, "menuClickCallback", [source, script]);
+}this.processClickCallback (source, script);
 }, "javajs.api.SC,~S");
 $_V(c$, "menuSetCheckBoxOption", 
 function (item, name, what) {

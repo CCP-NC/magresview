@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.viewer");
-Clazz.load (["java.lang.Enum", "javajs.api.PlatformViewer", "J.api.JmolViewer", "J.atomdata.AtomDataServer", "java.util.Hashtable", "javajs.awt.Dimension", "JU.List", "J.atomdata.RadiusData", "J.constant.EnumVdw", "J.i18n.GT", "J.util.CommandHistory"], "J.viewer.Viewer", ["java.io.Reader", "java.lang.Boolean", "$.Character", "$.Float", "JU.AU", "$.BS", "$.CU", "$.DF", "$.P3", "$.P3i", "$.PT", "$.SB", "$.V3", "J.adapter.smarter.SmarterJmolAdapter", "J.api.Interface", "$.JmolAppConsoleInterface", "J.constant.EnumAnimationMode", "$.EnumAxesMode", "$.EnumFileStatus", "$.EnumStereoMode", "J.io.CifDataReader", "$.JmolBinary", "J.modelset.Group", "J.script.SV", "$.T", "J.thread.TimeoutThread", "J.util.BSUtil", "$.C", "$.Elements", "$.Escape", "$.GData", "$.JmolMolecule", "$.Logger", "$.Measure", "$.Parser", "$.TempArray", "$.Txt", "J.viewer.ActionManager", "$.AnimationManager", "$.ColorManager", "$.FileManager", "$.JC", "$.ModelManager", "$.SelectionManager", "$.ShapeManager", "$.StateManager", "$.StatusManager", "$.TransformManager", "J.viewer.binding.Binding"], function () {
+Clazz.load (["java.lang.Enum", "javajs.api.PlatformViewer", "J.api.JmolViewer", "J.atomdata.AtomDataServer", "java.util.Hashtable", "javajs.awt.Dimension", "JU.List", "J.atomdata.RadiusData", "J.constant.EnumVdw", "J.i18n.GT", "J.util.CommandHistory"], "J.viewer.Viewer", ["java.io.Reader", "java.lang.Boolean", "$.Character", "$.Float", "JU.BS", "$.CU", "$.DF", "$.P3", "$.P3i", "$.PT", "$.SB", "$.V3", "J.adapter.smarter.SmarterJmolAdapter", "J.api.Interface", "$.JmolAppConsoleInterface", "J.constant.EnumAnimationMode", "$.EnumAxesMode", "$.EnumFileStatus", "$.EnumStereoMode", "J.io.CifDataReader", "$.JmolBinary", "J.modelset.Group", "J.script.SV", "$.T", "J.thread.TimeoutThread", "J.util.BSUtil", "$.C", "$.Elements", "$.Escape", "$.GData", "$.JmolMolecule", "$.Logger", "$.Measure", "$.Parser", "$.TempArray", "$.Txt", "J.viewer.ActionManager", "$.AnimationManager", "$.ColorManager", "$.FileManager", "$.JC", "$.ModelManager", "$.SelectionManager", "$.ShapeManager", "$.StateManager", "$.StatusManager", "$.TransformManager", "J.viewer.binding.Binding"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.autoExit = false;
 this.haveDisplay = false;
@@ -1915,12 +1915,12 @@ function () {
 return (this.smilesMatcher == null ? (this.smilesMatcher = J.api.Interface.getOptionInterface ("smiles.SmilesMatcher")) : this.smilesMatcher);
 });
 $_M(c$, "clearModelDependentObjects", 
-($fz = function () {
+function () {
 this.setFrameOffsets (null);
 this.stopMinimization ();
 this.minimizer = null;
 this.smilesMatcher = null;
-}, $fz.isPrivate = true, $fz));
+});
 $_M(c$, "zap", 
 function (notify, resetUndo, zapModelKit) {
 this.clearThreads ();
@@ -3057,11 +3057,7 @@ this.gdata.releaseScreenImage ();
 });
 $_V(c$, "evalFile", 
 function (strFilename) {
-if (!this.allowScripting) return null;
-var ptWait = strFilename.indexOf (" -noqueue");
-if (ptWait >= 0) {
-return this.evalStringWaitStatusQueued ("String", strFilename.substring (0, ptWait), "", true, false, false);
-}return this.getScriptManager ().addScript (strFilename, true, false);
+return (this.allowScripting && this.getScriptManager () != null ? this.scriptManager.evalFile (strFilename) : null);
 }, "~S");
 $_M(c$, "getInsertedCommand", 
 function () {
@@ -5366,7 +5362,7 @@ this.setObjectMad (35, "frank", (TF ? 1 : 0));
 $_M(c$, "getShowFrank", 
 function () {
 if (this.$isPreviewOnly || this.$isApplet && this.creatingImage) return false;
-return (!this.isJS && this.$isSignedApplet && !this.isSignedAppletLocal || this.frankOn);
+return (this.$isSignedApplet && !this.isSignedAppletLocal && !this.isJS || this.frankOn);
 });
 $_V(c$, "setShowMeasurements", 
 function (TF) {
@@ -6256,14 +6252,14 @@ var atomIndex = (bs == null ? -1 : bs.nextSetBit (0));
 if (atomIndex < 0) return 0;
 this.clearModelDependentObjects ();
 if (!fullModels) {
-this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, 4);
+this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, 4, "deleting atom " + this.getAtomName (atomIndex));
 this.modelSet.deleteAtoms (bs);
 var n = this.selectionManager.deleteAtoms (bs);
 this.setTainted (true);
-this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, -4);
+this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, -4, "OK");
 return n;
 }var modelIndex = this.modelSet.atoms[atomIndex].modelIndex;
-this.statusManager.modifySend (-1, modelIndex, 5);
+this.statusManager.modifySend (-1, modelIndex, 5, "deleting model " + this.getModelNumberDotted (modelIndex));
 this.setCurrentModelIndexClear (0, false);
 this.animationManager.setAnimationOn (false);
 var bsD0 = J.util.BSUtil.copy (this.getDeletedAtoms ());
@@ -6279,19 +6275,25 @@ this.hoverAtomIndex = -1;
 this.setFileLoadStatus (J.constant.EnumFileStatus.DELETED, null, null, null, null, null);
 this.refreshMeasures (true);
 if (bsD0 != null) bsDeleted.andNot (bsD0);
-this.statusManager.modifySend (-1, modelIndex, -5);
+this.statusManager.modifySend (-1, modelIndex, -5, "OK");
 return J.util.BSUtil.cardinalityOf (bsDeleted);
 }, "JU.BS,~B");
 $_M(c$, "deleteBonds", 
 function (bsDeleted) {
+var modelIndex = this.modelSet.getBondModelIndex (bsDeleted.nextSetBit (0));
+this.statusManager.modifySend (-1, modelIndex, 2, "delete bonds " + J.util.Escape.eBond (bsDeleted));
 this.modelSet.deleteBonds (bsDeleted, false);
+this.statusManager.modifySend (-1, modelIndex, -2, "OK");
 }, "JU.BS");
 $_M(c$, "deleteModelAtoms", 
 function (firstAtomIndex, nAtoms, bsDeleted) {
+var modelIndex = this.getAtomModelIndex (firstAtomIndex);
+this.statusManager.modifySend (-1, modelIndex, 1, "delete atoms " + J.util.Escape.eBS (bsDeleted));
 this.selectionManager.deleteModelAtoms (bsDeleted);
 J.util.BSUtil.deleteBits (this.getFrameOffsets (), bsDeleted);
 this.setFrameOffsets (this.getFrameOffsets ());
 this.getDataManager ().deleteModelAtoms (firstAtomIndex, nAtoms, bsDeleted);
+this.statusManager.modifySend (-1, modelIndex, -1, "OK");
 }, "~N,~N,JU.BS");
 $_M(c$, "getDeletedAtoms", 
 function () {
@@ -6700,66 +6702,6 @@ function (taintedAtom, type, clearRedo) {
 if (!this.global.preserveState) return;
 this.getStateCreator ().undoMoveActionClear (taintedAtom, type, clearRedo);
 }, "~N,~N,~B");
-$_M(c$, "assignBond", 
-function (bondIndex, type) {
-try {
-var bsAtoms = this.modelSet.setBondOrder (bondIndex, type);
-if (bsAtoms == null || type == '0') this.refresh (3, "setBondOrder");
- else this.addHydrogens (bsAtoms, false, true);
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-J.util.Logger.error ("assignBond failed");
-} else {
-throw e;
-}
-}
-}, "~N,~S");
-$_M(c$, "assignAtom", 
-function (atomIndex, pt, type) {
-if (type.equals ("X")) this.setRotateBondIndex (-1);
-if (this.modelSet.atoms[atomIndex].modelIndex != this.modelSet.modelCount - 1) return;
-this.clearModelDependentObjects ();
-var atomCount = this.modelSet.getAtomCount ();
-if (pt == null) {
-this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, 1);
-this.modelSet.assignAtom (atomIndex, type, true);
-if (!JU.PT.isOneOf (type, ";Mi;Pl;X;")) this.modelSet.setAtomNamesAndNumbers (atomIndex, -atomCount, null);
-this.statusManager.modifySend (atomIndex, this.modelSet.atoms[atomIndex].modelIndex, -1);
-this.refresh (3, "assignAtom");
-return;
-}var atom = this.modelSet.atoms[atomIndex];
-var bs = J.util.BSUtil.newAndSetBit (atomIndex);
-var pts = [pt];
-var vConnections =  new JU.List ();
-vConnections.addLast (atom);
-var modelIndex = atom.modelIndex;
-this.statusManager.modifySend (atomIndex, modelIndex, 3);
-try {
-bs = this.addHydrogensInline (bs, vConnections, pts);
-atomIndex = bs.nextSetBit (0);
-this.modelSet.assignAtom (atomIndex, type, false);
-} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-} else {
-throw e;
-}
-}
-this.modelSet.setAtomNamesAndNumbers (atomIndex, -atomCount, null);
-this.statusManager.modifySend (atomIndex, modelIndex, -3);
-}, "~N,JU.P3,~S");
-$_M(c$, "assignConnect", 
-function (index, index2) {
-this.clearModelDependentObjects ();
-var connections = JU.AU.newFloat2 (1);
-connections[0] = [index, index2];
-var modelIndex = this.modelSet.atoms[index].modelIndex;
-this.statusManager.modifySend (index, modelIndex, 2);
-this.modelSet.connect (connections);
-this.modelSet.assignAtom (index, ".", true);
-this.modelSet.assignAtom (index2, ".", true);
-this.statusManager.modifySend (index, modelIndex, -2);
-this.refresh (3, "assignConnect");
-}, "~N,~N");
 $_M(c$, "moveAtomWithHydrogens", 
 function (atomIndex, deltaX, deltaY, deltaZ, bsAtoms) {
 this.stopMinimization ();
@@ -6840,29 +6782,6 @@ $_M(c$, "getModelAtomProperty",
 function (atom, text) {
 return this.modelSet.getModelAtomProperty (atom, text);
 }, "J.modelset.Atom,~S");
-$_M(c$, "setStateScriptVersion", 
-function (version) {
-if (version != null) {
-var tokens = JU.PT.getTokens (version.$replace ('.', ' ').$replace ('_', ' '));
-try {
-var main = JU.PT.parseInt (tokens[0]);
-var sub = JU.PT.parseInt (tokens[1]);
-var minor = JU.PT.parseInt (tokens[2]);
-if (minor == -2147483648) minor = 0;
-if (main != -2147483648 && sub != -2147483648) {
-this.stateScriptVersionInt = main * 10000 + sub * 100 + minor;
-this.global.legacyAutoBonding = (this.stateScriptVersionInt < 110924);
-this.global.legacyHAddition = (this.stateScriptVersionInt < 130117);
-return;
-}} catch (e) {
-if (Clazz.exceptionOf (e, Exception)) {
-} else {
-throw e;
-}
-}
-}this.setBooleanProperty ("legacyautobonding", false);
-this.stateScriptVersionInt = 2147483647;
-}, "~S");
 $_M(c$, "initializeExporter", 
 function (params) {
 var isJS = params.get ("type").equals ("JS");
@@ -7130,10 +7049,10 @@ if (wasAppendNew) this.setAppendNew (true);
 return bsB;
 }, "JU.BS,~B,~B");
 $_M(c$, "addHydrogensInline", 
-($fz = function (bsAtoms, vConnections, pts) {
+function (bsAtoms, vConnections, pts) {
 if (this.getScriptManager () == null) return null;
 return this.eval.addHydrogensInline (bsAtoms, vConnections, pts);
-}, $fz.isPrivate = true, $fz), "JU.BS,JU.List,~A");
+}, "JU.BS,JU.List,~A");
 $_V(c$, "evalFunctionFloat", 
 function (func, params, values) {
 return (this.getScriptManager () == null ? 0 : this.eval.evalFunctionFloat (func, params, values));

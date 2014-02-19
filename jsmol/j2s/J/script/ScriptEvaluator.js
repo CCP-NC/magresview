@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.script");
-Clazz.load (["J.api.JmolScriptEvaluator"], "J.script.ScriptEvaluator", ["java.lang.Boolean", "$.Float", "$.NullPointerException", "$.Thread", "java.util.Hashtable", "$.Map", "JU.BS", "$.CU", "$.List", "$.M3", "$.M34", "$.M4", "$.P3", "$.P4", "$.PT", "$.SB", "$.V3", "J.api.Interface", "$.JmolParallelProcessor", "J.atomdata.RadiusData", "J.constant.EnumAnimationMode", "$.EnumPalette", "$.EnumStereoMode", "$.EnumStructure", "$.EnumVdw", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.Atom", "$.BondSet", "$.Group", "$.ModelCollection", "$.TickInfo", "J.script.FileLoadThread", "$.SV", "$.ScriptCompiler", "$.ScriptContext", "$.ScriptDelayThread", "$.ScriptException", "$.ScriptInterruption", "$.ScriptMathProcessor", "$.T", "J.util.BSUtil", "$.ColorEncoder", "$.Elements", "$.Escape", "$.GData", "$.JmolEdge", "$.Logger", "$.Measure", "$.Parser", "$.Quaternion", "$.SimpleUnitCell", "$.Txt", "J.viewer.ActionManager", "$.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
+Clazz.load (["J.api.JmolScriptEvaluator"], "J.script.ScriptEvaluator", ["java.lang.Boolean", "$.Float", "$.NullPointerException", "$.Thread", "java.util.Hashtable", "$.Map", "JU.BS", "$.CU", "$.List", "$.M3", "$.M34", "$.M4", "$.P3", "$.P4", "$.PT", "$.SB", "$.V3", "J.api.Interface", "$.JmolParallelProcessor", "J.atomdata.RadiusData", "J.constant.EnumAnimationMode", "$.EnumPalette", "$.EnumStereoMode", "$.EnumStructure", "$.EnumVdw", "J.i18n.GT", "J.io.JmolBinary", "J.modelset.Atom", "$.BondSet", "$.Group", "$.ModelCollection", "$.TickInfo", "J.script.FileLoadThread", "$.SV", "$.ScriptCompiler", "$.ScriptContext", "$.ScriptDelayThread", "$.ScriptException", "$.ScriptInterruption", "$.ScriptManager", "$.ScriptMathProcessor", "$.T", "J.util.BSUtil", "$.ColorEncoder", "$.Elements", "$.Escape", "$.GData", "$.JmolEdge", "$.Logger", "$.Measure", "$.Parser", "$.Quaternion", "$.SimpleUnitCell", "$.Txt", "J.viewer.ActionManager", "$.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.allowJSThreads = true;
 this.listCommands = false;
@@ -9,7 +9,7 @@ this.chk = false;
 this.isCmdLine_C_Option = false;
 this.isCmdLine_c_or_C_Option = false;
 this.historyDisabled = false;
-this.logMessages = false;
+this.debugHigh = false;
 this.debugScript = false;
 this.executionStopped = false;
 this.executionPaused = false;
@@ -114,7 +114,7 @@ this.allowJSThreads = allowThreads;
 this.listCommands = listCommands;
 this.startEval ();
 this.isCmdLine_C_Option = tempOpen;
-this.viewer.setStateScriptVersion (null);
+J.script.ScriptManager.setStateScriptVersion (this.viewer, null);
 }, "~B,~B,~B,~B,JU.SB,~B");
 $_M(c$, "useThreads", 
 function () {
@@ -232,7 +232,7 @@ return sb;
 $_V(c$, "setDebugging", 
 function () {
 this.debugScript = this.viewer.getBoolean (603979825);
-this.logMessages = (this.debugScript && J.util.Logger.debugging);
+this.debugHigh = (this.debugScript && J.util.Logger.debugging);
 });
 $_M(c$, "getExecutionWalltime", 
 ($fz = function () {
@@ -279,7 +279,7 @@ return this.executionStopped || !this.isJS && this.currentThread !== Thread.curr
 });
 $_V(c$, "getNextStatement", 
 function () {
-return (this.pc < this.aatoken.length ? J.script.ScriptEvaluator.getErrorLineMessage (this.functionName, this.scriptFileName, this.getLinenumber (null), this.pc, J.script.ScriptEvaluator.statementAsString (this.viewer, this.aatoken[this.pc], -9999, this.logMessages)) : "");
+return (this.pc < this.aatoken.length ? J.script.ScriptEvaluator.getErrorLineMessage (this.functionName, this.scriptFileName, this.getLinenumber (null), this.pc, J.script.ScriptEvaluator.statementAsString (this.viewer, this.aatoken[this.pc], -9999, this.debugHigh)) : "");
 });
 $_M(c$, "getCommand", 
 ($fz = function (pc, allThisLine, addSemi) {
@@ -317,15 +317,14 @@ return s;
 }, $fz.isPrivate = true, $fz), "~N,~B,~B");
 $_M(c$, "logDebugScript", 
 ($fz = function (ifLevel) {
-if (this.logMessages) {
+this.iToken = -9999;
+if (this.debugHigh) {
 if (this.st.length > 0) J.util.Logger.debug (this.st[0].toString ());
 for (var i = 1; i < this.slen; ++i) J.util.Logger.debug (this.st[i].toString ());
 
-}this.iToken = -9999;
-if (this.logMessages) {
 var strbufLog =  new JU.SB ();
 var s = (ifLevel > 0 ? "                          ".substring (0, ifLevel * 2) : "");
-strbufLog.append (s).append (J.script.ScriptEvaluator.statementAsString (this.viewer, this.st, this.iToken, this.logMessages));
+strbufLog.append (s).append (J.script.ScriptEvaluator.statementAsString (this.viewer, this.st, this.iToken, this.debugHigh));
 this.viewer.scriptStatus (strbufLog.toString ());
 } else {
 var cmd = this.getCommand (this.pc, false, false);
@@ -1247,7 +1246,7 @@ $_M(c$, "compileScript",
 function (filename, strScript, debugCompiler) {
 this.scriptFileName = filename;
 strScript = this.fixScriptPath (strScript, filename);
-this.restoreScriptContext (this.compiler.compile (filename, strScript, false, false, debugCompiler, false), false, false, false);
+this.restoreScriptContext (this.compiler.compile (filename, strScript, false, false, debugCompiler && J.util.Logger.debugging, false), false, false, false);
 this.isStateScript = (this.$script.indexOf ("# Jmol state version ") >= 0);
 this.forceNoAddHydrogens = (this.isStateScript && this.$script.indexOf ("pdbAddHydrogens") < 0);
 var s = this.$script;
@@ -1726,12 +1725,12 @@ this.thisContext.scriptLevel = -1;
 this.contextVariables =  new java.util.Hashtable ();
 if (token.contextVariables != null) for (var key, $key = token.contextVariables.keySet ().iterator (); $key.hasNext () && ((key = $key.next ()) || true);) J.script.ScriptCompiler.addContextVariable (this.contextVariables, key);
 
-}if (this.debugScript || this.isCmdLine_c_or_C_Option) J.util.Logger.info ("-->>-------------".substring (0, Math.max (17, this.scriptLevel + 5)) + this.scriptLevel + " " + this.scriptFileName + " " + token + " " + this.thisContext.id);
+}if (this.debugHigh || this.isCmdLine_c_or_C_Option) J.util.Logger.info ("-->>-------------".substring (0, Math.max (17, this.scriptLevel + 5)) + this.scriptLevel + " " + this.scriptFileName + " " + token + " " + this.thisContext.id);
 }, $fz.isPrivate = true, $fz), "J.script.ContextToken,~S");
 $_V(c$, "getScriptContext", 
 function (why) {
 var context =  new J.script.ScriptContext ();
-if (this.debugScript) J.util.Logger.info ("creating context " + context.id + " for " + why);
+if (this.debugHigh) J.util.Logger.info ("creating context " + context.id + " for " + why);
 context.scriptLevel = this.scriptLevel;
 context.parentContext = this.thisContext;
 context.contextPath = this.contextPath;
@@ -1771,13 +1770,13 @@ if (this.thisContext.scriptLevel > 0) this.scriptLevel = this.thisContext.script
 var scTemp = (isFlowCommand ? this.getScriptContext ("popFlow") : null);
 this.restoreScriptContext (this.thisContext, true, isFlowCommand, statementOnly);
 if (scTemp != null) this.restoreScriptContext (scTemp, true, false, true);
-if (this.debugScript || this.isCmdLine_c_or_C_Option) J.util.Logger.info ("--<<-------------".substring (0, Math.max (17, this.scriptLevel + 5)) + this.scriptLevel + " " + this.scriptFileName + " " + (this.thisContext == null ? "" : "" + this.thisContext.id));
+if (this.debugHigh || this.isCmdLine_c_or_C_Option) J.util.Logger.info ("--<<-------------".substring (0, Math.max (17, this.scriptLevel + 5)) + this.scriptLevel + " " + this.scriptFileName + " " + (this.thisContext == null ? "" : "" + this.thisContext.id));
 }, "~B,~B");
 $_M(c$, "restoreScriptContext", 
 function (context, isPopContext, isFlowCommand, statementOnly) {
 this.executing = !this.chk;
 if (context == null) return;
-if (this.debugScript || this.isCmdLine_c_or_C_Option) J.util.Logger.info ("--<<-------------".substring (0, Math.max (17, this.scriptLevel + 5)) + this.scriptLevel + " " + this.scriptFileName + " isPop " + isPopContext + " " + context.id);
+if (this.debugHigh || this.isCmdLine_c_or_C_Option) J.util.Logger.info ("--<<-------------".substring (0, Math.max (17, this.scriptLevel + 5)) + this.scriptLevel + " " + this.scriptFileName + " isPop " + isPopContext + " " + context.id);
 if (!isFlowCommand) {
 this.st = context.statement;
 this.slen = context.statementLength;
@@ -3725,7 +3724,7 @@ this.delayScript (millis);
 $_M(c$, "dispatchCommands", 
 function (isSpt, fromFunc) {
 if (this.sm == null) this.sm = this.viewer.getShapeManager ();
-this.debugScript = this.logMessages = false;
+this.debugScript = this.debugHigh = false;
 if (!this.chk) this.setDebugging ();
 if (this.pcEnd == 0) this.pcEnd = 2147483647;
 if (this.lineEnd == 0) this.lineEnd = 2147483647;
@@ -3759,7 +3758,7 @@ this.doDelay (-1);
 }lastTime = System.currentTimeMillis ();
 }if (!this.chk && !this.checkContinue ()) break;
 if (this.lineNumbers[this.pc] > this.lineEnd) break;
-if (this.logMessages) {
+if (this.debugHigh) {
 var timeBegin = 0;
 timeBegin = System.currentTimeMillis ();
 this.viewer.scriptStatus ("Eval.dispatchCommands():" + timeBegin);
@@ -3794,7 +3793,7 @@ if (this.slen == 1 && this.st[0].tok != 135368713 && this.st[0].tok != 102436) c
 } else {
 if (this.debugScript) this.logDebugScript (0);
 if (this.scriptLevel == 0 && this.viewer.global.logCommands) this.viewer.log (this.thisCommand);
-if (this.logMessages && this.theToken != null) J.util.Logger.debug (this.theToken.toString ());
+if (this.debugHigh && this.theToken != null) J.util.Logger.debug (this.theToken.toString ());
 }if (this.theToken == null) continue;
 if (J.script.T.tokAttr (this.theToken.tok, 135168)) this.processShapeCommand (this.theToken.tok);
  else switch (this.theToken.tok) {
@@ -3834,9 +3833,6 @@ if (this.theTok == 102439) vProcess = null;
 break;
 case 4097:
 this.animation ();
-break;
-case 4098:
-this.assign ();
 break;
 case 1610616835:
 this.background (1);
@@ -4057,6 +4053,7 @@ break;
 case 4170:
 this.zoom (true);
 break;
+case 4098:
 case 4102:
 case 4103:
 case 135270405:
@@ -6032,7 +6029,7 @@ return;
 this.viewer.setAnimationRange (-1, -1);
 this.viewer.setCurrentModelIndex (modelCount0);
 }if (this.scriptLevel == 0 && !isAppend && nFiles < 2) this.showString (this.viewer.getModelSetAuxiliaryInfoValue ("modelLoadNote"));
-if (this.logMessages) this.scriptStatusOrBuffer ("Successfully loaded:" + (filenames == null ? htParams.get ("fullPathName") : modelName));
+if (this.debugHigh) this.scriptStatusOrBuffer ("Successfully loaded:" + (filenames == null ? htParams.get ("fullPathName") : modelName));
 var info = this.viewer.getModelSetAuxiliaryInfo ();
 if (info != null && info.containsKey ("centroidMinMax") && this.viewer.getAtomCount () > 0) {
 var bs = J.util.BSUtil.newBitSet2 (isAppend ? atomCount0 : 0, this.viewer.getAtomCount ());
@@ -7584,31 +7581,6 @@ throw e;
 }
 }
 }, $fz.isPrivate = true, $fz), "~A");
-$_M(c$, "assign", 
-($fz = function () {
-var atomsOrBonds = this.tokAt (1);
-var index = this.atomExpressionAt (2).nextSetBit (0);
-var index2 = -1;
-var type = null;
-if (index < 0) return;
-if (atomsOrBonds == 4106) {
-index2 = this.atomExpressionAt (++this.iToken).nextSetBit (0);
-} else {
-type = this.parameterAsString (++this.iToken);
-}var pt = (++this.iToken < this.slen ? this.centerParameter (this.iToken) : null);
-if (this.chk) return;
-switch (atomsOrBonds) {
-case 1141899265:
-this.clearDefinedVariableAtomSets ();
-this.viewer.assignAtom (index, pt, type);
-break;
-case 1678770178:
-this.viewer.assignBond (index, (type + "p").charAt (0));
-break;
-case 4106:
-this.viewer.assignConnect (index, index2);
-}
-}, $fz.isPrivate = true, $fz));
 $_M(c$, "file", 
 ($fz = function () {
 var file = this.intParameter (this.checkLast (1));
@@ -9286,7 +9258,7 @@ this.scriptDelayThread.run ();
 }, "~N");
 $_M(c$, "getErrorLineMessage2", 
 function () {
-return J.script.ScriptEvaluator.getErrorLineMessage (this.functionName, this.scriptFileName, this.getLinenumber (null), this.pc, J.script.ScriptEvaluator.statementAsString (this.viewer, this.st, -9999, this.logMessages));
+return J.script.ScriptEvaluator.getErrorLineMessage (this.functionName, this.scriptFileName, this.getLinenumber (null), this.pc, J.script.ScriptEvaluator.statementAsString (this.viewer, this.st, -9999, this.debugHigh));
 });
 $_V(c$, "evaluateParallel", 
 function (context, shapeManager) {

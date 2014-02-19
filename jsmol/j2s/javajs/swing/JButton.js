@@ -8,7 +8,7 @@ Clazz.superConstructor (this, javajs.swing.JButton, ["btnJB"]);
 $_V(c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
-sb.append ("<input type=button id='" + this.id + "' class='JButton' style='" + this.getCSSstyle (0) + "' onclick='SwingController.click(this)' value='" + this.text + "'/>");
+sb.append ("<input type=button id='" + this.id + "' class='JButton' style='" + this.getCSSstyle (80, 0) + "' onclick='SwingController.click(this)' value='" + this.text + "'/>");
 return sb.toString ();
 });
 });

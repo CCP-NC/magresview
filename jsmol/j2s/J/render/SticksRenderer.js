@@ -61,12 +61,8 @@ this.slabbing = this.viewer.getSlabEnabled ();
 this.slabByAtom = this.viewer.getBoolean (603979938);
 this.endcaps = 3;
 this.dashDots = (this.viewer.getBoolean (603979889) ? J.render.FontLineShapeRenderer.sixdots : J.render.FontLineShapeRenderer.dashes);
-this.multipleBondSpacing = this.viewer.getFloat (570425370);
 this.isCartesianExport = (this.exportType == 1);
-if (this.multipleBondSpacing == 0 && this.isCartesianExport) this.multipleBondSpacing = 0.2;
-this.multipleBondRadiusFactor = this.viewer.getFloat (570425369);
-this.modeMultipleBond = this.viewer.getModeMultipleBond ();
-this.showMultipleBonds = (this.multipleBondSpacing != 0 && this.modeMultipleBond != 0 && this.viewer.getBoolean (603979928));
+this.getMultipleBondSettings (false);
 this.wireframeOnly = !this.viewer.checkMotionRendering (1678770178);
 this.ssbondsBackbone = this.viewer.getBoolean (603979952);
 this.hbondsBackbone = this.viewer.getBoolean (603979852);
@@ -86,6 +82,14 @@ this.bsForPass2.set (i);
 }}
 return needTranslucent;
 });
+$_M(c$, "getMultipleBondSettings", 
+($fz = function (isPymol) {
+this.multipleBondSpacing = (isPymol ? 0.15 : this.viewer.getFloat (570425370));
+this.multipleBondRadiusFactor = (isPymol ? 0.4 : this.viewer.getFloat (570425369));
+if (this.multipleBondSpacing == 0 && this.isCartesianExport) this.multipleBondSpacing = 0.2;
+this.modeMultipleBond = this.viewer.getModeMultipleBond ();
+this.showMultipleBonds = (this.multipleBondSpacing != 0 && this.modeMultipleBond != 0 && this.viewer.getBoolean (603979928));
+}, $fz.isPrivate = true, $fz), "~B");
 $_M(c$, "renderBond", 
 ($fz = function () {
 var atomA0;
@@ -129,7 +133,7 @@ return true;
 if ((this.bondOrder & 224) == 0) {
 if ((this.bondOrder & 256) != 0) this.bondOrder &= -257;
 if ((this.bondOrder & 1023) != 0) {
-if (!this.showMultipleBonds || (this.modeMultipleBond == 2 && this.mad > 500) || (this.bondOrder & 65536) != 0) {
+if (!this.showMultipleBonds || (this.modeMultipleBond == 2 && this.mad > 500) || (this.bondOrder & 98304) == 65536) {
 this.bondOrder = 1;
 }}}var mask = 0;
 switch (this.bondOrder) {
@@ -157,6 +161,10 @@ this.bondOrder = 1;
 if (!this.hbondsSolid) mask = -1;
 } else if (this.bondOrder == 32768) {
 this.bondOrder = 1;
+} else if ((this.bondOrder & 98304) == 98304) {
+this.getMultipleBondSettings (true);
+this.bondOrder &= 3;
+mask = -2;
 }}
 this.xA = this.a.sX;
 this.yA = this.a.sY;
@@ -174,6 +182,10 @@ if (this.asLineOnly && (this.isAntialiased)) {
 this.width = 3;
 this.asLineOnly = false;
 }}switch (mask) {
+case -2:
+this.drawBond (0);
+this.getMultipleBondSettings (false);
+break;
 case -1:
 this.drawDashed (this.xA, this.yA, this.zA, this.xB, this.yB, this.zB, J.render.FontLineShapeRenderer.hDashes);
 break;

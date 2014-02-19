@@ -67,7 +67,7 @@ throw e;
 $_M(c$, "exportSpectrumOrImage", 
 ($fz = function (viewer, eType, index, out) {
 var spec;
-var pd = viewer.selectedPanel.getPanelData ();
+var pd = viewer.pd ();
 if (index < 0 && (index = pd.getCurrentSpectrumIndex ()) < 0) return "Error exporting spectrum: No spectrum selected";
 spec = pd.getSpectrumAt (index);
 var startIndex = pd.getStartingPointIndex (index);
@@ -147,16 +147,17 @@ $_M(c$, "printPDF",
 if (!viewer.si.isSigned ()) return "Error: Applet must be signed for the PRINT command.";
 var isJob = (pdfFileName == null || pdfFileName.length == 0);
 var isBase64 = (!isJob && pdfFileName.toLowerCase ().startsWith ("base64"));
-var jsvp = viewer.selectedPanel;
-if (jsvp == null) return null;
-jsvp.getPanelData ().closeAllDialogsExcept (JSV.common.Annotation.AType.NONE);
+var pd = viewer.pd ();
+if (pd == null) return null;
+pd.closeAllDialogsExcept (JSV.common.Annotation.AType.NONE);
 var pl;
 {
 pl = new JSV.common.PrintLayout(); pl.asPDF = true;
 }if (isJob && pl.asPDF) {
 isJob = false;
 pdfFileName = "PDF";
-}if (!isBase64 && !isJob) {
+}var jsvp = viewer.selectedPanel;
+if (!isBase64 && !isJob) {
 var helper = viewer.fileHelper;
 helper.setFileChooser (JSV.common.ExportType.PDF);
 if (pdfFileName.equals ("?") || pdfFileName.equalsIgnoreCase ("PDF")) pdfFileName = this.getSuggestedFileName (viewer, JSV.common.ExportType.PDF);
@@ -167,7 +168,7 @@ pdfFileName = file.getFullPath ();
 }var s = null;
 try {
 var out = (isJob ? null : viewer.getOutputChannel (isBase64 ? null : pdfFileName, true));
-var printJobTitle = jsvp.getPanelData ().getPrintJobTitle (true);
+var printJobTitle = pd.getPrintJobTitle (true);
 if (pl.showTitle) {
 printJobTitle = jsvp.getInput ("Title?", "Title for Printing", printJobTitle);
 if (printJobTitle == null) return null;
@@ -184,18 +185,18 @@ return s;
 }, $fz.isPrivate = true, $fz), "JSV.common.JSViewer,~S");
 $_M(c$, "getExportableItems", 
 ($fz = function (viewer, isSameType) {
-var jsvp = viewer.selectedPanel;
+var pd = viewer.pd ();
 var isView = viewer.currentSource.isView;
-var nSpectra = jsvp.getPanelData ().getNumberOfSpectraInCurrentSet ();
-if (nSpectra == 1 || !isView && isSameType || jsvp.getPanelData ().getCurrentSpectrumIndex () >= 0) return null;
+var nSpectra = pd.getNumberOfSpectraInCurrentSet ();
+if (nSpectra == 1 || !isView && isSameType || pd.getCurrentSpectrumIndex () >= 0) return null;
 var items =  new Array (nSpectra);
-for (var i = 0; i < nSpectra; i++) items[i] = jsvp.getPanelData ().getSpectrumAt (i).getTitle ();
+for (var i = 0; i < nSpectra; i++) items[i] = pd.getSpectrumAt (i).getTitle ();
 
 return items;
 }, $fz.isPrivate = true, $fz), "JSV.common.JSViewer,~B");
 $_M(c$, "getSuggestedFileName", 
 ($fz = function (viewer, imode) {
-var pd = viewer.selectedPanel.getPanelData ();
+var pd = viewer.pd ();
 var sourcePath = pd.getSpectrum ().getFilePath ();
 var newName = JSV.common.JSVFileManager.getName (sourcePath);
 if (newName.startsWith ("$")) newName = newName.substring (1);

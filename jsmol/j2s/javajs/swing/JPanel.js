@@ -29,7 +29,7 @@ this.grid =  new javajs.swing.Grid (1, 1);
 this.grid.add (this.last,  new javajs.swing.GridBagConstraints (0, 0, 1, 1, 0, 0, 10, 0, null, 0, 0));
 this.last = null;
 }var sb =  new JU.SB ();
-sb.append ("\n<div id='" + this.id + "' class='JPanel' style='" + this.getCSSstyle (100) + "'>\n");
+sb.append ("\n<div id='" + this.id + "' class='JPanel' style='" + this.getCSSstyle (100, 100) + "'>\n");
 sb.append ("\n<span id='" + this.id + "_minimizer' style='width:" + this.minWidth + "px;height:" + this.minHeight + "px;'>");
 sb.append (this.grid.toHTML (this.id));
 sb.append ("</span>");

@@ -85,7 +85,6 @@ this.bsStickBonds = null;
 this.thisState = 0;
 this.currentAtomSetIndex = 0;
 this.surfaceInfoName = null;
-this.haveMultipleBonds = false;
 Clazz.instantialize (this, arguments);
 }, J.adapter.readers.pymol, "PyMOLScene", null, J.api.JmolSceneGenerator);
 Clazz.prepareFields (c$, function () {
@@ -455,10 +454,7 @@ this.bsUniqueBonds = this.bsStickBonds = this.bsLineBonds = null;
 $_M(c$, "finalizeObjects", 
 ($fz = function () {
 this.viewer.setStringProperty ("defaults", "PyMOL");
-if (this.haveMultipleBonds) {
-this.viewer.setFloatProperty ("multipleBondSpacing", 0.15);
-this.viewer.setFloatProperty ("multipleBondRadiusFactor", 0.4);
-}for (var i = 0; i < this.jmolObjects.size (); i++) {
+for (var i = 0; i < this.jmolObjects.size (); i++) {
 try {
 var obj = this.jmolObjects.get (i);
 obj.finalizeObject (this, this.viewer.modelSet, this.mepList, this.doCache);
@@ -1214,6 +1210,8 @@ this.bsLineBonds.andNot (this.bsStickBonds);
 $_M(c$, "finalizeUniqueBonds", 
 ($fz = function () {
 if (this.uniqueList == null) return;
+var bondCount = this.viewer.getBondCount ();
+var bonds = this.viewer.modelSet.bonds;
 for (var i = this.bsUniqueBonds.nextSetBit (0); i >= 0; i = this.bsUniqueBonds.nextSetBit (i + 1)) {
 var rad = NaN;
 var id = this.uniqueList.get (Integer.$valueOf (i)).intValue ();
@@ -1225,9 +1223,22 @@ rad = this.getUniqueFloatDef (id, 21, NaN);
 if (c != 2147483647) c = J.adapter.readers.pymol.PyMOL.getRGB (c);
 var valence = this.getUniqueFloatDef (id, 64, NaN);
 var t = this.getUniqueFloatDef (id, 198, NaN);
-this.viewer.modelSet.setBondParameters (this.thisState - 1, i, rad, valence, c, t);
+if (i < 0 || i >= bondCount) return;
+var b = bonds[i];
+this.setBondParameters (b, this.thisState - 1, rad, valence, c, t);
 }
 }, $fz.isPrivate = true, $fz));
+$_M(c$, "setBondParameters", 
+function (b, modelIndex, rad, pymolValence, argb, trans) {
+if (modelIndex >= 0 && b.atom1.modelIndex != modelIndex) return;
+if (!Float.isNaN (rad)) b.mad = Clazz.floatToShort (rad * 2000);
+var colix = b.colix;
+if (argb != 2147483647) colix = J.util.C.getColix (argb);
+if (!Float.isNaN (trans)) b.colix = J.util.C.getColixTranslucent3 (colix, trans != 0, trans);
+ else if (b.colix != colix) b.colix = J.util.C.copyColixTranslucency (b.colix, colix);
+if (pymolValence == 1) b.order |= 98304;
+ else if (pymolValence == 0) b.order |= 65536;
+}, "J.modelset.Bond,~N,~N,~N,~N,~N");
 $_M(c$, "addMesh", 
 function (tok, obj, objName, isMep) {
 var jo = this.addJmolObject (tok, null, obj);

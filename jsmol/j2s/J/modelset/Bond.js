@@ -67,6 +67,10 @@ $_M(c$, "isAromatic",
 function () {
 return (this.order & 512) != 0;
 });
+$_M(c$, "isPymolStyle", 
+function () {
+return (this.order & 98304) == 98304;
+});
 $_M(c$, "setPaletteID", 
 function (pid) {
 }, "~N");

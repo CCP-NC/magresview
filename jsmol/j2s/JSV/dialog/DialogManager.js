@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JSV.dialog");
-Clazz.load (null, "JSV.dialog.DialogManager", ["java.util.Hashtable", "JSV.common.JSVFileManager"], function () {
+Clazz.load (null, "JSV.dialog.DialogManager", ["java.util.Hashtable", "JU.PT", "JSV.common.JSVFileManager"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.viewer = null;
 this.htSelectors = null;
@@ -40,13 +40,14 @@ if (errorLog != null && errorLog.length > 0) this.showScrollingText (frame, curr
  else this.showMessageDialog (frame, "No errors found.", "Error Log", 1);
 }, "~O,JSV.source.JDXSource");
 $_M(c$, "showSource", 
-function (frame, currentSource) {
-if (currentSource == null) {
+function (frame, f) {
+if (f == null) {
 this.showMessageDialog (frame, "Please Select a Spectrum", "Select Spectrum", 2);
 return;
 }try {
-var f = currentSource.getFilePath ();
-this.showScrollingText (null, f, JSV.common.JSVFileManager.getFileAsString (f));
+var s = JSV.common.JSVFileManager.getFileAsString (f);
+if (this.viewer.isJS) s = JU.PT.rep (s, "<", "&lt;");
+this.showScrollingText (null, f, s);
 } catch (ex) {
 if (Clazz.exceptionOf (ex, Exception)) {
 this.showMessageDialog (frame, "File Not Found", "SHOWSOURCE", 0);
@@ -54,7 +55,7 @@ this.showMessageDialog (frame, "File Not Found", "SHOWSOURCE", 0);
 throw ex;
 }
 }
-}, "~O,JSV.source.JDXSource");
+}, "~O,~S");
 $_M(c$, "processClick", 
 function (eventId) {
 var pt = eventId.lastIndexOf ("/");

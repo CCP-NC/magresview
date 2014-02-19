@@ -113,7 +113,7 @@ function jmolEvaluate_each(id, prop)
 
 function enable_NMR_controls()
 {
-	reset_visualization_options();
+	//reset_visualization_options();
 	
 	document.getElementById("labels_check").disabled = false;
 

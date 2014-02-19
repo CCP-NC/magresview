@@ -2,7 +2,7 @@ Clazz.declarePackage ("javajs.awt");
 Clazz.load (null, "javajs.awt.Component", ["JU.CU"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.visible = false;
-this.enabled = false;
+this.enabled = true;
 this.text = null;
 this.name = null;
 this.width = 0;
@@ -19,11 +19,15 @@ Clazz.instantialize (this, arguments);
 }, javajs.awt, "Component");
 Clazz.makeConstructor (c$, 
 function (type) {
-this.id = type + ("" + Math.random ()).substring (3, 10);
+this.id = javajs.awt.Component.newID (type);
 if (type == null) return;
 {
 SwingController.register(this, type);
 }}, "~S");
+c$.newID = $_M(c$, "newID", 
+function (type) {
+return type + ("" + Math.random ()).substring (3, 10);
+}, "~S");
 $_M(c$, "setBackground", 
 function (color) {
 this.bgcolor = color;
@@ -66,7 +70,9 @@ return this.enabled;
 $_M(c$, "setEnabled", 
 function (enabled) {
 this.enabled = enabled;
-}, "~B");
+{
+SwingController.setEnabled(this);
+}}, "~B");
 $_M(c$, "isVisible", 
 function () {
 return this.visible;
@@ -74,7 +80,9 @@ return this.visible;
 $_M(c$, "setVisible", 
 function (visible) {
 this.visible = visible;
-}, "~B");
+{
+SwingController.setVisible(this);
+}}, "~B");
 $_M(c$, "getHeight", 
 function () {
 return this.height;
@@ -97,11 +105,11 @@ function () {
 return this.height;
 });
 $_M(c$, "getCSSstyle", 
-function (defaultPercent) {
+function (defaultPercentW, defaultPercentH) {
 var width = (this.renderWidth > 0 ? this.renderWidth : this.getSubcomponentWidth ());
 var height = (this.renderHeight > 0 ? this.renderHeight : this.getSubcomponentHeight ());
-return (width > 0 ? "width:" + width + "px;" : defaultPercent > 0 ? "width:" + defaultPercent + "%;" : "") + (height > 0 ? "height:" + height + "px;" : defaultPercent > 0 ? "height:" + defaultPercent + "%;" : "") + (this.bgcolor == null ? "" : "background-color:" + JU.CU.toCSSString (this.bgcolor) + ";");
-}, "~N");
+return (width > 0 ? "width:" + width + "px;" : defaultPercentW > 0 ? "width:" + defaultPercentW + "%;" : "") + (height > 0 ? "height:" + height + "px;" : defaultPercentH > 0 ? "height:" + defaultPercentH + "%;" : "") + (this.bgcolor == null ? "" : "background-color:" + JU.CU.toCSSString (this.bgcolor) + ";");
+}, "~N,~N");
 $_M(c$, "repaint", 
 function () {
 });

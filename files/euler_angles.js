@@ -270,6 +270,7 @@ function euler_diff_calc_handler()
 
 function euldiff_butt_handler()
 {
+	
 	var eul_conv = document.getElementById("opt_euler_drop").value;
 	var conv_table = {
 		"zyz": "%6",
@@ -286,7 +287,7 @@ function euldiff_butt_handler()
 	type2 = euldiff_pick_atom2.substring(euldiff_pick_atom2.indexOf('_')+1, euldiff_pick_atom2.indexOf('#'));
 	atom2 = Jmol.evaluate(mainJmol, "{" + euldiff_pick_atom2.substring(euldiff_pick_atom2.indexOf('#')+1, euldiff_pick_atom2.lastIndexOf('#')) + "}.atomname");
 	quat2 = euldiff_pick_atom2.substring(euldiff_pick_atom2.lastIndexOf('{'));
-
+	
 	if (atom1 == atom2 && type1 == type2)
 		return;
 	
@@ -296,7 +297,7 @@ function euldiff_butt_handler()
 }
 
 function echo_callback(id, echo)
-{
+{	
 	if (echo.indexOf("lc") >= 0)
 	{
 		euldiff_pick_atom1 = echo;

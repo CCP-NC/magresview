@@ -229,7 +229,7 @@ $_M(c$, "checkCallbacks",
 if (this.coordCallbackFunctionName == null && this.peakCallbackFunctionName == null) return;
 var coord =  new JSV.common.Coordinate ();
 var actualCoord = (this.peakCallbackFunctionName == null ? null :  new JSV.common.Coordinate ());
-if (!this.viewer.selectedPanel.getPanelData ().getPickedCoordinates (coord, actualCoord)) return;
+if (!this.viewer.pd ().getPickedCoordinates (coord, actualCoord)) return;
 var iSpec = this.viewer.mainPanel.getCurrentPanelIndex ();
 if (actualCoord == null) this.appletFrame.callToJavaScript (this.coordCallbackFunctionName, [Double.$valueOf (coord.getXVal ()), Double.$valueOf (coord.getYVal ()), Integer.$valueOf (iSpec + 1)]);
  else this.appletFrame.callToJavaScript (this.peakCallbackFunctionName, [Double.$valueOf (coord.getXVal ()), Double.$valueOf (coord.getYVal ()), Double.$valueOf (actualCoord.getXVal ()), Double.$valueOf (actualCoord.getYVal ()), Integer.$valueOf (iSpec + 1)]);
@@ -297,7 +297,7 @@ this.appletFrame.newWindow (isSelected);
 $_V(c$, "siValidateAndRepaint", 
 function (isAll) {
 var pd;
-if (this.viewer.selectedPanel != null && (pd = this.viewer.selectedPanel.getPanelData ()) != null) pd.taintedAll = true;
+if (this.viewer.selectedPanel != null && (pd = this.viewer.pd ()) != null) pd.taintedAll = true;
 this.appletFrame.validate ();
 this.repaint ();
 }, "~B");

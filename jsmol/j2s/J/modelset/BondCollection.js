@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.modelset");
-Clazz.load (["J.modelset.AtomCollection", "JU.BS"], "J.modelset.BondCollection", ["java.lang.Float", "JU.AU", "J.modelset.Bond", "$.BondIteratorSelected", "$.HBond", "J.util.BSUtil", "$.C", "$.JmolEdge", "$.Logger"], function () {
+Clazz.load (["J.modelset.AtomCollection", "JU.BS"], "J.modelset.BondCollection", ["JU.AU", "J.modelset.Bond", "$.BondIteratorSelected", "$.HBond", "J.util.BSUtil", "$.JmolEdge", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.molecules = null;
 this.moleculeCount = 0;
@@ -200,7 +200,7 @@ this.bondCount = 0;
 });
 $_M(c$, "getDefaultMadFromOrder", 
 function (order) {
-return (J.modelset.Bond.isOrderH (order) ? 1 : (order & 32768) != 0 ? Clazz.doubleToInt (Math.floor (this.viewer.getFloat (570425406) * 2000)) : this.defaultCovalentMad);
+return (J.modelset.Bond.isOrderH (order) ? 1 : order == 32768 ? Clazz.doubleToInt (Math.floor (this.viewer.getFloat (570425406) * 2000)) : this.defaultCovalentMad);
 }, "~N");
 $_M(c$, "deleteConnections", 
 function (minDistance, maxDistance, order, bsA, bsB, isBonds, matchNull, minDistanceSquared, maxDistanceSquared) {
@@ -527,19 +527,6 @@ if (!isDisplay) this.haveHiddenBonds = true;
 for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) if (i < this.bondCount && this.bonds[i].mad != 0) this.bonds[i].setShapeVisibility (isDisplay);
 
 }, "J.modelset.BondSet,~B");
-$_M(c$, "setBondParameters", 
-function (modelIndex, i, rad, pymolValence, argb, trans) {
-if (i < 0 || i >= this.bondCount) return;
-var b = this.bonds[i];
-if (modelIndex >= 0 && b.atom1.modelIndex != modelIndex) return;
-if (!Float.isNaN (rad)) b.mad = Clazz.floatToShort (rad * 2000);
-var colix = b.colix;
-if (argb != 2147483647) colix = J.util.C.getColix (argb);
-if (!Float.isNaN (trans)) b.colix = J.util.C.getColixTranslucent3 (colix, trans != 0, trans);
- else if (b.colix != colix) b.colix = J.util.C.copyColixTranslucency (b.colix, colix);
-if (pymolValence == 1) b.order &= -65537;
- else if (pymolValence == 0) b.order |= 65536;
-}, "~N,~N,~N,~N,~N,~N");
 Clazz.defineStatics (c$,
 "BOND_GROWTH_INCREMENT", 250,
 "MAX_BONDS_LENGTH_TO_CACHE", 5,
