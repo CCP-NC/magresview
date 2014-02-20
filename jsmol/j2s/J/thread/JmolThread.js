@@ -46,7 +46,6 @@ this.sc = null;
 $_M(c$, "start", 
 function () {
 if (this.isJS) {
-J.util.Logger.info ("starting " + this.$name);
 this.run ();
 } else {
 Clazz.superCall (this, J.thread.JmolThread, "start", []);

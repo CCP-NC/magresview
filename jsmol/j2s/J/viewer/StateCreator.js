@@ -36,7 +36,7 @@ s.append ("\n");
 if (isAll || type.equalsIgnoreCase ("windowState")) s.append (this.getWindowState (sfunc, width, height));
 if (isAll || type.equalsIgnoreCase ("fileState")) s.append (this.getFileState (sfunc));
 if (isAll || type.equalsIgnoreCase ("definedState")) s.append (this.getDefinedState (sfunc, true));
-if (isAll || type.equalsIgnoreCase ("variableState")) s.append (this.getVariableState (global, sfunc));
+if (isAll || type.equalsIgnoreCase ("variableState")) s.append (this.getParameterState (global, sfunc));
 if (isAll || type.equalsIgnoreCase ("dataState")) s.append (this.getDataState (sfunc));
 if (isAll || type.equalsIgnoreCase ("modelState")) s.append (this.getModelState (sfunc, true, this.viewer.getBooleanProperty ("saveProteinStructureState")));
 if (isAll || type.equalsIgnoreCase ("colorState")) s.append (this.getColorState (this.viewer.colorManager, sfunc));
@@ -342,14 +342,14 @@ if (am.animationOn && am.animationPaused) J.viewer.StateCreator.appendCmd (comma
 if (sfunc != null) commands.append ("}\n\n");
 return commands.toString ();
 }, $fz.isPrivate = true, $fz), "J.viewer.AnimationManager,JU.SB");
-$_M(c$, "getVariableState", 
+$_M(c$, "getParameterState", 
 ($fz = function (global, sfunc) {
 var list =  new Array (global.htBooleanParameterFlags.size () + global.htNonbooleanParameterValues.size ());
 var commands =  new JU.SB ();
 var isState = (sfunc != null);
 if (isState) {
-sfunc.append ("  _setVariableState;\n");
-commands.append ("function _setVariableState() {\n\n");
+sfunc.append ("  _setParameterState;\n");
+commands.append ("function _setParameterState() {\n\n");
 }var n = 0;
 for (var key, $key = global.htBooleanParameterFlags.keySet ().iterator (); $key.hasNext () && ((key = $key.next ()) || true);) if (J.viewer.GlobalSettings.doReportProperty (key)) list[n++] = "set " + key + " " + global.htBooleanParameterFlags.get (key);
 
@@ -905,17 +905,22 @@ this.clearTemp ();
 return s;
 }, "J.shape.AtomShape");
 $_V(c$, "getFunctionCalls", 
-function (selectedFunction) {
-if (selectedFunction == null) selectedFunction = "";
+function (f) {
+if (f == null) f = "";
 var s =  new JU.SB ();
-var pt = selectedFunction.indexOf ("*");
+var pt = f.indexOf ("*");
 var isGeneric = (pt >= 0);
-var isStatic = (selectedFunction.indexOf ("static_") == 0);
-var namesOnly = (selectedFunction.equalsIgnoreCase ("names") || selectedFunction.equalsIgnoreCase ("static_names"));
-if (namesOnly) selectedFunction = "";
-if (isGeneric) selectedFunction = selectedFunction.substring (0, pt);
-selectedFunction = selectedFunction.toLowerCase ();
-var ht = (isStatic ? J.viewer.Viewer.staticFunctions : this.viewer.localFunctions);
+var isStatic = (f.indexOf ("static_") == 0);
+var namesOnly = (f.equalsIgnoreCase ("names") || f.equalsIgnoreCase ("static_names"));
+if (namesOnly) f = "";
+if (isGeneric) f = f.substring (0, pt);
+f = f.toLowerCase ();
+if (isStatic || f.length == 0) this.addFunctions (s, J.viewer.Viewer.staticFunctions, f, isGeneric, namesOnly);
+if (!isStatic || f.length == 0) this.addFunctions (s, this.viewer.localFunctions, f, isGeneric, namesOnly);
+return s.toString ();
+}, "~S");
+$_M(c$, "addFunctions", 
+($fz = function (s, ht, selectedFunction, isGeneric, namesOnly) {
 var names =  new Array (ht.size ());
 var n = 0;
 for (var name, $name = ht.keySet ().iterator (); $name.hasNext () && ((name = $name.next ()) || true);) if (selectedFunction.length == 0 && !name.startsWith ("_") || name.equalsIgnoreCase (selectedFunction) || isGeneric && name.toLowerCase ().indexOf (selectedFunction) == 0) names[n++] = name;
@@ -926,8 +931,7 @@ var f = ht.get (names[i]);
 s.append (namesOnly ? f.getSignature () : f.toString ());
 s.appendC ('\n');
 }
-return s.toString ();
-}, "~S");
+}, $fz.isPrivate = true, $fz), "JU.SB,java.util.Map,~S,~B,~B");
 c$.isTainted = $_M(c$, "isTainted", 
 ($fz = function (tainted, atomIndex, type) {
 return (tainted != null && tainted[type] != null && tainted[type].get (atomIndex));

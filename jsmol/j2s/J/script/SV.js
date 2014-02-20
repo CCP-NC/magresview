@@ -837,10 +837,19 @@ return (allowNull ? null :  new JU.BS ());
 c$.areEqual = $_M(c$, "areEqual", 
 function (x1, x2) {
 if (x1 == null || x2 == null) return false;
-if (x1.tok == 4 && x2.tok == 4) return J.script.SV.sValue (x1).equalsIgnoreCase (J.script.SV.sValue (x2));
-if (x1.tok == 8 && x2.tok == 8) return ((x1.value).distance (x2.value) < 0.000001);
-if (x1.tok == 9 && x2.tok == 9) return ((x1.value).distance (x2.value) < 0.000001);
-return (Math.abs (J.script.SV.fValue (x1) - J.script.SV.fValue (x2)) < 0.000001);
+if (x1.tok == x2.tok) {
+switch (x1.tok) {
+case 4:
+case 10:
+case 6:
+case 7:
+return x1.equals (x2);
+case 8:
+return ((x1.value).distance (x2.value) < 0.000001);
+case 9:
+return ((x1.value).distance (x2.value) < 0.000001);
+}
+}return (Math.abs (J.script.SV.fValue (x1) - J.script.SV.fValue (x2)) < 0.000001);
 }, "J.script.SV,J.script.SV");
 $_M(c$, "sortOrReverse", 
 function (arrayPt) {

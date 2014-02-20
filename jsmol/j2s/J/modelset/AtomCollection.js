@@ -28,6 +28,7 @@ this.bfactor100Hi = 0;
 this.surfaceDistanceMax = 0;
 this.bsSurface = null;
 this.nSurfaceAtoms = 0;
+this.averageAtomPoint = null;
 this.bspf = null;
 this.preserveState = true;
 this.tainted = null;
@@ -758,6 +759,7 @@ throw e;
 $_M(c$, "validateBspf", 
 function (isValid) {
 if (this.bspf != null) this.bspf.validate (isValid);
+this.averageAtomPoint = null;
 }, "~B");
 $_M(c$, "validateBspfForModel", 
 function (modelIndex, isValid) {

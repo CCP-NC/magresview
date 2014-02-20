@@ -21,7 +21,6 @@ this.someModelsHaveSymmetry = false;
 this.someModelsHaveAromaticBonds = false;
 this.someModelsHaveFractionalCoordinates = false;
 this.ptTemp = null;
-this.averageAtomPoint = null;
 this.isBbcageDefault = false;
 this.bboxModels = null;
 this.bboxAtoms = null;
@@ -51,7 +50,6 @@ this.modelNumbersForAtomLabel =  new Array (1);
 this.modelNames =  new Array (1);
 this.frameTitles =  new Array (1);
 this.ptTemp =  new JU.P3 ();
-this.averageAtomPoint =  new JU.P3 ();
 this.boxInfo =  new J.util.BoxInfo ();
 {
 this.boxInfo.addBoundBoxPoint (JU.P3.new3 (-10, -10, -10));
@@ -179,10 +177,6 @@ $_M(c$, "setCrystallographicDefaults",
 function () {
 return !this.isPDB && this.someModelsHaveSymmetry && this.someModelsHaveFractionalCoordinates;
 });
-$_M(c$, "getAverageAtomPoint", 
-function () {
-return this.averageAtomPoint;
-});
 $_M(c$, "getBoundBoxCenter", 
 function (modelIndex) {
 if (this.isJmolDataFrameForModel (modelIndex)) return  new JU.P3 ();
@@ -233,6 +227,7 @@ return false;
 }, "~N,~N");
 $_M(c$, "calcRotationRadius", 
 function (modelIndex, center) {
+System.out.println ("modelcoll center=" + center);
 if (this.isJmolDataFrameForModel (modelIndex)) {
 var r = this.models[modelIndex].defaultRotationRadius;
 return (r == 0 ? 10 : r);
@@ -253,11 +248,10 @@ return (maxRadius == 0 ? 10 : maxRadius);
 $_M(c$, "calcBoundBoxDimensions", 
 function (bs, scale) {
 if (bs != null && bs.nextSetBit (0) < 0) bs = null;
-if (bs == null && this.isBbcageDefault || this.atomCount < 2) return;
+if (bs == null && this.isBbcageDefault || this.atomCount == 0) return;
 this.bboxModels = this.getModelBitSet (this.bboxAtoms = J.util.BSUtil.copy (bs), false);
 if (this.calcAtomsMinMax (bs, this.boxInfo) == this.atomCount) this.isBbcageDefault = true;
 if (bs == null) {
-this.averageAtomPoint.setT (this.getAtomSetCenter (null));
 if (this.unitCells != null) this.calcUnitCellMinMax ();
 }this.boxInfo.setBbcage (scale);
 }, "JU.BS,~N");
@@ -349,9 +343,9 @@ points[1][0].scale (1 / (points[1].length - 1));
 }, "JU.List,~B");
 $_M(c$, "getAtomSetCenter", 
 function (bs) {
-var ptCenter = JU.P3.new3 (0, 0, 0);
+var ptCenter =  new JU.P3 ();
 var nPoints = 0;
-if (bs != null) for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
+for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
 if (!this.isJmolDataFrameForAtom (this.atoms[i])) {
 nPoints++;
 ptCenter.add (this.atoms[i]);
@@ -359,6 +353,11 @@ ptCenter.add (this.atoms[i]);
 if (nPoints > 0) ptCenter.scale (1.0 / nPoints);
 return ptCenter;
 }, "JU.BS");
+$_M(c$, "getAverageAtomPoint", 
+function () {
+if (this.averageAtomPoint == null) (this.averageAtomPoint =  new JU.P3 ()).setT (this.getAtomSetCenter (this.viewer.getAllAtoms ()));
+return this.averageAtomPoint;
+});
 $_M(c$, "setAPm", 
 function (bs, tok, iValue, fValue, sValue, values, list) {
 this.setAPa (bs, tok, iValue, fValue, sValue, values, list);
@@ -1900,7 +1899,7 @@ if (!this.stateScripts.get (i).deleteAtoms (modelIndex, bsBonds, bsAtoms)) {
 this.stateScripts.remove (i);
 }}
 this.deleteModelAtoms (firstAtomIndex, nAtoms, bsAtoms);
-this.viewer.deleteModelAtoms (firstAtomIndex, nAtoms, bsAtoms);
+this.viewer.deleteModelAtoms (modelIndex, firstAtomIndex, nAtoms, bsAtoms);
 }, "~N,~N,~N,JU.BS,JU.BS");
 $_M(c$, "getMoInfo", 
 function (modelIndex) {
@@ -1982,6 +1981,7 @@ this.makeConnections2 (0.1, 1.8, 1, 1073741904, bsA, bs, null, false, false, 0);
 }, "~N,~S,~B");
 $_M(c$, "deleteAtoms", 
 function (bs) {
+this.averageAtomPoint = null;
 if (bs == null) return;
 var bsBonds =  new JU.BS ();
 for (var i = bs.nextSetBit (0); i >= 0 && i < this.atomCount; i = bs.nextSetBit (i + 1)) this.atoms[i].deleteBonds (bsBonds);

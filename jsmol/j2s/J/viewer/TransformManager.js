@@ -758,6 +758,7 @@ var pt = JU.P3.new3 (Clazz.doubleToInt (this.screenWidth / 2), Clazz.doubleToInt
 this.viewer.unTransformPoint (pt, pt);
 pt.sub (this.fixedRotationCenter);
 ptCamera.add (pt);
+System.out.println ("TM no " + this.navigationOffset + " rpo " + this.referencePlaneOffset + " aa " + this.aperatureAngle + " sppa " + this.scalePixelsPerAngstrom + " vr " + this.visualRange + " sw/vr " + this.screenWidth / this.visualRange + " " + ptRef + " " + this.fixedRotationCenter);
 return [ptRef, ptCamera, this.fixedRotationCenter, JU.P3.new3 (this.cameraDistanceFromCenter, this.aperatureAngle, this.scalePixelsPerAngstrom)];
 });
 $_M(c$, "getFrontPlane", 
@@ -1447,14 +1448,6 @@ return;
 }this.setFixedRotationCenter (newCenterOfRotation);
 if (andRadius && this.windowCentered) this.modelRadius = this.viewer.calcRotationRadius (this.fixedRotationCenter);
 }, $fz.isPrivate = true, $fz), "JU.P3,~B");
-$_M(c$, "setRotCenterRel", 
-($fz = function (relativeTo, pt) {
-var pt1 = JU.P3.newP (pt);
-if (relativeTo === "average") pt1.add (this.viewer.getAverageAtomPoint ());
- else if (relativeTo === "boundbox") pt1.add (this.viewer.getBoundBoxCenter ());
- else if (relativeTo !== "absolute") pt1.setT (this.rotationCenterDefault);
-this.setRotationCenterAndRadiusXYZ (pt1, true);
-}, $fz.isPrivate = true, $fz), "~S,JU.P3");
 $_M(c$, "setNewRotationCenter", 
 function (center, doScale) {
 if (center == null) center = this.rotationCenterDefault;
@@ -1477,9 +1470,21 @@ this.setRotationCenterAndRadiusXYZ (this.fixedRotationCenter, true);
 });
 $_M(c$, "setCenterAt", 
 function (relativeTo, pt) {
-this.setRotCenterRel (relativeTo, pt);
+var pt1 = JU.P3.newP (pt);
+switch (relativeTo) {
+case 96:
+pt1.add (this.viewer.getAverageAtomPoint ());
+break;
+case 1679429641:
+pt1.add (this.viewer.getBoundBoxCenter ());
+break;
+case 1073741826:
+pt1.setT (this.rotationCenterDefault);
+break;
+}
+this.setRotationCenterAndRadiusXYZ (pt1, true);
 this.resetFitToScreen (true);
-}, "~S,JU.P3");
+}, "~N,JU.P3");
 $_M(c$, "setFrameOffset", 
 function (modelIndex) {
 if (this.frameOffsets == null || modelIndex < 0 || modelIndex >= this.frameOffsets.length) this.frameOffset.set (0, 0, 0);

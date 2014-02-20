@@ -16,7 +16,7 @@ function output_file_gen()
 		
 	if (to_newtab == true)
 	{	
-		var out_window = window.open('', 'JMol file output');	
+		var out_window = window.open('', 'JMol file output');
 		out_window.document.write("<title>JMol file output</title>");	
 		//The <pre> tags are required to make the page writable as if it was a .txt file
 		out_window.document.write("<pre id=\"file_text\" style=\"white-space:pre-wrap\">");
@@ -33,6 +33,7 @@ function output_file_gen()
 				this.file_str = "";
 			}
 		}
+		
 	}
 	
 	switch (filetype)
@@ -65,6 +66,8 @@ function output_file_gen()
 				out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
 				out_window.focus();
 			}
+			
+			
 			break;			
 	}
 			
@@ -75,10 +78,13 @@ function output_file_gen()
 			switch (filetype)
 			{
 				case "recap":
-					savefile_script += "x = \"" + file_destination.file_str + "\"; write var x ?.mview; x = null;";
+					savefile_script += "x = '" + file_destination.file_str + "'; write var x ?.txt; x = null;";
+					break;
+				case "table":
+					savefile_script += "x = '" + file_destination.file_str + "'; write var x ?.dat; x = null;";
 					break;
 				case "json":
-					savefile_script += "x = \"" + file_destination.file_str + "\"; write var x ?.json; x = null;";
+					savefile_script += "x = '" + file_destination.file_str + "'; write var x ?.json; x = null;";
 					break;
 			}
 			
@@ -96,6 +102,9 @@ function output_file_gen()
 			{
 				case "recap":
 					$("#file_download").attr("download", "magres.txt");
+					break;
+				case "table":
+					$("#file_download").attr("download", "magres.dat");
 					break;
 				case "json":
 					$("#file_download").attr("download", "magres.json");

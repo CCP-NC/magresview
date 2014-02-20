@@ -17,6 +17,10 @@ this.renderWidth = 0;
 this.renderHeight = 0;
 Clazz.instantialize (this, arguments);
 }, javajs.awt, "Component");
+$_M(c$, "setParent", 
+function (p) {
+this.parent = p;
+}, "~O");
 Clazz.makeConstructor (c$, 
 function (type) {
 this.id = javajs.awt.Component.newID (type);

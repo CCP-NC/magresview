@@ -171,6 +171,20 @@ default:
 return false;
 }
 }, "~N");
+$_M(c$, "equals", 
+function (o) {
+if (!(Clazz.instanceOf (o, J.script.T))) return false;
+var t = o;
+if (this.tok == t.tok) return (t.intValue == this.intValue && (this.tok == 2 || t.value.equals (this.value)));
+switch (this.tok) {
+case 2:
+return (t.tok == 3 && (t.value).floatValue () == this.intValue);
+case 3:
+return (t.tok == 2 && (this.value).floatValue () == t.intValue);
+default:
+return false;
+}
+}, "~O");
 Clazz.defineStatics (c$,
 "nada", 0,
 "integer", 2,
@@ -254,7 +268,7 @@ Clazz.defineStatics (c$,
 "calculate", 4102,
 "capture", 4103,
 "cd", 1069064,
-"centerAt", 4105,
+"centerat", 4105,
 "connect", 4106,
 "console", 528395,
 "delay", 528397,
@@ -269,7 +283,7 @@ Clazz.defineStatics (c$,
 "initialize", 266264,
 "invertSelected", 4121,
 "loop", 528410,
-"mapProperty", 1052700,
+"mapproperty", 1052700,
 "minimize", 4126,
 "move", 4128,
 "moveto", 4130,

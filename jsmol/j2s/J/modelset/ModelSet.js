@@ -583,6 +583,7 @@ this.recalculateLeadMidpointsAndWingVectors (-1);
 var bsModels = this.getModelBitSet (bs, false);
 for (var i = bsModels.nextSetBit (0); i >= 0; i = bsModels.nextSetBit (i + 1)) this.shapeManager.refreshShapeTrajectories (i, bs, mat);
 
+this.averageAtomPoint = null;
 }, "JU.BS,JU.M4");
 $_M(c$, "getBsBranches", 
 function (dihedralList) {

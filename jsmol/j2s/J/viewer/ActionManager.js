@@ -713,13 +713,14 @@ if (this.checkUserAction (this.clickAction, x, y, 0, 0, time, 32768)) return;
 this.clickAction = this.viewer.notifyMouseClicked (x, y, this.clickAction, 32768);
 if (this.clickAction == 0) return;
 }if (J.util.Logger.debugging) J.util.Logger.debug (J.viewer.binding.Binding.getMouseActionName (this.clickAction, false));
-if (this.isBound (this.clickAction, 2) && this.viewer.frankClicked (x, y)) {
+if (this.isBound (this.clickAction, 2)) {
+if (this.viewer.frankClicked (x, y)) {
 this.viewer.popupMenu (-x, y, 'j');
 return;
-}if (this.isBound (this.clickAction, 2) && this.viewer.frankClickedModelKit (x, y)) {
+}if (this.viewer.frankClickedModelKit (x, y)) {
 this.viewer.popupMenu (0, 0, 'm');
 return;
-}var nearestPoint = null;
+}}var nearestPoint = null;
 var isBond = false;
 var isIsosurface = false;
 var t = null;

@@ -62,6 +62,8 @@ if (scale == null) {
 this.schemes.remove (name);
 var iScheme = this.createColorScheme (name, false, isOverloaded);
 if (isOverloaded) switch (iScheme) {
+case 2147483647:
+return 0;
 case 12:
 this.paletteFriendly = this.getPaletteAC ();
 break;
@@ -92,7 +94,7 @@ case 4:
 this.argbsShapely = J.viewer.JC.argbsShapely;
 break;
 }
-return (iScheme == 2147483647 ? 0 : iScheme);
+return iScheme;
 }this.schemes.put (name, scale);
 this.setThisScheme (name, scale);
 var iScheme = this.createColorScheme (name, false, isOverloaded);

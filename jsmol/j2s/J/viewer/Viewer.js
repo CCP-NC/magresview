@@ -596,7 +596,7 @@ $_M(c$, "setCenterAt",
 function (relativeTo, pt) {
 if (this.isJmolDataFrame ()) return;
 this.tm.setCenterAt (relativeTo, pt);
-}, "~S,JU.P3");
+}, "~N,JU.P3");
 $_M(c$, "setCenterBitSet", 
 function (bsCenter, doScale) {
 var center = (J.util.BSUtil.cardinalityOf (bsCenter) > 0 ? this.getAtomSetCenter (bsCenter) : null);
@@ -6286,15 +6286,14 @@ this.modelSet.deleteBonds (bsDeleted, false);
 this.statusManager.modifySend (-1, modelIndex, -2, "OK");
 }, "JU.BS");
 $_M(c$, "deleteModelAtoms", 
-function (firstAtomIndex, nAtoms, bsDeleted) {
-var modelIndex = this.getAtomModelIndex (firstAtomIndex);
+function (modelIndex, firstAtomIndex, nAtoms, bsDeleted) {
 this.statusManager.modifySend (-1, modelIndex, 1, "delete atoms " + J.util.Escape.eBS (bsDeleted));
 this.selectionManager.deleteModelAtoms (bsDeleted);
 J.util.BSUtil.deleteBits (this.getFrameOffsets (), bsDeleted);
 this.setFrameOffsets (this.getFrameOffsets ());
 this.getDataManager ().deleteModelAtoms (firstAtomIndex, nAtoms, bsDeleted);
 this.statusManager.modifySend (-1, modelIndex, -1, "OK");
-}, "~N,~N,JU.BS");
+}, "~N,~N,~N,JU.BS");
 $_M(c$, "getDeletedAtoms", 
 function () {
 return this.selectionManager.getDeletedAtoms ();

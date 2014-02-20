@@ -264,9 +264,8 @@ this.ifPt--;
 this.oPt -= 2;
 this.skipping = false;
 return true;
-default:
-return true;
 }
+return true;
 }var newOp = null;
 var tok;
 var isLeftOp = false;
@@ -279,9 +278,33 @@ switch (op.tok) {
 case 1073742195:
 this.haveSpaceBeforeSquare = true;
 return true;
+case 269484096:
+isLeftOp = true;
+if (!this.wasX || this.haveSpaceBeforeSquare) {
+this.squareCount++;
+op = newOp = J.script.T.tokenArraySquare;
+this.haveSpaceBeforeSquare = false;
+}break;
 case 269484080:
 if (!this.wasX) return false;
 break;
+case 269484097:
+break;
+case 269484049:
+if (!this.wasX && this.oPt >= 1 && tok0 == 269484048 && !J.script.ScriptMathProcessor.isOpFunc (this.oStack[this.oPt - 1])) return false;
+break;
+case 269484192:
+if (!this.wasX) op = J.script.SV.newV (269484224, "-");
+break;
+case 269484225:
+case 269484226:
+this.incrementX = (op.tok == 269484226 ? 1 : -1);
+if (this.ptid == this.ptx) {
+if (this.chk) return true;
+var x = this.xStack[this.xPt];
+this.xStack[this.xPt] = J.script.SV.newS ("").setv (x);
+return x.increment (this.incrementX);
+}break;
 case 32:
 case 64:
 case 96:
@@ -293,32 +316,6 @@ tok = (this.oPt < 0 ? 0 : tok0);
 if (!this.wasX || !(tok == 269484241 || tok == 1678770178 || tok == 1141899265)) return false;
 this.oStack[this.oPt].intValue |= op.tok;
 return true;
-case 269484096:
-isLeftOp = true;
-if (!this.wasX || this.haveSpaceBeforeSquare) {
-this.squareCount++;
-op = newOp = J.script.T.tokenArraySquare;
-this.haveSpaceBeforeSquare = false;
-}break;
-case 269484097:
-break;
-case 269484225:
-case 269484226:
-this.incrementX = (op.tok == 269484226 ? 1 : -1);
-if (this.ptid == this.ptx) {
-if (this.chk) return true;
-var x = this.xStack[this.xPt];
-this.xStack[this.xPt] = J.script.SV.newS ("").setv (x);
-return x.increment (this.incrementX);
-}break;
-case 269484192:
-if (this.wasX) break;
-this.addXInt (0);
-op = J.script.SV.newV (269484224, "-");
-break;
-case 269484049:
-if (!this.wasX && this.oPt >= 1 && tok0 == 269484048 && !J.script.ScriptMathProcessor.isOpFunc (this.oStack[this.oPt - 1])) return false;
-break;
 case 269484144:
 case 269484048:
 isLeftOp = true;
@@ -329,9 +326,8 @@ newOp = op;
 isLeftOp = true;
 break;
 }if (this.wasX == isLeftOp && tok0 != 269484241) {
-if (this.wasX && allowMathFunc) {
+if (!this.wasX || !allowMathFunc) return false;
 if (this.addOp (J.script.T.tokenComma)) return this.addOp (op);
-}return false;
 }break;
 }
 while (this.oPt >= 0 && tok0 != 269484066 && (!isLeftOp || tok0 == 269484241 && (op.tok == 269484241 || op.tok == 269484096)) && J.script.T.getPrecedence (tok0) >= J.script.T.getPrecedence (op.tok) && (tok0 != 269484224 || op.tok != 269484224)) {
@@ -345,6 +341,7 @@ break;
 break;
 }if (op.tok == 269484097 && tok0 == 269484096) {
 if (this.isArrayItem && this.squareCount == 1 && this.equalCount == 0) {
+this.wasX = false;
 this.addXVar (J.script.SV.newT (J.script.T.tokenArraySelector));
 break;
 }if (!this.doSelection ()) return false;
@@ -498,6 +495,7 @@ $_M(c$, "operate",
 var op = this.oStack[this.oPt--];
 var pt;
 var m;
+var m4;
 var s;
 if (this.debugHigh) {
 this.dumpStacks ("operate: " + op);
@@ -505,12 +503,38 @@ this.dumpStacks ("operate: " + op);
 return true;
 }var x2 = this.getX ();
 if (x2 === J.script.T.tokenArraySelector) return false;
-if (op.tok == 269484225 || op.tok == 269484226) {
+switch (op.tok) {
+case 269484225:
+case 269484226:
 if (!this.chk && !x2.increment (this.incrementX)) return false;
 this.wasX = true;
 this.putX (x2);
 return true;
-}if (op.tok == 269484144) {
+case 269484224:
+switch (x2.tok) {
+case 2:
+return this.addXInt (-x2.asInt ());
+case 8:
+pt = JU.P3.newP (x2.value);
+pt.scale (-1.0);
+return this.addXPt (pt);
+case 9:
+var pt4 = JU.P4.newPt (x2.value);
+pt4.scale (-1.0);
+return this.addXPt4 (pt4);
+case 11:
+m = JU.M3.newM3 (x2.value);
+m.transpose ();
+return this.addXM3 (m);
+case 12:
+m4 = JU.M4.newM4 (x2.value);
+m4.transpose ();
+return this.addXM4 (m4);
+case 10:
+return this.addXBs (J.util.BSUtil.copyInvert (J.script.SV.bsSelectVar (x2), (Clazz.instanceOf (x2.value, J.modelset.BondSet) ? this.viewer.getBondCount () : this.viewer.getAtomCount ())));
+}
+return this.addXFloat (-x2.asFloat ());
+case 269484144:
 if (this.chk) return this.addXBool (true);
 switch (x2.tok) {
 case 9:
@@ -520,7 +544,7 @@ m = JU.M3.newM3 (x2.value);
 m.invert ();
 return this.addXM3 (m);
 case 12:
-var m4 = JU.M4.newM4 (x2.value);
+m4 = JU.M4.newM4 (x2.value);
 m4.invert ();
 return this.addXM4 (m4);
 case 10:
@@ -528,8 +552,8 @@ return this.addXBs (J.util.BSUtil.copyInvert (J.script.SV.bsSelectVar (x2), (Cla
 default:
 return this.addXBool (!x2.asBoolean ());
 }
-}var iv = op.intValue & -481;
-if (op.tok == 269484241) {
+case 269484241:
+var iv = op.intValue & -481;
 switch (iv) {
 case 1073741824:
 return this.getAllProperties (x2, op.value);
@@ -586,7 +610,8 @@ if (!(Clazz.instanceOf (v, J.script.SV))) return false;
 x2 = v;
 }if (op.tok == x2.tok) x2 = this.getX ();
 return this.getPointOrBitsetOperation (op, x2);
-}var x1 = this.getX ();
+}
+var x1 = this.getX ();
 if (this.chk) {
 if (op === J.script.T.tokenAndFALSE || op === J.script.T.tokenOrTRUE) this.chk = false;
 return this.addXVar (J.script.SV.newT (x1));
@@ -753,30 +778,6 @@ return this.addXPt4 (q2.mulQ (q1.inv ()).toPoint4f ());
 }return this.addXPt4 (q1.add (-x2.asFloat ()).toPoint4f ());
 }
 return this.addXFloat (x1.asFloat () - x2.asFloat ());
-case 269484224:
-switch (x2.tok) {
-case 2:
-return this.addXInt (-x2.asInt ());
-case 8:
-pt = JU.P3.newP (x2.value);
-pt.scale (-1.0);
-return this.addXPt (pt);
-case 9:
-pt4 = JU.P4.newPt (x2.value);
-pt4.scale (-1.0);
-return this.addXPt4 (pt4);
-case 11:
-m = JU.M3.newM3 (x2.value);
-m.transpose ();
-return this.addXM3 (m);
-case 12:
-var m4 = JU.M4.newM4 (x2.value);
-m4.transpose ();
-return this.addXM4 (m4);
-case 10:
-return this.addXBs (J.util.BSUtil.copyInvert (J.script.SV.bsSelectVar (x2), (Clazz.instanceOf (x2.value, J.modelset.BondSet) ? this.viewer.getBondCount () : this.viewer.getAtomCount ())));
-}
-return this.addXFloat (-x2.asFloat ());
 case 1276117508:
 if (x1.tok == 8 && x2.tok == 8) {
 pt = x1.value;

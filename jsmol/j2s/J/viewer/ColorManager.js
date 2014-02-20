@@ -83,10 +83,9 @@ id = atom.getAtomicAndIsotopeNumber ();
 if (id < J.util.Elements.elementNumberMax) return this.g3d.getChangeableColix (id, this.argbsCpk[id]);
 var id0 = id;
 id = J.util.Elements.altElementIndexFromNumber (id);
-if (id == 0) {
+if (id > 0) return this.g3d.getChangeableColix (J.util.Elements.elementNumberMax + id, this.altArgbsCpk[id]);
 id = J.util.Elements.getElementNumber (id0);
 return this.g3d.getChangeableColix (id, this.argbsCpk[id]);
-}return this.g3d.getChangeableColix (J.util.Elements.elementNumberMax + id, this.altArgbsCpk[id]);
 case 2:
 index = J.util.ColorEncoder.quantize (atom.getPartialCharge (), -1, 1, J.viewer.JC.PARTIAL_CHARGE_RANGE_SIZE);
 return this.g3d.getChangeableColix (J.viewer.JC.PARTIAL_CHARGE_COLIX_RED + index, J.viewer.JC.argbsRwbScale[index]);
