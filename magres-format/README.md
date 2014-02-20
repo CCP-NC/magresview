@@ -1,9 +1,20 @@
 magres-format
 =============
 
-Code for parsing the CCP-NC ab-initio magnetic resonance file format as used in the latest version of Castep. See more at http://www.ccpnc.ac.uk/pmwiki.php/CCPNC/Fileformat
+Code for parsing the CCP-NC ab-initio magnetic resonance file format as used in the latest version of [CASTEP](http://www.castep.org), coming soon to other codes such as [Quantum ESPRESSO](http://www.quantum-espresso.org). See [more on this page](http://www.ccpnc.ac.uk/pmwiki.php/CCPNC/Fileformat)
 
 Documentation for the Python API is [available here](http://tfgg.github.io/magres-format/build/html/).
+
+A few IPython notebooks have been written using the library as examples. You can [see them here](https://github.com/tfgg/magres-format/tree/master/notebooks).
+
+IPython is an enhanced interpreter for Python and offers an excellent in-browser workbook experience,
+similar to Matlab or Mathematica. This is particularly useful when developing code using this library
+to process your magnetic resonance calculations. You can [read instructions for installing it here](http://ipython.org/install.html).
+
+<p align="center">
+  <img src='https://github.com/tfgg/magres-format/raw/master//samples/ethanol.png' /><br/>
+  A calculated J-coupling network in ethanol.
+</p>
 
 Installing
 ----------
@@ -43,22 +54,14 @@ and optionally with the associated job's .castep file, to capture the lattice in
 Python module usage
 -------------------
 
-More documentation is [available here](http://tfgg.github.io/magres-format/build/html/)
+The `magres.format` and `magres.atoms` modules contain code for, respectively, a low level parser of the CCPNC ab-initio
+magres format and a high-level collection of objects to represent its contents.
 
-From inside Python you can import the magres.format module and use the MagresFile class.
+The module also include the useful `magres.constants` module, which gives the best-known gamma constants and quadrupole 
+moments for all isotopes, the most common isotopes used in experiments.
 
-
-     >>> from magres.format import MagresFile
-     >>> magres_file = MagresFile(open('samples/T1Si0.magres'))
-     >>> magres_file
-     <magres.format.MagresFile object at 0x26ad690>
-
-The 'data_dict' member variable contains all the information parsed from the file. You can also request the data
-serialized as JSON by the .as_json() method and load JSON data with the .load_json() method.
-
-The module also include the useful magres.constants module, which gives the best-known gamma constants and quadrupole 
-moments for all isotopes, the most common isotopes used in experiments, and helper functions such as K_to_J, which
-converts a reduced K tensor to a full J tensor.
+More documentation is [available here](http://tfgg.github.io/magres-format/build/html/). Also, see the IPython notebooks
+linked at the top of this document.
 
 JSON schema
 -----------

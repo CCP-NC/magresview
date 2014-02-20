@@ -1,5 +1,6 @@
 #!python
 import sys
+from numpy.linalg import det
 from magres.format import MagresFile, BadVersion
 from magres.atoms import MagresAtoms
 from magres.utils import find_all_magres
@@ -29,13 +30,28 @@ if tensor == "isc_spin_total":
   K1 = atom1.isc_fc[atom2].K + atom1.isc_spin[atom2].K
   K2 = atom2.isc_fc[atom1].K + atom2.isc_spin[atom1].K
 else:
-  K1 = getattr(atom1, tensor)[atom2].K_sym
-  K2 = getattr(atom2, tensor)[atom1].K_sym
+  K1 = getattr(atom1, tensor)[atom2].K
+  K2 = getattr(atom2, tensor)[atom1].K
 
-print "K tensors"
-print " ".join(["%10s" % ("%.3f" % x) for x in K1[0]]) + "   " + " ".join(["%10s" % ("%.3f" % x) for x in K2[0]])
-print " ".join(["%10s" % ("%.3f" % x) for x in K1[1]]) + "   " + " ".join(["%10s" % ("%.3f" % x) for x in K2[1]])
-print " ".join(["%10s" % ("%.3f" % x) for x in K1[2]]) + "   " + " ".join(["%10s" % ("%.3f" % x) for x in K2[2]])
+
+#K1 = getattr(atom1, tensor)[atom2].K
+#K2 = getattr(atom2, tensor)[atom1].K
+
+diff = K1 - K2
+
+print sys.argv[1], abs(det(diff))**(1.0/3)
+
+print >>sys.stderr, "K tensors"
+print >>sys.stderr, " ".join(["%10s" % ("%.3f" % x) for x in K1[0]]) + "   " + " ".join(["%10s" % ("%.3f" % x) for x in K2[0]])
+print >>sys.stderr, " ".join(["%10s" % ("%.3f" % x) for x in K1[1]]) + "   " + " ".join(["%10s" % ("%.3f" % x) for x in K2[1]])
+print >>sys.stderr, " ".join(["%10s" % ("%.3f" % x) for x in K1[2]]) + "   " + " ".join(["%10s" % ("%.3f" % x) for x in K2[2]])
+
+print
+print >>sys.stderr, " ".join(["%10s" % ("%.3f" % x) for x in diff[0]]) 
+print >>sys.stderr, " ".join(["%10s" % ("%.3f" % x) for x in diff[1]])
+print >>sys.stderr, " ".join(["%10s" % ("%.3f" % x) for x in diff[2]])
+
+print atom1.position - atom2.position
 
 #print "K_sym difference, K_asym difference"
 #delta_K_sym = isc1.K_sym - isc2.K_sym

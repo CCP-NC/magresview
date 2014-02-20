@@ -7,12 +7,48 @@
 
 import sys,os
 import math
-import constants
 import numpy
+import re
 
-from decorators import lazyproperty
+import constants
+import html_repr
 
 from format import MagresFile
+
+from efg import MagresAtomEfg
+from isc import MagresAtomIsc
+from ms import MagresAtomMs
+from atom import MagresAtom, MagresAtomImage
+
+element_colours = {'H': ("#EEEEEE", "#000000"),
+                   'C': ("#999999", "#000000"),
+                   'O': ("#FF0000", "#FFFFFF"),
+                   'N': ("#0000FF", "#FFFFFF"),}
+
+min_dist = 1.0
+max_dist = 2.0
+
+class ListPropertyView(list):
+  """
+    Allows property accessors on lists of objects. E.g.
+
+    x = [A(1), A(2), A(3)]
+    x.a = [1,2,3]
+
+    if A(a) is an object that stores a in self.a
+  """
+
+  def mean(self, *args, **kwargs):
+    return numpy.mean([x for x in self], *args, **kwargs) 
+
+  def __getattr__(self, prop):
+    if any([hasattr(x, prop) for x in self]):
+      return ListPropertyView([getattr(x, prop, None) for x in self])
+    else:
+      raise AttributeError("{} not present".format(prop))
+
+  def _repr_html_(self):
+    return html_repr.list_view(self)
 
 def insideout():
   """
@@ -27,556 +63,6 @@ def insideout():
     yield i
     yield -i
     i += 1
-
-class MagresAtomEfg(object):
-  """
-    Representation of the electric field gradient on a particular atom.
-  """
-
-  def __init__(self, atom, magres_efg):
-    self.atom = atom
-    self.magres_efg = magres_efg
-
-  @lazyproperty
-  def V(self):
-    """
-      The EFG V tensor in atomic units.
-    """
-    return numpy.array(self.magres_efg['V'])
-
-  @lazyproperty
-  def Cq(self):
-    """
-      The Cq of the V tensor.
-
-      :math:`C_q = eV_{ZZ} Q / h`
-
-      Where Q is the quadrupole moment of this particular species, e is the electron charge and h is Planck's constant.
-    """
-    try:
-      return constants.efg_to_Cq_isotope(self.V, self.atom.species, self.atom.isotope)
-    except KeyError:
-      return 0.0
-
-  @lazyproperty
-  def eta(self):
-    evals = self.evals
-
-    return (evals[0] - evals[1])/evals[2]
-
-  @lazyproperty
-  def evalsvecs(self):
-    """
-      The eigenvalues and eigenvectors of V, ordered according to the Haeberlen convention:
-
-      :math:`|V_{ZZ}| \geq |V_{XX}| \geq |V_{YY}|`
-      
-      where
-
-        :math:`V_{XX}` = evals[0]
-
-        :math:`V_{YY}` = evals[1]
-
-        :math:`V_{ZZ}` = evals[2]
-    """
-    evals, evecs = numpy.linalg.eig(self.magres_efg['V'])
-
-    se = zip(*sorted(zip(evals, evecs), key=lambda (x,y): abs(x)))
-
-    return ([se[0][1], se[0][0], se[0][2]], [se[1][1], se[1][0], se[1][2]])
-
-  @lazyproperty
-  def evecs(self):
-    """
-      The eigenvectors of V, ordered according to the Haeberlen convention:
-
-      :math:`|V_{ZZ}| \geq |V_{XX}| \geq |V_{YY}|`
-      
-      where
-
-        :math:`V_{XX}` = evals[0]
-
-        :math:`V_{YY}` = evals[1]
-
-        :math:`V_{ZZ}` = evals[2]
-    """
-    return self.evalsvecs[1]
-  
-  @lazyproperty
-  def evals(self):
-    """
-      The eigenvalues of V, ordered according to the Haeberlen convention:
-
-      :math:`|V_{ZZ}| \geq |V_{XX}| \geq |V_{YY}|`
-      
-      where
-
-        :math:`V_{XX}` = evals[0]
-
-        :math:`V_{YY}` = evals[1]
-
-        :math:`V_{ZZ}` = evals[2]
-    """
-    return self.evalsvecs[0]
-
-class MagresAtomIsc(object):
-  """
-    Representation of the indirect spin coupling between two atoms.
-  """
-  def __init__(self, atom1, atom2, magres_isc):
-    self.atom1 = atom1
-    self.atom2 = atom2
-    self.magres_isc = magres_isc
-
-  @property
-  def symbol(self):
-    """
-      A textual symbol representing this coupling.
-    """
-    return "%s -> %s" % (self.atom1, self.atom2)
-
-  @property
-  def dist(self):
-    """
-      The distance between the two atoms involved.
-    """
-    return self.atom1.dist(self.atom2.position)
-
-  @property
-  def K(self):
-    """
-      The reduced indirect spin-spin coupling K tensor.
-    """
-    return numpy.array(self.magres_isc['K'])
-  
-  @property
-  def K_iso(self):
-    """
-      The isotropic component of the reduced indirect spin-spin coupling tensor.
-    """
-    return numpy.trace(self.K)/3.0
-
-  @property
-  def J(self):
-    """
-      The spin-spin coupling J tensor.
-    """
-    return constants.K_to_J_iso(self.K, self.atom1.species, self.atom1.isotope, self.atom2.species, self.atom2.isotope)
-
-  @property
-  def J_iso(self):
-    """
-      The isotropic component of the indirect spin-spin coupling J tensor.
-    """
-    return numpy.trace(self.J)/3.0
-
-  @property
-  def K_sym(self):
-    """
-      The symmetric component of the reduced indirect spin-spin coupling tensor K.
-    """
-    return (self.K + self.K.T)/2.0
-  
-  @property
-  def K_asym(self):
-    """
-      The asymmetric component of the reduced indirect spin-spin coupling tensor K.
-    """
-    return (self.K - self.K.T)/2.0
-  
-  @property
-  def J_sym(self):
-    """
-      The symmetric component of the indirect spin-spin coupling tensor J.
-    """
-    return (self.J + self.J.T)/2.0
-  
-  @property
-  def J_asym(self):
-    """
-      The asymmetric component of the indirect spin-spin coupling tensor J.
-    """
-    return (self.J - self.J.T)/2.0
-
-  @lazyproperty
-  def K_evalsvecs(self):
-    evals, evecs = numpy.linalg.eig(self.K_sym)
-
-    se = zip(*sorted(zip(evals, evecs), key=lambda (x,y): abs(x-self.K_iso)))
-
-    return ([se[0][1], se[0][0], se[0][2]], [se[1][1], se[1][0], se[1][2]])
-
-  @lazyproperty
-  def K_evecs(self):
-    return self.K_evalsvecs[1]
-  
-  @lazyproperty
-  def K_evals(self):
-    return self.K_evalsvecs[0]
-
-  @lazyproperty
-  def J_evalsvecs(self):
-    evals, evecs = numpy.linalg.eig(self.J_sym)
-
-    se = zip(*sorted(zip(evals, evecs), key=lambda (x,y): abs(x-self.J_iso)))
-
-    return ([se[0][1], se[0][0], se[0][2]], [se[1][1], se[1][0], se[1][2]])
-
-  @lazyproperty
-  def J_evecs(self):
-    return self.J_evalsvecs[1]
-  
-  @lazyproperty
-  def J_evals(self):
-    return self.J_evalsvecs[0]
-
-  @property
-  def K_aniso(self):
-    """
-      The K anisotropy.
-    """
-    jx = self.K_evals
-    return jx[2] - (jx[0] + jx[1])/2.0
-  
-  @property
-  def J_aniso(self):
-    """
-      The J anisotropy.
-    """
-    jx = self.J_evals
-    return jx[2] - (jx[0] + jx[1])/2.0
-
-  @property
-  def K_eta(self):
-    """
-      The K principal component asymmetry.
-    """
-    jx = self.K_evals
-    return (jx[1] - jx[0]) / (jx[2] - sum(jx)/3.0)
-  
-  @property
-  def J_eta(self):
-    """
-      The K principal component asymmetry.
-    """
-    jx = self.J_evals
-    return (jx[1] - jx[0]) / (jx[2] - sum(jx)/3.0)
-
-class MagresAtomMs(object):
-  """
-    Representation of the magnetic shielding of a particular atom.
-  """
-
-  def __init__(self, atom, magres_ms, reference=None):
-    self.atom = atom
-    self.magres_ms = magres_ms
-    self.reference = reference
-
-  @lazyproperty
-  def sigma(self):
-    """
-      The sigma tensor, i.e. the magnetic shielding.
-    """
-    return numpy.array(self.magres_ms['sigma'])
-
-  @lazyproperty
-  def sym(self):
-    """
-      The symmetric part of sigma.
-      
-      :math:`\sigma_{sym} = (\sigma + \sigma^T)/2`
-    """
-    return (self.sigma + self.sigma.T)/2.0
-  
-  @lazyproperty
-  def asym(self):
-    """
-      The asymmetric part of sigma.
-
-      :math:`\sigma_{asym} = (\sigma - \sigma^T)/2`
-    """
-    return (self.sigma - self.sigma.T)/2.0
-
-  @lazyproperty
-  def iso(self):
-    """
-      The isotropic part of sigma. Defined by
-
-      :math:`\sigma_{iso} = (\sigma_{XX} + \sigma_{YY} + \sigma_{ZZ})/3`
-
-    """
-    return numpy.trace(self.sigma)/3.0
-
-  @lazyproperty
-  def aniso(self):
-    """
-      The shielding anisotropy. Defined by
-
-      :math:`\Delta \sigma = \sigma_{ZZ} - (\sigma_{XX} + \sigma_{YY})/2`
-    """
-    ev = self.evals
-    return ev[2] - (ev[0] + ev[1])/2.0
-
-  @lazyproperty
-  def zeta(self):
-    """
-      The shielding anisotropy (alternative). Defined by
-
-      :math:`\zeta = \sigma_{ZZ} - \sigma_{iso}`
-    """
-    return self.evals[2] - self.iso
-
-  @lazyproperty
-  def eta(self):
-    """
-      The shielding asymmetry. Defined by
-
-      :math:`\eta = (\sigma_{YY} - \sigma_{XX}) / \zeta`
-    """
-    return (self.evals[1] - self.evals[0]) / self.zeta
-
-  @lazyproperty
-  def evalsvecs(self):
-    """
-      The eigenvalues and eigenvectors of the symmetric part of sigma, ordered according to the Haeberlen convention:
-
-      :math:`|\sigma_{ZZ} - \sigma_{iso}| \geq |\sigma_{XX} - \sigma_{iso}| \geq |\sigma_{YY} - \sigma_{iso}|`
-      
-      where
-
-        sigma_XX = evals[0]
-        sigma_YY = evals[1]
-        sigma_ZZ = evals[2]
-    """
-
-    evals, evecs = numpy.linalg.eig(self.sym)
-
-    se = zip(*sorted(zip(evals, evecs), key=lambda (x,y): abs(x - self.iso)))
-
-    return ([se[0][1], se[0][0], se[0][2]], [se[1][1], se[1][0], se[1][2]])
-
-  @lazyproperty
-  def evecs(self):
-    """
-      The eigenvectors of sigma, ordered according to the Haeberlen convention:
-
-      :math:`|\sigma_{ZZ} - \sigma_{iso}| \geq |\sigma_{XX} - \sigma_{iso}| \geq |\sigma_{YY} - \sigma_{iso}|`
-
-      where
-
-        sigma_XX = evals[0]
-        sigma_YY = evals[1]
-        sigma_ZZ = evals[2]
-    """
-    return self.evalsvecs[1]
-  
-  @lazyproperty
-  def evals(self):
-    """
-      The eigenvalues of sigma, ordered according to the Haeberlen convention:
-
-      :math:`|\sigma_{ZZ} - \sigma_{iso}| \geq |\sigma_{XX} - \sigma_{iso}| \geq |\sigma_{YY} - \sigma_{iso}|`
-
-      where
-
-        sigma_XX = evals[0]
-        sigma_YY = evals[1]
-        sigma_ZZ = evals[2]
-    """
-    return self.evalsvecs[0]
-
-  @lazyproperty
-  def evalsvecs_mehring(self):
-    """
-      The eigenvalues and eigenvectors of the symmetric part of sigma ordered according to the Mehring notation:
-
-      :math:`\sigma_{11} \leq \sigma_{22} \leq \sigma_{33}`
-    """
- 
-    evals, evecs = numpy.linalg.eig(self.sym)
-
-    se = zip(*sorted(zip(evals, evecs), key=lambda (x,y): x))
-
-    return ([se[0][0], se[0][1], se[0][2]], [se[1][0], se[1][1], se[1][2]])
-  
-  @lazyproperty
-  def evals_mehring(self):
-    """
-      The eigenvalues of sigma ordered according to the Mehring notation:
-
-      :math:`\sigma_{11} \leq \sigma_{22} \leq \sigma_{33}`
-    """
-    return self.evalsvecs_mehring[0]
-
-  @lazyproperty
-  def evecs_mehring(self):
-    """
-      The eigenvectors of sigma ordered according to the Mehring notation:
-
-      :math:`\sigma_{11} \leq \sigma_{22} \leq \sigma_{33}`
-    """
-    return self.evalsvecs_mehring[1]
-
-  @lazyproperty
-  def span(self):
-    """
-      The span of sigma. Defined by
-
-      :math:`\Omega = \sigma_{33} - \sigma_{11}`
-    """
-    return self.evals_mehring[2] - self.evals_mehring[0]
-  
-  @lazyproperty
-  def skew(self):
-    """
-      The skew of sigma. Defined by
-
-      :math:`\kappa = 3(\sigma_{iso} - \sigma_{22}) / \Omega`
-    """
-    return 3.0*(self.iso - self.evals_mehring[1]) / self.span
-
-class MagresAtom(object):
-  def __init__(self, magres_atom):
-    self.magres_atom = magres_atom
-
-  def __str__(self):
-    if self.species != self.label:
-      return "%d%s(%s)%d" % (self.isotope, self.species, self.label, self.index)
-    else:
-      return "%d%s%d" % (self.isotope, self.species, self.index)
-
-  def dist(self, r):
-    """
-      Calculate distance from this atom to another position or atom.
-    """
-
-    if hasattr(r, 'position'):
-      r = r.position
-    dr = self.position - r
-    return math.sqrt(numpy.dot(dr, dr))
-
-  @property
-  def label(self):
-    """
-      This atom's label.
-    """
-    return self.magres_atom['label']
-  
-  @label.setter
-  def label(self, value):
-    self.magres_atom['label'] = value
-
-  @property
-  def species(self):
-    """
-      This atom's species.
-    """
-    return self.magres_atom['species']
- 
-  @species.setter
-  def species(self, value):
-    self.magres_atom['species'] = value
-
-  @property
-  def index(self):
-    """
-      This atom's label index.
-    """
-    return self.magres_atom['index']
-  
-  @property
-  def position(self):
-    """
-      This atom's position in cartesian coordinates. Units are Angstroms.
-    """
-    return numpy.array(self.magres_atom['position'])
-
-  @property
-  def isotope(self):
-    """
-      The isotope of this atom. Assumed to be most common NMR-active nucleus unless specified otherwise.
-    """
-    if hasattr(self, '_isotope'):
-      return self._isotope
-    else:
-      if self.species in constants.gamma_iso:
-        return constants.gamma_iso[self.species]
-      else:
-        return None
-
-  @isotope.setter
-  def isotope(self, value):
-    if (self.species, value) in constants.gamma:
-      self._isotope = value
-    else:
-      raise ValueError("Unknown NMR isotope %d%s" % (value, self.species))
-
-  @property
-  def gamma(self):
-    """
-      The gyromagnetic ratio constant of this atom's species and isotope.
-    """
-    if (self.species, self.isotope) in constants.gamma:
-      return constants.gamma[(self.species, self.isotope)]
-    else:
-      return 0.0
-  
-  @property
-  def Q(self):
-    """
-      The quadrupole moment of this atom's species and isotope.
-    """
-    if (self.species, self.isotope) in constants.Q:
-      return constants.Q[(self.species, self.isotope)]
-    else:
-      return 0.0
-
-  @property
-  def spin(self):
-    if (self.species, self.isotope) in constants.iso_spin:
-      return constants.iso_spin[(self.species, self.isotope)]
-    else:
-      return None # We don't even know what spin this isotope is.
-
-class MagresAtomImage(object):
-  """
-    A periodic image of a particular atom. Exactly like the underlying atom except for its position.
-  """
-
-  def __init__(self, atom, position):
-    object.__setattr__(self, "position", position)
-    object.__setattr__(self, "atom", atom)
-
-  def dist(self, r):
-    if hasattr(r, 'position'):
-      r = r.position
-
-    dr = self.position - r
-    return math.sqrt(numpy.dot(dr, dr))
-
-  def __str__(self):
-    return str(self.atom)
-  
-  def __unicode__(self):
-    return unicode(self.atom)
-
-  def __getattribute__(self, name):
-    if name == "atom":
-      return object.__getattribute__(self, "atom")
-    elif name == "position":
-      return object.__getattribute__(self, "position")
-    elif name == "dist":
-      return object.__getattribute__(self, "dist")
-    else:
-      return getattr(object.__getattribute__(self, "atom"), name)
-
-  def __setattr__(self, name, value):
-    if name == "position":
-      object.__setattr__(self, "position", value)
-    elif name == "atom":
-      object.__setattr__(self, "atom", value)
-    else:
-      setattr(object.__getattribute__(self, "atom"), name, value)
 
 class LabelNotFound(Exception):
   pass
@@ -636,6 +122,15 @@ class MagresAtomsView(object):
       else:
         self.species_index[atom.species] = [atom]
 
+      # This is a bit hacky. Need some way to transfer through arbitrary properties?
+      # Possibly improve PropertyView so it's an arbitrary sequence of objects, and queries
+      # on its properties will return a sequence.
+      #if hasattr(atom, 'isc'):
+      #  if not hasattr(self, 'isc'):
+      #    self.isc = []
+      #
+      #  self.isc.append(atom.isc)
+
   def get_label(self, label, index=None):
     """
       Get a single atom of a particular label and index.
@@ -676,7 +171,10 @@ class MagresAtomsView(object):
     """
 
     if species not in self.species_index:
-      return []
+      if index is None:
+        return []
+      else:
+        return None
     else:
       if index is None:
         return self.species_index[species]
@@ -699,6 +197,10 @@ class MagresAtomsView(object):
       if s in self.species_index:
         rtn_atoms += self.species_index[s]
     return MagresAtomsView(rtn_atoms, self.lattice)
+
+  def set_reference(self, reference):
+    for atom in self.atoms:
+      atom.reference = float(reference)
 
   def within(self, pos, max_dr):
     """
@@ -735,7 +237,7 @@ class MagresAtomsView(object):
 
   #  return [MagresAtomImage(numpy.dot(M, atom.position.T).T, atom) for atom in self.atoms]
 
-  def _least_mirror(self, a, b):
+  def least_mirror(self, a, b):
     """
       Give the closest periodic image of a to b given the current lattice.
     """
@@ -796,6 +298,18 @@ class MagresAtomsView(object):
 
     return images
 
+  re_species_index = re.compile('([A-Za-z]+)([0-9]+)')
+
+  def __getattribute__(self, attr_name):
+    try:
+      return object.__getattribute__(self, attr_name)
+    except AttributeError:
+      try:
+        s, i = self.re_species_index.findall(attr_name)[0]
+        return self.get_species(s, int(i))
+      except:
+        return getattr(ListPropertyView(self.atoms), attr_name)
+
   def __getitem__(self, idx):
     if type(idx) == tuple:
       s, i = idx
@@ -808,6 +322,130 @@ class MagresAtomsView(object):
 
   def __len__(self):
     return len(self.atoms)
+
+  def __add__(self, b):
+    if type(b) is MagresAtomsView and (self.lattice == b.lattice).all():
+      new_atoms = set(self.atoms).union(set(b.atoms))
+
+      return MagresAtomsView(list(new_atoms), self.lattice)
+
+    elif type(b) is MagresAtom:
+      new_atoms = set(self.atoms + [b])
+      
+      return MagresAtomsView(list(new_atoms), self.lattice)
+
+  def __radd__(self, b):
+    if type(b) is MagresAtom:
+      new_atoms = set(self.atoms + [b])
+      
+      return MagresAtomsView(list(new_atoms), self.lattice)
+
+  def _repr_png_(self):
+    import pydot
+
+    dist_graph = pydot.Dot(graph_type='graph', size="100", prog='neato', dim=2)
+
+    has_isc = numpy.array([hasattr(atom, 'isc') for atom in self.atoms]).any()
+    has_ms = numpy.array([hasattr(atom, 'ms') for atom in self.atoms]).any()
+
+    def lm_dist(atom1, atom2):
+        return self.least_mirror(atom1.position, atom2.position)
+
+    def strength_color(dist):
+        x = min(max((abs(dist) - min_dist) / (max_dist - min_dist),0.0),1.0)
+        y = (1.0-x)*255
+        
+        return "#000000{:02x}".format(int(y))
+
+    for atom in self:
+        fillcolor, fontcolor = element_colours.get(atom.species, ("#CCCCCC","#000000"))
+         
+        #if has_ms:
+        #  label = "{}\n{:.3f}".format(str(atom), atom.ms.iso)
+        #else:
+        label = str(atom)#"{}\n{:.3f}".format(str(atom), 3.0)
+
+        node = pydot.Node(str(atom),
+                          label=label,
+                          shape="circle",
+                          style="filled",
+                          size="0.01",
+                          fillcolor=fillcolor,
+                          fontcolor=fontcolor,
+                          fontsize=10)
+
+        dist_graph.add_node(node)
+
+    bonds_done = set()
+    atom_set = set([str(atom) for atom in self.atoms])
+
+    for atom1 in self:
+      for atom2 in atom1.bonded:
+        if str(atom2) not in atom_set:
+          continue
+
+        dist, pos = lm_dist(atom1, atom2)
+
+        idx1 = (str(atom2), str(atom1))
+        idx2 = (str(atom1), str(atom2))
+
+        if idx1 not in bonds_done and idx2 not in bonds_done:
+          bonds_done.add(idx2)
+
+          # Hide bonds if we have ISC, but keep for structure
+          if has_isc:
+            color = "#000000{:02x}".format(64)
+          else:
+            color = strength_color(dist)
+            
+          edge = pydot.Edge(str(atom1),
+                            str(atom2),
+                            color=color,
+                            len=dist,
+                            fontsize=8)
+
+          dist_graph.add_edge(edge)
+
+    if has_isc:
+      isc_done = set()
+      atom_set = {str(atom) for atom in self.atoms}
+
+      min_isc = min([abs(isc.K_iso) for isc_dict in self.isc if isc_dict is not None for isc in isc_dict.values() if isc.atom1 is not isc.atom2 and str(isc.atom1) in atom_set and str(isc.atom2) in atom_set])
+      max_isc = max([abs(isc.K_iso) for isc_dict in self.isc if isc_dict is not None for isc in isc_dict.values() if isc.atom1 is not isc.atom2 and str(isc.atom1) in atom_set and str(isc.atom2) in atom_set])
+
+      def strength_color_K(K_iso):
+          x = min(max((abs(K_iso) - min_isc) / (max_isc - min_isc),0.0),1.0)
+          y = x*255
+
+          if K_iso > 0.0:
+            return "#FF0000%02X" % y
+          else:
+            return "#0000FF%02X" % y
+
+      for atom in self.atoms:
+        if hasattr(atom, 'isc'):
+          for isc in atom.isc.values():
+            strength = min(max((abs(isc.K_iso) - min_isc) / (max_isc - min_isc),0.0),1.0)
+
+            if strength > 0.01 and \
+               isc.atom1 is not isc.atom2 and \
+               (str(isc.atom2), str(isc.atom1)) not in isc_done and \
+               str(isc.atom1) in atom_set and \
+               str(isc.atom2) in atom_set:
+
+              isc_done.add((str(isc.atom1), str(isc.atom2)))
+
+              edge = pydot.Edge(str(isc.atom1),
+                                str(isc.atom2),
+                                fontsize=8,
+                                color=strength_color_K(isc.K_iso),
+                                fontcolor=strength_color_K(isc.K_iso),
+                                label="{:.3f}".format(isc.K_iso),
+                                len=lm_dist(isc.atom1, isc.atom2)[0])
+
+              dist_graph.add_edge(edge)
+
+    return dist_graph.create_png(prog='neato')
 
 class MagresAtoms(MagresAtomsView):
   """
@@ -829,6 +467,9 @@ class MagresAtoms(MagresAtomsView):
       atoms = []
 
     super(MagresAtoms, self).__init__(atoms, lattice)
+    
+    if len(self) < 20:
+      self.calculate_bonds()
 
   def _from_magres(self, magres_file):
     """
@@ -857,12 +498,10 @@ class MagresAtoms(MagresAtomsView):
 
         ms_type = tag
         
-        setattr(self, ms_type, [])
-
         for magres_ms in magres_file.data_dict['magres'][ms_type]:
           atom = temp_label_index[(magres_ms['atom']['label'], magres_ms['atom']['index'])]
           magres_atom_ms = MagresAtomMs(atom, magres_ms)
-          getattr(self, ms_type).append(magres_atom_ms)
+          #getattr(self, ms_type).append(magres_atom_ms)
           setattr(atom, ms_type, magres_atom_ms)
 
       for tag in magres_file.data_dict['magres']:
@@ -871,12 +510,10 @@ class MagresAtoms(MagresAtomsView):
 
         efg_type = tag
         
-        setattr(self, efg_type, [])
-
         for magres_efg in magres_file.data_dict['magres'][efg_type]:
           atom = temp_label_index[(magres_efg['atom']['label'], magres_efg['atom']['index'])]
           magres_atom_efg = MagresAtomEfg(atom, magres_efg)
-          getattr(self, efg_type).append(magres_atom_efg)
+          #getattr(self, efg_type).append(magres_atom_efg)
           setattr(atom, efg_type, magres_atom_efg)
      
       for tag in magres_file.data_dict['magres']:
@@ -885,13 +522,13 @@ class MagresAtoms(MagresAtomsView):
 
         isc_type = tag
 
-        setattr(self, isc_type, [])
+        #setattr(self, isc_type, [])
 
         for magres_isc in magres_file.data_dict['magres'][isc_type]:
           atom1 = temp_label_index[(magres_isc['atom1']['label'], magres_isc['atom1']['index'])]
           atom2 = temp_label_index[(magres_isc['atom2']['label'], magres_isc['atom2']['index'])]
           magres_atom_isc = MagresAtomIsc(atom1, atom2, magres_isc)
-          getattr(self, isc_type).append(magres_atom_isc) 
+          #getattr(self, isc_type).append(magres_atom_isc) 
 
           if not hasattr(atom1, isc_type):
             setattr(atom1, isc_type, {})
@@ -900,9 +537,39 @@ class MagresAtoms(MagresAtomsView):
 
     return (atoms, lattice)
 
-  def set_reference(self, species, reference):
-    for atom in self.species(species):
-      atom.reference = reference
+  def load_bonds(self, castep_file, pop_tol=0.2):
+    from castepy.output.bonds import parse_bonds
+    from collections import Counter
+
+    bonds = parse_bonds(castep_file)
+
+    bonded_dict = {(atom.species,atom.index): [] for atom in self}
+
+    for idx1, idx2, pop, length in bonds:
+      if pop >= pop_tol:
+        bonded_dict[idx1].append(idx2)
+        bonded_dict[idx2].append(idx1)
+
+    for idx1, idx2s in bonded_dict.items():
+      atom1 = self.get_species(*idx1)
+
+      bonded_atoms = []
+
+      for idx2 in idx2s:
+        atom2 = self.get_species(*idx2)
+        bonded_atoms.append(atom2)
+
+      atom1.bonded = MagresAtomsView(list(bonded_atoms), self.lattice)
+
+  def calculate_bonds(self, tol=2.0):
+    for atom1 in self.atoms:
+      bonded_atoms = []
+
+      for atom2 in self.within(atom1, tol):
+        if (atom1.position != atom2.position).any():
+          bonded_atoms.append(atom2)
+
+      atom1.bonded = MagresAtomsView(list(bonded_atoms), self.lattice)
 
   @classmethod
   def load_magres(self, f):
