@@ -139,6 +139,7 @@ def json_to_simpson(dataset, data_name, sim_options, sim_options_num, sim_option
 	else:
 		main_file.write(" crystal_file alpha0beta0\n")		
 	main_file.write(" sw " + str(1e6/sim_options_num["-dw"]) + "\n")	#Dwell time, microseconds
+	main_file.write(" num_cores 1\n")	#Required to avoid crashes in Simpson 4.0+
 	main_file.write("}\n\n")
 	
 	#Pulse sequence section - a standard pi/2 experiment
