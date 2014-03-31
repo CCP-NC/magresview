@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 from json_to_sim import *
 
 import tkFileDialog
