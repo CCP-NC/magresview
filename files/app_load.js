@@ -130,6 +130,7 @@ function enable_NMR_controls()
 		document.getElementById("ms_ell_scale").disabled = false;
 		document.getElementById("eultype1_ms").disabled = false;
 		document.getElementById("eultype2_ms").disabled = false;
+		document.getElementById("align_t_2").disabled = false;
 	}
 
 	if (atom_set.has_efg)
@@ -145,6 +146,7 @@ function enable_NMR_controls()
 		document.getElementById("efg_ell_scale").disabled = false;
 		document.getElementById("eultype1_efg").disabled = false;
 		document.getElementById("eultype2_efg").disabled = false;
+		document.getElementById("align_t_3").disabled = false;
 		if(!atom_set.has_ms)
 		{
 			document.getElementById("eultype1_efg").checked = true;
@@ -209,6 +211,7 @@ function disable_NMR_controls()
 			document.getElementById("eultype2_ms").disabled = true;
 			document.getElementById("eultype1_ms").checked = true;
 			document.getElementById("eultype2_ms").checked = true;
+			document.getElementById("align_t_2").disabled = false;
 
 			document.getElementById("efg_drop").disabled = true;
 			document.getElementById("efg_check").checked = false;
@@ -225,6 +228,7 @@ function disable_NMR_controls()
 			document.getElementById("efg_ell_scale").disabled = true;
 			document.getElementById("eultype1_efg").disabled = true;
 			document.getElementById("eultype2_efg").disabled = true;
+			document.getElementById("align_t_3").disabled = false;
 
 			document.getElementById("isc_drop").disabled = true;
 			document.getElementById("isc_check").checked = false;
