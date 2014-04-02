@@ -236,7 +236,7 @@ var euldiff_pick_atom2 = null;
 
 function euler_diff_calc_handler()
 {
-	var euldiff_init_script = "unbind; unbind \"right-click\";";
+	var euldiff_init_script = 'unbind "left-click"; unbind "right-click"; unbind "left-down"; unbind "right-down";';
 	
 	//A bit of jQuery magic to check whether the active tab is the "Visualization" one. It just works.
 
@@ -262,7 +262,7 @@ function euler_diff_calc_handler()
 	}
 	else
 	{
-		euldiff_init_script += "set disablePopupMenu FALSE; set picking measure distance; draw id euldiff_circle_1 delete; draw id euldiff_circle_2 delete;";
+		euldiff_init_script += "unbind; set disablePopupMenu FALSE; set picking measure; draw id euldiff_circle_1 delete; draw id euldiff_circle_2 delete;";
 	}
 	
 	Jmol.script(mainJmol, euldiff_init_script);

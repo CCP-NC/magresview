@@ -297,10 +297,7 @@ function euldiff_butt_handler()
 }
 
 function echo_callback(id, echo)
-{
-	
-	alert(echo);
-	
+{	
 	if (echo.indexOf("lc") >= 0)
 	{
 		euldiff_pick_atom1 = echo;

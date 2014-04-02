@@ -244,6 +244,10 @@ Copy of the license can be found as a text file in the /jmol folder
     
     <script type="text/javascript" src="files/hover.js"></script>
     
+    <!-- System alignment handling -->
+    
+    <script type="text/javascript" src="files/align.js"></script>
+    
     <!-- JSON parser and stringifier, for passing values to the Python script -->
 
 	 <script type="text/javascript" src="files/json2.js"></script>
@@ -278,6 +282,7 @@ Copy of the license can be found as a text file in the /jmol folder
 				sel_file_drop_handler();
 				visual_accor_handler();
 				iso_drop_update();
+				align_radio_handler();
 			}
 		});
 		
@@ -385,6 +390,7 @@ Copy of the license can be found as a text file in the /jmol folder
 								<ul>
 									<li><a href="#visual_accordion">Visualization</a></li>
 									<li><a href="#iso_selection">Isotope selection</a></li>
+									<li><a href="#sys_align">Alignment</a></li>
 									<li><a href="#file_gen">File generation</a></li>
 									<li><a href="#options_accordion">Options</a></li>
 								</ul>
@@ -402,7 +408,25 @@ Copy of the license can be found as a text file in the /jmol folder
 							</div>
 							<br>
 							<br>
-							</div>						
+							</div>
+							
+							<div id="sys_align">
+							  
+							  Align system with:<br><br>							  
+							  <form id="align_method">
+							    &nbsp <input type="radio" name="align_t" id="align_t_1" value="bond" autocomplete="off" onclick="align_radio_handler(event)"
+							    checked>
+							    Align with bond</input> <br>
+							    &nbsp <input type="radio" name="align_t" id="align_t_1" value="ms" autocomplete="off" onclick="align_radio_handler(event)"
+							    disabled="disabled">
+							    Align with <span style="color: rgb(255, 128, 0)">MS</span> tensor</input> <br>
+							    &nbsp <input type="radio" name="align_t" id="align_t_1" value="efg" autocomplete="off" onclick="align_radio_handler(event)"
+							    disabled="disabled">
+							    Align with <span style="color: rgb(0, 128, 255)">EFG</span> tensor</input>
+						    
+							  </form>
+							  
+							</div>
 																					
 							<div id="visual_accordion">
 							
