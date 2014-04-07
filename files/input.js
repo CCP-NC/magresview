@@ -136,6 +136,13 @@ function load_file(evt)
 		var file_content = this.result;
 
 		atom_set.is_magres = (file_content.indexOf("#$magres-abinitio") >= 0); //Is the loaded file a magres file?
+		
+		// Checking if the file is an old magres file
+		
+		if ((file_content.split('\n').indexOf('============') >= 0) && (to_load.name.split('.').slice(-1)[0] == 'magres'))
+		{
+			alert("This is an old magres file. It must be converted to the new version of the format before MagresView can load it.");
+		}
 
 		load_string(mainJmol, file_content);
 
