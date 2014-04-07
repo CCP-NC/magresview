@@ -165,7 +165,14 @@ function efg_color_handler()
 	
 	if(efg_plot_on)
 	{
-		efg_plot_jmol_script += "color {displayed} {200, 200, 200}; {all}.property_efg_colorscale = NaN; {selected}.property_efg_colorscale = {selected}";
+		efg_plot_jmol_script += "color {displayed} {200, 200, 200}; {all}.property_efg_colorscale = NaN;";
+		if (l_type == 3) {
+			efg_plot_jmol_script += " var p_e_c = {selected}";
+		}
+		else
+		{
+			efg_plot_jmol_script += " {selected}.property_efg_colorscale = {selected}";			
+		}
 		switch(l_type)
 		{
 			case 0:
@@ -194,7 +201,11 @@ function efg_color_handler()
 				break;
 		}
 		
-		efg_plot_jmol_script += ".mul(-1); color {selected} property_efg_colorscale;";
+		efg_plot_jmol_script += ".mul(-1);";
+		if (l_type == 3) {
+			efg_plot_jmol_script += " for (var i=p_e_c.length; i > 0; --i) {p_e_c[i] = -abs(p_e_c[i])}; {selected}.property_efg_colorscale = p_e_c;";
+		}
+		efg_plot_jmol_script += " color {selected} property_efg_colorscale;";
 	}
 	else
 	{
