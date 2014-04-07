@@ -181,6 +181,14 @@ Copy of the license can be found as a text file in the /jmol folder
       text-align: center;
       vertical-align: middle;
     }
+    
+    .failed_jmol {
+      
+      background-color: rgb(80, 0, 0);
+      font-size: large;
+      text-align: center;
+      
+    }
 
     h3.head {
 	font-weight: bold;
@@ -823,7 +831,30 @@ Copy of the license can be found as a text file in the /jmol folder
 		$(document).ready( function() {
 		  $("#jmol_console").attr("size",Math.ceil(winW*0.6/9));
 		  $("#credit_div").css("fontSize", Math.ceil(winH/70.0) + "px");
-		  $("#jmol_div").html(Jmol.getAppletHtml("mainJmol",main_info));
+		  
+		  // Handles gracefully failure in case of browsers not supporting XMLHttpRequest:
+		  
+		  test_req = new XMLHttpRequest();
+		  test_req.open('get', 'mview_config.js', true);
+		  try
+		  {
+		    test_req.send();
+		    $("#jmol_div").html(Jmol.getAppletHtml("mainJmol",main_info));
+		  }
+		  catch(e)
+		  {
+		    $("#jmol_div").width(jmolW).height(jmolH);
+		    $("#jmol_div").addClass('failed_jmol');
+		    $("#jmol_div").html('<br><br><br><br>\
+					\
+					It appears like your browser does not support MagresView at the moment.<br>\
+					This is probably due to restricted permissions.<br>\
+					If you&#39;re using JSmol (JavaScript), try switching to Java by clicking on the button below,<br>\
+					or check out the possible compatibility fixes on the wiki:<br>\
+					<a href="http://ccpforge.cse.rl.ac.uk/gf/project/magresview/wiki/?pagename=compatibility+fixes"\
+					target="_blank" style="color:rgb(150,150,200)">MagresView Wiki</a>');
+		  }
+		  
 		  
 		  //Handles the reloading of the page if needed because Java applet is required
 		  
