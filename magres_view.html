@@ -509,7 +509,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					  						onchange="efg_plot_handler(event)" autocomplete="off" disabled="disabled">Ellipsoids</input>
 					  						<br>Scale (0 = auto): <input type="text" id="efg_ell_scale" maxlength="5" size="3" autocomplete="off" disabled="disabled" onkeypress="efg_ell_scale_handler(event)" value="0"></input> 
 											<br><br>
-											<br>
+											<br><br>
 			  						
 					  			<div id="efg_label_div" class="ctrl_right">
 		
@@ -533,7 +533,8 @@ Copy of the license can be found as a text file in the /jmol folder
 												title="Asymmetry, defined as (Vyy-Vxx)/Vzz"
 												value="2" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled"><span id="efg_par_2">Asymmetry</span> </input> <br>
 												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_4"
-												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered"
+												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered.
+WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
 												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
 											</form>
 					  			</div>
@@ -672,10 +673,11 @@ Copy of the license can be found as a text file in the /jmol folder
 					
 					<div id="file_type_div" class="ctrl_left">
 					File type: <select id="file_type_drop" autocomplete="off" onchange="file_type_drop_handler()"
-					title="Select the desired file output type. Overview = a readable format for data summarizing - Tabulated = a data summary designed for parsing with Excel or Origin - JSON = formatted data for use by the json_tosim.py script">
+					title="Select the desired file output type. Overview = a readable format for data summarizing - Tabulated = a data summary designed for parsing with Excel or Origin - JSON = formatted data for use by the json_tosim.py script - Spinsys = formatted data for inclusion in Simpson or pNMR simulations">
 						<option value="recap">Overview</option>
 						<option value="table">Tabulated</option>
 						<option value="json">JSON</option>
+						<option value="spinsys">Spinsys</option>
 					</select>
 					<div id="file_btn_div" class="ctrl_right">
 						<input type="button" value="Generate" onclick="output_file_gen()"></input>
@@ -683,7 +685,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					</div>
 					<br>
 					<div class="ctrl_left">
-					Target software: <select id="soft_targ_drop" autocomplete="off" disabled="disabled"
+					Target software: <select id="soft_targ_drop" autocomplete="off" disabled="disabled" style="width: 100pt;"
 					title="Select the simulation software you want to use with your data - json_to_sim.py will create the appropriate files">
 						<option value="simpson">SIMPSON</option>
 						<option value="spinev">SPINEVOLUTION</option>
@@ -725,7 +727,7 @@ Copy of the license can be found as a text file in the /jmol folder
 					</div>
 					Options:
 					<div class="ctrl_left">
-					<input type="checkbox" id="ms_file_check" autocomplete="off"
+					<input type="checkbox" id="rot_file_check" autocomplete="off"
 					title="Rotate geometry and tensors according to the current visualization orientation rather than the default reference frame">Use on-screen rotation</input>
 					<div class="ctrl_right">
 					</div>

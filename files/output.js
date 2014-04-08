@@ -123,7 +123,8 @@ function file_type_drop_handler()
 {
 	//Clear out the previous file
 	$("#file_download").addClass("hidden");
-	json_controls_switch();
+	update_filetype_classes();
+	include_controls_switch();
 }
 
 //Make the range_file_div division visible if needed
@@ -150,13 +151,38 @@ function sel_file_drop_handler()
 	
 }
 
-//Make the JSON related controls active if needed
+//Update the "software target" dropdown depending on the required filetype
 
-function json_controls_switch()
+function update_filetype_classes()
+{
+	var filetype = document.getElementById("file_type_drop").value;	
+	var soft_targ = document.getElementById("soft_targ_drop");
+	
+	
+	if (filetype == "json")
+	{
+		soft_targ.options.length = 2;
+		
+		soft_targ.options[0] = new Option("SIMPSON", "simpson");
+		soft_targ.options[1] = new Option("SPINEVOLUTION", "spinev");		
+	}
+	else if (filetype == "spinsys")
+	{
+		soft_targ.options.length = 2;
+		
+		soft_targ.options[0] = new Option("SIMPSON", "simpson");
+		soft_targ.options[1] = new Option("pNMRsim", "pnmr");		
+	}
+}
+
+
+//Make the NMR include controls active if needed
+
+function include_controls_switch()
 {
 	var filetype = document.getElementById("file_type_drop").value;
 
-	if (filetype == "json")
+	if (filetype == "json" || filetype == "spinsys")
 	{
 		document.getElementById("soft_targ_drop").disabled = false;
 		if(atom_set.is_magres && atom_set.has_ms)
@@ -969,7 +995,16 @@ function compile_data_set(ds, ac, use_all)
 	var abc = atom_set.lattice_pars;	//Storing the lattice parameters for convenience
 	var ch = choice_atomexp(ac);
 	
+	var use_rotated_frame = document.getElementById("rot_file_check").checked;
+	
 	//To prevent errors if there is no lattice data; it will be irrelevant anyway, because in this case the k_*_max will all be zero
+	
+	if (use_rotated_frame) {
+		
+		//Here we store the current orientation quaternion to express properly all further tensor orientations & coordinates down the line
+		
+		Jmol.script(mainJmol, 'rot_q = quaternion();')
+	}
 
 	if (abc == null)
 	{
@@ -981,12 +1016,35 @@ function compile_data_set(ds, ac, use_all)
 	else	//Insert lattice data in the final file
 	{
 		ds.atoms.units.push(["lattice", "Angstrom"]);
-		ds.atoms.lattice.push(abc);
+		
+		if (!use_rotated_frame) {
+			ds.atoms.lattice.push(abc);
+		}
+		else
+		{
+			// Form lattice parameters as points in Jmol, THEN rotate them.
+			var temp_abc = new Array();
+			var rotated_lattice_script = 	'par_a = rot_q%{1/1 0 0};' + 
+							'par_b = rot_q%{0 1/1 0};' +
+							'par_c = rot_q%{0 0 1/1};';
+			
+			Jmol.scriptWait(mainJmol, rotated_lattice_script);
+			temp_abc[0] = Jmol.evaluateVar(mainJmol, 'par_a');
+			temp_abc[1] = Jmol.evaluateVar(mainJmol, 'par_b');
+			temp_abc[2] = Jmol.evaluateVar(mainJmol, 'par_c');
+			
+		}
 	}
 		
 	ds.atoms.units.push(["atom", "Angstrom"]);
-
-	Jmol.scriptWait(mainJmol, "coord_info = []; for (a in " + ch + ") {coord_info = coord_info or [a.atomno, a.atomname, a.element, a.xyz];}");
+	
+	if (!rotated_lattice_script) {
+		Jmol.scriptWait(mainJmol, "coord_info = []; for (a in " + ch + ") {coord_info = coord_info or [a.atomno, a.atomname, a.element, a.xyz];}");
+	}
+	else
+	{
+		Jmol.scriptWait(mainJmol, "coord_info = []; for (a in " + ch + ") {coord_info = coord_info or [a.atomno, a.atomname, a.element, rot_q%a.xyz];}");		
+	}
 	var coord_info = Jmol.evaluate(mainJmol, "coord_info").split('\n');
 
 	var species_indices = {};
@@ -1093,10 +1151,19 @@ function compile_data_set(ds, ac, use_all)
 	{
 		ds.magres.units.push(["ms", "ppm"]);
 		ds.magres.ms = [];
-		
 		var ms_reference = parseFloat(document.getElementById("ms_file_ref").value);
+		var ms_calc_script = "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'),";
+		
+		if (!rotated_lattice_script) {
+			ms_calc_script += " a.tensor('ms', 'quaternion')];}";
+		}
+		else
+		{
+			ms_calc_script += " quaternion(a.tensor('ms', 'quaternion')) * rot_q];}";
 
-		Jmol.scriptWait(mainJmol, "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'), a.tensor('ms', 'quaternion')];}");
+		}
+		 		
+		Jmol.scriptWait(mainJmol, ms_calc_script);
 		var ms_info = Jmol.evaluate(mainJmol, "ms_info").split('\n');
 		//Clean up the info array
 		for (l in ms_info)
@@ -1123,6 +1190,13 @@ function compile_data_set(ds, ac, use_all)
 			var a_alpha = parseFloat(a_eulang[0]);
 			var a_beta  = parseFloat(a_eulang[1]);
 			var a_gamma = parseFloat(a_eulang[2]);
+			
+			// A small simplification for special cases
+			
+			if (a_beta == 0) {
+				a_alpha = (a_alpha+a_gamma)%360;
+				a_gamma = 0;
+			}
 
 			var a_sigma = [[],[],[]];
 
@@ -1148,9 +1222,18 @@ function compile_data_set(ds, ac, use_all)
 	if ((document.getElementById("efg_file_check").checked == true || use_all == true) && atom_set.has_efg)
 	{
 		ds.magres.units.push(["efg", "au"]);
-		ds.magres.efg = [];		
+		ds.magres.efg = [];
+		var efg_calc_script = "efg_info = []; for (a in " + ch + ") {efg_info = efg_info or [a.atomno, a.tensor('efg', 'asymmatrix'), a.tensor('efg', 'chi'), a.tensor('efg', 'asymmetry'),";
+		if (!rotated_lattice_script) {
+			efg_calc_script += " a.tensor('efg', 'quaternion')];}";
+		}
+		else
+		{
+			efg_calc_script += " quaternion(a.tensor('efg', 'quaternion')) * rot_q];}";			
+		}
 
-		Jmol.scriptWait(mainJmol, "efg_info = []; for (a in " + ch + ") {efg_info = efg_info or [a.atomno, a.tensor('efg', 'asymmatrix'), a.tensor('efg', 'chi'), a.tensor('efg', 'asymmetry'), a.tensor('efg', 'quaternion')];}");
+		Jmol.scriptWait(mainJmol, efg_calc_script);
+
 		var efg_info = Jmol.evaluate(mainJmol, "efg_info").split('\n');
 		//Clean up the info array
 		for (l in efg_info)
@@ -1171,6 +1254,13 @@ function compile_data_set(ds, ac, use_all)
 			var a_alpha = parseFloat(a_eulang[0]);
 			var a_beta  = parseFloat(a_eulang[1]);
 			var a_gamma = parseFloat(a_eulang[2]);
+
+			// A small simplification for special cases
+			
+			if (a_beta == 0) {
+				a_alpha = (a_alpha+a_gamma)%360;
+				a_gamma = 0;
+			}
 
 			var a_V = [[],[],[]];
 
@@ -1198,7 +1288,13 @@ function compile_data_set(ds, ac, use_all)
 		ds.magres.units.push(["dip", "Hz"]);
 		ds.magres.dip = [];
 		
-		Jmol.scriptWait(mainJmol, "dip_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {dip_info = dip_info or [measure(" + ch + "[i] " + ch + "[j], \"khz\")]; r = " + ch + "[i].xyz-" + ch + "[j].xyz; mod = sqrt(r*r); dip_info = dip_info or [r/mod];}}");
+		var dip_calc_script = "dip_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {dip_info = dip_info or [measure(" + ch + "[i] " + ch + "[j], \"khz\")]; r = " + ch + "[i].xyz-" + ch + "[j].xyz;";
+		if (rotated_lattice_script) {
+			dip_calc_script += "r = rot_q % r;";
+		}
+		dip_calc_script += "mod = sqrt(r*r); dip_info = dip_info or [r/mod];}}";
+		
+		Jmol.scriptWait(mainJmol, dip_calc_script);
 		var dip_info = Jmol.evaluate(mainJmol, "dip_info").split('\n');
 		
 		//Clean up the info array
@@ -1237,10 +1333,20 @@ function compile_data_set(ds, ac, use_all)
 		ds.magres.units.push(["isc", "10^19.T^2.J^-1"]);
 		ds.magres.isc = [];
 		
-		Jmol.scriptWait(mainJmol, "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"j\")[1])[3], \
-								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"asymmetry\")[1])[3], \
-								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3], \
-								   \"#\" + {" + ch + "[i]}.atomno, \"#\" + {" + ch + "[j]}.atomno];}}");
+		var isc_calc_script = "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"j\")[1])[3], \
+								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"asymmetry\")[1])[3],";
+		if (!rotated_lattice_script) {
+			isc_calc_script += " \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3],";
+		}
+		else
+		{
+			isc_calc_script += " \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q,";
+		}
+								   
+		isc_calc_script += " \"#\" + {" + ch + "[i]}.atomno, \"#\" + {" + ch + "[j]}.atomno];}}";
+		
+		
+		Jmol.scriptWait(mainJmol, isc_calc_script);
 		var isc_info = Jmol.evaluate(mainJmol, "isc_info").split('\n');
 				
 		//Clean up the info array
@@ -1263,6 +1369,13 @@ function compile_data_set(ds, ac, use_all)
 			var a_eul_c = parseFloat(a_eulang[2]);
 			var a_no_1 = parseInt(isc_info[i+4].substring(isc_info[i+4].indexOf('#')+1));
 			var a_no_2 = parseInt(isc_info[i+5].substring(isc_info[i+5].indexOf('#')+1));
+			
+			// A small simplification for special cases
+			
+			if (a_eul_b == 0) {
+				a_eul_a = (a_eul_a+a_eul_c)%360;
+				a_eul_c = 0;
+			}
 			
 			if (isNaN(a_J))
 				continue;
