@@ -1,0 +1,69 @@
+//MagresView 
+//by Simone Sturniolo
+//
+//Copyright 2013 Science and Technology Facilities Council
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
+//Please refer to the file COPYING for the text of the license
+
+//This file contains all functions necessary to the server side version of MagresView
+
+function inspect_example_folder() {
+    
+    var inspect_request = new XMLHttpRequest();
+    
+    inspect_request.onload = file_load_drop_update;
+    inspect_request.open('get', 'examples', true);
+    inspect_request.send();
+    
+}
+
+function file_load_drop_update() {
+    
+    var dropd = document.getElementById("file_load_drop");
+    var example_file_list = [];
+    var ext = '.magres';
+    
+    $(this.responseText).filter('ul').find('li').find('a').each(function(i, val) {
+            var fname = $(val).attr('href');
+            if (fname.indexOf('.magres', fname.length - ext.length) !== -1) {
+               example_file_list.push(fname);
+            }
+        });
+    
+    dropd.options.length = example_file_list.length + 1;
+    
+    for (var i = 0; i < example_file_list.length; ++i)
+    {
+        dropd.options[i] = new Option(example_file_list[i], 'examples/' + example_file_list[i]);
+    }
+    
+    dropd.options[dropd.options.length-1] = new Option('Load user file...', '#user_file#');
+}
+
+function file_load_drop_handler()
+{
+    var to_load = $('#file_load_drop').val();
+    
+    if (to_load == '#user_file#') {
+        $('#load_button').click();
+    }
+    else
+    {
+        var file_req = new XMLHttpRequest();
+        
+        file_req.onload = forward_loadrequest;
+        file_req.open('get', to_load, true);
+        file_req.send();
+    }
+
+    
+}
+
+function forward_loadrequest()
+{
+    last_loaded_file = this.responseText;
+    is_magres = (last_loaded_file.indexOf("#$magres-abinitio") >= 0); //Is the loaded file a magres file?
+    reset_system();
+    atom_set.is_magres = is_magres;
+    load_string(mainJmol, last_loaded_file);
+}

@@ -247,7 +247,7 @@ function range_file_species_drop_handler()
 function range_file_r_handler(evt)
 {
 	//Compatibility code - see console.js for details
-	var evt = window.event || evt;
+	evt = window.event || evt;
 	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
 	
 	if (myKey == 13)
@@ -825,7 +825,6 @@ function table_file_gen(out)
 		}
 		
 		out.write("\n\n");
-		
 	}
 	
 	//If present, print dipolar couplings
