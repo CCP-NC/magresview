@@ -34,10 +34,13 @@ function file_load_drop_update() {
     
     for (var i = 0; i < example_file_list.length; ++i)
     {
-        dropd.options[i] = new Option(example_file_list[i], 'examples/' + example_file_list[i]);
+        dropd.options[i] = new Option(example_file_list[i].slice(0,example_file_list[i].length - ext.length), 'examples/' + example_file_list[i]);
     }
     
     dropd.options[dropd.options.length-1] = new Option('Load user file...', '#user_file#');
+    
+    dropd.selectedIndex = -1;
+    
 }
 
 function file_load_drop_handler()
@@ -55,7 +58,6 @@ function file_load_drop_handler()
         file_req.open('get', to_load, true);
         file_req.send();
     }
-
     
 }
 

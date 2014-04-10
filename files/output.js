@@ -66,8 +66,16 @@ function output_file_gen()
 				out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
 				out_window.focus();
 			}
-			
-			
+			break;
+		case "magres":
+			magres_file_gen(file_destination);
+			if (to_newtab == true)
+			{
+				file_destination.write("</pre>");
+				file_destination.close();
+				out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
+				out_window.focus();
+			}			
 			break;			
 	}
 			
@@ -86,6 +94,10 @@ function output_file_gen()
 				case "json":
 					savefile_script += "x = '" + file_destination.file_str + "'; write var x ?.json; x = null;";
 					break;
+				case "magres":
+					savefile_script += "x = '" + file_destination.file_str + "'; write var x ?.magres; x = null;";
+					break;
+				
 			}
 			
 			//Necessary as the "data clear" instruction will delete all new user defined properties
@@ -108,6 +120,9 @@ function output_file_gen()
 					break;
 				case "json":
 					$("#file_download").attr("download", "magres.json");
+					break;				
+				case "magres":
+					$("#file_download").attr("download", "magres.magres");
 					break;				
 			}
 			$("#file_download").attr("href", "data:text/plain," + file_destination.file_str.replace(/\n/g, '%0A').replace(/\t/g, '%09'));
@@ -197,7 +212,7 @@ function include_controls_switch()
 		document.getElementById("dip_file_check").disabled = false;
 		document.getElementById("sel_file_drop").disabled = false;
 	}
-	else if (filetype == "table")
+	else if (filetype == "table" || filetype == "magres")
 	{
 		document.getElementById("soft_targ_drop").disabled = true;
 		if(atom_set.is_magres && atom_set.has_ms)
@@ -607,7 +622,7 @@ function recap_file_gen(out)
 	//If present, print internal spin-spin couplings
 	if ("isc" in data_set.magres)
 	{
-		out.write("\n% Internal spin-spin coupling data\n")
+		out.write("\n% Internal spin-spin coupling data\n");
 		
 		for (var i = 0; i < data_set.magres.isc.length; ++i)
 		{
@@ -619,6 +634,7 @@ function recap_file_gen(out)
 			var sp2_label = i_to_info[id2][0];
 			var atom2_i = i_to_info[id2][1];
 			var el2 = i_to_info[id2][2];
+			
 			
 			var haeb = data_set.magres.isc[i].mview_data.slice(0, 3);
 			var eul_ang = data_set.magres.isc[i].mview_data.slice(3, 6);
@@ -667,6 +683,101 @@ function recap_file_gen(out)
 	
 	}
 
+}
+
+//An output in normal .magres format
+
+function magres_file_gen(out) {
+	
+	//Outputs as a new .magres file
+	
+	var data_set = {
+		
+		magres_view: "Made with MagresView " + magresview_version_number,		//Tagline
+		
+		soft_targ: "", //Software target of the JSON file, the final format to be generated for NMR simulation
+		
+		atoms: {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
+		
+		magres: {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
+
+	};
+	
+		//This structure holds the parameters controlling the choice of atoms to use for the file
+	
+	var atom_choice = {
+		
+		t: document.getElementById("sel_file_drop").value,				//Type of choice
+		
+		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
+
+		c: last_atom_picked,									//Center atom (for "atoms within...")
+				
+	}
+	
+	if(!compile_data_set(data_set, atom_choice, false))
+	{
+		out.close();
+		return;
+	}
+	
+	//Print crystallographic labels and compile id -> label and element table
+	
+	var i_to_info = {};
+
+	var labels = [];
+	var labels_n = {};
+	for (var i = 0; i < data_set.atoms.atom.length; ++i)
+	{
+		var sp = data_set.atoms.atom[i].label;
+		var ind = data_set.atoms.atom[i].index;
+		if (labels.indexOf(sp) < 0)
+		{
+			labels.push(sp);
+			labels_n[sp] = 1;
+		}
+		else
+		{
+			labels_n[sp] += 1;
+		}
+		
+		i_to_info[data_set.atoms.atom[i].id] = [sp, ind];
+	}
+		
+	//Print elements and compile id -> label and element table
+	var elems = [];
+	var elems_n = {};
+	for (var i = 0; i < data_set.atoms.atom.length; ++i)
+	{
+		var el = data_set.atoms.atom[i].species;
+		if (elems.indexOf(el) < 0)
+		{
+			elems.push(el);
+			elems_n[el] = 1;
+		}
+		else
+		{
+			elems_n[el] += 1;
+		}
+
+		i_to_info[data_set.atoms.atom[i].id].push(el);
+	}
+	
+	// Write header lines
+	
+	out.write("#$magres-abinitio\n");
+	
+	var system_stochiometry = "";
+	
+	for (var i = 0; i < atom_set.atom_species_labels.length; ++i) {
+		l = atom_set.atom_species_labels[i];
+		system_stochiometry += l + "_" + atom_set.atom_species_sites[l].length + " ";
+	}
+	
+	out.write("#.magres formatted NMR data for " + system_stochiometry + "\n");
+	out.write("#" + data_set.magres_view + "\n");
+
+	
 }
 
 //A file format meant for parsing in Excel/Origin like software
@@ -995,6 +1106,7 @@ function compile_data_set(ds, ac, use_all)
 	var ch = choice_atomexp(ac);
 	
 	var use_rotated_frame = document.getElementById("rot_file_check").checked;
+	var rot_matrix = null;
 	
 	//To prevent errors if there is no lattice data; it will be irrelevant anyway, because in this case the k_*_max will all be zero
 	
@@ -1154,41 +1266,31 @@ function compile_data_set(ds, ac, use_all)
 		var ms_calc_script = "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'),";
 		
 		if (!rotated_lattice_script) {
-			ms_calc_script += " a.tensor('ms', 'quaternion')];}";
+			ms_calc_script += " quaternion(a.tensor('ms', 'quaternion'))" + conv_table[eul_conv] + "];}";
 		}
 		else
 		{
-			ms_calc_script += " quaternion(a.tensor('ms', 'quaternion')) * rot_q];}";
+			ms_calc_script += " (quaternion(a.tensor('ms', 'quaternion')) * rot_q)" + conv_table[eul_conv] + "];}";
 
 		}
 		 		
 		Jmol.scriptWait(mainJmol, ms_calc_script);
-		var ms_info = Jmol.evaluate(mainJmol, "ms_info").split('\n');
-		//Clean up the info array
-		for (l in ms_info)
-		{
-			if (ms_info[l] == "" || ms_info[l] == "\t[")
-				ms_info.splice(l, 1);
-		}
-
-		for (var i = 0; i < ms_info.length-7; i += 8)
+		var ms_info = Jmol.evaluateVar(mainJmol, "ms_info");
+		
+		for (var i = 0; i < ms_info.length-5; i += 6)
 		{
 			var a_no = ms_info[i];
-			var a_sigma_1 = ms_info[i+1].substring(ms_info[i+1].lastIndexOf('[')+1, ms_info[i+1].lastIndexOf(']')).split(',');
-			var a_sigma_2 = ms_info[i+2].substring(ms_info[i+2].lastIndexOf('[')+1, ms_info[i+2].lastIndexOf(']')).split(',');
-			var a_sigma_3 = ms_info[i+3].substring(ms_info[i+3].lastIndexOf('[')+1, ms_info[i+3].lastIndexOf(']')).split(',');
-			var a_iso   = parseFloat(ms_info[i+4]);
+			var a_sigma = ms_info[i+1][0];
+			var a_iso = ms_info[i+2][0];
 			if (!isNaN(ms_reference))
 			{
 				a_iso = ms_reference - a_iso;
 			}
-			var a_aniso = parseFloat(ms_info[i+5]);
-			var a_asymm = parseFloat(ms_info[i+6]);
-			//This is very roundabout, but it supplies for the fact that in JSmol there are problem with functions returning arrays, hence "{something}.tensor('ms', 'eulerzyz')" doesn't work properly
-			var a_eulang = Jmol.evaluate(mainJmol, "(" + ms_info[i+7] + ")" + conv_table[eul_conv]).split('\n');
-			var a_alpha = parseFloat(a_eulang[0]);
-			var a_beta  = parseFloat(a_eulang[1]);
-			var a_gamma = parseFloat(a_eulang[2]);
+			var a_aniso = ms_info[i+3][0];
+			var a_asymm = ms_info[i+4][0];
+			var a_alpha = ms_info[i+5][0];
+			var a_beta  = ms_info[i+5][1];
+			var a_gamma = ms_info[i+5][2];
 			
 			// A small simplification for special cases
 			
@@ -1196,17 +1298,20 @@ function compile_data_set(ds, ac, use_all)
 				a_alpha = (a_alpha+a_gamma)%360;
 				a_gamma = 0;
 			}
-
-			var a_sigma = [[],[],[]];
-
-			for (var j = 0; j < 3; ++j)
-			{
-				a_sigma[0][j] = parseFloat(a_sigma_1[j]);
-				a_sigma[1][j] = parseFloat(a_sigma_2[j]);
-				a_sigma[2][j] = parseFloat(a_sigma_3[j]);
+			
+			// If required, make Jmol rotate the matrix
+			
+			if (rotated_lattice_script) {
+				
+				if (rot_matrix == null) {
+					rot_matrix = Jmol.evaluateVar(mainJmol, '(rot_q%-9)');
+				}
+				
+				a_sigma = mat3_product(a_sigma, rot_matrix);
+				a_sigma = mat3_product(transpose(rot_matrix), a_sigma);
 			}
 
-			ds.magres.ms[i/8] = {
+			ds.magres.ms[i/6] = {
 				sigma:	a_sigma,
 				mview_data: [a_iso, a_aniso, a_asymm, a_alpha, a_beta, a_gamma],
 				atom_id: a_no, 
@@ -1224,53 +1329,48 @@ function compile_data_set(ds, ac, use_all)
 		ds.magres.efg = [];
 		var efg_calc_script = "efg_info = []; for (a in " + ch + ") {efg_info = efg_info or [a.atomno, a.tensor('efg', 'asymmatrix'), a.tensor('efg', 'chi'), a.tensor('efg', 'asymmetry'),";
 		if (!rotated_lattice_script) {
-			efg_calc_script += " a.tensor('efg', 'quaternion')];}";
+			efg_calc_script += " quaternion(a.tensor('efg', 'quaternion')) " + conv_table[eul_conv] + "];}";
 		}
 		else
 		{
-			efg_calc_script += " quaternion(a.tensor('efg', 'quaternion')) * rot_q];}";			
+			efg_calc_script += " (quaternion(a.tensor('efg', 'quaternion')) * rot_q)" + conv_table[eul_conv] + "];}";			
 		}
 
 		Jmol.scriptWait(mainJmol, efg_calc_script);
 
-		var efg_info = Jmol.evaluate(mainJmol, "efg_info").split('\n');
-		//Clean up the info array
-		for (l in efg_info)
-		{
-			if (efg_info[l] == "" || efg_info[l] == "\t[")
-				efg_info.splice(l, 1);
-		}
-
-		for (var i = 0; i < efg_info.length-6; i += 7)
+		var efg_info = Jmol.evaluateVar(mainJmol, "efg_info");
+		
+		for (var i = 0; i < efg_info.length-4; i += 5)
 		{
 			var a_no = efg_info[i];
-			var a_V_1 = efg_info[i+1].substring(efg_info[i+1].lastIndexOf('[')+1, efg_info[i+1].lastIndexOf(']')).split(',');
-			var a_V_2 = efg_info[i+2].substring(efg_info[i+2].lastIndexOf('[')+1, efg_info[i+2].lastIndexOf(']')).split(',');
-			var a_V_3 = efg_info[i+3].substring(efg_info[i+3].lastIndexOf('[')+1, efg_info[i+3].lastIndexOf(']')).split(',');
-			var a_chi   = parseFloat(efg_info[i+4]);
-			var a_asymm = parseFloat(efg_info[i+5]);
-			var a_eulang = Jmol.evaluate(mainJmol, "(" + efg_info[i+6] + ")" + conv_table[eul_conv]).split('\n');
-			var a_alpha = parseFloat(a_eulang[0]);
-			var a_beta  = parseFloat(a_eulang[1]);
-			var a_gamma = parseFloat(a_eulang[2]);
-
+			var a_V = efg_info[i+1][0];
+			var a_chi = efg_info[i+2][0]
+			var a_asymm = efg_info[i+3][0]
+			var a_alpha = efg_info[i+4][0];
+			var a_beta  = efg_info[i+4][1];
+			var a_gamma = efg_info[i+4][2];
+			
 			// A small simplification for special cases
 			
 			if (a_beta == 0) {
 				a_alpha = (a_alpha+a_gamma)%360;
 				a_gamma = 0;
 			}
-
-			var a_V = [[],[],[]];
-
-			for (var j = 0; j < 3; ++j)
-			{
-				a_V[0][j] = parseFloat(a_V_1[j]);
-				a_V[1][j] = parseFloat(a_V_2[j]);
-				a_V[2][j] = parseFloat(a_V_3[j]);
+			
+			// If required, make Jmol rotate the matrix
+			
+			if (rotated_lattice_script) {
+				
+				if (rot_matrix == null) {
+					rot_matrix = Jmol.evaluateVar(mainJmol, '(rot_q%-9)');
+				}
+				
+				a_V = mat3_product(a_V, rot_matrix);
+				a_V = mat3_product(transpose(rot_matrix), a_V);
 			}
 
-			ds.magres.efg[i/7] = {
+
+			ds.magres.efg[i/5] = {
 				V: a_V,
 				mview_data: [a_chi, a_asymm, a_alpha, a_beta, a_gamma],
 				atom_id: a_no, 
@@ -1294,27 +1394,16 @@ function compile_data_set(ds, ac, use_all)
 		dip_calc_script += "mod = sqrt(r*r); dip_info = dip_info or [r/mod];}}";
 		
 		Jmol.scriptWait(mainJmol, dip_calc_script);
-		var dip_info = Jmol.evaluate(mainJmol, "dip_info").split('\n');
+		var dip_info = Jmol.evaluateVar(mainJmol, "dip_info");
 		
-		//Clean up the info array
-		for (l in dip_info)
+		for (var i = 0; i < dip_info.length-1; i += 2)
 		{
-			if (dip_info[l] == "")
-				dip_info.splice(l, 1);
-		}
-		
-		for (var i = 0; i < dip_info.length; i += 2)
-		{
-			var a_dip = dip_info[i].split('\t');
-			var a_b = parseFloat(a_dip[2])*1000.0;		//Coupling constant in Hz
-			var a_no_1 = parseInt(a_dip[4].substring(a_dip[4].indexOf('#')+1));
-			var a_no_2 = parseInt(a_dip[5].substring(a_dip[5].indexOf('#')+1));
-			var a_r = dip_info[i+1].substring(1, dip_info[i+1].length-1).split(' ');
-			
-			//a_r is the versor of the vector connecting the two spins. With it we can build the corresponding Euler angles
-			
-			a_r = [parseFloat(a_r[0]), parseFloat(a_r[1]), parseFloat(a_r[2])];
-			
+			var a_dip = dip_info[i][0].split('\t');
+			var a_b = parseFloat(a_dip[1])*1000.0;		//Coupling constant in Hz
+			var a_no_1 = parseInt(a_dip[3].substring(a_dip[3].indexOf('#')+1));
+			var a_no_2 = parseInt(a_dip[4].substring(a_dip[4].indexOf('#')+1));
+			var a_r = dip_info[i+1];
+						
 			var a_alpha = rad2deg(Math.atan2(a_r[1], a_r[0]));
 			var a_beta = rad2deg(Math.acos(a_r[2]));
 			
@@ -1335,26 +1424,22 @@ function compile_data_set(ds, ac, use_all)
 		var isc_calc_script = "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"j\")[1])[3], \
 								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"asymmetry\")[1])[3],";
 		if (!rotated_lattice_script) {
-			isc_calc_script += " \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3],";
+			isc_calc_script += " \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3])" + conv_table[eul_conv] + ",";
 		}
 		else
 		{
-			isc_calc_script += " \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q,";
+			isc_calc_script += " \"#\" + ((({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q) " + conv_table[eul_conv] + ",";
 		}
 								   
-		isc_calc_script += " \"#\" + {" + ch + "[i]}.atomno, \"#\" + {" + ch + "[j]}.atomno];}}";
+		isc_calc_script += " \"#\" + " + ch + "[i].atomno, \"#\" + " + ch + "[j].atomno];}}";
 		
 		
 		Jmol.scriptWait(mainJmol, isc_calc_script);
-		var isc_info = Jmol.evaluate(mainJmol, "isc_info").split('\n');
-				
-		//Clean up the info array
-		for (l = isc_info.length-1; l >= 0; --l)
-		{
-			if (isc_info[l] == "")
-				isc_info.splice(l, 1);
-		}
-				
+		
+		/// THIS SHOULD BE REPLACED WITH AN evaluateVar CALL SOONER OR LATER ///
+		
+		var isc_info = Jmol.evaluateVar(mainJmol, "isc_info");
+		
 		nonzero_isc = 0;
 		
 		for (var i = 0; i < isc_info.length; i += 6)
@@ -1362,7 +1447,7 @@ function compile_data_set(ds, ac, use_all)
 			var a_J = parseFloat(isc_info[i].substring(isc_info[i].indexOf('#')+1));
 			var a_eta = parseFloat(isc_info[i+1].substring(isc_info[i+1].indexOf('#')+1));
 			var a_asymm = parseFloat(isc_info[i+2].substring(isc_info[i+2].indexOf('#')+1));
-			var a_eulang = Jmol.evaluate(mainJmol, "(" + isc_info[i+3].substring(isc_info[i+3].indexOf('#')+1) + ")" + conv_table[eul_conv]).split('\n');
+			var a_eulang = isc_info[i+3].substring(isc_info[i+3].indexOf('#')+1).split('\n');
 			var a_eul_a = parseFloat(a_eulang[0]);
 			var a_eul_b = parseFloat(a_eulang[1]);
 			var a_eul_c = parseFloat(a_eulang[2]);
@@ -1377,8 +1462,10 @@ function compile_data_set(ds, ac, use_all)
 			}
 			
 			if (isNaN(a_J))
+			{
 				continue;
-
+			}
+			
 			ds.magres.isc[nonzero_isc] = {
 				mview_data: [a_J, a_eta, a_asymm, a_eul_a, a_eul_b, a_eul_c],				//Right now only the isotropic component of ISC is implemented!
 				atom1_id: a_no_1,
@@ -1387,7 +1474,8 @@ function compile_data_set(ds, ac, use_all)
 						
 			++nonzero_isc;
 
-		}		
+		}
+		
 	}
 	
 	return true;
@@ -1397,4 +1485,41 @@ function compile_data_set(ds, ac, use_all)
 function rad2deg(a)
 {
 	return a/Math.PI*180.0;
+}
+
+//Convenient, turns a 3x3 matrix into a Jmol string representation
+function mat3_to_string(m)
+{
+	s = '';
+	
+	if (m.length != 3) {
+		return s;
+	}
+	
+	for (var i = 0; i<3; ++i) {
+		if (m[i].length != 3) {
+			return s;
+		}
+	}
+	
+	s += '[';
+	
+	for (var i = 0; i<3; ++i) {
+		s+='[';
+		for (var j = 0; j<3; ++j) {
+			s+= m[i][j];
+			if (j < 2) {
+				s += ',';
+			}
+		}
+		s+=']';
+		if (i<2) {
+			s+=',';
+		}
+	}
+	
+	s+=']';
+	
+	return s;
+	
 }

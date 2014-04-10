@@ -34,6 +34,25 @@ function transpose(matrix)
 	return transp;
 }
 
+//3x3 Matrix by matrix product. 'nuff said
+
+function mat3_product(a, b) {
+	
+	var ans = [[],[],[]];
+	
+	for (var i = 0;i < 3;++i) {
+		for (var j = 0; j < 3; ++j) {
+			ans[i][j] = 0;
+			for (var k = 0; k < 3; ++k) {
+				ans[i][j] += a[k][j]*b[i][k];
+			}
+		}
+	}
+	
+	return ans
+	
+}
+
 //Matrix by vector product. The matrix is required to be square (it's not strictly necessary, but since we're dealing with rotation matrices...)
 
 function vec_rotate(vector, matrix)

@@ -70,7 +70,8 @@ function sel_drop_handler()
 				dropd_atoms.options[i] = new Option(atom_set.atom_species_sites[sp][i-1], atom_set.atom_species_sites[sp][i-1]);
 			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and " + sp + "*");
 		}
-	}	
+	}
+	
 }
 
 function sel_atom_drop_handler(turn_flag_on)
