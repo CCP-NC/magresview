@@ -12,7 +12,7 @@ function inspect_example_folder() {
     var inspect_request = new XMLHttpRequest();
     
     inspect_request.onload = file_load_drop_update;
-    inspect_request.open('get', 'examples', true);
+    inspect_request.open('get', 'examples/example_list', true);
     inspect_request.send();
     
 }
@@ -23,12 +23,24 @@ function file_load_drop_update() {
     var example_file_list = [];
     var ext = '.magres';
     
+    var split_raw_list = (this.responseText).split('\n');
+        
+    for (var i = 0; i < split_raw_list.length; ++i)
+    {
+        if (split_raw_list[i].indexOf('.magres', split_raw_list[i].length - ext.length) !== -1) {
+            example_file_list.push(split_raw_list[i]);
+        }
+    }
+    
+    /*
+    
     $(this.responseText).filter('ul').find('li').find('a').each(function(i, val) {
             var fname = $(val).attr('href');
             if (fname.indexOf('.magres', fname.length - ext.length) !== -1) {
                example_file_list.push(fname);
             }
         });
+    */
     
     dropd.options.length = example_file_list.length + 1;
     

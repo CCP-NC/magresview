@@ -776,6 +776,8 @@ function magres_file_gen(out) {
 	
 	out.write("#.magres formatted NMR data for " + system_stochiometry + "\n");
 	out.write("#" + data_set.magres_view + "\n");
+	
+	
 
 	
 }
