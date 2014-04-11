@@ -777,6 +777,9 @@ function magres_file_gen(out) {
 	out.write("#.magres formatted NMR data for " + system_stochiometry + "\n");
 	out.write("#" + data_set.magres_view + "\n");
 	
+	// Write down atom and lattice
+	
+	
 	
 
 	
@@ -1423,14 +1426,14 @@ function compile_data_set(ds, ac, use_all)
 		ds.magres.units.push(["isc", "10^19.T^2.J^-1"]);
 		ds.magres.isc = [];
 		
-		var isc_calc_script = "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"j\")[1])[3], \
-								   \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"asymmetry\")[1])[3],";
+		var isc_calc_script = "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"j\")[1])[3], \
+								   \"#\" + ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"asymmetry\")[1])[3],";
 		if (!rotated_lattice_script) {
-			isc_calc_script += " \"#\" + (({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3])" + conv_table[eul_conv] + ",";
+			isc_calc_script += " \"#\" + (({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3])" + conv_table[eul_conv] + ",";
 		}
 		else
 		{
-			isc_calc_script += " \"#\" + ((({" + ch + "[i] or " + ch + "[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q) " + conv_table[eul_conv] + ",";
+			isc_calc_script += " \"#\" + ((({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q) " + conv_table[eul_conv] + ",";
 		}
 								   
 		isc_calc_script += " \"#\" + " + ch + "[i].atomno, \"#\" + " + ch + "[j].atomno];}}";
