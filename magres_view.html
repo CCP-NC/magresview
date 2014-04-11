@@ -14,6 +14,9 @@ MagresView is built around the Java Applet version of JMol, a program by Robert 
 Copy of the license can be found as a text file in the /jmol folder
 -->
 
+<!-- NOTE: THIS FILE IS A SERVER-SIDE ONLY VERSION OF MAGRESVIEW.
+It provides the possibility to load example files from a dropdown menu but it makes heavy use of XMLHttpRequest, which won't work when the page is run locally.-->
+
 <html>
   <head>
 	<!-- JMol applet scripts loading -->
@@ -199,11 +202,16 @@ Copy of the license can be found as a text file in the /jmol folder
       visibility: hidden;
     }
     
+    .nodisplay {
+      display: none;
+    }
+    
     </style>
     
     <!-- Loading configuration parameters. Wrapped into two functions that change default error handling so that no matter what is written in mview_config.js, nothing too bad happens -->
     
-    <script type="text/javascript" src="files.js"></script>
+    <script type="text/javascript" src="files/def_config.js"></script>
+    
     <script type="text/javascript">
       $(window).error(function(e){
        e.preventDefault();
@@ -260,8 +268,9 @@ Copy of the license can be found as a text file in the /jmol folder
     
     <script type="text/javascript" src="files/align.js"></script>
     
-					
-
+    <!-- Serverside requests handling -->
+    
+    <script type="text/javascript" src="files/serverside.js"></script>
     
     <!-- JSON parser and stringifier, for passing values to the Python script -->
 
@@ -345,7 +354,17 @@ Copy of the license can be found as a text file in the /jmol folder
 					<h3 class="head" style="color: rgb(242, 154, 0)">Load file</h3>
 					<div id="main_load_div" class="ctrl_left">
 							File:<br>
-							<input type="file" id="load_button" name="Browse" onchange="load_file(event)" style="text-align: right" size="15%" autocomplete="off"></input>
+							<input type="file" id="load_button" name="Browse" onchange="load_file(event)" style="text-align: right;" size="15%" autocomplete="off"></input>
+							<script type="text/javascript">
+							  
+							  if (window.location.protocol != "file:") {
+							    $("#load_button").addClass("nodisplay");
+							    document.write('<select id="file_load_drop" style="width: 100pt;" onchange="file_load_drop_handler(event)"> \
+									    <option value="#user_file#">Load user file...</option> \
+									    </select>');
+							  }
+							  
+							</script>
 							<div class="ctrl_right">
 								<br>
 								<input type="button" id="reload_butt" value="Reload model" onclick="reload_butt_handler()"></input>
@@ -681,6 +700,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					title="Select the desired file output type. Overview = a readable format for data summarizing - Tabulated = a data summary designed for parsing with Excel or Origin - JSON = formatted data for use by the json_tosim.py script - Spinsys = formatted data for inclusion in Simpson or pNMR simulations">
 						<option value="recap">Overview</option>
 						<option value="table">Tabulated</option>
+						<option value="magres">Magres</option>
 						<option value="json">JSON</option>
 						<option value="spinsys">Spinsys</option>
 					</select>
@@ -872,9 +892,12 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 		  switch_handler(false);
 		  
 		  reset_visualization_options();
-		
 		  
 		  hover_load();
+		  
+		  if (window.location.protocol != "file:") {
+		    inspect_example_folder()
+		  }
 		  
 		});
   </script>  

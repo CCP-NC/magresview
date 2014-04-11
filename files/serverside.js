@@ -76,8 +76,10 @@ function file_load_drop_handler()
 function forward_loadrequest()
 {
     last_loaded_file = this.responseText;
-    is_magres = (last_loaded_file.indexOf("#$magres-abinitio") >= 0); //Is the loaded file a magres file?
+    var is_magres = (last_loaded_file.indexOf("#$magres-abinitio") >= 0); //Is the loaded file a magres file?
+    Jmol.script(mainJmol, "zap");
     reset_system();
+    disable_NMR_controls();
     atom_set.is_magres = is_magres;
     load_string(mainJmol, last_loaded_file);
 }
