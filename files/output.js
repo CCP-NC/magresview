@@ -361,17 +361,9 @@ function recap_file_gen(out)
 	
 	//Uses the same method as the json one to gather data from Jmol
 	
-	var data_set = {
-		
-		magres_view: "Made with MagresView " + magresview_version_number,		//Tagline
-		
-		soft_targ: "", //Software target of the JSON file, the final format to be generated for NMR simulation
-		
-		atoms: {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
-		
-		magres: {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
+	var data_set = {};
+	init_data_set(data_set);
 
-	};
 	
 	//This structure holds the parameters controlling the choice of atoms to use for the file
 	
@@ -726,7 +718,7 @@ function magres_file_gen(out) {
 	var i_to_info = {};
 
 	var labels = [];
-	var labels_n = {};
+	var labels_i = {};
 	for (var i = 0; i < data_set.atoms.atom.length; ++i)
 	{
 		var sp = data_set.atoms.atom[i].label;
@@ -734,14 +726,14 @@ function magres_file_gen(out) {
 		if (labels.indexOf(sp) < 0)
 		{
 			labels.push(sp);
-			labels_n[sp] = 1;
+			labels_i[sp] = 1;
 		}
 		else
 		{
-			labels_n[sp] += 1;
+			labels_i[sp] += 1;		
 		}
 		
-		i_to_info[data_set.atoms.atom[i].id] = [sp, ind];
+		i_to_info[data_set.atoms.atom[i].id] = [sp, ind, labels_i[sp]];
 	}
 		
 	//Print elements and compile id -> label and element table
@@ -777,11 +769,153 @@ function magres_file_gen(out) {
 	out.write("#.magres formatted NMR data for " + system_stochiometry + "\n");
 	out.write("#" + data_set.magres_view + "\n");
 	
-	// Write down atom and lattice
+	// Write down 'calculation' block
 	
+	if (atom_set.is_magres) {
+		out.write("[calculation]\n");
+		out.write(Jmol.getPropertyAsString(mainJmol, "fileHeader"));
+		out.write("[/calculation]\n");
+	}
 	
+	// Write down atoms and lattice
 	
-
+	out.write("[atoms]\n");
+	
+	// Start with units...
+	
+	out.write("units lattice Angstrom\n");
+	out.write("units atom Angstrom\n");
+	
+	//Then lattice...
+	
+	out.write("lattice ");
+	
+	for (var i = 0; i < 3; ++i) {
+		for (var j = 0; j < 3; ++j) {
+			out.write(data_set.atoms.lattice[0][i][j] + " ");
+		}
+	}
+	out.write("\n");
+	
+	//Then atoms...
+	
+	for (var i = 0; i < data_set.atoms.atom.length; ++i) {
+		var a = data_set.atoms.atom[i];
+		out.write("atom " + a.species + " " + a.label + " " + i_to_info[a.id][2]);
+		for (var j = 0; j < 3; ++j) {
+			out.write(" " + a.position[j]);
+		}
+		out.write("\t#" + a.label + "_" + a.index);
+		out.write("\n");
+	}
+	
+	out.write("[/atoms]\n");
+	
+	// Now on to the magres section!
+	
+	if (("ms" in data_set.magres) || ("efg" in data_set.magres) || ("isc" in data_set.magres)) {
+		
+		out.write("[magres]\n");
+		
+		if ("ms" in data_set.magres) {
+			out.write("units ms ppm\n");
+			
+			for (var i = 0; i < data_set.magres.ms.length; ++i)
+			{
+				var ms = data_set.magres.ms[i];
+				
+				out.write("ms " + i_to_info[ms.atom_id][0] + " " + i_to_info[ms.atom_id][2]);
+				
+				for (var j=0; j < 3; ++j)
+				{
+					for (var k = 0; k < 3; ++k)
+					{
+						out.write(" " + ms.sigma[j][k]);
+					}
+				}
+				out.write("\n");
+				
+			}
+		}
+		
+		if ("efg" in data_set.magres) {
+			out.write("units efg au\n");
+			
+			for (var i = 0; i < data_set.magres.efg.length; ++i)
+			{
+				var efg = data_set.magres.efg[i];
+				
+				out.write("efg " + i_to_info[efg.atom_id][0] + " " + i_to_info[efg.atom_id][2]);
+				
+				for (var j=0; j < 3; ++j)
+				{
+					for (var k = 0; k < 3; ++k)
+					{
+						out.write(" " + efg.V[j][k]);
+					}
+				}
+				out.write("\n");
+				
+			}
+		}
+		
+		if ("isc" in data_set.magres) {
+			out.write("units isc 10^19.T^2.J^-1\n");
+			
+			for (var i = 0; i < data_set.magres.isc.length; ++i)
+			{
+				var isc = data_set.magres.isc[i];
+				
+				out.write("isc " + i_to_info[isc.atom1_id][0] + " " + i_to_info[isc.atom1_id][2] + " " + i_to_info[isc.atom2_id][0] + " " + i_to_info[isc.atom2_id][2]);
+				
+				for (var j=0; j < 3; ++j)
+				{
+					for (var k = 0; k < 3; ++k)
+					{
+						out.write(" " + isc.sigma[j][k]);					
+					}
+				}
+				out.write("\n");
+				
+			}
+		}
+		
+		out.write("[/magres]\n");		
+		
+	}
+	
+	// Isotopes block, not in the official format definitiion
+		
+	out.write("[isotopes]\n");
+		
+	for (var i = 0; i < data_set.atoms.atom.length; ++i) {
+		var label = data_set.atoms.atom[i].label;
+		var id = data_set.atoms.atom[i].id;
+		out.write("iso " + label + " " + i_to_info[id][2] + " " + data_set.atoms.isotopes[id][0] + data_set.atoms.isotopes[id][1] + "\n");
+	}
+	
+	out.write("[/isotopes]\n");
+	
+	if ("dip" in data_set.magres) {
+		
+		out.write("[dipolar]\n");
+		out.write("units dip kHz\n");
+		
+		for (var i = 0; i < data_set.magres.dip.length; ++i)
+		{
+			var dip = data_set.magres.dip[i];
+			
+			out.write("dip " + i_to_info[dip.atom1_id][0] + " " + i_to_info[dip.atom1_id][2] + " " + i_to_info[dip.atom2_id][0] + " " + i_to_info[dip.atom2_id][2]);
+			for (var j = 0; j < 3; ++j)
+			{
+				out.write(" " + dip.mview_data[j]);
+			}
+			out.write("\n");
+			
+		}
+		out.write("[/dipolar]");		
+	}
+	
 	
 }
 
@@ -793,17 +927,8 @@ function table_file_gen(out)
 	
 	//Uses the same method as the json one to gather data from Jmol
 	
-	var data_set = {
-		
-		magres_view: "Made with MagresView " + magresview_version_number,		//Tagline
-		
-		soft_targ: "", //Software target of the JSON file, the final format to be generated for NMR simulation
-		
-		atoms: {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
-		
-		magres: {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
-
-	};
+	var data_set = {};
+	init_data_set(data_set);
 	
 	//This structure holds the parameters controlling the choice of atoms to use for the file
 	
@@ -1019,17 +1144,8 @@ function json_file_gen(out)
 	//A dataset containing all necessary quantities is generated, so that it might be imported later in a Python script
 	//Its structure is thought as to be compatible with Tim Green's MagresAtom Python library conventions, but has added elements to store software target, diagonalized data, etc.	
 	
-	var data_set = {
-		
-		magres_view: "Made with MagresView " + magresview_version_number,		//Tagline
-		
-		soft_targ: "", //Software target of the JSON file, the final format to be generated for NMR simulation
-		
-		atoms: {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
-		
-		magres: {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
-
-	};
+	var data_set = {};
+	init_data_set(data_set);
 	
 	//This structure holds the parameters controlling the choice of atoms to use for the file
 	
@@ -1092,6 +1208,18 @@ function choice_atomexp(ac)
 	return false;
 }
 
+function init_data_set(data_set)
+{			
+	data_set.magres_view = "Made with MagresView " + magresview_version_number,		//Tagline
+		
+	data_set.soft_targ = "", //Software target of the JSON file, the final format to be generated for NMR simulation
+		
+	data_set.atoms = {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
+		
+	data_set.magres = {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
+
+}
+
 //Fill in the data_set with the required atoms
 
 function compile_data_set(ds, ac, use_all)
@@ -1148,6 +1276,7 @@ function compile_data_set(ds, ac, use_all)
 			temp_abc[0] = Jmol.evaluateVar(mainJmol, 'par_a');
 			temp_abc[1] = Jmol.evaluateVar(mainJmol, 'par_b');
 			temp_abc[2] = Jmol.evaluateVar(mainJmol, 'par_c');
+			ds.atoms.lattice.push(temp_abc);
 			
 		}
 	}
@@ -1426,17 +1555,18 @@ function compile_data_set(ds, ac, use_all)
 		ds.magres.units.push(["isc", "10^19.T^2.J^-1"]);
 		ds.magres.isc = [];
 		
-		var isc_calc_script = "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [\"#\" + ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"j\")[1])[3], \
-								   \"#\" + ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"eta\")[1])[3], \"#\" + ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"asymmetry\")[1])[3],";
+		var isc_calc_script = "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"j\")[1])[3], \
+								    ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"eta\")[1])[3], ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"asymmetry\")[1])[3],";
 		if (!rotated_lattice_script) {
-			isc_calc_script += " \"#\" + (({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3])" + conv_table[eul_conv] + ",";
+			isc_calc_script += "(({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3])" + conv_table[eul_conv] + ",";
 		}
 		else
 		{
-			isc_calc_script += " \"#\" + ((({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q) " + conv_table[eul_conv] + ",";
+			isc_calc_script += "((({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q) " + conv_table[eul_conv] + ",";
 		}
-								   
-		isc_calc_script += " \"#\" + " + ch + "[i].atomno, \"#\" + " + ch + "[j].atomno];}}";
+				
+		isc_calc_script += "({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"asymmatrix\")[1])[3],";			   
+		isc_calc_script += ch + "[i].atomno," + ch + "[j].atomno];}}";
 		
 		
 		Jmol.scriptWait(mainJmol, isc_calc_script);
@@ -1447,17 +1577,18 @@ function compile_data_set(ds, ac, use_all)
 		
 		nonzero_isc = 0;
 		
-		for (var i = 0; i < isc_info.length; i += 6)
+		for (var i = 0; i < isc_info.length-6; i += 7)
 		{			
-			var a_J = parseFloat(isc_info[i].substring(isc_info[i].indexOf('#')+1));
-			var a_eta = parseFloat(isc_info[i+1].substring(isc_info[i+1].indexOf('#')+1));
-			var a_asymm = parseFloat(isc_info[i+2].substring(isc_info[i+2].indexOf('#')+1));
-			var a_eulang = isc_info[i+3].substring(isc_info[i+3].indexOf('#')+1).split('\n');
-			var a_eul_a = parseFloat(a_eulang[0]);
-			var a_eul_b = parseFloat(a_eulang[1]);
-			var a_eul_c = parseFloat(a_eulang[2]);
-			var a_no_1 = parseInt(isc_info[i+4].substring(isc_info[i+4].indexOf('#')+1));
-			var a_no_2 = parseInt(isc_info[i+5].substring(isc_info[i+5].indexOf('#')+1));
+			var a_J = isc_info[i];
+			var a_eta = isc_info[i+1];
+			var a_asymm = isc_info[i+2];
+			var a_eulang = isc_info[i+3];
+			var a_eul_a = a_eulang[0];
+			var a_eul_b = a_eulang[1];
+			var a_eul_c = a_eulang[2];
+			var a_sigma = isc_info[i+4];
+			var a_no_1 = isc_info[i+5];
+			var a_no_2 = isc_info[i+6];
 			
 			// A small simplification for special cases
 			
@@ -1472,6 +1603,7 @@ function compile_data_set(ds, ac, use_all)
 			}
 			
 			ds.magres.isc[nonzero_isc] = {
+				sigma: a_sigma,
 				mview_data: [a_J, a_eta, a_asymm, a_eul_a, a_eul_b, a_eul_c],				//Right now only the isotropic component of ISC is implemented!
 				atom1_id: a_no_1,
 				atom2_id: a_no_2,
