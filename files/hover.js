@@ -19,17 +19,22 @@ function hover_load() {
 
 function drop_handler(e) {
     
-    e.preventDefault();
+    if (e.preventDefault)
+    {
+        e.preventDefault();
+    }
         
     load_file(e);
-    
     drag_handler(e);
         
 }
 
 function drag_handler(e) {
     
-    e.preventDefault();
+    if (e.preventDefault)
+    {
+        e.preventDefault();
+    }
     
     hover_on = (e.type == "dragover");
     $(dragdrop_target).toggleClass("hovered", hover_on);

@@ -17,6 +17,7 @@ function output_file_gen()
 	if (to_newtab == true)
 	{	
 		var out_window = window.open('', 'JMol file output');
+		out_window.document.body.innerHTML = '';
 		out_window.document.write("<title>JMol file output</title>");	
 		//The <pre> tags are required to make the page writable as if it was a .txt file
 		out_window.document.write("<pre id=\"file_text\" style=\"white-space:pre-wrap\">");
@@ -40,46 +41,31 @@ function output_file_gen()
 	{
 		case "recap":
 			recap_file_gen(file_destination);
-			if (to_newtab == true)
-			{
-				file_destination.write("</pre>");
-				file_destination.close();
-				out_window.focus();
-			}
 			break;
 		case "table":
 			table_file_gen(file_destination);
-			if (to_newtab == true)
-			{
-				file_destination.write("</pre>");
-				file_destination.close();
-				out_window.getSelection().selectAllChildren(out_window.document);		//Table document needs to be copied, so we select it all for convenience
-				out_window.focus();
-			}
 			break;						
 		case "json":
 			json_file_gen(file_destination);
-			if (to_newtab == true)
-			{
-				file_destination.write("</pre>");
-				file_destination.close();
-				out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
-				out_window.focus();
-			}
 			break;
 		case "magres":
 			magres_file_gen(file_destination);
-			if (to_newtab == true)
-			{
-				file_destination.write("</pre>");
-				file_destination.close();
-				out_window.getSelection().selectAllChildren(out_window.document);		//JSON document needs to be copied, so we select it all for convenience
-				out_window.focus();
-			}			
+			break;
+		case "spinsys":
+			spinsys_file_gen(file_destination);
 			break;			
 	}
 			
-	if(to_newtab == false)
+	if (to_newtab == true)
+	{
+		file_destination.write("</pre>");
+		file_destination.close();
+		if (filetype != "recap") {
+			out_window.getSelection().selectAllChildren(out_window.document);		//All types except recap need to be copied, so we select it all for convenience
+		}
+		out_window.focus();
+	}
+	else
 	{
 		if (current_framework == "Java") {
 			var savefile_script = "";
@@ -683,17 +669,8 @@ function magres_file_gen(out) {
 	
 	//Outputs as a new .magres file
 	
-	var data_set = {
-		
-		magres_view: "Made with MagresView " + magresview_version_number,		//Tagline
-		
-		soft_targ: "", //Software target of the JSON file, the final format to be generated for NMR simulation
-		
-		atoms: {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
-		
-		magres: {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
-
-	};
+	var data_set = {};
+	init_data_set(data_set);
 	
 		//This structure holds the parameters controlling the choice of atoms to use for the file
 	
@@ -917,6 +894,198 @@ function magres_file_gen(out) {
 	}
 	
 	
+}
+
+// An output directly in .spinsys format, for Simpson and pNMRsim
+
+function spinsys_file_gen(out)
+{
+	var data_set = {};
+	init_data_set(data_set);
+	
+	//This structure holds the parameters controlling the choice of atoms to use for the file
+	
+	var atom_choice = {
+		
+		t: document.getElementById("sel_file_drop").value,				//Type of choice
+		
+		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
+
+		c: last_atom_picked,									//Center atom (for "atoms within...")
+				
+	}
+	
+	if(!compile_data_set(data_set, atom_choice, false))
+	{
+		out.close();
+		return;
+	}
+	
+	//Print crystallographic labels and compile id -> label and element table
+	
+	var i_to_info = {};
+
+	var labels = [];
+	var labels_i = {};
+	for (var i = 0; i < data_set.atoms.atom.length; ++i)
+	{
+		var sp = data_set.atoms.atom[i].label;
+		var ind = data_set.atoms.atom[i].index;
+		if (labels.indexOf(sp) < 0)
+		{
+			labels.push(sp);
+			labels_i[sp] = 1;
+		}
+		else
+		{
+			labels_i[sp] += 1;		
+		}
+		
+		i_to_info[data_set.atoms.atom[i].id] = [sp, ind, labels_i[sp]];
+	}
+		
+	//Print elements and compile id -> label and element table
+	var elems = [];
+	var elems_n = {};
+	for (var i = 0; i < data_set.atoms.atom.length; ++i)
+	{
+		var el = data_set.atoms.atom[i].species;
+		if (elems.indexOf(el) < 0)
+		{
+			elems.push(el);
+			elems_n[el] = 1;
+		}
+		else
+		{
+			elems_n[el] += 1;
+		}
+
+		i_to_info[data_set.atoms.atom[i].id].push(el);
+	}
+	
+	if (data_set.soft_targ == "simpson")
+	{			
+		out.write('spinsys {\n');
+		
+		//And the channels part (by default, all elements are used)
+		
+		out.write('channels');
+		
+		var channel_str = '';
+		
+		for (i in data_set.atoms.isotopes)
+		{
+			var iso = data_set.atoms.isotopes[i][0] + data_set.atoms.isotopes[i][1];
+			
+			// Compensate for the cases of weird symbols, for hydrogen isotopes
+			switch(iso)
+			{
+				case "2D":
+					iso = "2H";
+					break;
+				case "3T":
+					iso = "3H";
+					break;
+			}
+			
+			if (channel_str.indexOf(iso) < 0)
+			{
+				channel_str += '\t' + iso;
+			}
+	
+		}
+		
+		out.write(channel_str + '\n');
+		
+	}
+	
+	// Write down nuclei
+	
+	var atom_lookup = {}
+
+	out.write(" nuclei\t");
+	var a_n = 1 //Arbitrary sequential atom number for internal purposes
+	for (var i = 0; i < data_set.atoms.atom.length; ++i)
+	{
+		var a = data_set.atoms.atom[i];
+		out.write(data_set.atoms.isotopes[a.id][0] + data_set.atoms.isotopes[a.id][1] + " ");
+		atom_lookup[a.id] = {"index": a.index, "label": a.label, "n": a_n};
+		a_n += 1;
+	}
+	out.write("\n");
+	
+	if ('ms' in data_set.magres)
+	{
+		for (var i = 0; i < data_set.magres.ms.length; ++i)
+		{
+			var ms = data_set.magres.ms[i];
+			
+			if ('mview_data' in ms)
+			{
+				var n = atom_lookup[ms.atom_id].n;
+				out.write(" shift\t" + n + " " + (-ms.mview_data[0]) + "p " + (-ms.mview_data[1])
+				+ "p " + (ms.mview_data[2]) + " " + (ms.mview_data[3]) + " " + (ms.mview_data[4]) + " " + (ms.mview_data[5]) + "\n");
+			}
+		}
+	}
+
+	if ('efg' in data_set.magres)
+	{
+		for (var i = 0; i < data_set.magres.efg.length; ++i)
+		{
+			var efg = data_set.magres.efg[i];
+			
+			if ('mview_data' in efg)
+			{
+			    var n = atom_lookup[efg.atom_id].n;
+				if (efg.mview_data[0] == 0.0)
+				{
+				    continue;
+				}
+				out.write(" quadrupole\t" + n + " 2 " + (efg.mview_data[0]) + " " + (efg.mview_data[1]) 
+				+ " " + (efg.mview_data[2]) + " " + (efg.mview_data[3]) + " " + (efg.mview_data[4]) + "\n");
+			}
+		}
+	}
+
+	if ('dip' in data_set.magres)
+	{
+	        for (var i = 0; i < data_set.magres.dip.length; ++i)
+		{
+			var dip = data_set.magres.dip[i];
+			
+			if ('mview_data' in dip)
+			{
+				n1 = atom_lookup[dip.atom1_id].n;
+				n2 = atom_lookup[dip.atom2_id].n;
+				out.write(" dipole\t" + n2 + " " + n1 + " " + (dip.mview_data[0]/(2.0*Math.PI))
+				+ " " + (dip.mview_data[1]) + " " + (dip.mview_data[2]) + " " + (dip.mview_data[3]) + "\n");
+			}
+		}
+	}
+		
+	if ('isc' in data_set.magres)
+        {
+	        for (var i = 0; i < data_set.magres.isc.length; ++i)
+		{
+			var isc = data_set.magres.isc[i];
+			
+			if ('mview_data' in isc)
+			{
+	                    n1 = atom_lookup[isc.atom1_id].n;
+	                    n2 = atom_lookup[isc.atom2_id].n;				
+			}
+	                out.write(" jcoupling\t" + n2 + " " + n1 + " " + (isc.mview_data[0]) + " " + (isc.mview_data[1])
+			+ " " + (isc.mview_data[2]) + " " + (isc.mview_data[3]) + " " + (isc.mview_data[4]) + " " + (isc.mview_data[5]) + "\n");
+		}
+	}
+	
+	if (data_set.soft_targ == "simpson")
+	{			
+		out.write('}');
+	}
+
+
 }
 
 //A file format meant for parsing in Excel/Origin like software
