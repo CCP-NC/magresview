@@ -143,6 +143,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
     	font-weight: normal;
     	font-size: 80%;
     	text-align: left;
+	position: absolute;
     }
     
     div.titlediv {
@@ -155,12 +156,34 @@ It provides the possibility to load example files from a dropdown menu but it ma
     
     div.creditdiv {
     	position: absolute;
-		bottom:	3%;    
-		right: 3%;
-  	  	text-align: right;
-		font-weight: bolder;
-		font-size: 80%;
-		color: rgb(245, 245, 235);
+	bottom:	3%;    
+	right: 3%;
+ 	text-align: right;
+	font-weight: bolder;
+	font-size: 80%;
+	color: rgb(245, 245, 235);
+    }
+    
+    div.conv_popup {
+      
+      position: relative;
+      border: 5pt rgb(245, 245, 235);
+      border-style: dashed;
+      border-radius: 10pt;
+      width: 80pt;
+      height: 80pt;
+      margin: 5pt;
+      font-weight: bold;
+      text-align: center;
+      vertical-align: middle;
+      line-height: 80pt;
+      
+    }
+    
+    div.obfuscated {
+      
+      opacity: .5;
+      
     }
     
     .switchdiv {
@@ -272,6 +295,10 @@ It provides the possibility to load example files from a dropdown menu but it ma
     
     <script type="text/javascript" src="files/serverside.js"></script>
     
+    <!-- Drag-n-Drop magres conversion popup handling -->
+    
+    <script type="text/javascript" src="files/oldmagres.js"></script>
+    
     <!-- JSON parser and stringifier, for passing values to the Python script -->
 
 	 <script type="text/javascript" src="files/json2.js"></script>
@@ -310,9 +337,12 @@ It provides the possibility to load example files from a dropdown menu but it ma
 			}
 		});
 		
+		dndrop_popup_init();
+		
 		$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
 		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
- 		  		  		
+		$("#oldmagres_convert_popup").dialog({autoOpen: true, modal: true, position: [0.7*winW, 0.3*winH], width: '320pt'});
+ 		
   		});  		
   		
   </script>
@@ -615,25 +645,6 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 								<br>
 								<br>
 							
-							<div id="dipolar_ctrl_right" class="ctrl_right">
-
-							<!--
-							
-							Commented out while waiting for Jmol to implement this
-
-								<span title="Setting any of these three indices to a value different from zero will apply a static magnetic field to the sample, and the consequent dipolar couplings will be calculated keeping into account the angular dependency, (3cos&theta;-1)/2. If all three indices are zero, only the dipolar coupling constant will be calculated.">
-								Static magnetic field (crystallographic direction, [0 0 0] = no field):<br>
-								
-								h: <input id="h_Hdir" type="text" maxlength="5" size="3" value="0" autocomplete="off" onkeypress="hkl_field_handler(event)"
-		  						title="Crystallographic direction of the static field H - index h."></input>
-		  						k: <input id="k_Hdir" type="text" maxlength="5" size="3" value="0" autocomplete="off" onkeypress="hkl_field_handler(event)"
-		  						title="Crystallographic direction of the static field H - index k"></input>
-		  						l: <input id="l_Hdir" type="text" maxlength="5" size="3" value="0" autocomplete="off" onkeypress="hkl_field_handler(event)"
-		  						title="Crystallographic direction of the static field H - index l"></input>
-		  						</span>							
-							-->
-
-							</div>							
 							</div>
 							Click on any atom to show its couplings with the rest of the selection (the picking will not work when the selection is in "Custom" mode).<br>
 							Cutoff distance: 
@@ -849,7 +860,11 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 			</div>
 			
 			<div id="oldmagres_convert_popup" title="Convert old Magres file" class="popupdiv">
-				
+			  Drag and drop the old .magres file and (optionally, if you want the lattice parameters to be included) the .castep file
+			  to get a converted new format .magres file you can drag straight on MagresView:<br><br>
+			      <div id="oldmagres_box" class="conv_popup obfuscated" style="float: left;"> Old .MAGRES </div>
+			      <div id="castep_box"    class="conv_popup obfuscated" style="float: left;"> .CASTEP </div>
+			      <div id="newmagres_box" class="conv_popup obfuscated" style="float: left;" draggable=false> New .MAGRES </div>
 			</div>
 
   </div>
