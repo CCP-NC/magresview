@@ -760,19 +760,26 @@ function magres_file_gen(out) {
 	
 	// Start with units...
 	
-	out.write("units lattice Angstrom\n");
-	out.write("units atom Angstrom\n");
-	
-	//Then lattice...
-	
-	out.write("lattice ");
-	
-	for (var i = 0; i < 3; ++i) {
-		for (var j = 0; j < 3; ++j) {
-			out.write(data_set.atoms.lattice[0][i][j] + " ");
-		}
+	for (var i = 0; i < data_set.atoms.units.length; ++i) {
+		out.write("units " + data_set.atoms.units[i][0] + " " + data_set.atoms.units[i][1] + "\n");
 	}
-	out.write("\n");
+	
+		out.write("units lattice Angstrom\n");
+	if ("lattice" in data_set.atoms) {
+		
+		
+		//Then lattice...
+		
+		out.write("lattice ");
+		
+		for (var i = 0; i < 3; ++i) {
+			for (var j = 0; j < 3; ++j) {
+				out.write(data_set.atoms.lattice[0][i][j] + " ");
+			}
+		}
+		out.write("\n");
+		
+	}
 	
 	//Then atoms...
 	
@@ -794,8 +801,11 @@ function magres_file_gen(out) {
 		
 		out.write("[magres]\n");
 		
+		for (var i = 0; i < data_set.magres.units.length; ++i) {
+			out.write("units " + data_set.magres.units[i][0] + " " + data_set.magres.units[i][1] + "\n");
+		}
+		
 		if ("ms" in data_set.magres) {
-			out.write("units ms ppm\n");
 			
 			for (var i = 0; i < data_set.magres.ms.length; ++i)
 			{
@@ -816,7 +826,6 @@ function magres_file_gen(out) {
 		}
 		
 		if ("efg" in data_set.magres) {
-			out.write("units efg au\n");
 			
 			for (var i = 0; i < data_set.magres.efg.length; ++i)
 			{
@@ -837,7 +846,6 @@ function magres_file_gen(out) {
 		}
 		
 		if ("isc" in data_set.magres) {
-			out.write("units isc 10^19.T^2.J^-1\n");
 			
 			for (var i = 0; i < data_set.magres.isc.length; ++i)
 			{
@@ -862,16 +870,21 @@ function magres_file_gen(out) {
 	}
 	
 	// Isotopes block, not in the official format definitiion
+	
+	if ("isotopes" in data_set.atoms)
+	{
+		out.write("[isotopes]\n");
+			
+		for (var i = 0; i < data_set.atoms.atom.length; ++i) {
+			var label = data_set.atoms.atom[i].label;
+			var id = data_set.atoms.atom[i].id;
+			out.write("iso " + label + " " + i_to_info[id][2] + " " + data_set.atoms.isotopes[id][0] + data_set.atoms.isotopes[id][1] + "\n");
+		}
 		
-	out.write("[isotopes]\n");
-		
-	for (var i = 0; i < data_set.atoms.atom.length; ++i) {
-		var label = data_set.atoms.atom[i].label;
-		var id = data_set.atoms.atom[i].id;
-		out.write("iso " + label + " " + i_to_info[id][2] + " " + data_set.atoms.isotopes[id][0] + data_set.atoms.isotopes[id][1] + "\n");
+		out.write("[/isotopes]\n");
 	}
 	
-	out.write("[/isotopes]\n");
+	// Dipolar couplings, as above, not official
 	
 	if ("dip" in data_set.magres) {
 		

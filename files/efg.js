@@ -57,7 +57,7 @@ function efg_plot_handler()
 		if (avg_radius == 0.0)
 			scale_ratio = 0.5;
 		else
-			scale_ratio = avg_radius/avg_efg*1.2*0.2;
+			scale_ratio = avg_radius/avg_efg*1.5;
 	}
 	
 	//New Jmol functionality
