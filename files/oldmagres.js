@@ -66,10 +66,14 @@ function parse_old_magres(ds, mfile) {
     
     var atoms = findall(atom_regex, mfile);
     
+    if (atoms.length == 0) {
+        return false;
+    }
+    
     // This table keeps track of the various indices met for different atom species - required to avoid inserting an atom multiple times
     
     var atom_table = {};
-        
+    
     for (var i = 0; i < atoms.length; ++i) {
         
         // Reset all regex 
@@ -166,9 +170,7 @@ function parse_old_magres(ds, mfile) {
         ds.atoms.units.push(["atom","Angstrom"]);
     }
     
-    console.log(ds);
-    
-    return false;
+    return true;
     
 }
 
