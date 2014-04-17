@@ -114,6 +114,8 @@ function load_file(evt)
 		var popup_file = evt.originalEvent.dataTransfer.getData("magres_file");
 		if (popup_file.indexOf("#$magres-abinitio") >= 0) {
 			
+			$("#oldmagres_convert_popup").dialog("close");
+			dndrop_popup_init();
 			atom_set.is_magres = true;
 			load_string(mainJmol, popup_file);
 			last_loaded_file = file_content;

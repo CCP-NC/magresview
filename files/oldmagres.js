@@ -18,6 +18,9 @@ function dndrop_popup_init()
 
     $("#oldmagres_box").addClass("obfuscated");
     $("#castep_box").addClass("obfuscated");
+    $("#newmagres_box").addClass("obfuscated");
+    $("#newmagres_box").attr("draggable", false);
+    $("#newmagres_box").on("dragstart", function() {});
     
     var data_set = {}; // The data set that is going to contain the info on the system as JSON
     init_data_set(data_set);
@@ -96,7 +99,7 @@ function newmagres_drag_handler(e)
     
     atom_set.is_magres = false; //This prevents undesired calls to Jmol
     magres_file_gen(data_set, file_destination);
-        
+    
     e.originalEvent.dataTransfer.setData("magres_file", file_destination.file_str);
     
 }
@@ -119,6 +122,9 @@ function parse_old_magres(ds, mfile) {
     
     var atom_table = {};
     
+    ds.atoms.atom = [];
+    ds.magres = {units: []};        
+   
     for (var i = 0; i < atoms.length; ++i) {
         
         // Reset all regex 
@@ -241,6 +247,7 @@ function parse_castep(ds, cfile)
         return false;
     }
     
+    ds.atoms.lattice = [];    
     ds.atoms.lattice.push([[parseFloat(latt_1[1]), parseFloat(latt_1[2]), parseFloat(latt_1[3])],
                            [parseFloat(latt_2[1]), parseFloat(latt_2[2]), parseFloat(latt_2[3])],
                            [parseFloat(latt_3[1]), parseFloat(latt_3[2]), parseFloat(latt_3[3])]]);
@@ -258,7 +265,6 @@ function parse_castep(ds, cfile)
     if (!has_units) {
         ds.atoms.units.push(["lattice","Angstrom"]);
     }
-
     
     return true;
     
