@@ -108,7 +108,22 @@ function load_file(evt)
 	// Note: this won't work on Chrome if the webpage is running locally. In that case, one must launch Chrome with the flag --allow-file-access-from-files 	
 	// Check if file is running locally and browser is Chrome or Chromium
 
-	if (!evt.target.files) {
+	// Is this coming from the popup?
+	
+	if (evt.originalEvent) {
+		var popup_file = evt.originalEvent.dataTransfer.getData("magres_file");
+		if (popup_file.indexOf("#$magres-abinitio") >= 0) {
+			
+			atom_set.is_magres = true;
+			load_string(mainJmol, popup_file);
+			last_loaded_file = file_content;
+			
+			return;
+		
+		}
+	}
+	
+	if (!evt.target.files) {		
 		var to_load = evt.originalEvent.dataTransfer.files[0];
 	}
 	else
@@ -138,10 +153,12 @@ function load_file(evt)
 		atom_set.is_magres = (file_content.indexOf("#$magres-abinitio") >= 0); //Is the loaded file a magres file?
 		
 		// Checking if the file is an old magres file
-		
-		if ((file_content.split('\n').indexOf('============') >= 0) && (to_load.name.split('.').slice(-1)[0] == 'magres'))
+				
+		if ((file_content.split('\n')[0].indexOf('============') >= 0) && (to_load.name.split('.').slice(-1)[0] == 'magres') ||
+		    (to_load.name.split('.').slice(-1)[0] == 'old' && to_load.name.split('.').slice(-2)[0] == 'magres'))
 		{
-			alert("This is an old magres file. It must be converted to the new version of the format before MagresView can load it.");
+			$("#oldmagres_convert_popup").dialog("open");
+			return;
 		}
 
 		load_string(mainJmol, file_content);

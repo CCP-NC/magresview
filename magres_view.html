@@ -341,7 +341,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		
 		$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
 		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
-		$("#oldmagres_convert_popup").dialog({autoOpen: true, modal: true, position: [0.7*winW, 0.3*winH], width: '320pt'});
+		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH], width: '330pt'});
  		
   		});  		
   		
@@ -389,7 +389,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 							  
 							  if (window.location.protocol != "file:") {
 							    $("#load_button").addClass("nodisplay");
-							    document.write('<select id="file_load_drop" style="width: 100pt;" onchange="file_load_drop_handler(event)"> \
+							    document.write('<select id="file_load_drop" style="width: 100pt;" onclick="file_load_drop_handler(event)"> \
 									    <option value="#user_file#">Load user file...</option> \
 									    </select>');
 							  }
@@ -860,6 +860,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 			</div>
 			
 			<div id="oldmagres_convert_popup" title="Convert old Magres file" class="popupdiv">
+			  You tried to load an old .magres file. This format is now deprecated and needs to be converted.<br>
 			  Drag and drop the old .magres file and (optionally, if you want the lattice parameters to be included) the .castep file
 			  to get a converted new format .magres file you can drag straight on MagresView:<br><br>
 			      <div id="oldmagres_box" class="conv_popup obfuscated" style="float: left;"> Old .MAGRES </div>

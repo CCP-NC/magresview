@@ -37,22 +37,46 @@ function output_file_gen()
 		
 	}
 	
+	var data_set = {};
+	init_data_set(data_set);
+	
+		//This structure holds the parameters controlling the choice of atoms to use for the file
+	
+	var atom_choice = {
+		
+		t: document.getElementById("sel_file_drop").value,				//Type of choice
+		
+		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
+
+		c: last_atom_picked,									//Center atom (for "atoms within...")
+				
+	}
+	
+	var use_all = (filetype == "recap");
+	
+	if(!compile_data_set(data_set, atom_choice, use_all))
+	{
+		file_destination.close();
+		return;
+	}
+
+	
 	switch (filetype)
 	{
 		case "recap":
-			recap_file_gen(file_destination);
+			recap_file_gen(data_set, file_destination);
 			break;
 		case "table":
-			table_file_gen(file_destination);
+			table_file_gen(data_set, file_destination);
 			break;						
 		case "json":
-			json_file_gen(file_destination);
+			json_file_gen(data_set, file_destination);
 			break;
 		case "magres":
-			magres_file_gen(file_destination);
+			magres_file_gen(data_set, file_destination);
 			break;
 		case "spinsys":
-			spinsys_file_gen(file_destination);
+			spinsys_file_gen(data_set, file_destination);
 			break;			
 	}
 			
@@ -341,34 +365,12 @@ function trim_num(n, d)
 
 //A file format meant for readability
 
-function recap_file_gen(out)
+function recap_file_gen(data_set, out)
 {
 	//This kind of file is meant to be a recap with readability as its main purpose. As such, it will be spaced and commented as much as possible
 	
 	//Uses the same method as the json one to gather data from Jmol
-	
-	var data_set = {};
-	init_data_set(data_set);
-
-	
-	//This structure holds the parameters controlling the choice of atoms to use for the file
-	
-	var atom_choice = {
 		
-		t: "unitcell",
-		
-		r: 0,
-
-		c: 0,
-				
-	}
-	
-	if(!compile_data_set(data_set, atom_choice, true))
-	{
-		out.close();
-		return;
-	}
-	
 	//Header
 	out.write("--------------   JMol Web - Summary file --------------\n");
 
@@ -665,30 +667,9 @@ function recap_file_gen(out)
 
 //An output in normal .magres format
 
-function magres_file_gen(out) {
+function magres_file_gen(data_set, out) {
 	
 	//Outputs as a new .magres file
-	
-	var data_set = {};
-	init_data_set(data_set);
-	
-		//This structure holds the parameters controlling the choice of atoms to use for the file
-	
-	var atom_choice = {
-		
-		t: document.getElementById("sel_file_drop").value,				//Type of choice
-		
-		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
-
-		c: last_atom_picked,									//Center atom (for "atoms within...")
-				
-	}
-	
-	if(!compile_data_set(data_set, atom_choice, false))
-	{
-		out.close();
-		return;
-	}
 	
 	//Print crystallographic labels and compile id -> label and element table
 	
@@ -738,9 +719,9 @@ function magres_file_gen(out) {
 	
 	var system_stochiometry = "";
 	
-	for (var i = 0; i < atom_set.atom_species_labels.length; ++i) {
-		l = atom_set.atom_species_labels[i];
-		system_stochiometry += l + "_" + atom_set.atom_species_sites[l].length + " ";
+	for (var i = 0; i < elems.length; ++i) {
+		l = elems[i];
+		system_stochiometry += l + "_" + elems_n[l] + " ";
 	}
 	
 	out.write("#.magres formatted NMR data for " + system_stochiometry + "\n");
@@ -764,9 +745,7 @@ function magres_file_gen(out) {
 		out.write("units " + data_set.atoms.units[i][0] + " " + data_set.atoms.units[i][1] + "\n");
 	}
 	
-		out.write("units lattice Angstrom\n");
-	if ("lattice" in data_set.atoms) {
-		
+	if ("lattice" in data_set.atoms && data_set.atoms.lattice.length > 0) {
 		
 		//Then lattice...
 		
@@ -780,7 +759,7 @@ function magres_file_gen(out) {
 		out.write("\n");
 		
 	}
-	
+		
 	//Then atoms...
 	
 	for (var i = 0; i < data_set.atoms.atom.length; ++i) {
@@ -845,6 +824,7 @@ function magres_file_gen(out) {
 			}
 		}
 		
+		
 		if ("isc" in data_set.magres) {
 			
 			for (var i = 0; i < data_set.magres.isc.length; ++i)
@@ -871,7 +851,7 @@ function magres_file_gen(out) {
 	
 	// Isotopes block, not in the official format definitiion
 	
-	if ("isotopes" in data_set.atoms)
+	if ("isotopes" in data_set.atoms && data_set.atoms.isotopes.length > 0)
 	{
 		out.write("[isotopes]\n");
 			
@@ -911,29 +891,8 @@ function magres_file_gen(out) {
 
 // An output directly in .spinsys format, for Simpson and pNMRsim
 
-function spinsys_file_gen(out)
+function spinsys_file_gen(data_set, out)
 {
-	var data_set = {};
-	init_data_set(data_set);
-	
-	//This structure holds the parameters controlling the choice of atoms to use for the file
-	
-	var atom_choice = {
-		
-		t: document.getElementById("sel_file_drop").value,				//Type of choice
-		
-		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
-
-		c: last_atom_picked,									//Center atom (for "atoms within...")
-				
-	}
-	
-	if(!compile_data_set(data_set, atom_choice, false))
-	{
-		out.close();
-		return;
-	}
-	
 	//Print crystallographic labels and compile id -> label and element table
 	
 	var i_to_info = {};
@@ -1103,32 +1062,11 @@ function spinsys_file_gen(out)
 
 //A file format meant for parsing in Excel/Origin like software
 
-function table_file_gen(out)
+function table_file_gen(data_set, out)
 {
 	//This kind of file is meant to be a recap with easy parsing as its main purpose
 	
-	//Uses the same method as the json one to gather data from Jmol
-	
-	var data_set = {};
-	init_data_set(data_set);
-	
-	//This structure holds the parameters controlling the choice of atoms to use for the file
-	
-	var atom_choice = {
-		
-		t: document.getElementById("sel_file_drop").value,				//Type of choice
-		
-		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
-
-		c: last_atom_picked,									//Center atom (for "atoms within...")
-				
-	}
-	
-	if(!compile_data_set(data_set, atom_choice, false))
-	{
-		out.close();
-		return;
-	}
+	//Uses the same method as the json one to gather data from Jmol	
 	
 	//Print crystallographic labels and compile id -> label and element table
 	
@@ -1321,32 +1259,11 @@ function table_file_gen(out)
 
 //A file format optimized for transferring data to a Python script
 
-function json_file_gen(out)
+function json_file_gen(data_set, out)
 {
 	//A dataset containing all necessary quantities is generated, so that it might be imported later in a Python script
 	//Its structure is thought as to be compatible with Tim Green's MagresAtom Python library conventions, but has added elements to store software target, diagonalized data, etc.	
 	
-	var data_set = {};
-	init_data_set(data_set);
-	
-	//This structure holds the parameters controlling the choice of atoms to use for the file
-	
-	var atom_choice = {
-		
-		t: document.getElementById("sel_file_drop").value,				//Type of choice
-		
-		r: parseFloat(document.getElementById("range_file_r").value),	//Radius (for "atoms within...")
-
-		c: last_atom_picked,											//Center atom (for "atoms within...")
-				
-	}
-	
-	if(!compile_data_set(data_set, atom_choice, false))
-	{
-		out.close();
-		return;
-	}
-
 	var to_write = JSON.stringify(data_set);
 	
 	out.write(to_write);
