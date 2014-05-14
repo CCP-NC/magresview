@@ -118,7 +118,7 @@ function load_file(evt)
 			dndrop_popup_init();
 			atom_set.is_magres = true;
 			load_string(mainJmol, popup_file);
-			last_loaded_file = file_content;
+			last_loaded_file = popup_file;
 			
 			return;
 		
