@@ -60,7 +60,7 @@ function sel_drop_handler()
 		if (atom_set.atom_species_sites == null)
 		{
 			dropd_atoms.disabled = true;
-			Jmol.script(mainJmol, "select displayed and {_" + sp + "};");
+			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and {_" + sp + "};");
 		}
 		else
 		{
@@ -68,7 +68,7 @@ function sel_drop_handler()
 			dropd_atoms.options.length = atom_set.atom_species_sites[sp].length + 1;
 			for (var i = 1; i < dropd_atoms.options.length; ++i)
 				dropd_atoms.options[i] = new Option(atom_set.atom_species_sites[sp][i-1], atom_set.atom_species_sites[sp][i-1]);
-			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and " + sp + "*");
+			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and " + sp + "_*");
 		}
 	}
 	
@@ -84,7 +84,7 @@ function sel_atom_drop_handler(turn_flag_on)
 	if (sp == "all")
 		Jmol.script(mainJmol, "select displayed");
 	else if (ind == "all")
-		Jmol.script(mainJmol, "select displayed and " + sp + "*");
+		Jmol.script(mainJmol, "select displayed and " + sp + "_*");
 	else
 		Jmol.script(mainJmol, "select displayed and " + sp + "_" + ind);
 
@@ -119,7 +119,7 @@ function bonds_check_handler()
 	}
 	else if (ind == "all")
 	{
-		bond_script += "select " + sp + "*";
+		bond_script += "select " + sp + "_*";
 	}
 	else
 	{
