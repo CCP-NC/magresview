@@ -104,14 +104,18 @@ function newmagres_drag_handler(e)
     
 }
 
+var debug_mfile = "";
+
 function parse_old_magres(ds, mfile) {
     
-    var atom_regex = /[=]+[\r\n]+( Perturbing Atom|Atom): ([A-Za-z\:0-9]+)\s+([0-9]+)[\r\n]+[=]+[\r\n]+([^=]+)[\r\n]+/mg;
+    var atom_regex = /[=]+[\r\n]+( Perturbing Atom|Atom): ([A-Za-z\:0-9]+)\s+([0-9]+)[\r\n]+[=]+[\r\n]+([^=]+)[\r\n]+/m;
     var shielding_tensor_regex = /\s{0,}(.*?) Shielding Tensor[\r\n]+\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+([0-9\.\-]+)[\n\r]+\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+([0-9\.\-]+)[\n\r]+\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+/;
     var jc_tensor_regex = /\s{0,}J-coupling (.*?)[\r\n]+\s+([0-9eE\.\-]+)\s+([0-9eE\.\-]+)\s+([0-9eE\.\-]+)[\n\r]+\s+([0-9eE\.\-]+)\s+([0-9eE\.\-]+)\s+([0-9eE\.\-]+)[\r\n]+\s+([0-9eE\.\-]+)\s+([0-9eE\.\-]+)\s+([0-9eE\.\-]+)\s+/;
     var efg_tensor_regex = /\s{0,}(.*?) tensor[\r\n]+\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+([0-9\.\-]+)[\r\n]+\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+([0-9\.\-]+)[\r\n]+\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+/;
     var coords_regex = /([A-Za-z\:0-9]+)\s+([0-9]+)\s+Coordinates\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+([0-9\.\-]+)\s+A[\r\n]+/;
         
+    debug_mfile = mfile;
+    
     var atoms = findall(atom_regex, mfile);
     
     if (atoms.length == 0) {
@@ -137,6 +141,7 @@ function parse_old_magres(ds, mfile) {
         var parse_coords = coords_regex.exec(atoms[i][4]);
         var parse_shielding = shielding_tensor_regex.exec(atoms[i][4]);
         var parse_efg = efg_tensor_regex.exec(atoms[i][4]);
+                
         //var parse_jc = jc_tensor_regex.exec(atoms[i][4]);
         
         /* J-coupling removed for now as it's a developer code feature and will probably never
@@ -283,6 +288,7 @@ function findall(regex, string)
         }
         res.push(lastres);
         string = string.slice(lastres.index + lastres[0].length);
+        console.log(string);
     }
     
     return res;    
