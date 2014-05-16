@@ -135,10 +135,16 @@ function output_file_gen()
 					$("#file_download").attr("download", "magres.magres");
 					break;				
 			}
-			$("#file_download").attr("href", "data:text/plain," + file_destination.file_str.replace(/\n/g, '%0A').replace(/\t/g, '%09'));
+			$("#file_download").attr("href", "data:text/plain," + file_destination.file_str
+						 .replace(/\n/g, '%0A')
+						 .replace(/\t/g, '%09')
+						 .replace(/%/g, '%25')
+						 .replace(/&/g, '%26')
+						 .replace(/#/g, '%23')
+						 .replace(/"/g, '%22')
+					         .replace(/'/g, '%27'));
 			$("#file_download").removeClass("hidden");
 		}
-		
 	}
 }
 
