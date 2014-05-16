@@ -227,15 +227,17 @@ function load_string(id, file_as_string)
 	{
 		var sc_min = 5 - supercell_border;
 		var sc_max = 5 + supercell_border;
-		default_displaygroup = "within(molecule, {*}[1])";
-		load_script += "{" + (sc_min) + (sc_min) + (sc_min) + " " +  (sc_max) + (sc_max) + (sc_max) + " -1}; display " + default_displaygroup + ";";
+		load_script += "{" + (sc_min) + (sc_min) + (sc_min) + " " +  (sc_max) + (sc_max) + (sc_max) + " -1};";
+		
+		// The whole "molecule handling" thing will be done in the afterload callback
 
 		document.getElementById("axes_check").checked = false;
 	}
 
 	load_script += "center displayed; zoom {displayed} 0;"
 
-	Jmol.script(id, load_script);
+	Jmol.script(id, load_script);	
+	
 }
 
 function ismol_check_handler()
@@ -427,3 +429,34 @@ function is_mol_crystal()
 
 	return (mol_n < unitcell_n);
 }
+
+// An heuristic algorithm to identify multiple molecules in co-crystals
+
+function generate_molecular_dd()
+{
+	var gen_dd_script = "";
+	
+	// Check against composition and gyration radius
+	gen_dd_script += "mols = []; mol_elems = []; mol_gyrs = []; unique_mols = [];";
+	gen_dd_script += "for (a in {unitcell}) {";
+	gen_dd_script += "mol_i = a.molecule; if (mols.find(mol_i)) {continue};";
+	gen_dd_script += "mols = mols + [mol_i];"
+	gen_dd_script += "this_mol = {within(molecule, a)};";
+	// Take composition
+	gen_dd_script += "elems = this_mol.elemno.sum;";
+	// Take gyration radius
+	gen_dd_script += "gyr = 0.0; for (m in this_mol) {";
+	gen_dd_script += "gyr = gyr + ({m}.xyz - {this_mol}.xyz)**2};";
+	gen_dd_script += "gyr = gyr%1;";
+	// Check if composition or gyration are already present
+	gen_dd_script += "if (!(mol_elems.find(elems) != null)) { if(!((mol_gyrs.find(gyr) != null))) {";
+	gen_dd_script += "unique_mols = unique_mols + [a];} };";
+	gen_dd_script += "mol_elems = mol_elems + [elems]; mol_gyrs = mol_gyrs + [gyr];};";
+	gen_dd_script += "temp_ddgroup = []; for (u in unique_mols) { temp_ddgroup = temp_ddgroup or within(molecule, u);};"
+	gen_dd_script += "display temp_ddgroup;"
+		
+	Jmol.scriptWait(mainJmol, gen_dd_script);
+	
+}
+
+

@@ -189,8 +189,6 @@ function enable_NMR_controls()
 
 function disable_NMR_controls()
 {
-			reset_visualization_options();
-			
 			document.getElementById("labels_check").checked = false;
 			document.getElementById("labels_check").disabled = true;
 			
@@ -397,17 +395,36 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 {
 	if (state == 3)
 	{
-		if (is_mol_crystal() && document.getElementById("ismol_check").checked == false)
+		if (is_mol_crystal())
 		{
-			default_displaygroup = default_displaygroup.replace(/cell/g, 'centroid');
-			Jmol.script(mainJmol, "display " + default_displaygroup);
+			if (document.getElementById("ismol_check").checked == false)
+			{
+				default_displaygroup = default_displaygroup.replace(/cell/g, 'centroid');
+				Jmol.script(mainJmol, "display " + default_displaygroup);
+			}
+			else
+			{
+				generate_molecular_dd();
+				var unique_mols = Jmol.evaluateVar(mainJmol, 'unique_mols');
+				
+				default_displaygroup = "{";
+				
+				for (var i = 0; i < unique_mols.length; ++i) {
+					default_displaygroup += " within(molecule, {*}[" + (unique_mols[i][0] + 1) + "]) ";
+					if (i < unique_mols.length - 1) {
+						default_displaygroup += "or";
+					}
+				}
+				default_displaygroup += "}";
+					
+			}
 		}
 
 		get_atom_info();
 		load_data_asproperty();
 
 		dropdown_update();
-		
+
 		enable_NMR_controls();
 
 		halos_check_handler();	
