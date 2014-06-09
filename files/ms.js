@@ -65,7 +65,7 @@ function ms_label_handler()
 	
 	var ms_plot_on = document.getElementById("ms_check_2").checked;
 
-    var shielding_ref = 0;
+	var shielding_ref = 0;
 	
 	var l_type_radios = document.getElementsByName("ms_ltype");
 	var l_type = 0;
@@ -97,23 +97,29 @@ function ms_label_handler()
 				label_components[1] = "iso = %.2[property_ms_iso] ppm";
 				break; 
 			case 1:
-				if (conv == "haeb")
+				switch(conv)
 				{
-					label_components[1] = "aniso = %.2[property_ms_aniso] ppm";
-				}
-				else 
-				{
-					label_components[1] = "span = %.2[property_ms_span] ppm";
+					case "haeb":
+						label_components[1] = "aniso = %.2[property_ms_aniso] ppm";
+						break;
+					case "haeb_red":
+						label_components[1] = "red_aniso = %.2[property_ms_red_aniso] ppm";
+						break;
+					case "herber":
+						label_components[1] = "span = %.2[property_ms_span] ppm";
+						break;
 				}
 				break; 
 			case 2:
-				if (conv == "haeb")
+				switch(conv)
 				{
-					label_components[1] = "asymm = %.2[property_ms_asymm]";
-				}
-				else 
-				{
-					label_components[1] = "skew = %.2[property_ms_skew]";
+					case "haeb":
+					case "haeb_red":
+						label_components[1] = "asymm = %.2[property_ms_asymm]";
+						break;
+					case "herber":	
+						label_components[1] = "skew = %.2[property_ms_skew]";
+						break;
 				}
 				break; 
 			case -1:
@@ -176,21 +182,29 @@ function ms_color_handler()
 				ms_plot_jmol_script += "tensor('ms', 'isotropy')";
 				break; 
 			case 1:
-				if (conv == "haeb") {
-					ms_plot_jmol_script += "tensor('ms', 'anisotropy')";
-				}
-				else
+				switch(conv)
 				{
-					ms_plot_jmol_script += "tensor('ms', 'span')";					
+					case "haeb":
+						ms_plot_jmol_script += "tensor('ms', 'anisotropy')";
+						break;
+					case "haeb_red":
+						ms_plot_jmol_script += "tensor('ms', 'anisotropy').mul(2.0/3.0)";
+						break;
+					case "herber":
+						ms_plot_jmol_script += "tensor('ms', 'span')";
+						break;
 				}
 				break; 
 			case 2:
-				if (conv == "haeb") {
-					ms_plot_jmol_script += "tensor('ms', 'asymmetry')";
-				}
-				else
+				switch(conv)
 				{
-					ms_plot_jmol_script += "tensor('ms', 'skew')";					
+					case "haeb":
+					case "haeb_red":
+						ms_plot_jmol_script += "tensor('ms', 'asymmetry')";
+						break;
+					case "herber":
+						ms_plot_jmol_script += "tensor('ms', 'skew')";
+						break;
 				}
 				break; 
 			case -1:

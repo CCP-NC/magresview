@@ -417,7 +417,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					<div>
 					<div id="main_sel_div" class="ctrl_left">
 							Select:<br>
-							<select id="sel_drop" onchange="sel_drop_handler()">
+							<select id="sel_drop" onchange="sel_drop_handler(true)">
 								<option value="all">All species</option>
 							</select>
 							<select id="sel_atom_drop" onchange="sel_atom_drop_handler()">
@@ -835,9 +835,10 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					</select>
 					<br><br>
 					Tensor conventions: <select id="t_conv_choice"
-					title="Choose the convention you prefer for tensor representation"
+					title="Choose the convention you prefer for tensor representation. CASTEP output uses the Haeberlen one by default"
 					onchange="t_conv_choice_handler(event)" autocomplete="off">
 						<option value="haeb">Haeberlen</option>
+						<option value="haeb_red">Haeberlen (with reduced anisotropy)</option>
 						<option value="herber">Herzfeld-Berger</option>
 					</select>
 					</div>
@@ -936,7 +937,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 		  }
 		  
 		});
-  </script>  
+  </script>
   
   A CCP-NC project by Simone Sturniolo
   <br>

@@ -28,3 +28,9 @@ var use_axes_unitcell = true;
 
 //Set this variable to "true" if you want MagresView to show atomic labels next to them (only valid for .magres files). Default is false.
 var use_atom_labels = false;
+
+/* Change this variable to change the convention used in measure units.
+ * 0 = Haeberlen (DEFAULT)
+ * 1 = Haeberlen with reduced anisotropy
+ * 2 = Herzfeld-Berger */
+var use_unit_convention = 0;

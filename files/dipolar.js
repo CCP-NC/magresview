@@ -131,7 +131,7 @@ function dip_label_handler()
 
 		dip_plot_jmol_script += "measure all {*}[" + last_atom_picked + "] {selected and within(" + r + ", ({*}[" + last_atom_picked + "]))} \"2:%VALUE kHz//khz\";"
 	}
-
+	
 	Jmol.script(mainJmol, dip_plot_jmol_script);
 }
 

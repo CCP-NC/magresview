@@ -232,38 +232,57 @@ function t_conv_choice_handler()
 	
 	var ms_title_1_haeb  = "Anisotropy, defined as s_3-(s_1+s_2)/2";
 	var ms_title_2_haeb  = "Asymmetry, defined as (s_2-s_1)/(s_3-s_iso)";
-	var efg_title_1_haeb = "Anisotropy, defined as Vzz-(Vxx+Vyy)/2";
+	var efg_title_1_haeb = "Anisotropy, defined as Vzz-(Vxx+Vyy)/2 (= 3/2 Vzz)";
 	var efg_title_2_haeb = "Asymmetry, defined as (Vyy-Vxx)/Vzz";
+	var ms_title_1_haeb_red  = "Reduced anisotropy, defined as s_3-s_iso";
+	var ms_title_2_haeb_red  = "Asymmetry, defined as (s_2-s_1)/(s_3-s_iso)";
+	var efg_title_1_haeb_red = "Reduced anisotropy, defined as Vzz-Viso (= Vzz)";
+	var efg_title_2_haeb_red = "Asymmetry, defined as (Vyy-Vxx)/Vzz";
 	var ms_title_1_herz  = "Span, defined as s_1-s_3";
 	var ms_title_2_herz  = "Skew, defined as 3(s_2-s_iso)/(s1-s3)";
 	var efg_title_1_herz = "Span, defined as Vxx-Vzz";
 	var efg_title_2_herz = "Skew, defined as 3Vyy/(Vxx-Vzz)";
 	
-	if(conv == "haeb")
+	switch(conv)
 	{
-		document.getElementById("ms_par_1").innerHTML = "Anisotropy";
-		document.getElementById("efg_par_1").innerHTML = "Anisotropy";
+		case "haeb":
+			document.getElementById("ms_par_1").innerHTML = "Anisotropy";
+			document.getElementById("efg_par_1").innerHTML = "Anisotropy";
+			
+			document.getElementById("ms_ltype_2").title  = ms_title_1_haeb;
+			document.getElementById("efg_ltype_2").title = efg_title_1_haeb;
+			document.getElementById("ms_ltype_3").title  = ms_title_2_haeb;
+			document.getElementById("efg_ltype_3").title = efg_title_2_haeb;
+	
+			document.getElementById("ms_par_2").innerHTML = "Asymmetry";
+			document.getElementById("efg_par_2").innerHTML = "Asymmetry";
+			break;
 		
-		document.getElementById("ms_ltype_2").title  = ms_title_1_haeb;
-		document.getElementById("efg_ltype_2").title = efg_title_1_haeb;
-		document.getElementById("ms_ltype_3").title  = ms_title_2_haeb;
-		document.getElementById("efg_ltype_3").title = efg_title_2_haeb;
-
-		document.getElementById("ms_par_2").innerHTML = "Asymmetry";
-		document.getElementById("efg_par_2").innerHTML = "Asymmetry";
-	}
-	else 
-	{
-		document.getElementById("ms_par_1").innerHTML = "Span";
-		document.getElementById("efg_par_1").innerHTML = "Span";
+			case "haeb_red":
+			document.getElementById("ms_par_1").innerHTML = "Reduced anisotropy";
+			document.getElementById("efg_par_1").innerHTML = "Reduced anisotropy";
+			
+			document.getElementById("ms_ltype_2").title  = ms_title_1_haeb_red;
+			document.getElementById("efg_ltype_2").title = efg_title_1_haeb_red;
+			document.getElementById("ms_ltype_3").title  = ms_title_2_haeb_red;
+			document.getElementById("efg_ltype_3").title = efg_title_2_haeb_red;
+	
+			document.getElementById("ms_par_2").innerHTML = "Asymmetry";
+			document.getElementById("efg_par_2").innerHTML = "Asymmetry";
+			break;
 		
-		document.getElementById("ms_ltype_2").title  = ms_title_1_herz;
-		document.getElementById("efg_ltype_2").title = efg_title_1_herz;
-		document.getElementById("ms_ltype_3").title  = ms_title_2_herz;
-		document.getElementById("efg_ltype_3").title = efg_title_2_herz;
-
-		document.getElementById("ms_par_2").innerHTML = "Skew";
-		document.getElementById("efg_par_2").innerHTML = "Skew";
+		case "herber":
+			document.getElementById("ms_par_1").innerHTML = "Span";
+			document.getElementById("efg_par_1").innerHTML = "Span";
+			
+			document.getElementById("ms_ltype_2").title  = ms_title_1_herz;
+			document.getElementById("efg_ltype_2").title = efg_title_1_herz;
+			document.getElementById("ms_ltype_3").title  = ms_title_2_herz;
+			document.getElementById("efg_ltype_3").title = efg_title_2_herz;
+	
+			document.getElementById("ms_par_2").innerHTML = "Skew";
+			document.getElementById("efg_par_2").innerHTML = "Skew";
+		break;
 	}
 
 	plot_update();

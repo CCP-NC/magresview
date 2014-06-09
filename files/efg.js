@@ -104,23 +104,28 @@ function efg_label_handler()
 				label_components[2] = "Vzz = %.2[property_" + tag + "_vzz] au";
 				break; 
 			case 1:
-				if (conv == "haeb")
+				switch(conv)
 				{
-					label_components[2] = "aniso = %.2[property_" + tag + "_aniso] au";
-				}
-				else 
-				{
-					label_components[2] = "span = %.2[property_" + tag + "_span] au";
+					case "haeb":
+						label_components[2] = "aniso = %.2[property_" + tag + "_aniso] au";
+						break;
+					case "haeb_red":
+						label_components[2] = "red_aniso = %.2[property_" + tag + "_red_aniso] au";
+						break;
+					case "herber":
+						label_components[2] = "span = %.2[property_" + tag + "_span] au";
+						break;
 				}
 				break; 
 			case 2:
-				if (conv == "haeb")
-				{
-					label_components[2] = "asymm = %.2[property_" + tag + "_asymm]";
-				}
-				else 
-				{
-					label_components[2] = "skew = %.2[property_" + tag + "_skew]";
+				switch (conv) {
+					case "haeb":
+					case "haeb_red":
+						label_components[2] = "asymm = %.2[property_" + tag + "_asymm]";
+						break;
+					case "herber":
+						label_components[2] = "skew = %.2[property_" + tag + "_skew]";
+						break;
 				}
 				break; 
 			case 3:
@@ -179,21 +184,29 @@ function efg_color_handler()
 				efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"value\")";
 				break; 
 			case 1:
-				if (conv == "haeb") {
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"anisotropy\")";					
-				}
-				else
+				switch(conv)
 				{
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"span\")";										
+					case "haeb":
+						efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"anisotropy\")";
+						break;
+					case "haeb_red":
+						efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"anisotropy\").mul(2.0/3.0)";
+						break;
+					case "herber":						
+						efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"span\")";
+						break;
 				}
 				break; 
 			case 2:
-				if (conv == "haeb") {
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"asymmetry\")";
-				}
-				else
+				switch(conv)
 				{
-					efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"skew\")";										
+					case "haeb":
+					case "haeb_red":
+						efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"asymmetry\")";
+						break;
+					case "herber":
+						efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"skew\")";
+						break;
 				}
 				break; 
 			case 3:

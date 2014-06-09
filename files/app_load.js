@@ -303,6 +303,29 @@ function reset_visualization_options() {
 			{
 				document.getElementById("labels_check").checked = false;
 			}
+			
+			if (typeof(use_unit_convention) == "number") {
+				switch (use_unit_convention) {
+					case 0:
+						document.getElementById("t_conv_choice").value = "haeb";
+						break;
+					case 1:
+						document.getElementById("t_conv_choice").value = "haeb_red";
+						break;
+					case 2:
+						document.getElementById("t_conv_choice").value = "herber";
+						break;
+					default:
+						document.getElementById("t_conv_choice").value = "haeb";
+						break;						
+				}
+				t_conv_choice_handler();
+			}
+			else
+			{
+				document.getElementById("t_conv_choice").value = "haeb";
+			}
+			
 }
 
 //This callback gets called when Jmol executes a line of script [with Jmol.script(...)]. The callback's purpose is to recognize when the script has been executed and provide the necessary actions.
@@ -351,7 +374,7 @@ function afterscript_callback(app, msg, scr_line)
 	}
 	else if (msg.indexOf("atoms hidden") > 0)
 	{
-		sel_drop_handler();
+		sel_drop_handler(false);
 	}
 }
 
@@ -395,29 +418,58 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 {
 	if (state == 3)
 	{
-		if (is_mol_crystal())
+		switch (is_mol_crystal())
 		{
-			if (document.getElementById("ismol_check").checked == false)
-			{
-				default_displaygroup = default_displaygroup.replace(/cell/g, 'centroid');
-				Jmol.script(mainJmol, "display " + default_displaygroup);
-			}
-			else
-			{
-				generate_molecular_dd();
-				var unique_mols = Jmol.evaluateVar(mainJmol, 'unique_mols');
-				
-				default_displaygroup = "{";
-				
-				for (var i = 0; i < unique_mols.length; ++i) {
-					default_displaygroup += " within(molecule, {*}[" + (unique_mols[i][0] + 1) + "]) ";
-					if (i < unique_mols.length - 1) {
-						default_displaygroup += "or";
-					}
+			case 1:
+				if (document.getElementById("ismol_check").checked == false)
+				{
+					default_displaygroup = default_displaygroup.replace(/cell/g, 'centroid');
+					Jmol.script(mainJmol, "display " + default_displaygroup);
 				}
-				default_displaygroup += "}";
+				else
+				{
+					generate_molecular_dd();
+					var unique_mols = Jmol.evaluateVar(mainJmol, 'unique_mols');
 					
-			}
+					default_displaygroup = "{";
+					
+					for (var i = 0; i < unique_mols.length; ++i) {
+						default_displaygroup += " within(molecule, {*}[" + (unique_mols[i][0] + 1) + "]) ";
+						if (i < unique_mols.length - 1) {
+							default_displaygroup += "or";
+						}
+					}
+					default_displaygroup += "}";
+						
+				}
+				break;
+			case -1:
+				if (document.getElementById("ismol_check").checked == false)
+				{
+					default_displaygroup = 'all';
+					Jmol.script(mainJmol, "display " + default_displaygroup);
+				}
+				else
+				{
+					generate_molecular_dd();
+					var unique_mols = Jmol.evaluateVar(mainJmol, 'unique_mols');
+					
+					default_displaygroup = "{";
+					
+					for (var i = 0; i < unique_mols.length; ++i) {
+						default_displaygroup += " within(molecule, {*}[" + (unique_mols[i][0] + 1) + "]) ";
+						if (i < unique_mols.length - 1) {
+							default_displaygroup += "or";
+						}
+					}
+					default_displaygroup += "}";
+						
+				}
+				break;
+			case 0:
+			default:
+				break;
+				
 		}
 
 		get_atom_info();

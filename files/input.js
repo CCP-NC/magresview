@@ -281,9 +281,7 @@ function get_atom_info()
 	if (rawlattice == "")
 	{
 		//No lattice information is present!
-		default_displaygroup = "all"
-		Jmol.script(mainJmol, "display " + default_displaygroup);
-		atom_set.lattice_pars = null;		
+		atom_set.lattice_pars = null;
 	}
 	else
 	{
@@ -395,6 +393,7 @@ function load_data_asproperty_script()
 	{
 		load_data_script += "{all}.property_ms_iso = {all}.tensor(\"ms\", \"isotropy\"); \
 		{all}.property_ms_aniso = {all}.tensor(\"ms\", \"anisotropy\");					 \
+		{all}.property_ms_red_aniso = {all}.tensor(\"ms\", \"anisotropy\").mul(2.0/3.0);		 \
 		{all}.property_ms_asymm = {all}.tensor(\"ms\", \"asymmetry\");						 \
 		{all}.property_ms_span = {all}.tensor(\"ms\", \"span\");					 \
 		{all}.property_ms_skew = {all}.tensor(\"ms\", \"skew\");";
@@ -407,6 +406,7 @@ function load_data_asproperty_script()
 			var tag = atom_set.efg_tags[i];
 			load_data_script += "{all}.property_" + tag + "_vzz = {all}.tensor(\"" + tag + "\", \"value\"); \
 			{all}.property_" + tag + "_aniso = {all}.tensor(\"" + tag + "\", \"anisotropy\");				\
+			{all}.property_" + tag + "_red_aniso = {all}.tensor(\"" + tag + "\", \"anisotropy\").mul(2.0/3.0);				\
 			{all}.property_" + tag + "_asymm = {all}.tensor(\"" + tag + "\", \"asymmetry\");				\
 			{all}.property_" + tag + "_span = {all}.tensor(\"" + tag + "\", \"span\");				\
 			{all}.property_" + tag + "_skew = {all}.tensor(\"" + tag + "\", \"skew\");				\
@@ -426,8 +426,21 @@ function is_mol_crystal()
 {
 	var unitcell_n = Jmol.evaluate(mainJmol, "{cell=555}.length");
 	var mol_n = Jmol.evaluate(mainJmol, "{within(molecule, {*}[1])}.length");
-
-	return (mol_n < unitcell_n);
+	
+	if ((mol_n < unitcell_n) && (unitcell_n > 0))
+	{
+		// Yes, it IS a molecular crystal
+		return 1;	
+	}
+	else if (unitcell_n == 0)
+	{		
+		// There are no lattice parameters!
+		return -1;
+	}
+	else
+	{
+		return 0;
+	}
 }
 
 // An heuristic algorithm to identify multiple molecules in co-crystals
@@ -438,6 +451,7 @@ function generate_molecular_dd()
 	
 	// Check against composition and gyration radius
 	gen_dd_script += "mols = []; mol_elems = []; mol_gyrs = []; unique_mols = [];";
+	gen_dd_script += "ucell = {unitcell}; if (ucell.length == 0) {ucell = {all}};"; 	//This fixes the case of molecules with no lattice parameters
 	gen_dd_script += "for (a in {unitcell}) {";
 	gen_dd_script += "mol_i = a.molecule; if (mols.find(mol_i)) {continue};";
 	gen_dd_script += "mols = mols + [mol_i];"

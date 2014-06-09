@@ -35,11 +35,11 @@ function dropdown_update()
 	
 }
 
-function sel_drop_handler()
+function sel_drop_handler(from_change)
 {
 	var sp = document.getElementById("sel_drop").value;
 	var dropd_atoms = document.getElementById("sel_atom_drop");
-
+	
 	script_callback_flag_selectiondrop = true;
 		
 	if (sp == "all")
@@ -62,13 +62,17 @@ function sel_drop_handler()
 			dropd_atoms.disabled = true;
 			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and {_" + sp + "};");
 		}
-		else
+		else if (from_change)	// from_change prevents resetting the selection when sel_drop_handler is not called as a callback of sel_drop
 		{
 			dropd_atoms.disabled = false;
 			dropd_atoms.options.length = atom_set.atom_species_sites[sp].length + 1;
 			for (var i = 1; i < dropd_atoms.options.length; ++i)
 				dropd_atoms.options[i] = new Option(atom_set.atom_species_sites[sp][i-1], atom_set.atom_species_sites[sp][i-1]);
 			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and " + sp + "_*");
+		}
+		else
+		{
+			sel_atom_drop_handler();
 		}
 	}
 	
