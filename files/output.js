@@ -1501,7 +1501,6 @@ function compile_data_set(ds, ac, use_all)
 	{
 		ds.magres.units.push(["ms", "ppm"]);
 		ds.magres.ms = [];
-		var ms_reference = parseFloat(document.getElementById("ms_file_ref").value);
 		var ms_calc_script = "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'),";
 		
 		if (!rotated_lattice_script) {
@@ -1519,6 +1518,7 @@ function compile_data_set(ds, ac, use_all)
 		for (var i = 0; i < ms_info.length-5; i += 6)
 		{
 			var a_no = ms_info[i];
+			var ms_reference = parseFloat(document.getElementById('ref_input_' + ds.atoms.isotopes[a_no][1]).value);
 			var a_sigma = ms_info[i+1][0];
 			var a_iso = ms_info[i+2][0];
 			if (!isNaN(ms_reference))
@@ -1721,6 +1721,28 @@ function compile_data_set(ds, ac, use_all)
 	}
 	
 	return true;
+}
+
+function ref_table_gen() {
+	
+	$('.ref_table').html('').append('<tr><td>Element</td><td>Reference (ppm)</td></tr>');
+	
+	for (var s = 0; s < atom_set.speciesno; ++s)
+	{
+		var t_row = $('<tr></tr>');
+		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'ref_label_' + atom_set.atom_species_labels[s]));
+		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({'id': 'ref_input_' + atom_set.atom_species_labels[s], 'value': NaN})));
+		
+		$('.ref_table').append(t_row);
+	}
+	
+}
+
+function ref_table_popup_handler()
+{
+	var active = $("#main_tabs").tabs("option", "active");
+	if(($("#main_tabs ul>li a").eq(active).attr('href') == "#spec_plot"))
+		svg_spectrum_plot(true);
 }
 
 //Useful bit of code for Euler angles output

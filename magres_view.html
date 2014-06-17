@@ -229,6 +229,38 @@ It provides the possibility to load example files from a dropdown menu but it ma
       display: none;
     }
     
+    table {
+      
+      border-collapse: collapse;
+      border: 1px solid rgb(245,245,235);
+      text-align: center;
+      background-color: rgb(245,245,235);
+      
+    }
+    
+    td {
+      
+      border: 1px solid rgb(245,245,235);
+      text-align: center;
+      width: 120pt;
+      background-color: rgb(20, 20, 20);
+      
+    }
+    
+    .ref_input {
+      
+      background-color: rgb(20, 20, 20);
+      color: inherit;
+      text-align: center;
+      
+    }
+    
+    #spec_container {
+      
+      text-align: center;
+      
+    }
+    
     </style>
     
     <!-- Loading configuration parameters. Wrapped into two functions that change default error handling so that no matter what is written in mview_config.js, nothing too bad happens -->
@@ -299,6 +331,11 @@ It provides the possibility to load example files from a dropdown menu but it ma
     
     <script type="text/javascript" src="files/oldmagres.js"></script>
     
+    <!-- Spectrum plotting - general SVG plotting functionality and specific ones -->
+    
+    <script type="text/javascript" src="files/svgplot.js"></script>
+    <script type="text/javascript" src="files/svgspectrum.js"></script>
+    
     <!-- JSON parser and stringifier, for passing values to the Python script -->
 
 	 <script type="text/javascript" src="files/json2.js"></script>
@@ -334,6 +371,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 				visual_accor_handler();
 				iso_drop_update();
 				align_radio_handler();
+				svg_spectrum_plot(true);
 			}
 		});
 		
@@ -342,7 +380,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
 		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
 		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH], width: '330pt'});
- 		
+ 		$("#ref_table_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH], width: '330pt', close: ref_table_popup_handler});
+		
   		});  		
   		
   </script>
@@ -455,6 +494,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 									<li><a href="#visual_accordion">Visualization</a></li>
 									<li><a href="#iso_selection">Isotope selection</a></li>
 									<li><a href="#sys_align">Alignment</a></li>
+									<li><a href="#spec_plot">Spectral plot</a></li>
 									<li><a href="#file_gen">File generation</a></li>
 									<li><a href="#options_accordion">Options</a></li>
 									<!--
@@ -707,6 +747,39 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 
 					</div>
 					
+					<div id="spec_plot">
+					  <div id="spec_container">					    
+					  </div>
+					  <br>
+					    <div id="spec_options_div" class="ctrl_left">
+					  Plot style: &nbsp;
+					  <select id="spec_style_drop" autocomplete="off" onchange="spec_style_drop_handler()" title="Select the style of the spectral plot. WARNING: Lorentzian broadening can be slow, especially with high numbers of points">
+					    <option value="pulses">Pulses</option>
+					    <option value="peaks">Lorentzian broadening (slow)</option>
+					  </select>
+					  <br><br>
+					  Interpolation points: &nbsp;
+					  <input type="text" id="spec_interp_n" value='100' maxlength='4' size='4'
+					  title='Select the number of interpolation points for the spline drawing the Lorentzian curve. Warning: high number of points might result in slow updates'
+					  onkeypress='spec_interp_n_handler(event)' disabled=true>
+					  <br><br>
+					  Line broadening: &nbsp;
+					  <input type="text" id="spec_broad" value='1' maxlength='4' size='4'
+					  title='Select the Lorentzian curve broadening in ppm.'
+					  onkeypress='spec_interp_n_handler(event)' disabled=true> &nbsp; ppm
+					  
+					  <div id="spec_options_2_div" class="ctrl_right">
+					    X axis range: &nbsp; <input type="text" id="spec_xrange_min" value='0' maxlength='4' size='4'
+					  title='X range - minimum' onkeypress='spec_xrange_handler(event)'> &nbsp; - &nbsp; <input type="text" id="spec_xrange_max" value='1' maxlength='4' size='4'
+					  title='X range - maximum' onkeypress='spec_xrange_handler(event)'> &nbsp; ppm
+					  <br><br>
+					  
+					  <input id="spec_reftable_but" type="button" value="Reference table" onclick="    $('#ref_table_popup').dialog('open');"
+					  title="Open a table to set up the chemical shift reference values for the various elements. To see the original shielding value, leave the field blank."></input>
+					  </div>
+					  </div>
+					</div>
+					
 					<div id="file_gen">
 					
 					<div id="file_type_div" class="ctrl_left">
@@ -755,7 +828,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					Include:
 					<div class="ctrl_left">
 					<input type="checkbox" id="ms_file_check" autocomplete="off" disabled="disabled">Magnetic shielding</input>
-					(with reference: <input type="text" id="ms_file_ref" size = "5" autocomplete="off" value="N/A" disabled="disabled"></input> ppm)
+					(with reference: <input type="button" value="Reference table" onclick="$('#ref_table_popup').dialog('open');"></input>)
 					<br>
 					<input type="checkbox" id="dip_file_check" autocomplete="off" disabled="disabled">Dipolar interactions</input>
 					<div class="ctrl_right">
@@ -854,15 +927,6 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 
 					</div>
 					
-					<!--
-					<div id="spectral_plot" style="text-align: center;">
-	  				  <svg id="svg_plot_div" style="height: 300px; width: 400px;">
-					    <rect id="myrect" width="400" height="300" style="fill: #fafaf0; stroke-width:0; stroke:rgb(0,0,0)"></rect>
-					    <circle cx="50" cy="50" r="40" stroke="green" stroke-width="4" fill="yellow" />
-					  </svg>
-					</div>
-					-->
-					
 					
 			</div>
 			
@@ -881,6 +945,17 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 			      <div id="oldmagres_box" class="conv_popup obfuscated" style="float: left;"> Old .MAGRES </div>
 			      <div id="castep_box"    class="conv_popup obfuscated" style="float: left;"> .CASTEP </div>
 			      <div id="newmagres_box" class="conv_popup obfuscated" style="float: left;" draggable=false> New .MAGRES </div>
+			</div>
+			
+			<div id="ref_table_popup" title="Reference table" class="popupdiv">
+			  
+			  <table id="ref_table" class="ref_table">
+			    <tr>
+			      <td>Element</td>
+			      <td>Reference (ppm)</td>
+			    </tr>
+			  </table>
+			  
 			</div>
 
   </div>

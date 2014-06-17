@@ -41,7 +41,7 @@ function sel_drop_handler(from_change)
 	var dropd_atoms = document.getElementById("sel_atom_drop");
 	
 	script_callback_flag_selectiondrop = true;
-		
+	
 	if (sp == "all")
 	{
 		dropd_atoms.disabled = true;

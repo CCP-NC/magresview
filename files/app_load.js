@@ -46,7 +46,7 @@ var main_info = {
  j2sPath: "jsmol/j2s",
  jarPath: "jsmol/java",
  memoryLimit: 512,
- readyFunction: null,
+ readyFunction: appready_callback,
  script: "",
  serverURL: "http://chemapps.stolaf.edu/jmol/jmolcd.php",
  scriptCallback: "afterscript_callback",
@@ -328,6 +328,14 @@ function reset_visualization_options() {
 			
 }
 
+//This serves the purpose of turning localization OFF
+//It's crucial because localized versions of Jmol will send different messages that won't be properly parsed by afterscript_callback
+
+function appready_callback()
+{
+	Jmol.script(mainJmol, 'set languageTranslation OFF');
+}
+
 //This callback gets called when Jmol executes a line of script [with Jmol.script(...)]. The callback's purpose is to recognize when the script has been executed and provide the necessary actions.
 //This proves to be often required as the Jmol scripts tend to be slow, and thus we need to handle asynchronously any action that has to be performed necessarily after their execution.
 //A series of boolean global flags keeps track of what needs to be done.
@@ -370,6 +378,7 @@ function afterscript_callback(app, msg, scr_line)
 
 		plot_update();
 		iso_drop_update();
+		svg_spectrum_plot(true);
 		script_callback_flag_selectiondrop = false;
 	}
 	else if (msg.indexOf("atoms hidden") > 0)
@@ -476,6 +485,7 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		load_data_asproperty();
 
 		dropdown_update();
+		ref_table_gen();		//Generates the shield reference table for output
 
 		enable_NMR_controls();
 
