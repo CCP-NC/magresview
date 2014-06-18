@@ -38,11 +38,16 @@ SVGP_styles = {
 function SVGPlot(width, height, style, id)
 {
     
-    if (SVGP_styles[style] == undefined) {
-        
-        style = 'default';
-
+    this.set_style = function(sty) {
+        if (SVGP_styles[sty] == undefined) {        
+            this.style = SVGP_styles['default'];
+        }
+        else
+        {
+            this.style = SVGP_styles[sty];
+        }
     }
+    
     
     if (id == undefined) {
         id = 'my_svgplot';
@@ -446,13 +451,19 @@ function SVGPlot(width, height, style, id)
             width: this.w,
             height: this.h,});
             
+        console.log('SVGPlot - Creating background...')
+        
         var bkg_rect = this.bkg_gen();
         
         this.jq_rep.append(bkg_rect);
         
+        console.log('SVGPlot - Plotting data...')
+        
         this.plot_area_calc();
         
         for (ds_i in this.data_series) {
+            
+            console.log('SVGPlot - Plotting data set n.' + ds_i + '...');
             
             var ds = this.data_series[ds_i];
             
@@ -461,7 +472,11 @@ function SVGPlot(width, height, style, id)
             
         }
         
+        console.log('SVGPlot - Creating key...')
+        
         this.jq_rep.append(this.key_gen());
+        
+        console.log('SVGPlot - Creating axes and labels...')
         
         var x_axis = this.axis_gen('x');
         var x_arr = this.arrow_gen('x');
@@ -474,6 +489,7 @@ function SVGPlot(width, height, style, id)
         this.jq_rep.append(y_axis);
         this.jq_rep.append(y_arr);
         
+        
         var x_label = this.label_gen('x');
         var y_label = this.label_gen('y');
         
@@ -484,6 +500,8 @@ function SVGPlot(width, height, style, id)
         
         for (var i = 0; i <= this.ticn; ++i) {
                         
+            console.log('SVGPlot - Creating tics, n.' + (i+1) + '...');
+            
             var newticx = this.tic_gen('x', i);
             var newticy = this.tic_gen('y', i);
             
@@ -551,6 +569,7 @@ function SVGPlot(width, height, style, id)
     this.toString = function() {
         
         this.redraw();
+        
         return $('<div>').append(this.jq_rep.clone()).html();
         
     }

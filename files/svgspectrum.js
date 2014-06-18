@@ -106,4 +106,19 @@ function svg_spectrum_plot(from_change)
     
     spec_plot.show('#spec_container');
     
+    // Prepare the downloadable version
+    
+    spec_plot.set_style('default');
+    
+    console.log(spec_plot.toString());
+    
+    $("#plot_download").attr("href", "data:text/plain," + spec_plot.toString()
+	.replace(/%/g, '%25')			//The % symbol must be replaced first, or everything goes down the drain!
+	.replace(/\n/g, '%0A')
+	.replace(/\t/g, '%09')
+	.replace(/&/g, '%26')
+	.replace(/#/g, '%23')
+	.replace(/"/g, '%22')
+	.replace(/'/g, '%27'));
+    
 }
