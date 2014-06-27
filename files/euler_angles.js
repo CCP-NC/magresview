@@ -242,7 +242,7 @@ function euler_diff_calc_handler()
 
 	var tab_active = $("#main_tabs").tabs("option", "active");
 	var acc_active = $("#visual_accordion").accordion("option", "active");
-	if($("#main_tabs ul>li a").eq(tab_active).attr('href') == "#visual_accordion" &&					//Is the Visualization tab active?
+	if(tab_active == tab_index("#visual_accordion") &&					//Is the Visualization tab active?
 		document.getElementById("euldiff_butt").disabled == false &&									//Is the Euler angles difference calculation active?
 		acc_active == 4)														  						//Is the Euler angles accordion section active?
 	{

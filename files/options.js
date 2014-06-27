@@ -318,7 +318,7 @@ function snap_handler()
 function snap_download_link_handler()
 {
 	var active = $("#main_tabs").tabs("option", "active");
-	if($("#main_tabs ul>li a").eq(active).attr('href') == "#options_accordion")				//Is the Options tab active?
+	if(active == tab_index("#options_accordion"))				//Is the Options tab active?
 	{
 		if(current_framework == "Java")
 		{

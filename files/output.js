@@ -292,7 +292,7 @@ function range_file_r_handler(evt)
 function download_link_handler()
 {
 	var active = $("#main_tabs").tabs("option", "active");
-	if($("#main_tabs ul>li a").eq(active).attr('href') == "#file_gen")				//Is the File generation tab active?
+	if(active == tab_index("#file_gen"))				//Is the File generation tab active?
 	{
 		if(current_framework == "Java")
 		{
@@ -317,7 +317,7 @@ function range_sphere_handler()
 	//A bit of jQuery magic to check whether the active tab is the "File generation" one.
 
 	var active = $("#main_tabs").tabs("option", "active");
-	if($("#main_tabs ul>li a").eq(active).attr('href') == "#file_gen" &&				//Is the File generation tab active?
+	if(active == tab_index("#file_gen") &&				//Is the File generation tab active?
 		document.getElementById("file_type_drop").value != "recap" && 					//Is the JSON or the Tabulated file generation active?
 		document.getElementById("sel_file_drop").value.indexOf("range") > -1 &&			//Is one of the 'range' options selected?
 		document.getElementById("range_sphere_check").checked == true)					//Is the box "Visualize range sphere" ticked?
@@ -1741,7 +1741,7 @@ function ref_table_gen() {
 function ref_table_popup_handler()
 {
 	var active = $("#main_tabs").tabs("option", "active");
-	if(($("#main_tabs ul>li a").eq(active).attr('href') == "#spec_plot"))
+	if(active == tab_index("#spec_plot"))
 		svg_spectrum_plot(true);
 }
 

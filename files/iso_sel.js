@@ -15,7 +15,7 @@ function iso_drop_update()
 	//Quit immediately if the currently selected tab is not the one of isotope selection
 
 	var tab_active = $("#main_tabs").tabs("option", "active");
-	if($("#main_tabs ul>li a").eq(tab_active).attr('href') != "#iso_selection")
+	if(tab_active != tab_index("#iso_selection"))
 	{
 		return;
 	}

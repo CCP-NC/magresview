@@ -12,7 +12,7 @@ function align_radio_handler(evt)
     var align_init_script = 'unbind "left-click"; unbind "right-click"; unbind "left-down"; unbind "right-down";';
 
     var active = $("#main_tabs").tabs("option", "active");
-    if($("#main_tabs ul>li a").eq(active).attr('href') == "#sys_align")
+    if(active == tab_index("#sys_align"))
     {    
         var align_type = $('input[name="align_t"]:checked').val();
         

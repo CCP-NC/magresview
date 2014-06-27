@@ -47,7 +47,7 @@ function svg_spectrum_plot(from_change)
 {
     
     var active = $("#main_tabs").tabs("option", "active");
-    if(!($("#main_tabs ul>li a").eq(active).attr('href') == "#spec_plot"))
+    if(!(active == tab_index("#spec_plot")))
         return;
     
     var plot_W = 0.3*winW;
@@ -109,8 +109,6 @@ function svg_spectrum_plot(from_change)
     // Prepare the downloadable version
     
     spec_plot.set_style('default');
-    
-    console.log(spec_plot.toString());
     
     $("#plot_download").attr("href", "data:text/plain," + spec_plot.toString()
 	.replace(/%/g, '%25')			//The % symbol must be replaced first, or everything goes down the drain!

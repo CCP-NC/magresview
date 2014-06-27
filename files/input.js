@@ -104,7 +104,7 @@ function load_file(evt)
 	Jmol.script(mainJmol, "zap");
 	reset_system();
 	disable_NMR_controls();
-	
+		
 	// Note: this won't work on Chrome if the webpage is running locally. In that case, one must launch Chrome with the flag --allow-file-access-from-files 	
 	// Check if file is running locally and browser is Chrome or Chromium
 
@@ -175,7 +175,7 @@ function load_string(id, file_as_string)
 {
 	var load_script = "load data \"model current_model\"" + file_as_string + "end \"model current_model\"";
 	var load_as_mol = document.getElementById("ismol_check").checked;
-
+	
 	if (!load_as_mol)
 	{	
 
@@ -416,7 +416,7 @@ function load_data_asproperty_script()
 			{all}.property_" + tag + "_chi_kHz = a.div(1e3);";
 		}
 	}
-
+	
 	return load_data_script;
 }
 
@@ -466,8 +466,9 @@ function generate_molecular_dd()
 	gen_dd_script += "if (!(mol_elems.find(elems) != null)) { if(!((mol_gyrs.find(gyr) != null))) {";
 	gen_dd_script += "unique_mols = unique_mols + [a];} };";
 	gen_dd_script += "mol_elems = mol_elems + [elems]; mol_gyrs = mol_gyrs + [gyr];};";
-	gen_dd_script += "temp_ddgroup = []; for (u in unique_mols) { temp_ddgroup = temp_ddgroup or within(molecule, u);};"
-	gen_dd_script += "display temp_ddgroup;"
+	gen_dd_script += "temp_ddgroup = []; for (u in unique_mols) { temp_ddgroup = temp_ddgroup or within(molecule, u);};";
+	gen_dd_script += "display temp_ddgroup;";
+	gen_dd_script += "center {displayed}; zoom 0;";
 		
 	Jmol.scriptWait(mainJmol, gen_dd_script);
 	
