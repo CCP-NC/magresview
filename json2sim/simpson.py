@@ -65,7 +65,7 @@ def json_to_simpson(dataset, path_and_name, sim_options, sim_options_num, sim_op
     a_n = 1 #Arbitrary sequential atom number for internal purposes
     for a in atoms['atom']:
         spinsys_file.write(str(isotopes[a['id']][0]) + isotopes[a['id']][1] + " ")
-        atom_lookup[a['id']] = {"index": a['index'], "label": a['label'], "n": a_n}
+        atom_lookup[str(a['id'])] = {"index": a['index'], "label": a['label'], "n": a_n}
         a_n += 1
     spinsys_file.write("\n")
     
@@ -74,10 +74,10 @@ def json_to_simpson(dataset, path_and_name, sim_options, sim_options_num, sim_op
         for ms in magres['ms']:
             if ms.has_key('mview_data'):
                 try:
-                    i = atom_lookup[ms['atom_id']]['n']
+                    i = atom_lookup[str(ms['atom_id'])]['n']
                 except KeyError:
                     #If the atom is not present in the system, skip
-                    sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+                    sys.stderr.write("Warning - an MS interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
                     continue
                 spinsys_file.write(" shift\t" + str(i) + " " + str(-ms['mview_data'][0]) + "p " + str(-ms['mview_data'][1]) 
                 + "p " + str(ms['mview_data'][2]) + " " + str(ms['mview_data'][3]) + " " + str(ms['mview_data'][4]) + " " + str(ms['mview_data'][5]) + "\n")
@@ -88,9 +88,9 @@ def json_to_simpson(dataset, path_and_name, sim_options, sim_options_num, sim_op
         for efg in magres['efg']:
             if efg.has_key('mview_data'):
                 try:
-                    i = atom_lookup[efg['atom_id']]['n']
+                    i = atom_lookup[str(efg['atom_id'])]['n']
                 except KeyError:                
-                    sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+                    sys.stderr.write("Warning - a quadrupolar interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
                     continue
                 #Skip null couplings
                 if (efg['mview_data'][0] == 0.0):
@@ -102,10 +102,10 @@ def json_to_simpson(dataset, path_and_name, sim_options, sim_options_num, sim_op
         for dip in magres['dip']:
             if dip.has_key('mview_data'):
                 try:
-                    i = atom_lookup[dip['atom1_id']]['n']
-                    j = atom_lookup[dip['atom2_id']]['n']
+                    i = atom_lookup[str(dip['atom1_id'])]['n']
+                    j = atom_lookup[str(dip['atom2_id'])]['n']
                 except KeyError:
-                    sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+                    sys.stderr.write("Warning - a dipolar interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
                     continue
                 spinsys_file.write(" dipole\t" + str(j) + " " + str(i) + " " + str(dip['mview_data'][0]/(2.0*math.pi))
                 + " " + str(dip['mview_data'][1]) + " " + str(dip['mview_data'][2]) + " " + str(dip['mview_data'][3]) + "\n")
@@ -115,10 +115,10 @@ def json_to_simpson(dataset, path_and_name, sim_options, sim_options_num, sim_op
         for isc in magres['isc']:
             if isc.has_key('mview_data'):
                 try:
-                    i = atom_lookup[isc['atom1_id']]['n']
-                    j = atom_lookup[isc['atom2_id']]['n']
+                    i = atom_lookup[str(isc['atom1_id'])]['n']
+                    j = atom_lookup[str(isc['atom2_id'])]['n']
                 except KeyError:                
-                    sys.stderr.write("Warning - an interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
+                    sys.stderr.write("Warning - a J-coupling interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
                     continue                
                 spinsys_file.write(" jcoupling\t" + str(j) + " " + str(i) + " " + str(isc['mview_data'][0]) + " " + str(isc['mview_data'][1]) 
                 + " " + str(isc['mview_data'][2]) + " " + str(isc['mview_data'][3]) + " " + str(isc['mview_data'][4]) + " " + str(isc['mview_data'][5]) + "\n")

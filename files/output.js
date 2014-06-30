@@ -217,13 +217,20 @@ function include_controls_switch()
 	{
 		document.getElementById("soft_targ_drop").disabled = false;
 		if(atom_set.is_magres && atom_set.has_ms)
+		{
 			document.getElementById("ms_file_check").disabled = false;
 			document.getElementById("ms_file_ref").disabled = false;
+		}
 		if(atom_set.is_magres && atom_set.has_efg)
+		{
+			console.log("Wut?");
 			document.getElementById("efg_file_check").disabled = false;
+		}
 		
 		if(atom_set.is_magres && atom_set.has_isc)
+		{
 			document.getElementById("isc_file_check").disabled = false; 
+		}
 		
 		document.getElementById("dip_file_check").disabled = false;
 		document.getElementById("sel_file_drop").disabled = false;
@@ -232,13 +239,19 @@ function include_controls_switch()
 	{
 		document.getElementById("soft_targ_drop").disabled = true;
 		if(atom_set.is_magres && atom_set.has_ms)
+		{
 			document.getElementById("ms_file_check").disabled = false;
 			document.getElementById("ms_file_ref").disabled = false;
+		}
 		if(atom_set.is_magres && atom_set.has_efg)
+		{
 			document.getElementById("efg_file_check").disabled = false;
+		}
 		
 		if(atom_set.is_magres && atom_set.has_isc)
+		{
 			document.getElementById("isc_file_check").disabled = false; 
+		}
 		
 		document.getElementById("dip_file_check").disabled = false;
 		document.getElementById("sel_file_drop").disabled = false;
