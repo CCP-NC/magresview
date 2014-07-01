@@ -167,6 +167,7 @@ function opt_type_handler(evt)
 			transl_text.disabled = false;
 			break;
 		case "axearcs":
+			console.log(type);
 			typescript = "set ellipsoidarcs true; set ellipsoidaxes true; set ellipsoidball false";
 			transl_text.value = "0.0";
 			transl_text.disabled = true;

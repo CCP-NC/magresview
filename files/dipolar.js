@@ -129,10 +129,26 @@ function dip_label_handler()
 		//Deactivate isc measures 
 		document.getElementById("isc_check").checked = false;
 
-		dip_plot_jmol_script += "measure all {*}[" + last_atom_picked + "] {selected and within(" + r + ", ({*}[" + last_atom_picked + "]))} \"2:%VALUE kHz//khz\";"
+		dip_plot_jmol_script += "measure all {*}[" + last_atom_picked + "] {selected and within(" + r + ", ({*}[" + last_atom_picked + "]))} \"2:%VALUE//khz\";";
 	}
 	
-	Jmol.script(mainJmol, dip_plot_jmol_script);
+	Jmol.scriptWait(mainJmol, dip_plot_jmol_script);
+	
+	// Added this part to insert the 2pi factor!
+	
+	dip_const = Jmol.getPropertyAsArray(mainJmol, "measurementInfo.strMeasurement");
+	dip_plot_jmol_script_correct = "";
+	
+	
+	for (var i = 0; i < dip_const.length; ++i) {
+		dip_const[i] = parseFloat(dip_const[i])/(2.0*Math.PI);
+		dip_plot_jmol_script_correct += 'script inline @{"select measure ({"+(' + i + ')+"})"};';
+		dip_plot_jmol_script_correct += 'measure @{"2:"+' + dip_const[i] + '%2.2 +" kHz"};';
+	}
+	
+	Jmol.script(mainJmol, dip_plot_jmol_script_correct);
+	
+	
 }
 
 function vvleck_eval(is_iso)
