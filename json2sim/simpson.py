@@ -172,7 +172,7 @@ def json_to_simpson(dataset, path_and_name, sim_options, sim_options_num, sim_op
         else:
             main_file.write("fset $f -sw [expr $par(sw)/1e3]\n")            #Conversion to kHz
         main_file.write("fsave $f $par(name)_spe.dat -xreim\n")
-    main_file.write(" puts \"Simulation of " + data_name + "_simps.in finished\"\n")
+    main_file.write(" puts \"Simulation of $par(name) finished\"\n")
     main_file.write("}")
     
     main_file.flush()
