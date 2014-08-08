@@ -480,7 +480,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					
 					<br>
 
-					<div id="main_tabs" style="font-size: 90%">
+					<div id="main_tabs" style="font-size: 90%; z-index: 999">
 					
 					<!-- This is a jQuery TAB. It needs two things:
 								1) the content of the tabs organized in different divisions identified by an id;
@@ -748,6 +748,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					</div>
 					
 					<div id="spec_plot">
+            WARNING: this spectral plot takes into account only magnetic shieldings. It ignores quadrupolar, dipolar and J couplings entirely, and is NOT a spectral simulation. Therefore it should always be considered only a graphical reference and not a realistic spectrum.<br><br>
 					  <div id="spec_container">					    
 					  </div>
 					  <br>
