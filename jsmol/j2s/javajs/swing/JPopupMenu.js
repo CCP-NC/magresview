@@ -9,25 +9,25 @@ function (name) {
 Clazz.superConstructor (this, javajs.swing.JPopupMenu, ["mnu"]);
 this.name = name;
 }, "~S");
-$_M(c$, "setInvoker", 
+Clazz.defineMethod (c$, "setInvoker", 
 function (applet) {
 this.applet = applet;
 {
 SwingController.setMenu(this);
 }}, "~O");
-$_M(c$, "show", 
+Clazz.defineMethod (c$, "show", 
 function (applet, x, y) {
 {
 if (applet != null)
 this.tainted = true;
 SwingController.showMenu(this, x, y);
 }}, "javajs.awt.Component,~N,~N");
-$_M(c$, "disposeMenu", 
+Clazz.defineMethod (c$, "disposeMenu", 
 function () {
 {
 SwingController.disposeMenu(this);
 }});
-$_V(c$, "toHTML", 
+Clazz.overrideMethod (c$, "toHTML", 
 function () {
 return this.getMenuHTML ();
 });

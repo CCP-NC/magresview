@@ -12,7 +12,7 @@ function () {
 Clazz.superConstructor (this, J["export"]._MayaExporter, []);
 this.commentChar = "// ";
 });
-$_V(c$, "outputHeader", 
+Clazz.overrideMethod (c$, "outputHeader", 
 function () {
 this.output ("//  Maya ASCII 8.5 scene\n");
 this.output ("//  Name: ball_stripped.ma\n");
@@ -26,33 +26,33 @@ this.output ("fileInfo \"version\" \"8.5\";\n");
 this.output ("fileInfo \"cutIdentifier\" \"200612170012-692032\";\n");
 this.output ("fileInfo \"osv\" \"Mac OS X 10.4.9\";  \n");
 });
-$_M(c$, "addAttr", 
-($fz = function () {
+Clazz.defineMethod (c$, "addAttr", 
+ function () {
 this.output (" setAttr -k off \".v\";\n");
 this.output (" setAttr \".vir\" yes;\n");
 this.output (" setAttr \".vif\" yes;\n");
 this.output (" setAttr \".tw\" yes;\n");
 this.output (" setAttr \".covm[0]\"  0 1 1;\n");
 this.output (" setAttr \".cdvm[0]\"  0 1 1;\n");
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "addConnect", 
-($fz = function () {
+});
+Clazz.defineMethod (c$, "addConnect", 
+ function () {
 this.output (" connectAttr \"make" + this.name + ".os\" \"" + this.id + ".cr\";\n");
 this.output ("connectAttr \"" + this.id + ".iog\" \":initialShadingGroup.dsm\" -na;\n");
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "setAttr", 
-($fz = function (attr, val) {
+});
+Clazz.defineMethod (c$, "setAttr", 
+ function (attr, val) {
 this.output (" setAttr \"." + attr + "\" " + val + ";\n");
-}, $fz.isPrivate = true, $fz), "~S,~N");
-$_M(c$, "setAttr", 
-($fz = function (attr, val) {
+}, "~S,~N");
+Clazz.defineMethod (c$, "setAttr", 
+ function (attr, val) {
 this.output (" setAttr \"." + attr + "\" " + val + ";\n");
-}, $fz.isPrivate = true, $fz), "~S,~N");
-$_M(c$, "setAttr", 
-($fz = function (attr, pt) {
+}, "~S,~N");
+Clazz.defineMethod (c$, "setAttr", 
+ function (attr, pt) {
 this.output (" setAttr \"." + attr + "\" -type \"double3\" " + pt.x + " " + pt.y + " " + pt.z + ";\n");
-}, $fz.isPrivate = true, $fz), "~S,JU.T3");
-$_V(c$, "outputCylinder", 
+}, "~S,JU.T3");
+Clazz.overrideMethod (c$, "outputCylinder", 
 function (ptCenter, pt1, pt2, colix, endcaps, radius, ptX, ptY, checkRadius) {
 if (ptX != null) return false;
 this.nCyl++;
@@ -81,7 +81,7 @@ this.setAttr ("hr", length / radius);
 this.addConnect ();
 return true;
 }, "JU.P3,JU.P3,JU.P3,~N,~N,~N,JU.P3,JU.P3,~B");
-$_V(c$, "outputSphere", 
+Clazz.overrideMethod (c$, "outputSphere", 
 function (pt, radius, colix, checkRadius) {
 this.nBalls++;
 this.name = "nurbsSphere" + this.nBalls;
@@ -97,31 +97,31 @@ this.setAttr ("s", 4);
 this.setAttr ("nsp", 3);
 this.addConnect ();
 }, "JU.P3,~N,~N,~B");
-$_V(c$, "drawTextPixel", 
+Clazz.overrideMethod (c$, "drawTextPixel", 
 function (argb, x, y, z) {
 }, "~N,~N,~N,~N");
-$_V(c$, "outputTextPixel", 
+Clazz.overrideMethod (c$, "outputTextPixel", 
 function (pt, argb) {
 }, "JU.P3,~N");
-$_V(c$, "outputSurface", 
+Clazz.overrideMethod (c$, "outputSurface", 
 function (vertices, normals, colixes, indices, polygonColixes, nVertices, nPolygons, nFaces, bsPolygons, faceVertexMax, colix, colorList, htColixes, offset) {
-}, "~A,~A,~A,~A,~A,~N,~N,~N,JU.BS,~N,~N,JU.List,java.util.Map,JU.P3");
-$_V(c$, "outputTriangle", 
+}, "~A,~A,~A,~A,~A,~N,~N,~N,JU.BS,~N,~N,JU.Lst,java.util.Map,JU.P3");
+Clazz.overrideMethod (c$, "outputTriangle", 
 function (pt1, pt2, pt3, colix) {
 }, "JU.P3,JU.P3,JU.P3,~N");
-$_V(c$, "outputCircle", 
+Clazz.overrideMethod (c$, "outputCircle", 
 function (pt1, pt2, radius, colix, doFill) {
 }, "JU.P3,JU.P3,~N,~N,~B");
-$_V(c$, "outputCone", 
+Clazz.overrideMethod (c$, "outputCone", 
 function (ptBase, ptTip, radius, colix) {
 }, "JU.P3,JU.P3,~N,~N");
-$_V(c$, "outputEllipsoid", 
+Clazz.overrideMethod (c$, "outputEllipsoid", 
 function (center, points, colix) {
 }, "JU.P3,~A,~N");
-$_V(c$, "outputFace", 
+Clazz.overrideMethod (c$, "outputFace", 
 function (is, coordMap, faceVertexMax) {
 }, "~A,~A,~N");
-$_M(c$, "output", 
+Clazz.defineMethod (c$, "output", 
 function (pt) {
 }, "JU.T3");
 });

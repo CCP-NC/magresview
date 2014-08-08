@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.render");
-Clazz.load (["J.render.FontLineShapeRenderer", "JU.P3", "$.P3i"], "J.render.LabelsRenderer", ["J.modelset.Text", "J.render.TextRenderer", "J.shape.Labels", "J.viewer.JC"], function () {
+Clazz.load (["J.render.FontLineShapeRenderer", "JU.P3", "$.P3i"], "J.render.LabelsRenderer", ["JM.Text", "J.render.TextRenderer", "J.shape.Labels", "JV.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.minZ = null;
 this.ascent = 0;
@@ -31,10 +31,10 @@ this.xy =  Clazz.newFloatArray (3, 0);
 this.screen =  new JU.P3i ();
 this.pTemp =  new JU.P3 ();
 });
-$_V(c$, "render", 
+Clazz.overrideMethod (c$, "render", 
 function () {
 this.fidPrevious = 0;
-this.zCutoff = this.viewer.getZShadeStart ();
+this.zCutoff = this.tm.getZShadeStart ();
 var labels = this.shape;
 var labelStrings = labels.strings;
 var bgcolixes = labels.bgcolixes;
@@ -42,12 +42,12 @@ if (this.isExport) bgcolixes = this.g3d.getBgColixes (bgcolixes);
 var fids = labels.fids;
 var offsets = labels.offsets;
 if (labelStrings == null) return false;
-var atoms = this.modelSet.atoms;
-var backgroundColixContrast = this.viewer.getColixBackgroundContrast ();
-var backgroundColor = this.viewer.getBackgroundArgb ();
-this.sppm = this.viewer.getScalePixelsPerAngstrom (true);
-this.scalePixelsPerMicron = (this.viewer.getBoolean (603979845) ? this.sppm * 10000 : 0);
-this.imageFontScaling = this.viewer.getImageFontScaling ();
+var atoms = this.ms.at;
+var backgroundColixContrast = this.vwr.getColixBackgroundContrast ();
+var backgroundColor = this.vwr.getBackgroundArgb ();
+this.sppm = this.vwr.getScalePixelsPerAngstrom (true);
+this.scalePixelsPerMicron = (this.vwr.getBoolean (603979845) ? this.sppm * 10000 : 0);
+this.imageFontScaling = this.vwr.getImageFontScaling ();
 var iGroup = -1;
 this.minZ[0] = 2147483647;
 var isAntialiased = this.g3d.isAntialiased ();
@@ -82,7 +82,7 @@ iGroup = ig;
 this.zBox = 1;
 }if (this.zBox < 1) this.zBox = 1;
 var text = labels.getLabel (i);
-this.boxXY = (!this.isExport || this.viewer.creatingImage ? labels.getBox (i) :  Clazz.newFloatArray (5, 0));
+this.boxXY = (!this.isExport || this.vwr.creatingImage ? labels.getBox (i) :  Clazz.newFloatArray (5, 0));
 if (this.boxXY == null) labels.putBox (i, this.boxXY =  Clazz.newFloatArray (5, 0));
 text = this.renderLabelOrMeasure (text, label);
 if (text != null) labels.putLabel (i, text);
@@ -93,7 +93,7 @@ this.boxXY[1] /= 2;
 }
 return false;
 });
-$_M(c$, "renderLabelOrMeasure", 
+Clazz.defineMethod (c$, "renderLabelOrMeasure", 
 function (text, label) {
 var newText = false;
 if (text != null) {
@@ -109,7 +109,7 @@ text.setBgColix (this.bgcolix);
 if (text.pymolOffset[0] == 1) this.pTemp.setT (this.atomPt);
  else this.pTemp.set (0, 0, 0);
 this.pTemp.add3 (text.pymolOffset[4], text.pymolOffset[5], text.pymolOffset[6]);
-this.viewer.transformPtScr (this.pTemp, this.screen);
+this.tm.transformPtScr (this.pTemp, this.screen);
 text.setXYZs (this.screen.x, this.screen.y, this.screen.z, this.zSlab);
 text.setScalePixelsPerMicron (this.sppm);
 }} else {
@@ -127,10 +127,10 @@ var doPointer = ((this.pointer & 1) != 0);
 var pointerColix = ((this.pointer & 2) != 0 && this.bgcolix != 0 ? this.bgcolix : this.labelColix);
 this.boxXY[0] = this.atomPt.sX;
 this.boxXY[1] = this.atomPt.sY;
-J.render.TextRenderer.renderSimpleLabel (this.g3d, this.font3d, label, this.labelColix, this.bgcolix, this.boxXY, this.zBox, this.zSlab, J.viewer.JC.getXOffset (this.offset), J.viewer.JC.getYOffset (this.offset), this.ascent, this.descent, doPointer, pointerColix, this.isExact);
+J.render.TextRenderer.renderSimpleLabel (this.g3d, this.font3d, label, this.labelColix, this.bgcolix, this.boxXY, this.zBox, this.zSlab, JV.JC.getXOffset (this.offset), JV.JC.getYOffset (this.offset), this.ascent, this.descent, doPointer, pointerColix, this.isExact);
 this.atomPt = null;
 } else {
-text = J.modelset.Text.newLabel (this.g3d.getGData (), this.font3d, label, this.labelColix, this.bgcolix, this.textAlign, 0, null);
+text = JM.Text.newLabel (this.g3d.getGData (), this.font3d, label, this.labelColix, this.bgcolix, this.textAlign, 0, null);
 text.atomX = this.atomPt.sX;
 text.atomY = this.atomPt.sY;
 text.atomZ = this.zSlab;
@@ -141,7 +141,7 @@ if (text.pymolOffset == null) {
 text.setOffset (this.offset);
 if (this.textAlign != 0) text.setAlignment (this.textAlign);
 }text.setPointer (this.pointer);
-J.render.TextRenderer.render (text, this.viewer, this.g3d, this.scalePixelsPerMicron, this.imageFontScaling, this.isExact, this.boxXY, this.xy);
+J.render.TextRenderer.render (text, this.vwr, this.g3d, this.scalePixelsPerMicron, this.imageFontScaling, this.isExact, this.boxXY, this.xy);
 }return (newText ? text : null);
-}, "J.modelset.Text,~S");
+}, "JM.Text,~S");
 });

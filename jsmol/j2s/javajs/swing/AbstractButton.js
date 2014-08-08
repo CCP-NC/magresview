@@ -14,29 +14,29 @@ function (type) {
 Clazz.superConstructor (this, javajs.swing.AbstractButton, [type]);
 this.enabled = true;
 }, "~S");
-$_V(c$, "setSelected", 
+Clazz.overrideMethod (c$, "setSelected", 
 function (selected) {
 this.selected = selected;
 {
 SwingController.setSelected(this);
 }}, "~B");
-$_V(c$, "isSelected", 
+Clazz.overrideMethod (c$, "isSelected", 
 function () {
 return this.selected;
 });
-$_V(c$, "addItemListener", 
+Clazz.overrideMethod (c$, "addItemListener", 
 function (listener) {
 this.itemListener = listener;
 }, "~O");
-$_V(c$, "getIcon", 
+Clazz.overrideMethod (c$, "getIcon", 
 function () {
 return this.icon;
 });
-$_V(c$, "setIcon", 
+Clazz.overrideMethod (c$, "setIcon", 
 function (icon) {
 this.icon = icon;
 }, "~O");
-$_V(c$, "init", 
+Clazz.overrideMethod (c$, "init", 
 function (text, icon, actionCommand, popupMenu) {
 this.text = text;
 this.icon = icon;
@@ -45,23 +45,23 @@ this.popupMenu = popupMenu;
 {
 SwingController.initMenuItem(this);
 }}, "~S,~O,~S,javajs.api.SC");
-$_M(c$, "getTopPopupMenu", 
+Clazz.defineMethod (c$, "getTopPopupMenu", 
 function () {
 return this.popupMenu;
 });
-$_M(c$, "add", 
+Clazz.defineMethod (c$, "add", 
 function (item) {
 this.addComponent (item);
 }, "javajs.api.SC");
-$_V(c$, "insert", 
+Clazz.overrideMethod (c$, "insert", 
 function (subMenu, index) {
 this.insertComponent (subMenu, index);
 }, "javajs.api.SC,~N");
-$_V(c$, "getPopupMenu", 
+Clazz.overrideMethod (c$, "getPopupMenu", 
 function () {
 return null;
 });
-$_M(c$, "getMenuHTML", 
+Clazz.defineMethod (c$, "getMenuHTML", 
 function () {
 var label = (this.icon != null ? this.icon : this.text != null ? this.text : null);
 var s = (label == null ? "" : "<li><a>" + label + "</a>" + this.htmlMenuOpener ("ul"));
@@ -71,11 +71,11 @@ if (n > 0) for (var i = 0; i < n; i++) s += this.getComponent (i).toHTML ();
 if (label != null) s += "</ul></li>";
 return s;
 });
-$_M(c$, "htmlMenuOpener", 
+Clazz.defineMethod (c$, "htmlMenuOpener", 
 function (type) {
 return "<" + type + " id=\"" + this.id + "\"" + (this.enabled ? "" : this.getHtmlDisabled ()) + ">";
 }, "~S");
-$_M(c$, "getHtmlDisabled", 
+Clazz.defineMethod (c$, "getHtmlDisabled", 
 function () {
 return " disabled=\"disabled\"";
 });

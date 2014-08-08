@@ -10,21 +10,21 @@ function (info) {
 Clazz.superConstructor (this, javajs.swing.JComboBox, ["cmbJCB"]);
 this.info = info;
 }, "~A");
-$_M(c$, "setSelectedIndex", 
+Clazz.defineMethod (c$, "setSelectedIndex", 
 function (i) {
 this.selectedIndex = i;
 {
 SwingController.setSelectedIndex(this);
 }}, "~N");
-$_M(c$, "getSelectedIndex", 
+Clazz.defineMethod (c$, "getSelectedIndex", 
 function () {
 return this.selectedIndex;
 });
-$_M(c$, "getSelectedItem", 
+Clazz.defineMethod (c$, "getSelectedItem", 
 function () {
 return (this.selectedIndex < 0 ? null : this.info[this.selectedIndex]);
 });
-$_V(c$, "toHTML", 
+Clazz.overrideMethod (c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
 sb.append ("\n<select id='" + this.id + "' class='JComboBox' onchange='SwingController.click(this)'>\n");

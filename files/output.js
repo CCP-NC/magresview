@@ -1159,8 +1159,8 @@ function table_file_gen(data_set, out)
 			
 			var eigvals = [0.0, 0.0, 0.0];
 			eigvals[2] = 2.0/3.0*haeb[1]+haeb[0];
-			eigvals[0] = ((3.0*haeb[0] + eigvals[2])-(haeb[2]*2.0/3.0*haeb[1]))/2.0;
-			eigvals[1] = ((3.0*haeb[0] + eigvals[2])+(haeb[2]*2.0/3.0*haeb[1]))/2.0;
+			eigvals[0] = eigvals[2]-(1.0+1.0/3.0*haeb[2])*haeb[1];
+			eigvals[1] = eigvals[2]-(1.0-1.0/3.0*haeb[2])*haeb[1];
 			
 			//Write down atomic label
 			out.write("\n" + sp_label + "_" + atom_i);

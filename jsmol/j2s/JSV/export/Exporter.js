@@ -4,9 +4,9 @@ c$ = Clazz.declareType (JSV["export"], "Exporter", null, JSV.api.ExportInterface
 Clazz.makeConstructor (c$, 
 function () {
 });
-$_V(c$, "write", 
+Clazz.overrideMethod (c$, "write", 
 function (viewer, tokens, forInkscape) {
-if (tokens == null) return this.printPDF (viewer, null);
+if (tokens == null) return this.printPDF (viewer, null, false);
 var type = null;
 var fileName = null;
 var eType;
@@ -25,7 +25,7 @@ switch (eType) {
 case JSV.common.ExportType.PDF:
 case JSV.common.ExportType.PNG:
 case JSV.common.ExportType.JPG:
-return this.exportTheSpectrum (viewer, eType, null, null, -1, -1, null);
+return this.exportTheSpectrum (viewer, eType, null, null, -1, -1, null, false);
 default:
 viewer.fileHelper.setFileChooser (eType);
 var items = this.getExportableItems (viewer, eType.equals (JSV.common.ExportType.SOURCE));
@@ -45,7 +45,9 @@ fileName = JU.PT.trimQuotes (tokens.get (1));
 break;
 }
 var ext = fileName.substring (fileName.lastIndexOf (".") + 1).toUpperCase ();
-if (ext.equals ("JDX")) {
+if (ext.equals ("BASE64")) {
+fileName = ";base64,";
+} else if (ext.equals ("JDX")) {
 if (type == null) type = "XY";
 } else if (JSV.common.ExportType.isExportMode (ext)) {
 type = ext;
@@ -63,9 +65,9 @@ return null;
 throw e;
 }
 }
-}, "JSV.common.JSViewer,JU.List,~B");
-$_M(c$, "exportSpectrumOrImage", 
-($fz = function (viewer, eType, index, out) {
+}, "JSV.common.JSViewer,JU.Lst,~B");
+Clazz.defineMethod (c$, "exportSpectrumOrImage", 
+ function (viewer, eType, index, out) {
 var spec;
 var pd = viewer.pd ();
 if (index < 0 && (index = pd.getCurrentSpectrumIndex ()) < 0) return "Error exporting spectrum: No spectrum selected";
@@ -74,7 +76,9 @@ var startIndex = pd.getStartingPointIndex (index);
 var endIndex = pd.getEndingPointIndex (index);
 var msg = null;
 try {
-msg = this.exportTheSpectrum (viewer, eType, out, spec, startIndex, endIndex, pd);
+var asBase64 = out.isBase64 ();
+msg = this.exportTheSpectrum (viewer, eType, out, spec, startIndex, endIndex, pd, asBase64);
+if (asBase64) return msg;
 if (msg.startsWith ("OK")) return "OK - Exported " + eType.name () + ": " + out.getFileName () + msg.substring (2);
 } catch (ioe) {
 if (Clazz.exceptionOf (ioe, Exception)) {
@@ -84,9 +88,9 @@ throw ioe;
 }
 }
 return "Error exporting " + out.getFileName () + ": " + msg;
-}, $fz.isPrivate = true, $fz), "JSV.common.JSViewer,JSV.common.ExportType,~N,JU.OC");
-$_M(c$, "exportTheSpectrum", 
-function (viewer, mode, out, spec, startIndex, endIndex, pd) {
+}, "JSV.common.JSViewer,JSV.common.ExportType,~N,JU.OC");
+Clazz.defineMethod (c$, "exportTheSpectrum", 
+function (viewer, mode, out, spec, startIndex, endIndex, pd, asBase64) {
 var jsvp = viewer.selectedPanel;
 var type = mode.name ();
 switch (mode) {
@@ -133,20 +137,19 @@ throw e;
 }
 }return jsvp.saveImage (type.toLowerCase (), file);
 case JSV.common.ExportType.PDF:
-return this.printPDF (viewer, "PDF");
+return this.printPDF (viewer, "PDF", asBase64);
 case JSV.common.ExportType.SOURCE:
 if (jsvp == null) return null;
 return JSV["export"].Exporter.fileCopy (jsvp.getPanelData ().getSpectrum ().getFilePath (), out);
 case JSV.common.ExportType.UNK:
 return null;
 }
-return (JSV.common.JSViewer.getInterface ("JSV.export." + type.toUpperCase () + "Exporter")).exportTheSpectrum (viewer, mode, out, spec, startIndex, endIndex, null);
-}, "JSV.common.JSViewer,JSV.common.ExportType,JU.OC,JSV.common.JDXSpectrum,~N,~N,JSV.common.PanelData");
-$_M(c$, "printPDF", 
-($fz = function (viewer, pdfFileName) {
-if (!viewer.si.isSigned ()) return "Error: Applet must be signed for the PRINT command.";
+return (JSV.common.JSViewer.getInterface ("JSV.export." + type.toUpperCase () + "Exporter")).exportTheSpectrum (viewer, mode, out, spec, startIndex, endIndex, null, false);
+}, "JSV.common.JSViewer,JSV.common.ExportType,JU.OC,JSV.common.Spectrum,~N,~N,JSV.common.PanelData,~B");
+Clazz.defineMethod (c$, "printPDF", 
+ function (viewer, pdfFileName, isBase64) {
 var isJob = (pdfFileName == null || pdfFileName.length == 0);
-var isBase64 = (!isJob && pdfFileName.toLowerCase ().startsWith ("base64"));
+if (!isBase64 && !viewer.si.isSigned ()) return "Error: Applet must be signed for the PRINT command.";
 var pd = viewer.pd ();
 if (pd == null) return null;
 pd.closeAllDialogsExcept (JSV.common.Annotation.AType.NONE);
@@ -182,9 +185,9 @@ throw e;
 }
 }
 return s;
-}, $fz.isPrivate = true, $fz), "JSV.common.JSViewer,~S");
-$_M(c$, "getExportableItems", 
-($fz = function (viewer, isSameType) {
+}, "JSV.common.JSViewer,~S,~B");
+Clazz.defineMethod (c$, "getExportableItems", 
+ function (viewer, isSameType) {
 var pd = viewer.pd ();
 var isView = viewer.currentSource.isView;
 var nSpectra = pd.getNumberOfSpectraInCurrentSet ();
@@ -193,12 +196,12 @@ var items =  new Array (nSpectra);
 for (var i = 0; i < nSpectra; i++) items[i] = pd.getSpectrumAt (i).getTitle ();
 
 return items;
-}, $fz.isPrivate = true, $fz), "JSV.common.JSViewer,~B");
-$_M(c$, "getSuggestedFileName", 
-($fz = function (viewer, imode) {
+}, "JSV.common.JSViewer,~B");
+Clazz.defineMethod (c$, "getSuggestedFileName", 
+ function (viewer, imode) {
 var pd = viewer.pd ();
 var sourcePath = pd.getSpectrum ().getFilePath ();
-var newName = JSV.common.JSVFileManager.getName (sourcePath);
+var newName = JSV.common.JSVFileManager.getTagName (sourcePath);
 if (newName.startsWith ("$")) newName = newName.substring (1);
 var pt = newName.lastIndexOf (".");
 var name = (pt < 0 ? newName : newName.substring (0, pt));
@@ -228,9 +231,9 @@ ext = "." + imode.toString ().toLowerCase ();
 if (viewer.currentSource.isView) name = pd.getPrintJobTitle (isPrint);
 name += ext;
 return name;
-}, $fz.isPrivate = true, $fz), "JSV.common.JSViewer,JSV.common.ExportType");
-c$.fileCopy = $_M(c$, "fileCopy", 
-($fz = function (name, out) {
+}, "JSV.common.JSViewer,JSV.common.ExportType");
+c$.fileCopy = Clazz.defineMethod (c$, "fileCopy", 
+ function (name, out) {
 try {
 var br = JSV.common.JSVFileManager.getBufferedReaderFromName (name, null);
 var line = null;
@@ -247,6 +250,6 @@ return e.toString ();
 throw e;
 }
 }
-}, $fz.isPrivate = true, $fz), "~S,JU.OC");
+}, "~S,JU.OC");
 c$.newLine = c$.prototype.newLine = System.getProperty ("line.separator");
 });

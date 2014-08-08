@@ -17,7 +17,7 @@ this.renderWidth = 0;
 this.renderHeight = 0;
 Clazz.instantialize (this, arguments);
 }, javajs.awt, "Component");
-$_M(c$, "setParent", 
+Clazz.defineMethod (c$, "setParent", 
 function (p) {
 this.parent = p;
 }, "~O");
@@ -28,93 +28,93 @@ if (type == null) return;
 {
 SwingController.register(this, type);
 }}, "~S");
-c$.newID = $_M(c$, "newID", 
+c$.newID = Clazz.defineMethod (c$, "newID", 
 function (type) {
 return type + ("" + Math.random ()).substring (3, 10);
 }, "~S");
-$_M(c$, "setBackground", 
+Clazz.defineMethod (c$, "setBackground", 
 function (color) {
 this.bgcolor = color;
 }, "javajs.api.GenericColor");
-$_M(c$, "setText", 
+Clazz.defineMethod (c$, "setText", 
 function (text) {
 this.text = text;
 {
 SwingController.setText(this);
 }}, "~S");
-$_M(c$, "setName", 
+Clazz.defineMethod (c$, "setName", 
 function (name) {
 this.name = name;
 }, "~S");
-$_M(c$, "getName", 
+Clazz.defineMethod (c$, "getName", 
 function () {
 return this.name;
 });
-$_M(c$, "getParent", 
+Clazz.defineMethod (c$, "getParent", 
 function () {
 return this.parent;
 });
-$_M(c$, "setPreferredSize", 
+Clazz.defineMethod (c$, "setPreferredSize", 
 function (dimension) {
 this.width = dimension.width;
 this.height = dimension.height;
 }, "javajs.awt.Dimension");
-$_M(c$, "addMouseListener", 
+Clazz.defineMethod (c$, "addMouseListener", 
 function (listener) {
 this.mouseListener = listener;
 }, "~O");
-$_M(c$, "getText", 
+Clazz.defineMethod (c$, "getText", 
 function () {
 return this.text;
 });
-$_M(c$, "isEnabled", 
+Clazz.defineMethod (c$, "isEnabled", 
 function () {
 return this.enabled;
 });
-$_M(c$, "setEnabled", 
+Clazz.defineMethod (c$, "setEnabled", 
 function (enabled) {
 this.enabled = enabled;
 {
 SwingController.setEnabled(this);
 }}, "~B");
-$_M(c$, "isVisible", 
+Clazz.defineMethod (c$, "isVisible", 
 function () {
 return this.visible;
 });
-$_M(c$, "setVisible", 
+Clazz.defineMethod (c$, "setVisible", 
 function (visible) {
 this.visible = visible;
 {
 SwingController.setVisible(this);
 }}, "~B");
-$_M(c$, "getHeight", 
+Clazz.defineMethod (c$, "getHeight", 
 function () {
 return this.height;
 });
-$_M(c$, "getWidth", 
+Clazz.defineMethod (c$, "getWidth", 
 function () {
 return this.width;
 });
-$_M(c$, "setMinimumSize", 
+Clazz.defineMethod (c$, "setMinimumSize", 
 function (d) {
 this.minWidth = d.width;
 this.minHeight = d.height;
 }, "javajs.awt.Dimension");
-$_M(c$, "getSubcomponentWidth", 
+Clazz.defineMethod (c$, "getSubcomponentWidth", 
 function () {
 return this.width;
 });
-$_M(c$, "getSubcomponentHeight", 
+Clazz.defineMethod (c$, "getSubcomponentHeight", 
 function () {
 return this.height;
 });
-$_M(c$, "getCSSstyle", 
+Clazz.defineMethod (c$, "getCSSstyle", 
 function (defaultPercentW, defaultPercentH) {
 var width = (this.renderWidth > 0 ? this.renderWidth : this.getSubcomponentWidth ());
 var height = (this.renderHeight > 0 ? this.renderHeight : this.getSubcomponentHeight ());
 return (width > 0 ? "width:" + width + "px;" : defaultPercentW > 0 ? "width:" + defaultPercentW + "%;" : "") + (height > 0 ? "height:" + height + "px;" : defaultPercentH > 0 ? "height:" + defaultPercentH + "%;" : "") + (this.bgcolor == null ? "" : "background-color:" + JU.CU.toCSSString (this.bgcolor) + ";");
 }, "~N,~N");
-$_M(c$, "repaint", 
+Clazz.defineMethod (c$, "repaint", 
 function () {
 });
 });

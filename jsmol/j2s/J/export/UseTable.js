@@ -12,14 +12,14 @@ Clazz.superConstructor (this, J["export"].UseTable, []);
 this.keyword = keyword;
 this.term = keyword.charAt (keyword.length - 1);
 }, "~S");
-$_M(c$, "getDef", 
+Clazz.defineMethod (c$, "getDef", 
 function (key) {
 if (this.containsKey (key)) return this.keyword + this.get (key) + this.term;
 var id = "_" + (this.iObj++);
 this.put (key, id);
 return id;
 }, "~S");
-$_M(c$, "getDefRet", 
+Clazz.defineMethod (c$, "getDefRet", 
 function (key, ret) {
 if ((ret[0] = this.get (key)) != null) return true;
 this.put (key, ret[0] = "_" + key.charAt (0) + (this.iObj++));

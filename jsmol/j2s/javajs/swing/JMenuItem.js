@@ -15,18 +15,18 @@ function (type, i) {
 Clazz.superConstructor (this, javajs.swing.JMenuItem, [type]);
 this.btnType = i;
 }, "~S,~N");
-$_V(c$, "toHTML", 
+Clazz.overrideMethod (c$, "toHTML", 
 function () {
 return this.htmlMenuOpener ("li") + (this.text == null ? "" : "<a>" + this.htmlLabel () + "</a>") + "</li>";
 });
-$_V(c$, "getHtmlDisabled", 
+Clazz.overrideMethod (c$, "getHtmlDisabled", 
 function () {
 return " class=\"ui-state-disabled\"";
 });
-$_M(c$, "htmlLabel", 
-($fz = function () {
+Clazz.defineMethod (c$, "htmlLabel", 
+ function () {
 return (this.btnType == 1 ? this.text : "<label><input id=\"" + this.id + "-" + (this.btnType == 3 ? "r" : "c") + "b\" type=\"" + (this.btnType == 3 ? "radio\" name=\"" + this.htmlName : "checkbox") + "\" " + (this.selected ? "checked" : "") + " />" + this.text + "</label>");
-}, $fz.isPrivate = true, $fz));
+});
 Clazz.defineStatics (c$,
 "TYPE_SEPARATOR", 0,
 "TYPE_BUTTON", 1,

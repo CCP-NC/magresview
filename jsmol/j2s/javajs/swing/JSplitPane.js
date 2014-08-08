@@ -13,17 +13,17 @@ Clazz.superConstructor (this, javajs.swing.JSplitPane, ["JSpP"]);
 this.split = split;
 this.isH = (split == 1);
 }, "~N");
-$_M(c$, "setRightComponent", 
+Clazz.defineMethod (c$, "setRightComponent", 
 function (r) {
 this.right =  new javajs.swing.JComponentImp (null);
 this.right.add (r);
 }, "javajs.swing.JComponent");
-$_M(c$, "setLeftComponent", 
+Clazz.defineMethod (c$, "setLeftComponent", 
 function (l) {
 this.left =  new javajs.swing.JComponentImp (null);
 this.left.add (l);
 }, "javajs.swing.JComponent");
-$_M(c$, "getSubcomponentWidth", 
+Clazz.defineMethod (c$, "getSubcomponentWidth", 
 function () {
 var w = this.width;
 if (w == 0) {
@@ -34,7 +34,7 @@ if (this.isH) w = wleft + wright;
  else w = Math.max (wleft, wright);
 }}return w;
 });
-$_M(c$, "getSubcomponentHeight", 
+Clazz.defineMethod (c$, "getSubcomponentHeight", 
 function () {
 var h = this.height;
 if (h == 0) {
@@ -45,7 +45,7 @@ if (this.isH) h = Math.max (hleft, hright);
  else h = hleft + hright;
 }}return h;
 });
-$_M(c$, "toHTML", 
+Clazz.defineMethod (c$, "toHTML", 
 function () {
 if (this.left == null || this.right == null) return "";
 var isH = (this.split == 1);
