@@ -8,7 +8,7 @@ Clazz.makeConstructor (c$,
 function () {
 this.id = javajs.awt.Component.newID ("bg");
 });
-$_M(c$, "add", 
+Clazz.defineMethod (c$, "add", 
 function (item) {
 (item).htmlName = this.id;
 }, "javajs.api.SC");

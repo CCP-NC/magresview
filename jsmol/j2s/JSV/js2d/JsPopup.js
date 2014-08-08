@@ -6,15 +6,15 @@ function () {
 Clazz.superConstructor (this, JSV.js2d.JsPopup, []);
 this.helper =  new J.popup.JSSwingPopupHelper (this);
 });
-$_V(c$, "jpiInitialize", 
+Clazz.overrideMethod (c$, "jpiInitialize", 
 function (viewer, menu) {
 var bundle =  new JSV.popup.JSVPopupResourceBundle ();
 this.initialize (viewer, bundle, menu);
 }, "javajs.api.PlatformViewer,~S");
-$_V(c$, "menuShowPopup", 
+Clazz.overrideMethod (c$, "menuShowPopup", 
 function (popup, x, y) {
 try {
-(popup).show (this.isTainted ? this.viewer.getApplet () : null, x, y);
+(popup).show (this.isTainted ? this.vwr.getApplet () : null, x, y);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 } else {
@@ -22,11 +22,11 @@ throw e;
 }
 }
 }, "javajs.api.SC,~N,~N");
-$_V(c$, "getImageIcon", 
+Clazz.overrideMethod (c$, "getImageIcon", 
 function (fileName) {
 return null;
 }, "~S");
-$_V(c$, "menuFocusCallback", 
+Clazz.overrideMethod (c$, "menuFocusCallback", 
 function (name, actionCommand, b) {
 }, "~S,~S,~B");
 });

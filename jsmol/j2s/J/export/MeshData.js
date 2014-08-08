@@ -1,7 +1,7 @@
 Clazz.declarePackage ("J.export");
-Clazz.load (null, "J.export.MeshData", ["JU.AU", "$.P3", "$.V3", "J.util.MeshSurface"], function () {
+Clazz.load (null, "J.export.MeshData", ["JU.AU", "$.P3", "$.V3", "JU.MeshSurface"], function () {
 c$ = Clazz.declareType (J["export"], "MeshData");
-c$.getCircleData = $_M(c$, "getCircleData", 
+c$.getCircleData = Clazz.defineMethod (c$, "getCircleData", 
 function () {
 var ndeg = 10;
 var n = Clazz.doubleToInt (360 / ndeg);
@@ -20,9 +20,9 @@ normals[i] = JU.P3.new3 (0, 0, 1);
 }
 vertexes[n] = JU.P3.new3 (0, 0, 0);
 normals[n] = JU.P3.new3 (0, 0, 1);
-return J.util.MeshSurface.newMesh (false, vertexes, 0, faces, normals, 0);
+return JU.MeshSurface.newMesh (false, vertexes, 0, faces, normals, 0);
 });
-c$.getTriangleData = $_M(c$, "getTriangleData", 
+c$.getTriangleData = Clazz.defineMethod (c$, "getTriangleData", 
 function (pt1, pt2, pt3) {
 var vertexes = [pt1, pt2, pt3];
 var v1 = JU.V3.newVsub (pt3, pt1);
@@ -31,9 +31,9 @@ v2.cross (v2, v1);
 v2.normalize ();
 var normals = [v2, v2, v2];
 var faces = [[0, 1, 2]];
-return J.util.MeshSurface.newMesh (false, vertexes, 0, faces, normals, 0);
+return JU.MeshSurface.newMesh (false, vertexes, 0, faces, normals, 0);
 }, "JU.P3,JU.P3,JU.P3");
-c$.getConeData = $_M(c$, "getConeData", 
+c$.getConeData = Clazz.defineMethod (c$, "getConeData", 
 function () {
 var ndeg = 10;
 var n = Clazz.doubleToInt (360 / ndeg);
@@ -48,9 +48,9 @@ var y = (Math.sin (i * d));
 vertices[i] = JU.P3.new3 (x, y, 0);
 }
 vertices[n] = JU.P3.new3 (0, 0, 1);
-return J.util.MeshSurface.newMesh (false, vertices, 0, faces, vertices, 0);
+return JU.MeshSurface.newMesh (false, vertices, 0, faces, vertices, 0);
 });
-c$.getCylinderData = $_M(c$, "getCylinderData", 
+c$.getCylinderData = Clazz.defineMethod (c$, "getCylinderData", 
 function (inSide) {
 var ndeg = 10;
 var vertexCount = Clazz.doubleToInt (360 / ndeg) * 2;
@@ -81,6 +81,6 @@ normals[i + n] = normals[i];
 }
 if (inSide) for (var i = 0; i < n; i++) normals[i].scale (-1);
 
-return J.util.MeshSurface.newMesh (false, vertexes, 0, faces, normals, 0);
+return JU.MeshSurface.newMesh (false, vertexes, 0, faces, normals, 0);
 }, "~B");
 });

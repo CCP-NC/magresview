@@ -5,7 +5,7 @@ Clazz.makeConstructor (c$,
 function () {
 Clazz.superConstructor (this, javajs.swing.JCheckBox, ["chkJCB"]);
 });
-$_V(c$, "toHTML", 
+Clazz.overrideMethod (c$, "toHTML", 
 function () {
 var s = "<label><input type=checkbox id='" + this.id + "' class='JCheckBox' style='" + this.getCSSstyle (0, 0) + "' " + (this.selected ? "checked='checked' " : "") + "onclick='SwingController.click(this)'>" + this.text + "</label>";
 return s;

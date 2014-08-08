@@ -5,7 +5,7 @@ Clazz.makeConstructor (c$,
 function () {
 Clazz.superConstructor (this, javajs.swing.JContentPane, ["JCP"]);
 });
-$_M(c$, "toHTML", 
+Clazz.defineMethod (c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
 sb.append ("\n<div id='" + this.id + "' class='JContentPane' style='" + this.getCSSstyle (100, 100) + "'>\n");

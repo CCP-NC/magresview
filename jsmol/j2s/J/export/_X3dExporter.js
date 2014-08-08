@@ -1,22 +1,22 @@
 Clazz.declarePackage ("J.export");
-Clazz.load (["J.export._VrmlExporter"], "J.export._X3dExporter", ["JU.List", "$.PT", "J.export.UseTable", "J.viewer.Viewer"], function () {
+Clazz.load (["J.export._VrmlExporter"], "J.export._X3dExporter", ["JU.Lst", "$.PT", "J.export.UseTable", "JV.Viewer"], function () {
 c$ = Clazz.declareType (J["export"], "_X3dExporter", J["export"]._VrmlExporter);
 Clazz.makeConstructor (c$, 
 function () {
 Clazz.superConstructor (this, J["export"]._X3dExporter, []);
 this.useTable =  new J["export"].UseTable ("USE='");
 });
-$_V(c$, "outputHeader", 
+Clazz.overrideMethod (c$, "outputHeader", 
 function () {
 this.output ("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n");
 this.output ("<!DOCTYPE X3D PUBLIC \"ISO//Web3D//DTD X3D 3.1//EN\" \"http://www.web3d.org/specifications/x3d-3.1.dtd\">\n");
 this.output ("<X3D profile=\'Immersive\' version=\'3.1\' xmlns:xsd=\'http://www.w3.org/2001/XMLSchema-instance\' xsd:noNamespaceSchemaLocation=\' http://www.web3d.org/specifications/x3d-3.1.xsd \'>\n");
 this.output ("<head>\n");
-this.output ("<meta name='title' content=" + JU.PT.esc (this.viewer.getModelSetName ()).$replace ('<', ' ').$replace ('>', ' ').$replace ('&', ' ') + "/>\n");
+this.output ("<meta name='title' content=" + JU.PT.esc (this.vwr.getModelSetName ()).$replace ('<', ' ').$replace ('>', ' ').$replace ('&', ' ') + "/>\n");
 this.output ("<meta name='description' content='Jmol rendering'/>\n");
 this.output ("<meta name='creator' content=' '/>\n");
 this.output ("<meta name='created' content='" + this.getExportDate () + "'/>\n");
-this.output ("<meta name='generator' content='Jmol " + J.viewer.Viewer.getJmolVersion () + ", http://www.jmol.org'/>\n");
+this.output ("<meta name='generator' content='Jmol " + JV.Viewer.getJmolVersion () + ", http://www.jmol.org'/>\n");
 this.output ("<meta name='license' content='http://www.gnu.org/licenses/licenses.html#LGPL'/>\n");
 this.output ("</head>\n");
 this.output ("<Scene>\n");
@@ -38,14 +38,14 @@ this.tempP1.scale (-1);
 this.output (this.tempP1);
 this.output ("'>\n");
 });
-$_V(c$, "outputFooter", 
+Clazz.overrideMethod (c$, "outputFooter", 
 function () {
 this.useTable = null;
 this.output ("</Transform>\n");
 this.output ("</Scene>\n");
 this.output ("</X3D>\n");
 });
-$_V(c$, "outputAppearance", 
+Clazz.overrideMethod (c$, "outputAppearance", 
 function (colix, isText) {
 var def = this.useTable.getDef ((isText ? "T" : "") + colix);
 this.output ("<Appearance ");
@@ -57,16 +57,12 @@ if (isText) this.output ("0 0 0' specularColor='0 0 0' ambientIntensity='0.0' sh
 } else this.output (def + ">");
 this.output ("</Appearance>");
 }, "~N,~B");
-$_M(c$, "outputTransRot", 
-($fz = function (pt1, pt2, x, y, z) {
-var $private = Clazz.checkPrivateMethod (arguments);
-if ($private != null) {
-return $private.apply (this, arguments);
-}
+Clazz.defineMethod (c$, "outputTransRot", 
+function (pt1, pt2, x, y, z) {
 this.output (" ");
 this.outputTransRot (pt1, pt2, x, y, z, "='", "'");
-}, $fz.isPrivate = true, $fz), "JU.P3,JU.P3,~N,~N,~N");
-$_V(c$, "outputCircle", 
+}, "JU.P3,JU.P3,~N,~N,~N");
+Clazz.overrideMethod (c$, "outputCircle", 
 function (pt1, pt2, radius, colix, doFill) {
 if (doFill) {
 this.output ("<Transform translation='");
@@ -109,7 +105,7 @@ this.output (child + ">");
 }this.output ("</Billboard>\n");
 this.output ("</Transform>\n");
 }, "JU.P3,JU.P3,~N,~N,~B");
-$_V(c$, "outputCone", 
+Clazz.overrideMethod (c$, "outputCone", 
 function (ptBase, ptTip, radius, colix) {
 radius = this.scale (radius);
 var height = this.scale (ptBase.distance (ptTip));
@@ -132,7 +128,7 @@ this.output (child + ">");
 }this.output ("</Shape>\n");
 this.output ("</Transform>\n");
 }, "JU.P3,JU.P3,~N,~N");
-$_V(c$, "outputCylinder", 
+Clazz.overrideMethod (c$, "outputCylinder", 
 function (ptCenter, pt1, pt2, colix, endcaps, radius, ptX, ptY, checkRadius) {
 this.output ("<Transform");
 if (ptX == null) {
@@ -152,12 +148,8 @@ this.outputSphere (pt1, radius * 1.01, colix, true);
 this.outputSphere (pt2, radius * 1.01, colix, true);
 }return true;
 }, "JU.P3,JU.P3,JU.P3,~N,~N,~N,JU.P3,JU.P3,~B");
-$_M(c$, "outputCylinderChildScaled", 
-($fz = function (pt1, pt2, colix, endcaps, radius) {
-var $private = Clazz.checkPrivateMethod (arguments);
-if ($private != null) {
-return $private.apply (this, arguments);
-}
+Clazz.overrideMethod (c$, "outputCylinderChildScaled", 
+function (pt1, pt2, colix, endcaps, radius) {
 var length = this.scale (pt1.distance (pt2));
 radius = this.scale (radius);
 var child = this.useTable.getDef ("C" + colix + "_" + Clazz.floatToInt (length * 100) + "_" + radius + "_" + endcaps);
@@ -174,8 +166,8 @@ this.output (cyl + "/>");
 } else {
 this.output (child + ">");
 }this.output ("</Shape>");
-}, $fz.isPrivate = true, $fz), "JU.P3,JU.P3,~N,~N,~N");
-$_V(c$, "outputEllipsoid", 
+}, "JU.P3,JU.P3,~N,~N,~N");
+Clazz.overrideMethod (c$, "outputEllipsoid", 
 function (center, points, colix) {
 this.output ("<Transform translation='");
 this.output (center);
@@ -186,7 +178,7 @@ this.tempP3.set (0, 0, 0);
 this.outputSphereChildUnscaled (this.tempP3, 1.0, colix);
 this.output ("</Transform>\n");
 }, "JU.P3,~A,~N");
-$_V(c$, "outputSphereChildUnscaled", 
+Clazz.overrideMethod (c$, "outputSphereChildUnscaled", 
 function (center, radius, colix) {
 this.output ("<Transform translation='");
 this.output (center);
@@ -201,7 +193,7 @@ this.output (child + ">");
 }this.output ("</Shape>\n");
 this.output ("</Transform>\n");
 }, "JU.P3,~N,~N");
-$_V(c$, "outputSurface", 
+Clazz.overrideMethod (c$, "outputSurface", 
 function (vertices, normals, colixes, indices, polygonColixes, nVertices, nPolygons, nFaces, bsPolygons, faceVertexMax, colix, colorList, htColixes, offset) {
 this.output ("<Shape>\n");
 this.outputAppearance (colix, false);
@@ -214,7 +206,7 @@ this.outputIndices (indices, map, nPolygons, bsPolygons, faceVertexMax);
 this.output ("'\n");
 var vNormals = null;
 if (normals != null) {
-vNormals =  new JU.List ();
+vNormals =  new JU.Lst ();
 map = this.getNormalMap (normals, nVertices, null, vNormals);
 this.output ("  solid='false'\n  normalPerVertex='true'\n  normalIndex='\n");
 this.outputIndices (indices, map, nPolygons, bsPolygons, faceVertexMax);
@@ -239,8 +231,8 @@ this.outputColors (colorList);
 this.output ("'/>\n");
 }this.output ("</IndexedFaceSet>\n");
 this.output ("</Shape>\n");
-}, "~A,~A,~A,~A,~A,~N,~N,~N,JU.BS,~N,~N,JU.List,java.util.Map,JU.P3");
-$_V(c$, "outputTriangle", 
+}, "~A,~A,~A,~A,~A,~N,~N,~N,JU.BS,~N,~N,JU.Lst,java.util.Map,JU.P3");
+Clazz.overrideMethod (c$, "outputTriangle", 
 function (pt1, pt2, pt3, colix) {
 this.output ("<Shape>\n");
 this.output ("<IndexedFaceSet solid='false' ");
@@ -256,7 +248,7 @@ this.output ("</IndexedFaceSet>\n");
 this.outputAppearance (colix, false);
 this.output ("\n</Shape>\n");
 }, "JU.P3,JU.P3,JU.P3,~N");
-$_V(c$, "outputTextPixel", 
+Clazz.overrideMethod (c$, "outputTextPixel", 
 function (pt, argb) {
 var color = this.rgbFractionalFromArgb (argb);
 this.output ("<Transform translation='");
@@ -272,15 +264,15 @@ this.output (child + ">");
 }this.output ("</Shape>\n");
 this.output ("</Transform>\n");
 }, "JU.P3,~N");
-$_V(c$, "plotText", 
+Clazz.overrideMethod (c$, "plotText", 
 function (x, y, z, colix, text, font3d) {
-if (z < 3) z = this.viewer.getFrontPlane ();
+if (z < 3) z = Clazz.floatToInt (this.tm.cameraDistance);
 var useFontStyle = font3d.fontStyle.toUpperCase ();
 var preFontFace = font3d.fontFace.toUpperCase ();
 var useFontFace = (preFontFace.equals ("MONOSPACED") ? "TYPEWRITER" : preFontFace.equals ("SERIF") ? "SERIF" : "SANS");
 this.output ("<Transform translation='");
 this.tempP3.set (x, y, z);
-this.viewer.unTransformPoint (this.tempP3, this.tempP1);
+this.tm.unTransformPoint (this.tempP3, this.tempP1);
 this.output (this.tempP1);
 this.output ("'>");
 this.output ("<Billboard ");

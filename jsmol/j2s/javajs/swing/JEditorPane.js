@@ -6,7 +6,7 @@ function () {
 Clazz.superConstructor (this, javajs.swing.JEditorPane, ["txtJEP"]);
 this.text = "";
 });
-$_V(c$, "toHTML", 
+Clazz.overrideMethod (c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
 sb.append ("<textarea type=text id='" + this.id + "' class='JEditorPane' style='" + this.getCSSstyle (98, 98) + "'>" + this.text + "</textarea>");

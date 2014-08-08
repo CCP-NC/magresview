@@ -1,6 +1,3 @@
-___date="$Date: 2014-02-11 07:36:18 -0600 (Tue, 11 Feb 2014) $"
-___svnRev="$LastChangedRevision: 1528 $"
-___version="2.1.1"
 Clazz.declarePackage ("JSV.common");
 c$ = Clazz.declareType (JSV.common, "JSVersion");
 Clazz.defineStatics (c$,

@@ -10,7 +10,7 @@ this.zIndex = 9000;
 this.loc = null;
 Clazz.instantialize (this, arguments);
 }, javajs.swing, "JDialog", javajs.awt.Container);
-$_M(c$, "setZIndex", 
+Clazz.defineMethod (c$, "setZIndex", 
 function (zIndex) {
 this.zIndex = zIndex;
 }, "~N");
@@ -21,48 +21,48 @@ this.add (this.contentPane =  new javajs.swing.JContentPane ());
 this.setBackground (javajs.awt.Color.get3 (210, 210, 240));
 this.contentPane.setBackground (javajs.awt.Color.get3 (230, 230, 230));
 });
-$_M(c$, "setLocation", 
+Clazz.defineMethod (c$, "setLocation", 
 function (loc) {
 this.loc = loc;
 }, "~A");
-$_M(c$, "getContentPane", 
+Clazz.defineMethod (c$, "getContentPane", 
 function () {
 return this.contentPane;
 });
-$_M(c$, "setTitle", 
+Clazz.defineMethod (c$, "setTitle", 
 function (title) {
 this.title = title;
 }, "~S");
-$_M(c$, "pack", 
+Clazz.defineMethod (c$, "pack", 
 function () {
 this.html = null;
 });
-$_M(c$, "validate", 
+Clazz.defineMethod (c$, "validate", 
 function () {
 this.html = null;
 });
-$_M(c$, "setVisible", 
+Clazz.defineMethod (c$, "setVisible", 
 function (tf) {
 if (tf && this.html == null) this.setDialog ();
 Clazz.superCall (this, javajs.swing.JDialog, "setVisible", [tf]);
 }, "~B");
-$_M(c$, "dispose", 
+Clazz.defineMethod (c$, "dispose", 
 function () {
 {
 {
 SwingController.dispose(this);
 }}});
-$_V(c$, "repaint", 
+Clazz.overrideMethod (c$, "repaint", 
 function () {
 this.setDialog ();
 });
-$_M(c$, "setDialog", 
-($fz = function () {
+Clazz.defineMethod (c$, "setDialog", 
+ function () {
 this.html = this.toHTML ();
 {
 SwingController.setDialog(this);
-}}, $fz.isPrivate = true, $fz));
-$_V(c$, "toHTML", 
+}});
+Clazz.overrideMethod (c$, "toHTML", 
 function () {
 this.renderWidth = this.getSubcomponentWidth ();
 if (this.renderWidth == 0) this.renderWidth = this.defaultWidth;

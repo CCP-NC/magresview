@@ -11,7 +11,7 @@ function (manager) {
 Clazz.superConstructor (this, javajs.swing.JPanel, ["JP"]);
 this.grid =  new javajs.swing.Grid (10, 10);
 }, "javajs.awt.LayoutManager");
-$_M(c$, "add", 
+Clazz.defineMethod (c$, "add", 
 function (btn, c) {
 this.last = (++this.nElements == 1 ? btn : null);
 if (Clazz.instanceOf (c, String)) {
@@ -22,7 +22,7 @@ if (c.equals ("North")) c =  new javajs.swing.GridBagConstraints (0, 0, 3, 1, 0,
  else c =  new javajs.swing.GridBagConstraints (1, 1, 1, 1, 0, 0, 10, 0, null, 0, 0);
 }this.grid.add (btn, c);
 }, "javajs.swing.JComponent,~O");
-$_V(c$, "toHTML", 
+Clazz.overrideMethod (c$, "toHTML", 
 function () {
 if (this.last != null) {
 this.grid =  new javajs.swing.Grid (1, 1);

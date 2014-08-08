@@ -6,7 +6,7 @@ function (component) {
 Clazz.superConstructor (this, javajs.swing.JScrollPane, ["JScP"]);
 this.add (component);
 }, "javajs.swing.JComponent");
-$_M(c$, "toHTML", 
+Clazz.defineMethod (c$, "toHTML", 
 function () {
 var sb =  new JU.SB ();
 sb.append ("\n<div id='" + this.id + "' class='JScrollPane' style='" + this.getCSSstyle (98, 98) + "overflow:auto'>\n");
@@ -16,7 +16,7 @@ sb.append (c.toHTML ());
 }sb.append ("\n</div>\n");
 return sb.toString ();
 });
-$_V(c$, "setMinimumSize", 
+Clazz.overrideMethod (c$, "setMinimumSize", 
 function (dimension) {
 }, "javajs.awt.Dimension");
 });

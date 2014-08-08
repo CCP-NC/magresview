@@ -5,7 +5,7 @@ this.optionKey = null;
 this.options = null;
 this.type = null;
 this.title = null;
-this.viewer = null;
+this.vwr = null;
 this.$spec = null;
 this.manager = null;
 this.dialog = null;
@@ -40,10 +40,10 @@ this.iRowSelected = -1;
 this.iColSelected = -1;
 Clazz.instantialize (this, arguments);
 }, JSV.dialog, "JSVDialog", JSV.common.Annotation, JSV.api.AnnotationData);
-$_M(c$, "setParams", 
+Clazz.defineMethod (c$, "setParams", 
 function (title, viewer, spec) {
 this.title = title;
-this.viewer = viewer;
+this.vwr = viewer;
 this.$spec = spec;
 this.manager = viewer.getDialogManager ();
 this.jsvp = viewer.selectedPanel;
@@ -86,15 +86,15 @@ break;
 }
 this.initDialog ();
 return this;
-}, "~S,JSV.common.JSViewer,JSV.common.JDXSpectrum");
-$_M(c$, "initDialog", 
-($fz = function () {
+}, "~S,JSV.common.JSViewer,JSV.common.Spectrum");
+Clazz.defineMethod (c$, "initDialog", 
+ function () {
 this.dialog = this.manager.getDialog (this);
 this.restoreDialogPosition (this.jsvp, this.getPosXY ());
 this.dialog.setTitle (this.title);
 this.layoutDialog ();
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "layoutDialog", 
+});
+Clazz.defineMethod (c$, "layoutDialog", 
 function () {
 this.dialog.startLayout ();
 this.addUniqueControls ();
@@ -108,7 +108,7 @@ if (this.addClearBtn) this.dialog.addButton ("btnClear", "Clear");
 this.checkEnables ();
 this.dialog.setVisible (this.defaultVisible);
 });
-$_M(c$, "callbackAD", 
+Clazz.defineMethod (c$, "callbackAD", 
 function (id, msg) {
 if (id.equals ("FOCUS")) {
 this.eventFocus ();
@@ -131,93 +131,93 @@ return true;
 }if (this.jsvp != null) this.jsvp.doRepaint (true);
 return true;
 }, "~S,~S");
-$_M(c$, "addUniqueControls", 
+Clazz.defineMethod (c$, "addUniqueControls", 
 function (dialogHelper) {
 }, "JSV.dialog.DialogManager");
-$_V(c$, "getAType", 
+Clazz.overrideMethod (c$, "getAType", 
 function () {
 return this.type;
 });
-$_V(c$, "getGraphSetKey", 
+Clazz.overrideMethod (c$, "getGraphSetKey", 
 function () {
 return this.graphSetKey;
 });
-$_V(c$, "setGraphSetKey", 
+Clazz.overrideMethod (c$, "setGraphSetKey", 
 function (key) {
 this.graphSetKey = key;
 }, "~S");
-$_V(c$, "getSpectrum", 
+Clazz.overrideMethod (c$, "getSpectrum", 
 function () {
 return this.$spec;
 });
-$_V(c$, "getState", 
+Clazz.overrideMethod (c$, "getState", 
 function () {
 return this.isON;
 });
-$_V(c$, "setState", 
+Clazz.overrideMethod (c$, "setState", 
 function (b) {
 this.isON = b;
 }, "~B");
-$_M(c$, "checkEnables", 
+Clazz.defineMethod (c$, "checkEnables", 
 function () {
 var isShow = this.checkVisible ();
 this.dialog.setText (this.showHideButton, isShow ? "Hide" : "Show");
 });
-$_M(c$, "createTable", 
+Clazz.defineMethod (c$, "createTable", 
 function (data, header, widths) {
 this.tableData = data;
 this.dialog.createTable (data, header, widths);
 }, "~A,~A,~A");
-$_M(c$, "setTableSelectionEnabled", 
+Clazz.defineMethod (c$, "setTableSelectionEnabled", 
 function (enabled) {
 this.dialog.setCellSelectionEnabled (enabled);
 }, "~B");
-$_M(c$, "getParameters", 
+Clazz.defineMethod (c$, "getParameters", 
 function () {
 return this.myParams;
 });
-$_M(c$, "showMessage", 
+Clazz.defineMethod (c$, "showMessage", 
 function (msg, title, msgType) {
 this.manager.showMessageDialog (this.dialog, msg, title, msgType);
 }, "~S,~S,~N");
-$_M(c$, "setThreshold", 
+Clazz.defineMethod (c$, "setThreshold", 
 function (y) {
 this.dialog.setText (this.txt1, this.getThreasholdText (y));
 }, "~N");
-$_M(c$, "setComboSelected", 
+Clazz.defineMethod (c$, "setComboSelected", 
 function (i) {
 this.dialog.setSelectedIndex (this.combo1, i);
 }, "~N");
-$_M(c$, "applyFromFields", 
+Clazz.defineMethod (c$, "applyFromFields", 
 function () {
 this.apply (null);
 });
-$_M(c$, "reEnable", 
+Clazz.defineMethod (c$, "reEnable", 
 function () {
 this.paramsReEnable ();
 return this;
 });
-$_M(c$, "dispose", 
+Clazz.defineMethod (c$, "dispose", 
 function () {
 this.dialog.dispose ();
 });
-$_M(c$, "setVisible", 
+Clazz.defineMethod (c$, "setVisible", 
 function (visible) {
 this.dialog.setVisible (visible);
 }, "~B");
-$_V(c$, "isVisible", 
+Clazz.overrideMethod (c$, "isVisible", 
 function () {
 return this.dialog.isVisible ();
 });
-$_M(c$, "selectTableRow", 
+Clazz.defineMethod (c$, "selectTableRow", 
 function (i) {
 this.dialog.selectTableRow (i);
 }, "~N");
-$_M(c$, "repaint", 
+Clazz.defineMethod (c$, "repaint", 
 function () {
 this.dialog.repaint ();
 });
-$_M(c$, "setFields", 
+Clazz.defineMethod (c$, "setFields", 
 function () {
 switch (this.type) {
 case JSV.common.Annotation.AType.Integration:
@@ -238,12 +238,11 @@ case JSV.common.Annotation.AType.Views:
 break;
 }
 });
-$_M(c$, "setFocus", 
+Clazz.defineMethod (c$, "setFocus", 
 function (tf) {
-System.out.println ("setFocus " + this.$spec);
 this.dialog.setFocus (tf);
 }, "~B");
-$_M(c$, "update", 
+Clazz.defineMethod (c$, "update", 
 function (clicked, xRange, yOffset) {
 this.selectTableRow (-1);
 switch (this.type) {
@@ -281,28 +280,28 @@ case JSV.common.Annotation.AType.Views:
 break;
 }
 }, "JSV.common.Coordinate,~N,~N");
-$_M(c$, "getPeakData", 
+Clazz.defineMethod (c$, "getPeakData", 
 function () {
 var md =  new JSV.common.PeakData (JSV.common.Annotation.AType.PeakList, this.$spec);
 md.setPeakList (this.myParams, this.precision, this.jsvp.getPanelData ().getView ());
 this.xyData = md;
 return null;
 });
-$_V(c$, "getData", 
+Clazz.overrideMethod (c$, "getData", 
 function () {
 if (this.xyData == null) this.createData ();
 return this.xyData;
 });
-$_M(c$, "setData", 
+Clazz.defineMethod (c$, "setData", 
 function (data) {
 this.myParams = data.getParameters ();
 this.xyData = data;
 }, "JSV.api.AnnotationData");
-$_V(c$, "setSpecShift", 
+Clazz.overrideMethod (c$, "setSpecShift", 
 function (dx) {
 if (this.xyData != null) this.xyData.setSpecShift (dx);
 }, "~N");
-$_M(c$, "setType", 
+Clazz.defineMethod (c$, "setType", 
 function (type) {
 this.type = type;
 switch (type) {
@@ -321,7 +320,7 @@ case JSV.common.Annotation.AType.NONE:
 break;
 }
 }, "JSV.common.Annotation.AType");
-$_M(c$, "apply", 
+Clazz.defineMethod (c$, "apply", 
 function (objects) {
 try {
 switch (this.type) {
@@ -346,7 +345,7 @@ break;
 case JSV.common.Annotation.AType.OverlayLegend:
 break;
 case JSV.common.Annotation.AType.Views:
-this.viewer.parameters.viewOffset = Double.parseDouble (objects[0]);
+this.vwr.parameters.viewOffset = Double.parseDouble (objects[0]);
 break;
 }
 this.loadData ();
@@ -359,7 +358,7 @@ throw e;
 }
 }
 }, "~A");
-$_M(c$, "done", 
+Clazz.defineMethod (c$, "done", 
 function () {
 if (this.jsvp != null && this.$spec != null) this.jsvp.getPanelData ().removeDialog (this);
 if (this.xyData != null) this.xyData.setState (this.isON);
@@ -367,8 +366,8 @@ this.saveDialogPosition (this.getPosXY ());
 this.dispose ();
 this.jsvp.doRepaint (true);
 });
-$_M(c$, "restoreDialogPosition", 
-($fz = function (panel, posXY) {
+Clazz.defineMethod (c$, "restoreDialogPosition", 
+ function (panel, posXY) {
 if (panel != null) {
 if (posXY[0] == -2147483648) {
 posXY[0] = 0;
@@ -377,9 +376,9 @@ posXY[1] = -20;
 var height = panel.getHeight ();
 this.loc = [Math.max (0, pt[0] + posXY[0]), Math.max (0, pt[1] + height + posXY[1])];
 this.dialog.setIntLocation (this.loc);
-}}, $fz.isPrivate = true, $fz), "JSV.api.JSVPanel,~A");
-$_M(c$, "saveDialogPosition", 
-($fz = function (posXY) {
+}}, "JSV.api.JSVPanel,~A");
+Clazz.defineMethod (c$, "saveDialogPosition", 
+ function (posXY) {
 try {
 var pt = this.manager.getLocationOnScreen (this.dialog);
 posXY[0] += pt[0] - this.loc[0];
@@ -390,9 +389,9 @@ if (Clazz.exceptionOf (e, Exception)) {
 throw e;
 }
 }
-}, $fz.isPrivate = true, $fz), "~A");
-$_M(c$, "getThreasholdText", 
-($fz = function (y) {
+}, "~A");
+Clazz.defineMethod (c$, "getThreasholdText", 
+ function (y) {
 if (Double.isNaN (y)) {
 var pd = this.jsvp.getPanelData ();
 var f = (pd.getSpectrum ().isInverted () ? 0.1 : 0.9);
@@ -400,25 +399,24 @@ var c = pd.getClickedCoordinate ();
 y = (c == null ? (pd.getView ().minYOnScale * f + pd.getView ().maxYOnScale) * (1 - f) : c.getYVal ());
 }var sy = JU.DF.formatDecimalDbl (y, y < 1000 ? 2 : -2);
 return " " + sy;
-}, $fz.isPrivate = true, $fz), "~N");
-$_M(c$, "checkVisible", 
-($fz = function () {
-return this.viewer.pd ().getShowAnnotation (this.type);
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "getUnitOptions", 
-($fz = function () {
+}, "~N");
+Clazz.defineMethod (c$, "checkVisible", 
+ function () {
+return this.vwr.pd ().getShowAnnotation (this.type);
+});
+Clazz.defineMethod (c$, "getUnitOptions", 
+ function () {
 var key = this.optionKey + "_format";
 var format = this.options.get (key);
 if (format == null) this.options.put (key, format = Integer.$valueOf (this.formatOptions[this.unitPtr == null ? 0 : this.unitPtr.intValue ()]));
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "eventFocus", 
+});
+Clazz.defineMethod (c$, "eventFocus", 
 function () {
-System.out.println ("eventFocus on " + this.$spec);
 if (this.$spec != null) this.jsvp.getPanelData ().jumpToSpectrum (this.$spec);
 switch (this.type) {
 case JSV.common.Annotation.AType.Integration:
 if (this.iRowSelected >= 0) {
-var i = this.iRowSelected++;
+this.iRowSelected++;
 this.tableCellSelect (-1, -1);
 }break;
 case JSV.common.Annotation.AType.Measurements:
@@ -435,7 +433,7 @@ case JSV.common.Annotation.AType.Views:
 break;
 }
 });
-$_M(c$, "eventApply", 
+Clazz.defineMethod (c$, "eventApply", 
 function () {
 switch (this.type) {
 case JSV.common.Annotation.AType.Integration:
@@ -455,22 +453,22 @@ break;
 }
 this.applyFromFields ();
 });
-$_M(c$, "eventShowHide", 
-($fz = function (isShow) {
+Clazz.defineMethod (c$, "eventShowHide", 
+ function (isShow) {
 this.isON = isShow;
 if (isShow) this.eventApply ();
 this.jsvp.doRepaint (true);
 this.checkEnables ();
-}, $fz.isPrivate = true, $fz), "~B");
-$_M(c$, "clear", 
-($fz = function () {
+}, "~B");
+Clazz.defineMethod (c$, "clear", 
+ function () {
 this.setState (true);
 if (this.xyData != null) {
 this.xyData.clear ();
 this.applyFromFields ();
-}}, $fz.isPrivate = true, $fz));
-$_M(c$, "paramsReEnable", 
-($fz = function () {
+}});
+Clazz.defineMethod (c$, "paramsReEnable", 
+ function () {
 switch (this.type) {
 case JSV.common.Annotation.AType.Integration:
 break;
@@ -489,9 +487,9 @@ break;
 this.setVisible (true);
 this.isON = true;
 this.applyFromFields ();
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "tableCellSelect", 
-($fz = function (iRow, iCol) {
+});
+Clazz.defineMethod (c$, "tableCellSelect", 
+ function (iRow, iCol) {
 System.out.println (iRow + " jSVDial " + iCol);
 if (iRow < 0) {
 iRow = Clazz.doubleToInt (this.iRowColSelected / 1000);
@@ -547,8 +545,8 @@ if (Clazz.exceptionOf (e, Exception)) {
 throw e;
 }
 }
-}, $fz.isPrivate = true, $fz), "~N,~N");
-$_M(c$, "loadData", 
+}, "~N,~N");
+Clazz.defineMethod (c$, "loadData", 
 function () {
 var data;
 var header;
@@ -581,7 +579,7 @@ this.setTableSelectionEnabled (true);
 break;
 case JSV.common.Annotation.AType.OverlayLegend:
 header = ["No.", "Plot Color", "Title"];
-data = this.viewer.selectedPanel.getPanelData ().getOverlayLegendData ();
+data = this.vwr.selectedPanel.getPanelData ().getOverlayLegendData ();
 widths = [30, 60, 250];
 this.createTable (data, header, widths);
 this.setTableSelectionEnabled (true);
@@ -590,8 +588,8 @@ case JSV.common.Annotation.AType.Views:
 break;
 }
 });
-$_M(c$, "createData", 
-($fz = function () {
+Clazz.defineMethod (c$, "createData", 
+ function () {
 switch (this.type) {
 case JSV.common.Annotation.AType.Integration:
 this.xyData =  new JSV.common.IntegralData (this.$spec, this.myParams);
@@ -623,13 +621,13 @@ break;
 case JSV.common.Annotation.AType.Views:
 break;
 }
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "setPrecision", 
-($fz = function (i) {
+});
+Clazz.defineMethod (c$, "setPrecision", 
+ function (i) {
 this.precision = this.formatOptions[i];
-}, $fz.isPrivate = true, $fz), "~N");
-$_M(c$, "tableSelect", 
-($fz = function (url) {
+}, "~N");
+Clazz.defineMethod (c$, "tableSelect", 
+ function (url) {
 var isAdjusting = "true".equals (this.getField (url, "adjusting"));
 if (isAdjusting) {
 this.iColSelected = this.iRowSelected = -1;
@@ -650,12 +648,12 @@ break;
 }
 if (this.iColSelected >= 0 && this.iRowSelected >= 0) {
 this.tableCellSelect (this.iRowSelected, this.iColSelected);
-}}, $fz.isPrivate = true, $fz), "~S");
-$_M(c$, "getField", 
-($fz = function (url, name) {
+}}, "~S");
+Clazz.defineMethod (c$, "getField", 
+ function (url, name) {
 url += "&";
 var key = "&" + name + "=";
 var pt = url.indexOf (key);
 return (pt < 0 ? null : url.substring (pt + key.length, url.indexOf ("&", pt + 1)));
-}, $fz.isPrivate = true, $fz), "~S,~S");
+}, "~S,~S");
 });

@@ -42,7 +42,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	<!-- Version definition -->
 	     
 	<script type="text/javascript" >
-		var magresview_version_number = "1.3.1";
+		var magresview_version_number = "1.3.2";
 	</script>    
    
 	<!-- Create title -->   
@@ -376,11 +376,11 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		});
 		
 		dndrop_popup_init();
-		
-		$("#euler_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
-		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH]});
-		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH], width: '330pt'});
- 		$("#ref_table_popup").dialog({autoOpen: false, modal: true, position: [0.7*winW, 0.3*winH], width: '330pt', close: ref_table_popup_handler});
+
+		$("#euler_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
+		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
+		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
+ 		$("#ref_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: ref_table_popup_handler});
 		
   		});  		
   		

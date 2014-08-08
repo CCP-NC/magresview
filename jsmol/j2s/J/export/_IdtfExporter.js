@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.export");
-Clazz.load (["J.export.__CartesianExporter", "java.util.Hashtable", "JU.AU", "$.M4", "$.P3", "$.SB"], "J.export._IdtfExporter", ["java.lang.Boolean", "JU.List", "J.util.C", "$.Geodesic", "$.Quaternion", "J.viewer.Viewer"], function () {
+Clazz.load (["J.export.__CartesianExporter", "java.util.Hashtable", "JU.AU", "$.M4", "$.P3", "$.SB"], "J.export._IdtfExporter", ["java.lang.Boolean", "JU.Lst", "$.Quat", "JU.C", "$.Geodesic", "JV.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.haveSphere = false;
 this.haveCylinder = false;
@@ -39,29 +39,29 @@ function () {
 Clazz.superConstructor (this, J["export"]._IdtfExporter, []);
 this.commentChar = "% ";
 });
-$_M(c$, "output", 
+Clazz.defineMethod (c$, "output", 
 function (pt) {
 this.output (pt, this.sbTemp, true);
 }, "JU.T3");
-$_M(c$, "output", 
-($fz = function (pt, sb, checkpt) {
+Clazz.defineMethod (c$, "output", 
+ function (pt, sb, checkpt) {
 if (checkpt) this.checkPoint (pt);
 sb.append (J["export"].___Exporter.round (pt.x)).append (" ").append (J["export"].___Exporter.round (pt.y)).append (" ").append (J["export"].___Exporter.round (pt.z)).append (" ");
-}, $fz.isPrivate = true, $fz), "JU.T3,JU.SB,~B");
-$_M(c$, "checkPoint", 
-($fz = function (pt) {
+}, "JU.T3,JU.SB,~B");
+Clazz.defineMethod (c$, "checkPoint", 
+ function (pt) {
 if (pt.x < this.ptMin.x) this.ptMin.x = pt.x;
 if (pt.y < this.ptMin.y) this.ptMin.y = pt.y;
 if (pt.z < this.ptMin.z) this.ptMin.z = pt.z;
 if (pt.x > this.ptMax.x) this.ptMax.x = pt.x;
 if (pt.y > this.ptMax.y) this.ptMax.y = pt.y;
 if (pt.z > this.ptMax.z) this.ptMax.z = pt.z;
-}, $fz.isPrivate = true, $fz), "JU.T3");
-$_V(c$, "outputHeader", 
+}, "JU.T3");
+Clazz.overrideMethod (c$, "outputHeader", 
 function () {
 this.output ("FILE_FORMAT \"IDTF\"\nFORMAT_VERSION 100\n");
 this.m.setIdentity ();
-var q = this.viewer.getRotationQuaternion ();
+var q = this.tm.getRotationQuaternion ();
 this.m.setToM3 (q.getMatrix ());
 q.transformP2 (this.referenceCenter, this.tempP1);
 this.m.m03 = -this.tempP1.x;
@@ -75,21 +75,21 @@ this.output ("PARENT 0 {\n");
 this.output (this.getParentItem ("", this.m));
 this.output ("}}}\n");
 });
-$_V(c$, "finalizeOutput", 
+Clazz.overrideMethod (c$, "finalizeOutput", 
 function () {
 this.finalizeOutput2 ();
 return this.getAuxiliaryFileData ();
 });
-$_M(c$, "getAuxiliaryFileData", 
-($fz = function () {
+Clazz.defineMethod (c$, "getAuxiliaryFileData", 
+ function () {
 var fName = this.fileName.substring (this.fileName.lastIndexOf ("/") + 1);
 fName = fName.substring (fName.lastIndexOf ("\\") + 1);
 var name = fName + ".";
 name = name.substring (0, name.indexOf ("."));
-return "% Created by: Jmol " + J.viewer.Viewer.getJmolVersion () + "\n% Creation date: " + this.getExportDate () + "\n% File created: " + this.fileName + " (" + this.out.getByteCount () + " bytes)\n\n" + "\n\\documentclass[12pt,letter]{article}" + "\n\\usepackage{hyperref}" + "\n\\usepackage{media9}" + "\n\\usepackage{verbatim}" + "\n\\pagestyle{empty}" + "\n\\begin{document}" + "\n    \\begin{center}" + "\n        \\addmediapath{./} % here you can set the path where is been saved the u3d file" + "\n        \\includemedia[" + "\n            label=" + name + "," + "\n            width=0.9\\textwidth," + "\n            height=0.9\\textheight," + "\n            activate=pageopen," + "\n            deactivate=pageclose," + "\n            3Dtoolbar=false," + "\n            3Dnavpane=false," + "\n            3Dmenu," + "\n            3Droo=" + this.cameraDistance + "," + "\n            3Dcoo= 0.0 0.0 -" + this.cameraDistance + "," + "\n            3Dc2c=0.0 0.0 1.0," + "\n            3Daac=" + this.aperatureAngle + "," + "\n            3Droll=0.0," + "\n            3Dbg=" + this.rgbFractionalFromColix (this.backgroundColix) + ", % to set the background color for 3D viewer; white = 1 1 1; so, you need to do the proportion: '255:1=[RGB]:x'" + "\n            transparent=false," + "\n            3Dlights=Headlamp," + "\n            3Drender=Solid," + "\n            3Dpartsattrs=restore," + "\n        ]{}{" + name + ".u3d}" + "\n%  \\\\" + "\n%\\movieref[3Dcalculate]{" + name + "}{Click here!}" + "\n\\end{center}" + "\n\\end{document}" + "\n\\begin{comment}" + this.viewer.getWrappedStateScript () + "\n\\end{comment}";
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "getParentItem", 
-($fz = function (name, m) {
+return "% Created by: Jmol " + JV.Viewer.getJmolVersion () + "\n% Creation date: " + this.getExportDate () + "\n% File created: " + this.fileName + " (" + this.out.getByteCount () + " bytes)\n\n" + "\n\\documentclass[12pt,letter]{article}" + "\n\\usepackage{hyperref}" + "\n\\usepackage{media9}" + "\n\\usepackage{verbatim}" + "\n\\pagestyle{empty}" + "\n\\begin{document}" + "\n    \\begin{center}" + "\n        \\addmediapath{./} % here you can set the path where is been saved the u3d file" + "\n        \\includemedia[" + "\n            label=" + name + "," + "\n            width=0.9\\textwidth," + "\n            height=0.9\\textheight," + "\n            activate=pageopen," + "\n            deactivate=pageclose," + "\n            3Dtoolbar=false," + "\n            3Dnavpane=false," + "\n            3Dmenu," + "\n            3Droo=" + this.cameraDistance + "," + "\n            3Dcoo= 0.0 0.0 0.0," + "\n            3Dc2c=0.0 0.0 1.0," + "\n            3Daac=" + this.aperatureAngle + "," + "\n            3Droll=0.0," + "\n            3Dbg=" + this.rgbFractionalFromColix (this.backgroundColix) + ", % to set the background color for 3D vwr; white = 1 1 1; so, you need to do the proportion: '255:1=[RGB]:x'" + "\n            transparent=false," + "\n            3Dlights=Headlamp," + "\n            3Drender=Solid," + "\n            3Dpartsattrs=restore," + "\n        ]{}{" + name + ".u3d}" + "\n%  \\\\" + "\n%\\movieref[3Dcalculate]{" + name + "}{Click here!}" + "\n\\end{center}" + "\n\\end{document}" + "\n\\begin{comment}" + this.vwr.getWrappedStateScript () + "\n\\end{comment}";
+});
+Clazz.defineMethod (c$, "getParentItem", 
+ function (name, m) {
 var sb =  new JU.SB ();
 sb.append ("PARENT_NAME \"" + name + "\"\n");
 sb.append ("PARENT_TM {\n");
@@ -99,9 +99,9 @@ sb.append (m.m02 + " " + m.m12 + " " + m.m22 + " 0.0\n");
 sb.append (m.m03 + " " + m.m13 + " " + m.m23 + " " + m.m33 + "\n");
 sb.append ("}\n");
 return sb.toString ();
-}, $fz.isPrivate = true, $fz), "~S,JU.M4");
-$_M(c$, "addColix", 
-($fz = function (colix, haveColors) {
+}, "~S,JU.M4");
+Clazz.defineMethod (c$, "addColix", 
+ function (colix, haveColors) {
 var key = "_" + colix;
 if (this.htDefs.containsKey (key)) return;
 var color = (haveColors ? "1.0 1.0 1.0" : this.rgbFractionalFromColix (colix));
@@ -125,9 +125,9 @@ this.resources.append ("MATERIAL_EMISSIVE 0.0 0.0 0.0\n");
 this.resources.append ("MATERIAL_REFLECTIVITY 0.00000\n");
 this.resources.append ("MATERIAL_OPACITY " + J["export"].___Exporter.opacityFractionalFromColix (colix) + "\n");
 this.resources.append ("}}\n");
-}, $fz.isPrivate = true, $fz), "~N,~B");
-$_M(c$, "addShader", 
-($fz = function (key, colix) {
+}, "~N,~B");
+Clazz.defineMethod (c$, "addShader", 
+ function (key, colix) {
 this.modifiers.append ("MODIFIER \"SHADING\" {\n");
 this.modifiers.append ("MODIFIER_NAME \"" + key + "\"\n");
 this.modifiers.append ("PARAMETERS {\n");
@@ -138,8 +138,8 @@ this.modifiers.append ("SHADER_COUNT 1\n");
 this.modifiers.append ("SHADER_NAME_LIST {\n");
 this.modifiers.append ("SHADER 0 NAME: \"Shader_" + colix + "\"\n");
 this.modifiers.append ("}}}}}\n");
-}, $fz.isPrivate = true, $fz), "~S,~N");
-$_V(c$, "outputFooter", 
+}, "~S,~N");
+Clazz.overrideMethod (c$, "outputFooter", 
 function () {
 this.htDefs = null;
 this.outputNodes ();
@@ -159,8 +159,8 @@ this.output ("\t}\n");
 this.output ("}\n\n");
 this.output (this.modifiers.toString ());
 });
-$_M(c$, "outputNodes", 
-($fz = function () {
+Clazz.defineMethod (c$, "outputNodes", 
+ function () {
 for (var entry, $entry = this.htNodes.entrySet ().iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) {
 var key = entry.getKey ();
 var v = entry.getValue ();
@@ -182,18 +182,18 @@ key = key.substring (0, i);
 key = "Circle";
 }this.output ("RESOURCE_NAME \"" + key + "_Mesh\"\n}\n");
 }
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "outputEllipsoid", 
+});
+Clazz.defineMethod (c$, "outputEllipsoid", 
 function (center, points, colix) {
-var a = J.util.Quaternion.getQuaternionFrame (center, points[1], points[3]).toAxisAngle4f ();
+var a = JU.Quat.getQuaternionFrame (center, points[1], points[3]).toAxisAngle4f ();
 var sx = points[1].distance (center);
 var sy = points[3].distance (center);
 var sz = points[5].distance (center);
 this.setSphereMatrix (center, sx, sy, sz, a, this.sphereMatrix);
 this.outputEllipsoid (center, this.sphereMatrix, colix);
 }, "JU.P3,~A,~N");
-$_M(c$, "outputEllipsoid", 
-($fz = function (center, sphereMatrix, colix) {
+Clazz.defineMethod (c$, "outputEllipsoid", 
+ function (center, sphereMatrix, colix) {
 if (!this.haveSphere) {
 this.models.append (this.getSphereResource ());
 this.haveSphere = true;
@@ -202,29 +202,29 @@ this.addColix (colix, false);
 var key = "Sphere_" + colix;
 var v = this.htNodes.get (key);
 if (v == null) {
-v =  new JU.List ();
+v =  new JU.Lst ();
 this.htNodes.put (key, v);
 this.addShader (key, colix);
 }v.addLast (this.getParentItem ("Jmol", sphereMatrix));
-}, $fz.isPrivate = true, $fz), "JU.P3,JU.M4,~N");
-$_M(c$, "getSphereResource", 
-($fz = function () {
+}, "JU.P3,JU.M4,~N");
+Clazz.defineMethod (c$, "getSphereResource", 
+ function () {
 var sb =  new JU.SB ();
 sb.append ("RESOURCE_LIST \"MODEL\" {\n").append ("RESOURCE_COUNT 1\n").append ("RESOURCE 0 {\n").append ("RESOURCE_NAME \"Sphere_Mesh\"\n").append ("MODEL_TYPE \"MESH\"\n").append ("MESH {\n");
-var vertexCount = J.util.Geodesic.getVertexCount (2);
-var f = J.util.Geodesic.getFaceVertexes (2);
+var vertexCount = JU.Geodesic.getVertexCount (2);
+var f = JU.Geodesic.getFaceVertexes (2);
 var nFaces = Clazz.doubleToInt (f.length / 3);
 var faces = JU.AU.newInt2 (nFaces);
 var fpt = -1;
 for (var i = 0; i < nFaces; i++) faces[i] = [f[++fpt], f[++fpt], f[++fpt]];
 
 var vertexes =  new Array (vertexCount);
-for (var i = 0; i < vertexCount; i++) vertexes[i] = J.util.Geodesic.getVertexVector (i);
+for (var i = 0; i < vertexCount; i++) vertexes[i] = JU.Geodesic.getVertexVector (i);
 
 return this.getMeshData ("Sphere", faces, vertexes, vertexes);
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "getMeshData", 
-($fz = function (type, indices, vertexes, normals) {
+});
+Clazz.defineMethod (c$, "getMeshData", 
+ function (type, indices, vertexes, normals) {
 var nFaces = indices.length;
 var vertexCount = vertexes.length;
 var normalCount = normals.length;
@@ -255,12 +255,12 @@ for (var i = 0; i < normalCount; i++) this.output (normals[i], sb, false);
 
 sb.append ("}\n}}}\n");
 return sb.toString ();
-}, $fz.isPrivate = true, $fz), "~S,~A,~A,~A");
-$_M(c$, "getMeshHeader", 
-($fz = function (type, nFaces, vertexCount, normalCount, colorCount, sb) {
+}, "~S,~A,~A,~A");
+Clazz.defineMethod (c$, "getMeshHeader", 
+ function (type, nFaces, vertexCount, normalCount, colorCount, sb) {
 sb.append ("RESOURCE_LIST \"MODEL\" {\n").append ("RESOURCE_COUNT 1\n").append ("RESOURCE 0 {\n").append ("RESOURCE_NAME \"").append (type).append ("_Mesh\"\n").append ("MODEL_TYPE \"MESH\"\n").append ("MESH {\n").append ("FACE_COUNT ").appendI (nFaces).append ("\n").append ("MODEL_POSITION_COUNT ").appendI (vertexCount).append ("\n").append ("MODEL_NORMAL_COUNT ").appendI (normalCount).append ("\n").append ("MODEL_DIFFUSE_COLOR_COUNT ").appendI (colorCount).append ("\n").append ("MODEL_SPECULAR_COLOR_COUNT 0\n").append ("MODEL_TEXTURE_COORD_COUNT 0\n").append ("MODEL_BONE_COUNT 0\n").append ("MODEL_SHADING_COUNT 1\n").append ("MODEL_SHADING_DESCRIPTION_LIST {\n").append ("SHADING_DESCRIPTION 0 {\n").append ("TEXTURE_LAYER_COUNT 0\n").append ("SHADER_ID 0\n}}\n");
-}, $fz.isPrivate = true, $fz), "~S,~N,~N,~N,~N,JU.SB");
-$_V(c$, "outputCylinder", 
+}, "~S,~N,~N,~N,~N,JU.SB");
+Clazz.overrideMethod (c$, "outputCylinder", 
 function (ptCenter, pt1, pt2, colix, endcaps, radius, ptX, ptY, checkRadius) {
 if (ptX != null) {
 if (endcaps == 2) {
@@ -288,7 +288,7 @@ for (var i = 0; i < n; i++) {
 var key = "Cylinder" + (i == 0 ? "_" : "In_") + colix;
 var v = this.htNodes.get (key);
 if (v == null) {
-v =  new JU.List ();
+v =  new JU.Lst ();
 this.htNodes.put (key, v);
 this.addShader (key, colix);
 }if (ptX == null) this.cylinderMatrix.setToM3 (this.getRotationMatrix (pt1, pt2, radius));
@@ -302,14 +302,14 @@ radius *= 0.95;
 }
 return true;
 }, "JU.P3,JU.P3,JU.P3,~N,~N,~N,JU.P3,JU.P3,~B");
-$_M(c$, "outputCircle", 
+Clazz.defineMethod (c$, "outputCircle", 
 function (pt1, pt2, radius, colix, doFill) {
 if (doFill) {
 this.outputCircle (pt1, pt2, colix, radius);
 return;
 }}, "JU.P3,JU.P3,~N,~N,~B");
-$_M(c$, "outputEllipse", 
-($fz = function (ptCenter, ptZ, ptX, ptY, colix) {
+Clazz.defineMethod (c$, "outputEllipse", 
+ function (ptCenter, ptZ, ptX, ptY, colix) {
 if (!this.haveCircle) {
 this.models.append (this.getCircleResource ());
 this.haveCircle = true;
@@ -318,7 +318,7 @@ this.cylinderMatrix =  new JU.M4 ();
 var key = "Ellipse_" + colix;
 var v = this.htNodes.get (key);
 if (v == null) {
-v =  new JU.List ();
+v =  new JU.Lst ();
 this.htNodes.put (key, v);
 this.addShader (key, colix);
 }this.checkPoint (ptCenter);
@@ -329,9 +329,9 @@ this.cylinderMatrix.m23 = ptZ.z;
 this.cylinderMatrix.m33 = 1;
 v.addLast (this.getParentItem ("Jmol", this.cylinderMatrix));
 return true;
-}, $fz.isPrivate = true, $fz), "JU.P3,JU.P3,JU.P3,JU.P3,~N");
-$_M(c$, "outputCircle", 
-($fz = function (ptCenter, ptPerp, colix, radius) {
+}, "JU.P3,JU.P3,JU.P3,JU.P3,~N");
+Clazz.defineMethod (c$, "outputCircle", 
+ function (ptCenter, ptPerp, colix, radius) {
 if (!this.haveCircle) {
 this.models.append (this.getCircleResource ());
 this.haveCircle = true;
@@ -340,7 +340,7 @@ this.cylinderMatrix =  new JU.M4 ();
 var key = "Circle_" + colix;
 var v = this.htNodes.get (key);
 if (v == null) {
-v =  new JU.List ();
+v =  new JU.Lst ();
 this.htNodes.put (key, v);
 this.addShader (key, colix);
 }this.checkPoint (ptCenter);
@@ -350,9 +350,9 @@ this.cylinderMatrix.m13 = ptCenter.y;
 this.cylinderMatrix.m23 = ptCenter.z;
 this.cylinderMatrix.m33 = 1;
 v.addLast (this.getParentItem ("Jmol", this.cylinderMatrix));
-}, $fz.isPrivate = true, $fz), "JU.P3,JU.P3,~N,~N");
-$_M(c$, "getCylinderResource", 
-($fz = function (inSide) {
+}, "JU.P3,JU.P3,~N,~N");
+Clazz.defineMethod (c$, "getCylinderResource", 
+ function (inSide) {
 var ndeg = 10;
 var vertexCount = Clazz.doubleToInt (360 / ndeg) * 2;
 var n = Clazz.doubleToInt (vertexCount / 2);
@@ -383,14 +383,14 @@ normals[i + n] = normals[i];
 if (inSide) for (var i = 0; i < n; i++) normals[i].scale (-1);
 
 return this.getMeshData (inSide ? "CylinderIn" : "Cylinder", faces, vertexes, normals);
-}, $fz.isPrivate = true, $fz), "~B");
-$_V(c$, "outputFace", 
+}, "~B");
+Clazz.overrideMethod (c$, "outputFace", 
 function (face, map, faceVertexMax) {
 this.sbTemp.append (" " + map[face[0]] + " " + map[face[1]] + " " + map[face[2]]);
 if (faceVertexMax == 4 && face.length == 4) {
 this.sbTemp.append (" " + map[face[0]] + " " + map[face[2]] + " " + map[face[3]]);
 }}, "~A,~A,~N");
-$_V(c$, "outputSurface", 
+Clazz.overrideMethod (c$, "outputSurface", 
 function (vertices, normals, colixes, indices, polygonColixes, nVertices, nPolygons, nFaces, bsPolygons, faceVertexMax, colix, colorList, htColixes, offset) {
 this.addColix (colix, polygonColixes != null || colixes != null);
 if (polygonColixes != null) {
@@ -402,7 +402,7 @@ this.outputIndices (indices, map, nPolygons, bsPolygons, faceVertexMax);
 var sbFaceNormalIndices = this.sbTemp =  new JU.SB ();
 var vNormals = null;
 if (normals != null) {
-vNormals =  new JU.List ();
+vNormals =  new JU.Lst ();
 map = this.getNormalMap (normals, nVertices, null, vNormals);
 this.outputIndices (indices, map, nPolygons, bsPolygons, faceVertexMax);
 }map = null;
@@ -433,14 +433,14 @@ sbColors.append (this.rgbFractionalFromColix (c)).append (" ").append (J["export
 }
 }var key = "mesh" + (++this.iObj);
 this.addMeshData (key, nFaces, nCoord, nNormals, nColors, sbFaceCoordIndices, sbFaceNormalIndices, sbColorIndexes, sbCoords, sbNormals, sbColors);
-var v =  new JU.List ();
+var v =  new JU.Lst ();
 this.htNodes.put (key, v);
 this.addShader (key, colix);
 this.cylinderMatrix.setIdentity ();
 v.addLast (this.getParentItem ("Jmol", this.cylinderMatrix));
-}, "~A,~A,~A,~A,~A,~N,~N,~N,JU.BS,~N,~N,JU.List,java.util.Map,JU.P3");
-$_M(c$, "addMeshData", 
-($fz = function (key, nFaces, nCoord, nNormals, nColors, sbFaceCoordIndices, sbFaceNormalIndices, sbColorIndices, sbCoords, sbNormals, sbColors) {
+}, "~A,~A,~A,~A,~A,~N,~N,~N,JU.BS,~N,~N,JU.Lst,java.util.Map,JU.P3");
+Clazz.defineMethod (c$, "addMeshData", 
+ function (key, nFaces, nCoord, nNormals, nColors, sbFaceCoordIndices, sbFaceNormalIndices, sbColorIndices, sbCoords, sbNormals, sbColors) {
 this.getMeshHeader (key, nFaces, nCoord, nNormals, nColors, this.models);
 this.models.append ("MESH_FACE_POSITION_LIST { ").appendSB (sbFaceCoordIndices).append (" }\n").append ("MESH_FACE_NORMAL_LIST { ").appendSB (sbFaceNormalIndices).append (" }\n");
 this.models.append ("MESH_FACE_SHADING_LIST { ");
@@ -451,8 +451,8 @@ if (nColors > 0) this.models.append ("MESH_FACE_DIFFUSE_COLOR_LIST { ").appendSB
 this.models.append ("MODEL_POSITION_LIST { ").appendSB (sbCoords).append (" }\n").append ("MODEL_NORMAL_LIST { ").appendSB (sbNormals).append (" }\n");
 if (nColors > 0) this.models.append ("MODEL_DIFFUSE_COLOR_LIST { ").appendSB (sbColors).append (" }\n");
 this.models.append ("}}}\n");
-}, $fz.isPrivate = true, $fz), "~S,~N,~N,~N,~N,JU.SB,JU.SB,JU.SB,JU.SB,JU.SB,JU.SB");
-$_V(c$, "outputCone", 
+}, "~S,~N,~N,~N,~N,JU.SB,JU.SB,JU.SB,JU.SB,JU.SB,JU.SB");
+Clazz.overrideMethod (c$, "outputCone", 
 function (ptBase, ptTip, radius, colix) {
 if (!this.haveCone) {
 this.models.append (this.getConeResource ());
@@ -463,7 +463,7 @@ this.addColix (colix, false);
 var key = "Cone_" + colix;
 var v = this.htNodes.get (key);
 if (v == null) {
-v =  new JU.List ();
+v =  new JU.Lst ();
 this.htNodes.put (key, v);
 this.addShader (key, colix);
 }this.cylinderMatrix.setToM3 (this.getRotationMatrix (ptBase, ptTip, radius));
@@ -473,13 +473,13 @@ this.cylinderMatrix.m23 = ptBase.z;
 this.cylinderMatrix.m33 = 1;
 v.addLast (this.getParentItem ("Jmol", this.cylinderMatrix));
 }, "JU.P3,JU.P3,~N,~N");
-$_M(c$, "getConeResource", 
-($fz = function () {
+Clazz.defineMethod (c$, "getConeResource", 
+ function () {
 var m = J["export"].___Exporter.getConeMesh (null, null, 0);
-return this.getMeshData ("Cone", m.polygonIndexes, m.vertices, m.vertices);
-}, $fz.isPrivate = true, $fz));
-$_M(c$, "getCircleResource", 
-($fz = function () {
+return this.getMeshData ("Cone", m.pis, m.vs, m.vs);
+});
+Clazz.defineMethod (c$, "getCircleResource", 
+ function () {
 var ndeg = 10;
 var n = Clazz.doubleToInt (360 / ndeg);
 var vertexCount = n + 1;
@@ -497,31 +497,31 @@ normals[i] = JU.P3.new3 (0, 0, 1);
 vertexes[n] = JU.P3.new3 (0, 0, 0);
 normals[n] = JU.P3.new3 (0, 0, 1);
 return this.getMeshData ("Circle", faces, vertexes, normals);
-}, $fz.isPrivate = true, $fz));
-$_V(c$, "outputSphere", 
+});
+Clazz.overrideMethod (c$, "outputSphere", 
 function (center, radius, colix, checkRadius) {
 this.setSphereMatrix (center, radius, radius, radius, null, this.sphereMatrix);
 this.outputEllipsoid (center, this.sphereMatrix, colix);
 }, "JU.P3,~N,~N,~B");
-$_V(c$, "outputTextPixel", 
+Clazz.overrideMethod (c$, "outputTextPixel", 
 function (pt, argb) {
-var colix = J.util.C.getColix (argb);
+var colix = JU.C.getColix (argb);
 this.outputSphere (pt, 0.02, colix, true);
 }, "JU.P3,~N");
-$_V(c$, "outputTriangle", 
+Clazz.overrideMethod (c$, "outputTriangle", 
 function (pt1, pt2, pt3, colix) {
 this.addColix (colix, false);
 var key = "T" + (++this.iObj);
 this.models.append (this.getTriangleResource (key, pt1, pt2, pt3));
-var v =  new JU.List ();
+var v =  new JU.Lst ();
 this.htNodes.put (key, v);
 this.addShader (key, colix);
 if (this.cylinderMatrix == null) this.cylinderMatrix =  new JU.M4 ();
 this.cylinderMatrix.setIdentity ();
 v.addLast (this.getParentItem ("Jmol", this.cylinderMatrix));
 }, "JU.P3,JU.P3,JU.P3,~N");
-$_M(c$, "getTriangleResource", 
-($fz = function (key, pt1, pt2, pt3) {
+Clazz.defineMethod (c$, "getTriangleResource", 
+ function (key, pt1, pt2, pt3) {
 var vertexes = [pt1, pt2, pt3];
 this.tempV1.sub2 (pt3, pt1);
 this.tempV2.sub2 (pt2, pt1);
@@ -529,5 +529,5 @@ this.tempV2.cross (this.tempV2, this.tempV1);
 this.tempV2.normalize ();
 var normals = [this.tempV2, this.tempV2, this.tempV2];
 return this.getMeshData (key, this.triangleFace, vertexes, normals);
-}, $fz.isPrivate = true, $fz), "~S,JU.P3,JU.P3,JU.P3");
+}, "~S,JU.P3,JU.P3,JU.P3");
 });
