@@ -56,6 +56,9 @@ function svg_spectrum_plot(from_change)
     var style = document.getElementById('spec_style_drop').value;
     
     var spec_plot = new SVGPlot(plot_W, plot_H, 'mview', 'svg_spec_plot');
+
+    spec_plot.has_y_axis = false;
+    spec_plot.has_y_tics = false;
     
     spec_plot.xlabel = "Magnetic shielding, isotropic (ppm)";
     spec_plot.ylabel = "";

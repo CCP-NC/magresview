@@ -75,6 +75,13 @@ function SVGPlot(width, height, style, id)
     
     this.lor_width = 1.0;
     this.lor_points = 100;
+
+    // A series of options to hide/show some elements
+
+    this.has_x_axis = true;
+    this.has_y_axis = true;
+    this.has_x_tics = true;
+    this.has_y_tics = true;
     
     this.plot_area_calc = function () {
         this.x0y0 = [this.w*0.1,this.h*0.9];
@@ -478,42 +485,53 @@ function SVGPlot(width, height, style, id)
         
         console.log('SVGPlot - Creating axes and labels...')
         
-        var x_axis = this.axis_gen('x');
-        var x_arr = this.arrow_gen('x');
+        if (this.has_x_axis)
+        {
+            var x_axis = this.axis_gen('x');
+            var x_arr = this.arrow_gen('x');
+            var x_label = this.label_gen('x');
+            this.jq_rep.append(x_axis);
+            this.jq_rep.append(x_arr);
+            this.jq_rep.append(x_label);
+        }
         
-        var y_axis = this.axis_gen('y');        
-        var y_arr = this.arrow_gen('y');
-        
-        this.jq_rep.append(x_axis);
-        this.jq_rep.append(x_arr);
-        this.jq_rep.append(y_axis);
-        this.jq_rep.append(y_arr);
-        
-        
-        var x_label = this.label_gen('x');
-        var y_label = this.label_gen('y');
-        
-        this.jq_rep.append(x_label);
-        this.jq_rep.append(y_label);
+        if (this.has_y_axis)
+        {
+            var y_axis = this.axis_gen('y');        
+            var y_arr = this.arrow_gen('y');
+            var y_label = this.label_gen('y');
+            this.jq_rep.append(y_axis);
+            this.jq_rep.append(y_arr);
+            this.jq_rep.append(y_label);
+        }
         
         // Create tics
         
-        for (var i = 0; i <= this.ticn; ++i) {
-                        
-            console.log('SVGPlot - Creating tics, n.' + (i+1) + '...');
-            
-            var newticx = this.tic_gen('x', i);
-            var newticy = this.tic_gen('y', i);
-            
-            var newticlabelx = this.ticlabel_gen('x', i);
-            var newticlabely = this.ticlabel_gen('y', i);
-            
-            this.jq_rep.append(newticx);
-            this.jq_rep.append(newticy);
-            
-            this.jq_rep.append(newticlabelx);
-            this.jq_rep.append(newticlabely);
-        }        
+        if (this.has_x_tics || this.has_y_tics)
+        {
+            for (var i = 0; i <= this.ticn; ++i) {
+                            
+                console.log('SVGPlot - Creating tics, n.' + (i+1) + '...');
+                
+                if (this.has_x_tics)
+                {
+                    var newticx = this.tic_gen('x', i);
+                    var newticlabelx = this.ticlabel_gen('x', i);
+                    
+                    this.jq_rep.append(newticx);
+                    this.jq_rep.append(newticlabelx);
+                }
+
+                if (this.has_y_tics)
+                {
+                    var newticy = this.tic_gen('y', i);
+                    var newticlabely = this.ticlabel_gen('y', i);
+                    
+                    this.jq_rep.append(newticy);
+                    this.jq_rep.append(newticlabely);
+                }
+            }        
+        }
     
     };
     

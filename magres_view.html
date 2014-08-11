@@ -25,6 +25,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	<!-- This section serves the purpose of loading jQuery, jQuery UI, and the graphic theme "Vader" -->	  		
   	
 	<link href="jquery/css/vader/jquery-ui.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="images/favico.png">
 	<script src="jquery/js/jquery-ui.min.js"></script>
     
     <!-- jQuery is a Javascript library that allows lots of new functionalities, extending in fact the language to be more efficient and flexible.
@@ -522,13 +523,13 @@ It provides the possibility to load example files from a dropdown menu but it ma
 							  Align system with:<br><br>							  
 							  <form id="align_method">
 							    &nbsp <input type="radio" name="align_t" id="align_t_1" value="bond" autocomplete="off" onclick="align_radio_handler(event)"
-							    checked>
-							    Align with bond</input> <br>
+                  title="Align system with the line connecting two atoms of choice" checked>
+							    Align with dipolar coupling</input> <br>
 							    &nbsp <input type="radio" name="align_t" id="align_t_2" value="ms" autocomplete="off" onclick="align_radio_handler(event)"
-							    disabled="disabled">
+							    title="Align system with the principal axis system for the MS tensor on an atom of choice" disabled="disabled">
 							    Align with <span style="color: rgb(255, 128, 0)">MS</span> tensor</input> <br>
 							    &nbsp <input type="radio" name="align_t" id="align_t_3" value="efg" autocomplete="off" onclick="align_radio_handler(event)"
-							    disabled="disabled">
+							    title="Align system with the principal axis system for the EFG tensor on an atom of choice" disabled="disabled">
 							    Align with <span style="color: rgb(0, 128, 255)">EFG</span> tensor</input>
 						    
 							  </form>
