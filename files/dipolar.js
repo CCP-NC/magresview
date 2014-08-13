@@ -132,7 +132,8 @@ function dip_label_handler()
 		dip_plot_jmol_script += "measure all {*}[" + last_atom_picked + "] {selected and within(" + r + ", ({*}[" + last_atom_picked + "]))} \"2:%VALUE//khz\";";
 	}
 
-	Jmol.scriptWait(mainJmol, dip_plot_jmol_script);
+	Jmol.evaluateVar(mainJmol, 'script(\'' + dip_plot_jmol_script + '\');');
+	//Jmol.scriptWait(mainJmol, dip_plot_jmol_script);
 	
 	// Added this part to insert the 2pi factor!
 	
