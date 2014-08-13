@@ -470,7 +470,9 @@ function generate_molecular_dd()
 	gen_dd_script += "display temp_ddgroup;";
 	gen_dd_script += "center {displayed}; zoom 0;";
 	
-	Jmol.scriptWait(mainJmol, gen_dd_script);
+
+	Jmol.evaluateVar(mainJmol, 'script("' + gen_dd_script + '");');
+	//Jmol.scriptWait(mainJmol, gen_dd_script);
 	
 }
 
