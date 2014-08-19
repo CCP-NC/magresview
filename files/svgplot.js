@@ -290,7 +290,7 @@ function SVGPlot(width, height, style, id)
                     }).css({
                        'fill': 'none',
                        'stroke': this.data_col(ds_i),
-                       'stroke-width': 2.0*this.style.axes_stroke,
+                       'stroke-width': 1.2*this.style.axes_stroke,
                     }));
                     break;
                 case "points":

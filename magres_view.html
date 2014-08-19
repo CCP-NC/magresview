@@ -144,7 +144,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
     	font-weight: normal;
     	font-size: 80%;
     	text-align: left;
-	position: absolute;
+	    position: absolute;
+      z-index: 999 !important ;
     }
     
     div.titlediv {
@@ -481,7 +482,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					
 					<br>
 
-					<div id="main_tabs" style="font-size: 90%; z-index: 999">
+					<div id="main_tabs" style="font-size: 90%; z-index: 100">
 					
 					<!-- This is a jQuery TAB. It needs two things:
 								1) the content of the tabs organized in different divisions identified by an id;
