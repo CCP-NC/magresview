@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.jvxl.readers");
-Clazz.load (["J.jvxl.readers.AtomDataReader"], "J.jvxl.readers.IsoMOReader", ["java.lang.Float", "java.util.Random", "JU.AU", "$.Measure", "$.P3", "$.V3", "J.api.Interface", "J.c.QS", "JU.Logger", "$.Txt"], function () {
+Clazz.load (["J.jvxl.readers.AtomDataReader"], "J.jvxl.readers.IsoMOReader", ["java.lang.Float", "java.util.Random", "JU.AU", "$.P3", "$.V3", "J.api.Interface", "J.c.QS", "JU.Logger", "$.Measure", "$.Txt"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.random = null;
 this.vDist = null;

@@ -1,10 +1,10 @@
 Clazz.declarePackage ("J.api");
-Clazz.load (null, "J.api.JmolViewer", ["java.lang.Boolean", "java.util.Hashtable"], function () {
+Clazz.load (["javajs.api.JSInterface"], "J.api.JmolViewer", ["java.lang.Boolean", "java.util.Hashtable"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.menuStructure = null;
 this.apiPlatform = null;
 Clazz.instantialize (this, arguments);
-}, J.api, "JmolViewer");
+}, J.api, "JmolViewer", null, javajs.api.JSInterface);
 c$.allocateViewer = Clazz.defineMethod (c$, "allocateViewer", 
 function (display, modelAdapter, fullName, documentBase, codeBase, commandOptions, statusListener, implementedPlatform) {
 var info =  new java.util.Hashtable ();
@@ -43,6 +43,10 @@ Clazz.defineMethod (c$, "openFileAsync",
 function (fileName) {
 this.openFileAsyncSpecial (fileName, 0);
 }, "~S");
+Clazz.defineMethod (c$, "mouseEvent", 
+function (id, x, y, modifiers, when) {
+this.processMouseEvent (id, x, y, modifiers, when);
+}, "~N,~N,~N,~N,~N");
 Clazz.defineMethod (c$, "renderScreenImage", 
 function (g, currentSize, rectClip) {
 this.apiPlatform.renderScreenImage (g, currentSize);

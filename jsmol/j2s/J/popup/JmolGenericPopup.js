@@ -71,7 +71,7 @@ this.noZapped = ["surfaceMenu", "measureMenu", "pickingMenu", "computationMenu",
 Clazz.defineMethod (c$, "initialize", 
 function (vwr, bundle, title) {
 this.vwr = vwr;
-this.initSwing (title, bundle, vwr.getHtml5Applet (), vwr.isJS, vwr.getBooleanProperty ("_signedApplet"), vwr.isWebGL);
+this.initSwing (title, bundle, vwr.getApplet (), vwr.isJS, vwr.getBooleanProperty ("_signedApplet"), vwr.isWebGL);
 }, "JV.Viewer,J.popup.PopupResource,~S");
 Clazz.overrideMethod (c$, "jpiDispose", 
 function () {
@@ -214,7 +214,7 @@ this.updateModelSetComputedMenu ();
 Clazz.defineMethod (c$, "setFrankMenu", 
  function (id) {
 if (this.currentFrankId != null && this.currentFrankId === id && this.nFrankList > 0) return;
-if (this.frankPopup == null) this.frankPopup = this.helper.menuCreatePopup ("Frank", this.vwr.getHtml5Applet ());
+if (this.frankPopup == null) this.frankPopup = this.helper.menuCreatePopup ("Frank", this.vwr.getApplet ());
 this.thisPopup = this.frankPopup;
 this.menuRemoveAll (this.frankPopup, 0);
 this.menuCreateItem (this.frankPopup, this.getMenuText ("mainMenuText"), "MAIN", "");

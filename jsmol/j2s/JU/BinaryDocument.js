@@ -158,11 +158,11 @@ this.writeInt ((b & 0xFFFFFFFF));
 Clazz.defineMethod (c$, "readLEInt", 
  function () {
 this.ioRead (this.t8, 0, 4);
-return JU.BC.bytesToInt (this.t8, 0, false);
+return this.bytesToInt (this.t8, 0, false);
 });
 Clazz.overrideMethod (c$, "readFloat", 
 function () {
-return JU.BC.intToFloat (this.readInt ());
+return this.intToFloat (this.readInt ());
 });
 Clazz.overrideMethod (c$, "readDouble", 
 function () {
@@ -186,15 +186,12 @@ try {
 if (offset == this.nBytes) return;
 if (offset < this.nBytes) {
 this.stream.reset ();
-if (this.out != null && this.nBytes != 0) this.out.reset ();
 this.nBytes = 0;
 } else {
 offset -= this.nBytes;
-}if (this.out == null) {
-this.stream.skipBytes (offset);
-} else {
-this.readByteArray ( Clazz.newByteArray (offset, 0), 0, offset);
-}} catch (e) {
+}this.stream.skipBytes (offset);
+this.nBytes += offset;
+} catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 System.out.println (e.toString ());
 } else {

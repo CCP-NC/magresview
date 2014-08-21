@@ -854,8 +854,8 @@ if (Clazz.exceptionOf (e, Exception)) {
 throw e;
 }
 }
-}this.vwr.g.setO ("_slabPlane", JU.Escape.eP4 (this.getSlabDepthPlane (false)));
-this.vwr.g.setO ("_depthPlane", JU.Escape.eP4 (this.getSlabDepthPlane (true)));
+}this.vwr.g.setS ("_slabPlane", JU.Escape.eP4 (this.getSlabDepthPlane (false)));
+this.vwr.g.setS ("_depthPlane", JU.Escape.eP4 (this.getSlabDepthPlane (true)));
 if (this.slabEnabled) return;
 this.slabValue = 0;
 this.depthValue = 2147483647;
@@ -993,7 +993,7 @@ this.matrixTransform.rotate2 (vectorAngstroms, vectorTransformed);
 }, "JU.V3,JU.V3");
 Clazz.defineMethod (c$, "move", 
 function (eval, dRot, dZoom, dTrans, dSlab, floatSecondsTotal, fps) {
-this.movetoThread = J.api.Interface.getOption ("thread.MoveToThread");
+this.movetoThread = J.api.Interface.getOption ("thread.MoveThread");
 this.movetoThread.setManager (this, this.vwr, [dRot, dTrans, [dZoom, dSlab, floatSecondsTotal, fps]]);
 if (floatSecondsTotal > 0) this.movetoThread.setEval (eval);
 this.movetoThread.run ();

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.JmolCmdExtension"], "JS.CmdExt", ["java.lang.Boolean", "$.Float", "$.Long", "$.Short", "java.util.Hashtable", "JU.AU", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.Measure", "$.P3", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.c.AXES", "$.STER", "$.VDW", "J.i18n.GT", "JM.Atom", "$.AtomCollection", "$.BondSet", "$.LabelToken", "JS.SV", "$.ScriptCompiler", "$.ScriptError", "$.ScriptEval", "$.ScriptInterruption", "$.ScriptMathProcessor", "$.ScriptParam", "$.T", "JU.BSUtil", "$.BoxInfo", "$.C", "$.Edge", "$.Elements", "$.Escape", "$.Logger", "$.Parser", "$.Point3fi", "$.TempArray", "$.Txt", "JV.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
+Clazz.load (["JS.JmolCmdExtension"], "JS.CmdExt", ["java.lang.Boolean", "$.Float", "$.Long", "$.Short", "java.util.Hashtable", "JU.AU", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.P3", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.c.AXES", "$.STER", "$.VDW", "J.i18n.GT", "JM.Atom", "$.AtomCollection", "$.BondSet", "$.LabelToken", "JS.SV", "$.ScriptCompiler", "$.ScriptError", "$.ScriptEval", "$.ScriptInterruption", "$.ScriptMathProcessor", "$.ScriptParam", "$.T", "JU.BSUtil", "$.BoxInfo", "$.C", "$.Edge", "$.Elements", "$.Escape", "$.Logger", "$.Measure", "$.Parser", "$.Point3fi", "$.TempArray", "$.Txt", "JV.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.e = null;
@@ -270,7 +270,7 @@ case 1052714:
 break;
 case 1073741916:
 if (this.chk) return;
-this.e.showString (this.vwr.getAnnotationParser ().calculateDSSRStructure (this.vwr, bs1));
+this.e.showString (this.vwr.getDSSRParser ().calculateStructure (this.vwr, bs1));
 return;
 case 1073741915:
 asDSSP = true;
@@ -660,14 +660,7 @@ this.invArg ();
 throw ex;
 }
 }
-var n = centerAndPoints[0].length - 1;
-for (var i = 1; i <= n; i++) {
-var aij = centerAndPoints[0][i];
-var bij = centerAndPoints[1][i];
-if (!(Clazz.instanceOf (aij, JM.Atom)) || !(Clazz.instanceOf (bij, JM.Atom))) break;
-JU.Logger.info (" atom 1 " + (aij).getInfo () + "\tatom 2 " + (bij).getInfo ());
-}
-q = JU.Measure.calculateQuaternionRotation (centerAndPoints, retStddev);
+q = JU.Measure.calculateQuaternionRotation (centerAndPoints, retStddev, true);
 var r0 = (Float.isNaN (retStddev[1]) ? NaN : Math.round (retStddev[0] * 100) / 100);
 var r1 = (Float.isNaN (retStddev[1]) ? NaN : Math.round (retStddev[1] * 100) / 100);
 this.showString ("RMSD " + r0 + " --> " + r1 + " Angstroms");
@@ -2785,7 +2778,7 @@ case 1073741836:
 propertyName = "angstroms";
 sbCommand.append (" angstroms");
 break;
-case 1073741837:
+case 1073741838:
 propertyName = "anisotropy";
 propertyValue = this.getPoint3f (++i, false);
 sbCommand.append (" anisotropy").append (JU.Escape.eP (propertyValue));
@@ -3605,7 +3598,7 @@ bsOut.set (pt);
 dataOut[(isProperty ? pt : nOut)] = F.floatValue ();
 nOut++;
 }
-if (isProperty) this.vwr.setData (property2, [property2, dataOut, bsOut, Integer.$valueOf (1), Boolean.TRUE], this.vwr.getAtomCount (), 0, 0, 2147483647, 0);
+if (isProperty) this.vwr.setData (property2, [property2, dataOut, bsOut, Integer.$valueOf (0), Boolean.TRUE], this.vwr.getAtomCount (), 0, 0, 2147483647, 0);
  else this.vwr.setAtomProperty (bsOut, tokProp2, 0, 0, null, dataOut, null);
 }}if (bsOut == null) {
 var format = "{" + mapKey + "=%[" + mapKey + "]}." + property2 + " = %[" + property1 + "]";
@@ -4570,11 +4563,8 @@ break;
 }
 if (tok == 1073741979) {
 var t = JS.T.getTokenFromName (JS.SV.sValue (args[pt]).toLowerCase ());
-if (t != null) {
-type = JS.SV.sValue (t).toUpperCase ();
-isCoord = (t.tok == 1048581);
-if (isCoord) pt++;
-}if (JU.PT.isOneOf (type, driverList.toUpperCase ())) {
+if (t != null) type = JS.SV.sValue (t).toUpperCase ();
+if (JU.PT.isOneOf (type, driverList.toUpperCase ())) {
 pt++;
 type = type.substring (0, 1).toUpperCase () + type.substring (1).toLowerCase ();
 isExport = true;
@@ -4583,7 +4573,7 @@ break;
 } else if (JU.PT.isOneOf (type, ";ZIP;ZIPALL;SPT;STATE;")) {
 pt++;
 break;
-} else if (!isCoord) {
+} else {
 type = "(image)";
 }}if (JS.CmdExt.tokAtArray (pt, args) == 2) {
 width = JS.SV.iValue (this.tokenAt (pt++, args));
@@ -4620,7 +4610,7 @@ case 4:
 fileName = JS.SV.sValue (this.tokenAt (pt, args));
 if (pt == argCount - 3 && JS.CmdExt.tokAtArray (pt + 1, args) == 1048583) {
 fileName += "." + JS.SV.sValue (this.tokenAt (pt + 2, args));
-}if (type !== "VAR" && pt == pt0 && !isCoord) type = "IMAGE";
+}if (type !== "VAR" && pt == pt0) type = "IMAGE";
  else if (fileName.length > 0 && fileName.charAt (0) == '.' && (pt == pt0 + 1 || pt == pt0 + 2)) {
 fileName = JS.SV.sValue (this.tokenAt (pt - 1, args)) + fileName;
 if (type !== "VAR" && pt == pt0 + 1) type = "IMAGE";
@@ -4849,22 +4839,6 @@ return;
 case 0:
 if (!this.chk) msg = (this.e.theToken).escape ();
 break;
-case 1073741838:
-this.e.checkLength23 ();
-len = this.st.length;
-if (!this.chk) {
-var d = this.vwr.ms.getInfo (this.vwr.am.cmi, "annotations");
-if (Clazz.instanceOf (d, JS.SV)) msg = this.vwr.getAnnotationInfo (d, this.e.optParameterAsString (2), 1073741838);
- else msg = "no annotation information has been loaded";
-}break;
-case 1073742189:
-this.e.checkLength23 ();
-len = this.st.length;
-if (!this.chk) {
-var d = this.vwr.ms.getInfo (this.vwr.am.cmi, "validation");
-if (Clazz.instanceOf (d, JS.SV)) msg = this.vwr.getAnnotationInfo (d, this.e.optParameterAsString (2), 1073742189);
- else msg = "no validation information has been loaded";
-}break;
 case 135270423:
 if (!this.chk) msg = JU.Escape.e (this.vwr.cacheList ());
 break;
@@ -5216,16 +5190,15 @@ break;
 case 1666189314:
 str = "solventProbeRadius";
 break;
-case 1087373320:
-if ((len = this.slen) == 3 && this.tokAt (2) == 1048588) tok = 1087373319;
 case 1073741864:
 case 1087373316:
+case 1087373320:
 case 1073742120:
 case 1114638363:
 case 1087373318:
 case 1141899265:
 case 1073741982:
-if (!this.chk) msg = this.vwr.getChimeInfo (tok);
+msg = this.vwr.getChimeInfo (tok);
 break;
 case 537022465:
 case 1610612738:
@@ -5249,7 +5222,7 @@ case 1073741992:
 case 36868:
 str = this.paramAsStr (len++);
 var v = this.e.getParameter (str, 1073742190, true);
-if (!this.chk) if (tok == 1073741992) {
+if (tok == 1073741992) {
 msg = v.toJSON ();
 } else {
 msg = v.escape ();

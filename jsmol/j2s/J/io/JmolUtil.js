@@ -391,6 +391,7 @@ return e.toString () + " opening " + fullPathName;
 throw e;
 }
 }
+return image;
 }, "JV.Viewer,~O,~S");
 Clazz.defineStatics (c$,
 "DELPHI_BINARY_MAGIC_NUMBER", "\24\0\0\0");

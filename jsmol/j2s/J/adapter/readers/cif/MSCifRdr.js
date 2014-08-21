@@ -26,9 +26,12 @@ if (r > 0 && c > 0) this.comSSMat.setElement (r - 1, c - 1, cr.parseFloatStr (cr
 Clazz.defineMethod (c$, "processLoopBlock", 
 function () {
 var cr = this.cr;
-if (cr.key.equals ("_cell_subsystem_code")) return this.processSubsystemLoopBlock ();
-if (cr.key.equals ("_jana_cell_twin_matrix_id")) return this.processTwinMatrixLoopBlock ();
-if (!cr.key.startsWith ("_cell_wave") && !cr.key.contains ("fourier") && !cr.key.contains ("_special_func")) return 0;
+if (cr.key.equals ("_cell_subsystem_code")) {
+this.processSubsystemLoopBlock ();
+return 1;
+}if (cr.key.equals ("_jana_cell_twin_matrix_id")) {
+this.processTwinMatrixLoopBlock ();
+}if (!cr.key.startsWith ("_cell_wave") && !cr.key.contains ("fourier") && !cr.key.contains ("_special_func")) return 0;
 if (cr.asc.iSet < 0) cr.asc.newAtomSet ();
 cr.parseLoopParameters (J.adapter.readers.cif.MSCifRdr.modulationFields);
 var tok;
@@ -199,7 +202,6 @@ this.fieldProperty (cr, 0);
 var id = this.field;
 this.addSubsystem (id, this.getSparseMatrix (cr, "_w_", 1, 3 + this.modDim));
 }
-return 1;
 });
 Clazz.defineMethod (c$, "processTwinMatrixLoopBlock", 
  function () {
@@ -210,7 +212,6 @@ this.fieldProperty (cr, 0);
 var id = this.field;
 this.addTwin (id, this.getSparseMatrix (cr, "_matrix_", 1, 3));
 }
-return 1;
 });
 Clazz.defineMethod (c$, "addTwin", 
  function (id, m) {

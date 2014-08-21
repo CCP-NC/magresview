@@ -8,8 +8,6 @@ this.binaryDoc = null;
 this.readerName = null;
 this.htParams = null;
 this.trajectorySteps = null;
-this.annotations = null;
-this.validation = null;
 this.line = null;
 this.prevline = null;
 this.next = null;
@@ -65,7 +63,6 @@ this.moreUnitCellInfo = null;
 this.filePath = null;
 this.fileName = null;
 this.stateScriptVersionInt = 2147483647;
-this.baseAtomIndex = 0;
 this.haveModel = false;
 this.previousSpaceGroup = null;
 this.previousUnitCell = null;
@@ -151,10 +148,11 @@ return this.finish ();
 Clazz.defineMethod (c$, "fixBaseIndices", 
  function () {
 try {
+var baseAtomIndex = (this.htParams.get ("baseAtomIndex")).intValue ();
 var baseModelIndex = (this.htParams.get ("baseModelIndex")).intValue ();
-this.baseAtomIndex += this.asc.ac;
+baseAtomIndex += this.asc.ac;
 baseModelIndex += this.asc.atomSetCount;
-this.htParams.put ("baseAtomIndex", Integer.$valueOf (this.baseAtomIndex));
+this.htParams.put ("baseAtomIndex", Integer.$valueOf (baseAtomIndex));
 this.htParams.put ("baseModelIndex", Integer.$valueOf (baseModelIndex));
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
@@ -215,26 +213,9 @@ this.finalizeReaderASCR ();
 Clazz.defineMethod (c$, "finalizeReaderASCR", 
 function () {
 this.applySymmetryAndSetTrajectory ();
+this.setLoadNote ();
 this.asc.finalizeStructures ();
 if (this.doCentralize) this.asc.centralize ();
-var info = this.asc.getAtomSetAuxiliaryInfo (0);
-if (this.annotations != null && info != null) {
-this.asc.setGlobalBoolean (5);
-var s = (this.annotations).getMapKeys (2, true);
-var pt = s.indexOf ("{ ", 2);
-if (pt >= 0) s = s.substring (pt + 2);
-s = JU.PT.rep (JU.PT.replaceAllCharacters (s, "{}", "").trim (), "\n", "\n  ") + "\nUse SHOW ANNOTATIONS for details.";
-this.appendLoadNote ("\nAnnotations loaded:\n   " + s);
-for (var i = this.asc.atomSetCount; --i >= 0; ) {
-info = this.asc.getAtomSetAuxiliaryInfo (i);
-info.put ("annotations", this.annotations);
-}
-}if (this.validation != null && info != null) {
-for (var i = this.asc.atomSetCount; --i >= 0; ) {
-info = this.asc.getAtomSetAuxiliaryInfo (i);
-info.put ("validation", this.validation);
-}
-}this.setLoadNote ();
 });
 Clazz.defineMethod (c$, "setLoadNote", 
 function () {
@@ -285,7 +266,6 @@ if (!this.vwr.isJS) e.printStackTrace ();
 }, "Throwable");
 Clazz.defineMethod (c$, "initialize", 
  function () {
-this.baseAtomIndex = (this.htParams.get ("baseAtomIndex")).intValue ();
 var o = this.htParams.get ("supercell");
 if (Clazz.instanceOf (o, String)) this.strSupercell = o;
  else this.ptSupercell = o;
@@ -351,9 +331,7 @@ this.addPrimitiveLatticeVector (2, fParams, 6);
 this.setUnitCell (fParams[0], fParams[1], fParams[2], fParams[3], fParams[4], fParams[5]);
 }this.ignoreFileUnitCell = this.iHaveUnitCell;
 if (this.merging && !this.iHaveUnitCell) this.setFractionalCoordinates (false);
-}this.annotations = this.htParams.get ("annotations");
-this.validation = this.htParams.get ("validations");
-});
+}});
 Clazz.defineMethod (c$, "initializeSymmetryOptions", 
 function () {
 this.latticeCells =  Clazz.newIntArray (3, 0);
@@ -1073,8 +1051,7 @@ return this.line;
 });
 Clazz.defineMethod (c$, "processDSSR", 
 function (reader, htGroup1) {
-var s = this.vwr.getAnnotationParser ().processDSSR (this.asc.getAtomSetAuxiliaryInfo (2147483647), reader, this.line, htGroup1);
-this.appendLoadNote (s);
+this.appendLoadNote ((J.api.Interface.getOption ("dssx.DSSRParser")).process (this.asc.getAtomSetAuxiliaryInfo (2147483647), reader, this.line, htGroup1));
 }, "javajs.api.GenericLineReader,java.util.Map");
 Clazz.defineMethod (c$, "appendUunitCellInfo", 
 function (info) {

@@ -451,8 +451,10 @@ function generate_molecular_dd()
 	
 	// Check against composition and gyration radius
 	gen_dd_script += "mols = []; mol_elems = []; mol_gyrs = []; unique_mols = [];";
-	gen_dd_script += "ucell = {unitcell}; if (ucell.length == 0) {ucell = {all}};"; 	//This fixes the case of molecules with no lattice parameters
-	gen_dd_script += "for (a in {unitcell}) {";
+	gen_dd_script += "ucell = {centroid=555}; if (ucell.length == 0) {ucell = {all}};"; 	//This fixes the case of molecules with no lattice parameters
+	gen_dd_script += "if (ucell.tensor('ms', 'value').sum != 'NaN') {mol_ms = []} else {mol_ms = 'None'};";	//Taking into account whether there are also NMR parameters in play
+	gen_dd_script += "if (ucell.tensor('efg', 'value').sum != 'NaN') {mol_efg = []} else {mol_ms = 'None'};";
+	gen_dd_script += "for (a in ucell) {";
 	gen_dd_script += "mol_i = a.molecule; if (mols.find(mol_i)) {continue};";
 	gen_dd_script += "mols = mols + [mol_i];"
 	gen_dd_script += "this_mol = {within(molecule, a)};";
@@ -462,14 +464,22 @@ function generate_molecular_dd()
 	gen_dd_script += "gyr = 0.0; for (m in this_mol) {";
 	gen_dd_script += "gyr = gyr + ({m}.xyz - {this_mol}.xyz)**2};";
 	gen_dd_script += "gyr = gyr%1;";
+	// Take NMR related quantities - if needed
+	gen_dd_script += "if (mol_ms != 'None') { this_ms = this_mol.tensor('ms', 'isotropy').sum2%1; };";
+	gen_dd_script += "if (mol_efg != 'None') { this_efg = this_mol.tensor('efg', 'value').sum2%1; };";
 	// Check if composition or gyration are already present
-	gen_dd_script += "if (!(mol_elems.find(elems) != null)) { if(!((mol_gyrs.find(gyr) != null))) {";
-	gen_dd_script += "unique_mols = unique_mols + [a];} };";
-	gen_dd_script += "mol_elems = mol_elems + [elems]; mol_gyrs = mol_gyrs + [gyr];};";
+	gen_dd_script += "elems_new = (mol_elems.find(elems) == null);"
+	gen_dd_script += "gyr_new = (mol_gyrs.find(gyr) == null);"
+	gen_dd_script += "ms_new = (mol_ms == 'None' || (mol_ms.find(this_ms) == null));"
+	gen_dd_script += "efg_new = (mol_efg == 'None' || (mol_efg.find(this_efg) == null));"
+	gen_dd_script += "if ( elems_new or gyr_new or ms_new or efg_new ) {";
+	gen_dd_script += "unique_mols = unique_mols + [a];};";
+	gen_dd_script += "mol_elems = mol_elems + [elems]; mol_gyrs = mol_gyrs + [gyr];";
+	gen_dd_script += "if (mol_ms != 'None') { mol_ms = mol_ms + [this_ms]; };";
+	gen_dd_script += "if (mol_efg != 'None') { mol_efg = mol_efg + [this_efg]; }; };";
 	gen_dd_script += "temp_ddgroup = []; for (u in unique_mols) { temp_ddgroup = temp_ddgroup or within(molecule, u);};";
 	gen_dd_script += "display temp_ddgroup;";
 	gen_dd_script += "center {displayed}; zoom 0;";
-	
 
 	Jmol.evaluateVar(mainJmol, 'script("' + gen_dd_script + '");');
 	//Jmol.scriptWait(mainJmol, gen_dd_script);

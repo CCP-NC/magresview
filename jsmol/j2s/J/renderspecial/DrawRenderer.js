@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.renderspecial");
-Clazz.load (["J.render.MeshRenderer", "JU.BS", "$.P3", "$.P3i", "$.V3"], "J.renderspecial.DrawRenderer", ["JU.A4", "$.M3", "$.Measure", "J.shapespecial.Draw", "JU.C", "$.GData"], function () {
+Clazz.load (["J.render.MeshRenderer", "JU.BS", "$.P3", "$.P3i", "$.V3"], "J.renderspecial.DrawRenderer", ["JU.A4", "$.M3", "J.shapespecial.Draw", "JU.C", "$.GData", "$.Measure"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.drawType = null;
 this.dmesh = null;

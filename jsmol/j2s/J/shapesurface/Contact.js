@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapesurface");
-Clazz.load (["J.shapesurface.Isosurface", "JU.P3", "$.V3", "J.atomdata.RadiusData", "J.c.VDW"], "J.shapesurface.Contact", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Hashtable", "JU.BS", "$.CU", "$.Lst", "$.Measure", "J.atomdata.AtomData", "J.c.HB", "J.jvxl.data.MeshData", "$.VolumeData", "JS.T", "JU.BSUtil", "$.ContactPair", "$.Escape", "$.Logger", "$.TempArray"], function () {
+Clazz.load (["J.shapesurface.Isosurface", "JU.P3", "$.V3", "J.atomdata.RadiusData", "J.c.VDW"], "J.shapesurface.Contact", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Hashtable", "JU.BS", "$.CU", "$.Lst", "J.atomdata.AtomData", "J.c.HB", "J.jvxl.data.MeshData", "$.VolumeData", "JS.T", "JU.BSUtil", "$.ContactPair", "$.Escape", "$.Logger", "$.Measure", "$.TempArray"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.atoms = null;
 this.ac = 0;

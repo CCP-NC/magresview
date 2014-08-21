@@ -57,7 +57,8 @@ if (this.isNewSet) {
 if (size == 1) {
 this.atokenInfix[0] = JS.T.tv (135368713, 0, this.atokenInfix[0].value);
 this.isNewSet = false;
-}}return ((this.isNewSet || this.isSetBrace) && size < this.ptNewSetModifier + 2 ? this.commandExpected () : size == 1 || !JS.T.tokAttr (this.tokCommand, 262144) ? true : this.error (0));
+}}if ((this.isNewSet || this.isSetBrace) && size < this.ptNewSetModifier + 2) return this.commandExpected ();
+return (size == 1 || !JS.T.tokAttr (this.tokCommand, 262144) ? true : this.error (0));
 });
 Clazz.defineMethod (c$, "compileExpression", 
 function () {
@@ -444,8 +445,6 @@ case 1073741916:
 case 135267335:
 case 135267336:
 case 1238369286:
-case 1073741838:
-case 1073742189:
 this.addTokenToPostfix (4, this.theValue);
 if (!this.addNextTokenIf (269484080)) return false;
 allowComma = false;
@@ -483,7 +482,7 @@ case 135267841:
 case 1095761937:
 case 1087373320:
 case 3145760:
-case 1095761941:
+case 1095761940:
 case 1641025539:
 case 4:
 case 1649412120:

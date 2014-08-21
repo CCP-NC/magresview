@@ -715,14 +715,14 @@ if (p == null) this.setAtomSetAuxiliaryInfoForSet ("modelProperties", p =  new j
 p.put (key, value);
 if (key.startsWith (".")) p.put (key.substring (1), value);
 }, "~S,~S,~N");
-Clazz.defineMethod (c$, "setAtomProperties", 
-function (key, data, atomSetIndex, isGroup) {
-if (Clazz.instanceOf (data, String) && !(data).endsWith ("\n")) data = data + "\n";
+Clazz.defineMethod (c$, "setAtomSetAtomProperty", 
+function (key, data, atomSetIndex) {
+if (!data.endsWith ("\n")) data += "\n";
 if (atomSetIndex < 0) atomSetIndex = this.iSet;
 var p = this.getAtomSetAuxiliaryInfoValue (atomSetIndex, "atomProperties");
 if (p == null) this.setAtomSetAuxiliaryInfoForSet ("atomProperties", p =  new java.util.Hashtable (), atomSetIndex);
 p.put (key, data);
-}, "~S,~O,~N,~B");
+}, "~S,~S,~N");
 Clazz.defineMethod (c$, "setAtomSetPartialCharges", 
 function (auxKey) {
 if (!this.atomSetAuxiliaryInfo[this.iSet].containsKey (auxKey)) {
@@ -774,8 +774,7 @@ return this.getAtomSetAuxiliaryInfoValue (atomSetIndex, "name");
 }, "~N");
 Clazz.defineMethod (c$, "getAtomSetAuxiliaryInfo", 
 function (atomSetIndex) {
-var i = (atomSetIndex >= this.atomSetCount ? this.atomSetCount - 1 : atomSetIndex);
-return (i < 0 ? null : this.atomSetAuxiliaryInfo[i]);
+return this.atomSetAuxiliaryInfo[atomSetIndex >= this.atomSetCount ? this.atomSetCount - 1 : atomSetIndex];
 }, "~N");
 Clazz.defineMethod (c$, "setAtomNames", 
 function (atomIdNames) {
@@ -839,12 +838,10 @@ for (var i = 0; i < a.trajectoryStepCount; i++) this.trajectorySteps.add (this.t
 this.setInfo ("trajectorySteps", this.trajectorySteps);
 }, "J.adapter.smarter.AtomSetCollection");
 Clazz.defineStatics (c$,
-"globalBooleans", ["someModelsHaveFractionalCoordinates", "someModelsHaveSymmetry", "someModelsHaveUnitcells", "someModelsHaveCONECT", "isPDB", "someModelsHaveAnnotations", "someModelsHaveValidations"],
+"globalBooleans", ["someModelsHaveFractionalCoordinates", "someModelsHaveSymmetry", "someModelsHaveUnitcells", "someModelsHaveCONECT", "isPDB"],
 "GLOBAL_FRACTCOORD", 0,
 "GLOBAL_SYMMETRY", 1,
 "GLOBAL_UNITCELLS", 2,
 "GLOBAL_CONECT", 3,
-"GLOBAL_ISPDB", 4,
-"GLOBAL_ANNOTATIONS", 5,
-"GLOBAL_VALIDATIONS", 6);
+"GLOBAL_ISPDB", 4);
 });

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.simple");
-Clazz.load (["J.adapter.smarter.AtomSetCollectionReader", "java.util.Hashtable", "JU.Lst", "$.P3", "$.P4", "$.V3"], "J.adapter.readers.simple.ZMatrixReader", ["java.lang.Character", "$.Exception", "$.Float", "JU.Measure", "$.Quat", "J.adapter.smarter.Atom", "$.Bond", "J.api.JmolAdapter", "JU.Logger"], function () {
+Clazz.load (["J.adapter.smarter.AtomSetCollectionReader", "java.util.Hashtable", "JU.Lst", "$.P3", "$.P4", "$.V3"], "J.adapter.readers.simple.ZMatrixReader", ["java.lang.Character", "$.Exception", "$.Float", "JU.Quat", "J.adapter.smarter.Atom", "$.Bond", "J.api.JmolAdapter", "JU.Logger", "$.Measure"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.ac = 0;
 this.vAtoms = null;

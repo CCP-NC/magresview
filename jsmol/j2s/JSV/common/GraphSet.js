@@ -1161,7 +1161,7 @@ Clazz.defineMethod (c$, "drawBar",
 var r = xMax + xMin;
 var d = Math.abs (xMax - xMin);
 var range = Math.abs (this.toX (this.xPixel1) - this.toX (this.xPixel0));
-if (tickSize > 0 && d > range / 20) {
+if (d > range / 20) {
 d = range / 20;
 xMin = r / 2 - d;
 xMax = r / 2 + d;

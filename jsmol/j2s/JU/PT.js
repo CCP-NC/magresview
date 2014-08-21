@@ -645,7 +645,6 @@ return (!isStart && !isEnd) ? areEqual : isStart && isEnd ? b.length == 1 || a.c
 }, "~S,~S");
 c$.getMapValueNoCase = Clazz.defineMethod (c$, "getMapValueNoCase", 
 function (h, key) {
-if ("this".equals (key)) return h;
 var val = h.get (key);
 if (val == null) for (var e, $e = h.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) if (e.getKey ().equalsIgnoreCase (key)) return e.getValue ();
 

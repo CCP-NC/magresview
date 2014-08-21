@@ -255,11 +255,8 @@ this.asc.setInfo ("tlsErrors", this.sbTlsErrors.toString ());
 this.appendLoadNote (this.sbTlsErrors.toString ());
 }this.doCheckUnitCell = new Boolean (this.doCheckUnitCell & (this.iHaveUnitCell && (this.doApplySymmetry || this.isbiomol))).valueOf ();
 this.finalizeReaderASCR ();
-if (this.vCompnds != null) {
-this.asc.setInfo ("compoundSource", this.vCompnds);
-for (var i = this.asc.iSet + 1; --i >= 0; ) this.asc.setAtomSetAuxiliaryInfoForSet ("compoundSource", this.vCompnds, i);
-
-}if (this.htSites != null) {
+if (this.vCompnds != null) this.asc.setInfo ("compoundSource", this.vCompnds);
+if (this.htSites != null) {
 this.addSites (this.htSites);
 }if (this.pdbHeader != null) this.asc.setInfo ("fileHeader", this.pdbHeader.toString ());
 if (this.configurationPtr > 0) {
@@ -335,7 +332,7 @@ this.currentCompnd = this.htMolIds.get ("");
 var pt = this.line.indexOf (":");
 if (pt < 0 || pt > 0 && this.line.charAt (pt - 1) == '\\') pt = this.line.length;
 var key = this.line.substring (0, pt).trim ();
-var value = (pt < this.line.length ? this.line.substring (pt + 1).trim () : null);
+var value = (pt < this.line.length ? this.line.substring (pt + 1) : null);
 if (key.equals ("MOL_ID")) {
 if (value == null) return;
 if (isSource) {
@@ -998,7 +995,7 @@ JU.Logger.info ("TLS model " + (iModel + 1) + " set " + (iGroup + 1));
 var tlsGroupInfo = this.vTlsModels.get (iGroup);
 var groups = tlsGroupInfo.get ("groups");
 var index0 = this.asc.getAtomSetAtomIndex (iModel);
-var data =  Clazz.newFloatArray (this.asc.getAtomSetAtomCount (iModel), 0);
+var data =  Clazz.newIntArray (this.asc.getAtomSetAtomCount (iModel), 0);
 var indexMax = index0 + data.length;
 var atoms = this.asc.atoms;
 var nGroups = groups.size ();
@@ -1028,7 +1025,10 @@ this.setTlsTensor (atom, group, symmetry);
 }}
 }
 }
-this.asc.setAtomProperties ("tlsGroup", data, iModel, true);
+var sdata =  new JU.SB ();
+for (var i = 0; i < data.length; i++) sdata.appendI (data[i]).appendC ('\n');
+
+this.asc.setAtomSetAtomProperty ("tlsGroup", sdata.toString (), iModel);
 this.asc.setAtomSetAuxiliaryInfoForSet ("TLS", tlsGroupInfo, iModel);
 this.asc.setTensors ();
 }, "~N,~N,J.api.SymmetryInterface");

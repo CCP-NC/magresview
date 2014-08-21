@@ -94,7 +94,8 @@ var bytes =  Clazz.newByteArray (tokens.length, 0);
 for (var i = 0; i < tokens.length; i++) bytes[i] = JU.PT.parseIntRadix (tokens[i], 16);
 
 mat =  Clazz.newFloatArray (16, 0);
-for (var i = 16, j = bytes.length - 8; --i >= 0; j -= 8) mat[i] = JU.BC.bytesToDoubleToFloat (bytes, j, false);
+var bc =  new JU.BC ();
+for (var i = 16, j = bytes.length - 8; --i >= 0; j -= 8) mat[i] = bc.bytesToDoubleToFloat (bytes, j, false);
 
 this.setTransform (mat[0], mat[1], mat[2], mat[4], mat[5], mat[6], mat[8], mat[9], mat[10]);
 });

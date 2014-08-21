@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapespecial");
-Clazz.load (["J.shape.AtomShape", "JU.P3", "$.V3"], "J.shapespecial.Polyhedra", ["java.lang.Boolean", "JU.AU", "$.BS", "$.Measure", "$.P3i", "$.SB", "J.c.PAL", "J.shapespecial.Polyhedron", "JU.Logger", "$.Normix"], function () {
+Clazz.load (["J.shape.AtomShape", "JU.P3", "$.V3"], "J.shapespecial.Polyhedra", ["java.lang.Boolean", "JU.AU", "$.BS", "$.P3i", "$.SB", "J.c.PAL", "J.shapespecial.Polyhedron", "JU.Logger", "$.Measure", "$.Normix"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.otherAtoms = null;
 this.polyhedronCount = 0;

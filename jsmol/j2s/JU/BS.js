@@ -236,30 +236,6 @@ this.words = a;
 }, "~N");
 Clazz.overrideMethod (c$, "toString", 
 function () {
-return JU.BS.escape (this, '{', '}');
-});
-c$.copy = Clazz.defineMethod (c$, "copy", 
-function (bitsetToCopy) {
-var bs;
-{
-bs = Clazz.clone(bitsetToCopy);
-}var wordCount = bitsetToCopy.wordsInUse;
-if (wordCount == 0) {
-bs.words = JU.BS.emptyBitmap;
-} else {
-bs.words =  Clazz.newIntArray (bs.wordsInUse = wordCount, 0);
-System.arraycopy (bitsetToCopy.words, 0, bs.words, 0, wordCount);
-}return bs;
-}, "JU.BS");
-Clazz.defineMethod (c$, "cardinalityN", 
-function (max) {
-var n = this.cardinality ();
-for (var i = this.length (); --i >= max; ) if (this.get (i)) n--;
-
-return n;
-}, "~N");
-Clazz.overrideMethod (c$, "toJSON", 
-function () {
 var numBits = (this.wordsInUse > 128) ? this.cardinality () : this.wordsInUse * 32;
 var b = JU.SB.newN (6 * numBits + 2);
 b.appendC ('[');
@@ -274,6 +250,30 @@ b.append (", ").appendI (i);
 }
 }b.appendC (']');
 return b.toString ();
+});
+c$.copy = Clazz.defineMethod (c$, "copy", 
+function (bitsetToCopy) {
+var bs = null;
+{
+bs = Clazz.clone(bitsetToCopy);
+}var wordCount = bitsetToCopy.wordsInUse;
+if (wordCount == 0) {
+bs.words = JU.BS.emptyBitmap;
+} else {
+bs.words =  Clazz.newIntArray (wordCount, 0);
+System.arraycopy (bitsetToCopy.words, 0, bs.words, 0, wordCount);
+}return bs;
+}, "JU.BS");
+Clazz.defineMethod (c$, "cardinalityN", 
+function (max) {
+var n = this.cardinality ();
+for (var i = this.length (); --i >= max; ) if (this.get (i)) n--;
+
+return n;
+}, "~N");
+Clazz.overrideMethod (c$, "toJSON", 
+function () {
+return this.toString ();
 });
 c$.escape = Clazz.defineMethod (c$, "escape", 
 function (bs, chOpen, chClose) {

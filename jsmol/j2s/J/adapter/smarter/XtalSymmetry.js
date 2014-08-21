@@ -418,7 +418,7 @@ if (tx != 0 || ty != 0 || tz != 0) pt = this.symmetryAddAtoms (tx, ty, tz, cell5
 }
 
 
-if (iCell * this.noSymmetryCount == this.asc.ac - this.firstSymmetryAtom) this.duplicateAtomProperties (iCell);
+if (iCell * this.noSymmetryCount == this.asc.ac - this.firstSymmetryAtom) this.appendAtomProperties (iCell);
 this.setSymmetryOps ();
 this.asc.setAtomSetAuxiliaryInfo ("presymmetryAtomIndex", Integer.$valueOf (this.firstSymmetryAtom));
 this.asc.setAtomSetAuxiliaryInfo ("presymmetryAtomCount", Integer.$valueOf (this.noSymmetryCount));
@@ -538,24 +538,19 @@ if (iAtom1 >= atomMax || iAtom2 >= atomMax) this.asc.addNewBondWithOrder (iAtom1
 }}
 return pt;
 }, "~N,~N,~N,~N,~N,~N,~A,J.adapter.smarter.MSInterface,~B");
-Clazz.defineMethod (c$, "duplicateAtomProperties", 
+Clazz.defineMethod (c$, "appendAtomProperties", 
  function (nTimes) {
 var p = this.asc.getAtomSetAuxiliaryInfoValue (-1, "atomProperties");
-if (p != null) for (var entry, $entry = p.entrySet ().iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) {
+if (p == null) {
+return;
+}for (var entry, $entry = p.entrySet ().iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) {
 var key = entry.getKey ();
-var val = entry.getValue ();
-if (Clazz.instanceOf (val, String)) {
-var data = val;
+var data = entry.getValue ();
 var s =  new JU.SB ();
 for (var i = nTimes; --i >= 0; ) s.append (data);
 
 p.put (key, s.toString ());
-} else {
-var f = val;
-var fnew =  Clazz.newFloatArray (f.length * nTimes, 0);
-for (var i = nTimes; --i >= 0; ) System.arraycopy (f, 0, fnew, i * f.length, f.length);
-
-}}
+}
 }, "~N");
 Clazz.defineMethod (c$, "finalizeSymmetry", 
  function (symmetry) {

@@ -334,8 +334,8 @@ colixC = JU.C.copyColixTranslucency (this.mesh.slabColix, vertexColixes[iC]);
 }if (this.iShowNormals) this.renderNormals ();
 } else {
 check &= polygon[3];
-if (check == 0) continue;
 if (iShowTriangles) check = 7;
+if (check == 0) continue;
 this.pt1i.setT (this.screens[iA]);
 this.pt2i.setT (this.screens[iB]);
 this.pt3i.setT (this.screens[iC]);

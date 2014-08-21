@@ -77,9 +77,9 @@ o = this.reader.lock.lock; if (o.$in) data = o.$in.buf;
 }if (Clazz.instanceOf (o, java.io.BufferedInputStream)) o = JU.Rdr.StreamToUTF8String (JU.Rdr.getBIS (data));
 {
 this.domObj[0] =
-parent.vwr.html5Applet._createDomNode("xmlReader",o);
+parent.vwr.applet._createDomNode("xmlReader",o);
 this.walkDOMTree();
-parent.vwr.html5Applet._createDomNode("xmlReader",null);
+parent.vwr.applet._createDomNode("xmlReader",null);
 }} else {
 var saxHandler = J.api.Interface.getOption ("adapter.readers.xml.XmlHandler");
 saxHandler.parseXML (this, saxReader, this.reader);

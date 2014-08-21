@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (null, "JS.ScriptMathProcessor", ["java.lang.Character", "$.Float", "java.util.Arrays", "$.Hashtable", "JU.A4", "$.AU", "$.BS", "$.CU", "$.DF", "$.Lst", "$.M3", "$.M4", "$.P3", "$.P4", "$.PT", "$.Quat", "$.V3", "JM.BondSet", "JS.SV", "$.T", "JU.BSUtil", "$.Escape", "$.Logger"], function () {
+Clazz.load (null, "JS.ScriptMathProcessor", ["java.lang.Float", "java.util.Arrays", "$.Hashtable", "JU.A4", "$.AU", "$.BS", "$.CU", "$.DF", "$.Lst", "$.M3", "$.M4", "$.P3", "$.P4", "$.PT", "$.Quat", "$.V3", "JM.BondSet", "JS.SV", "$.T", "JU.BSUtil", "$.Escape", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.wasX = false;
 this.asBitSet = false;
@@ -541,9 +541,7 @@ var args =  new Array (nParam);
 for (var i = nParam; --i >= 0; ) args[i] = this.getX ();
 
 this.xPt--;
-if (!this.chk) return this.getMathExt ().evaluate (this, op, args, tok);
-if (op.tok == 269484241) this.xPt--;
-return this.addXBool (true);
+return (!this.chk ? this.getMathExt ().evaluate (this, op, args, tok) : op.tok == 269484241 ? true : this.addXBool (true));
 }, "~N");
 Clazz.defineMethod (c$, "operate", 
  function () {
@@ -616,7 +614,6 @@ return this.addXBool (!x2.asBoolean ());
 }
 case 269484241:
 var iv = op.intValue & -481;
-if (this.chk) return this.addXObj (JS.SV.newS (""));
 if (this.vwr.allowArrayDotNotation) switch (x2.tok) {
 case 6:
 case 14:
@@ -717,10 +714,7 @@ if ((lst = x2.getList ()) != null && (n = lst.size ()) > 0) this.getKeyList (lst
 }return;
 }for (var e, $e = map.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 var k = e.getKey ();
-if (isAll && (k.length == 0 || !Character.isLetter (k.charAt (0)))) {
-if (prefix.endsWith (".")) prefix = prefix.substring (0, prefix.length - 1);
-k = "[" + JU.PT.esc (k) + "]";
-}keys.addLast (prefix + k);
+keys.addLast (prefix + k);
 if (isAll) this.getKeyList (e.getValue (), true, keys, prefix + k + ".");
 }
 }, "JS.SV,~B,JU.Lst,~S");
