@@ -119,8 +119,13 @@ function load_file(evt)
 			atom_set.is_magres = true;
 			load_string(mainJmol, popup_file);
 			last_loaded_file = popup_file;
+			// If local storage is available, use it to keep the file
+			if (typeof(Storage) !== "undefined")
+			{
+				sessionStorage.setItem('last_loaded_file', last_loaded_file);
+			}	
 			
-			return;
+		return;
 		
 		}
 	}
@@ -166,9 +171,15 @@ function load_file(evt)
 		load_string(mainJmol, file_content);
 
 		last_loaded_file = file_content;
+		// If local storage is available, use it to keep the file
+		if (typeof(Storage) !== "undefined")
+		{
+			sessionStorage.setItem('last_loaded_file', last_loaded_file);
+		}	
 	};
 
 	jmol_rdr.readAsText(to_load);
+
 }
 
 function load_string(id, file_as_string)
@@ -262,6 +273,12 @@ function ismol_check_handler()
 
 function reload_butt_handler()
 {
+
+	if (typeof(Storage) !== "undefined")
+	{
+		last_loaded_file = sessionStorage.last_loaded_file;
+	}
+
 	if (last_loaded_file != null)
 	{
 		var is_magres = atom_set.is_magres;
