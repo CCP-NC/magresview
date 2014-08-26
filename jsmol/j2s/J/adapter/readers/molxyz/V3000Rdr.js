@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.molxyz");
-Clazz.load (null, "J.adapter.readers.molxyz.V3000Rdr", ["java.util.Hashtable", "J.adapter.smarter.AtomSetCollectionReader"], function () {
+Clazz.load (null, "J.adapter.readers.molxyz.V3000Rdr", ["java.util.Hashtable", "JU.SB", "J.adapter.smarter.AtomSetCollectionReader"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.mr = null;
 this.line = null;
@@ -111,10 +111,10 @@ throw e;
 if (this.userData == null) return;
 for (var key, $key = this.userData.keySet ().iterator (); $key.hasNext () && ((key = $key.next ()) || true);) {
 var a = this.userData.get (key);
-var f =  Clazz.newFloatArray (a.length, 0);
-for (var i = 0; i < a.length; i++) f[i] = (a[i] == null ? 0 : this.mr.parseFloatStr (a[i]));
+var sb =  new JU.SB ();
+for (var i = 0; i < a.length; i++) sb.append (a[i] == null ? "0" : a[i]).appendC ('\n');
 
-this.mr.asc.setAtomProperties (key, f, -1, false);
+this.mr.asc.setAtomSetAtomProperty (key, sb.toString (), -1);
 }
 }, "~N");
 Clazz.defineMethod (c$, "getField", 

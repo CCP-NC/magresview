@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.cif");
-Clazz.load (["J.adapter.smarter.MSInterface"], "J.adapter.readers.cif.MSRdr", ["java.lang.Boolean", "$.Exception", "$.Float", "java.util.Hashtable", "JU.Lst", "$.M3", "$.Matrix", "$.P3", "J.adapter.readers.cif.Subsystem", "J.adapter.smarter.AtomSetCollectionReader", "JU.BSUtil", "$.BoxInfo", "$.Escape", "$.Logger", "$.Modulation", "$.ModulationSet"], function () {
+Clazz.load (["J.adapter.smarter.MSInterface"], "J.adapter.readers.cif.MSRdr", ["java.lang.Boolean", "$.Exception", "$.Float", "java.util.Hashtable", "JU.Lst", "$.M3", "$.Matrix", "$.P3", "$.SB", "J.adapter.readers.cif.Subsystem", "J.adapter.smarter.AtomSetCollectionReader", "JU.BSUtil", "$.BoxInfo", "$.Escape", "$.Logger", "$.Modulation", "$.ModulationSet"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.cr = null;
 this.modDim = 0;
@@ -15,6 +15,8 @@ this.modDebug = false;
 this.modSelected = -1;
 this.modLast = false;
 this.sigma = null;
+this.q1 = null;
+this.q1Norm = null;
 this.htModulation = null;
 this.htAtomMods = null;
 this.iopLast = -1;
@@ -142,9 +144,10 @@ this.atoms = this.cr.asc.atoms;
 this.cr.symmetry = this.cr.asc.getSymmetry ();
 if (this.cr.symmetry != null) this.nOps = this.cr.symmetry.getSpaceGroupOperationCount ();
 this.iopLast = -1;
-var i0 = this.cr.asc.getLastAtomSetAtomIndex ();
-for (var i = i0; i < n; i++) this.modulateAtom (this.atoms[i]);
+var sb =  new JU.SB ();
+for (var i = this.cr.asc.getLastAtomSetAtomIndex (); i < n; i++) this.modulateAtom (this.atoms[i], sb);
 
+this.cr.asc.setAtomSetAtomProperty ("modt", sb.toString (), -1);
 this.htAtomMods = null;
 if (this.minXYZ0 != null) this.trimAtomSet ();
 this.htSubsystems = null;
@@ -164,6 +167,8 @@ return;
 this.cr.appendUunitCellInfo ("q" + (i + 1) + "=" + this.fixPt (pt[0]) + " " + this.fixPt (pt[1]) + " " + this.fixPt (pt[2]));
 this.sigma.getArray ()[i] = [pt[0], pt[1], pt[2]];
 }
+this.q1 = this.sigma.getArray ()[0];
+this.q1Norm = JU.P3.new3 (this.q1[0] == 0 ? 0 : 1, this.q1[1] == 0 ? 0 : 1, this.q1[2] == 0 ? 0 : 1);
 var pt;
 var map =  new java.util.Hashtable ();
 for (var e, $e = this.htModulation.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
@@ -353,7 +358,7 @@ if (JU.Logger.debuggingHigh) JU.Logger.debug ("MOD RDR adding " + id + " " + i +
 this.cr.asc.setU (atom, i, val + atom.anisoBorU[i]);
 }, "J.adapter.smarter.Atom,~S,~N");
 Clazz.defineMethod (c$, "modulateAtom", 
- function (a) {
+ function (a, sb) {
 if (this.modCoord && this.htSubsystems != null) {
 var ptc = JU.P3.newP (a);
 var spt = this.getSymmetry (a);
@@ -414,7 +419,11 @@ JU.Logger.debug ("setModulation Uij(final)=" + JU.Escape.eAF (a.anisoBorU) + "\n
 JU.Logger.debug ("setModulation tensor=" + JU.Escape.e ((a.tensors.get (1)).getInfo ("all")));
 }}}if (Float.isNaN (ms.x)) ms.set (0, 0, 0);
 a.vib = ms;
-}, "J.adapter.smarter.Atom");
+if (this.modVib || a.foccupancy != 0) {
+var t = this.q1Norm.dot (a);
+if (Math.abs (t - Clazz.floatToInt (t)) > 0.001) t = Clazz.doubleToInt (Math.floor (t));
+sb.append ((Clazz.floatToInt (t)) + "\n");
+}}, "J.adapter.smarter.Atom,JU.SB");
 Clazz.overrideMethod (c$, "getAtomSymmetry", 
 function (a, defaultSymmetry) {
 var ss;
