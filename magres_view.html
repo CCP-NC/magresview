@@ -773,6 +773,8 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					  <input type="text" id="spec_broad" value='1' maxlength='4' size='4'
 					  title='Select the Lorentzian curve broadening in ppm.'
 					  onkeypress='spec_interp_n_handler(event)' disabled=true> &nbsp; ppm
+					  <br><br>
+					  <input type="checkbox" id="spec_plabel_check" autocomplete="off" onchange="spec_plab_handler()" checked>Show atom labels next to the peaks
 					  
 					  <div id="spec_options_2_div" class="ctrl_right">
 					    X axis range: &nbsp; <input type="text" id="spec_xrange_min" value='0' maxlength='4' size='4'
