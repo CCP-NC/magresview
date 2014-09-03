@@ -430,7 +430,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 							  
 							  if (window.location.protocol != "file:") {
 							    $("#load_button").addClass("nodisplay");
-							    document.write('<select id="file_load_drop" style="width: 100pt;" onclick="file_load_drop_handler(event)"> \
+							    document.write('<select id="file_load_drop" style="width: 100pt;" onchange="file_load_drop_handler(event)"> \
 									    <option value="#user_file#">Load user file...</option> \
 									    </select>');
 							  }
@@ -440,7 +440,9 @@ It provides the possibility to load example files from a dropdown menu but it ma
 								<br>
 								<input type="button" id="reload_butt" value="Reload model" onclick="reload_butt_handler()"></input>
 								<br><br><br>
-								<input type="checkbox" id="ismol_check" autocomplete="off" onchange="ismol_check_handler()"></input>Load as molecule
+								<input type="checkbox" id="ismol_check" autocomplete="off" onchange="ismol_check_handler()"
+								title="Load the system not as a whole unit cell, but as the minimum repeated unit. This is done by using an heuristic algorithm which might not be right 100% of the times, so care should be taken."></input>
+								<span title="Load the system not as a whole unit cell, but as the minimum repeated unit. This is done by using an heuristic algorithm which might not be right 100% of the times, so care should be taken.">Load as molecule/asymmetric unit</span>
 							</div>
 							<br><br>
 	  						Lattice:<br> 
