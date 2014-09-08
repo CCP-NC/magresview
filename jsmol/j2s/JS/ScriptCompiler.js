@@ -72,7 +72,6 @@ this.logMessages = (!isSilent && !isPredefining && debugScript);
 this.preDefining = (filename === "#predefine");
 var doFull = true;
 var isOK = this.compile0 (doFull);
-this.atokenInfix = null;
 if (!isOK) this.handleError ();
 var sc =  new JS.ScriptContext ();
 isOK = (this.iBrace == 0 && this.parenCount == 0 && this.braceCount == 0 && this.bracketCount == 0);
@@ -656,8 +655,6 @@ this.lastToken = JS.T.tokenMinus;
 return 2;
 }
 }}}switch (this.tokCommand) {
-case 135270926:
-if (this.nTokens != 2 || this.lastToken.tok != 1073741838 && this.lastToken.tok != 1073742189) return 0;
 case 135271426:
 case 135271429:
 case 1276121098:
@@ -665,9 +662,7 @@ if (this.script.charAt (this.ichToken) == '@') {
 this.iHaveQuotedString = true;
 return 0;
 }if (this.tokCommand == 135271426) {
-if (this.nTokens == 1 || this.nTokens == 2 && this.tokAt (1) == 1073741839) {
-var isDataBase = JV.Viewer.isDatabaseCode (this.charAt (this.ichToken));
-if (this.lookingAtLoadFormat (isDataBase)) {
+if ((this.nTokens == 1 || this.nTokens == 2 && this.tokAt (1) == 1073741839) && this.lookingAtLoadFormat ()) {
 var strFormat = this.script.substring (this.ichToken, this.ichToken + this.cchToken);
 var token = JS.T.getTokenFromName (strFormat.toLowerCase ());
 switch (token == null ? 0 : token.tok) {
@@ -685,18 +680,18 @@ case 1073741849:
 this.addTokenToPrefix (token);
 break;
 default:
-var tok = (isDataBase ? 4 : JU.PT.isOneOf (strFormat = strFormat.toLowerCase (), ";xyz;vxyz;vibration;temperature;occupancy;partialcharge;") ? 1073741824 : 0);
+var tok = (strFormat.indexOf ("=") == 0 || strFormat.indexOf ("$") == 0 ? 4 : JU.PT.isOneOf (strFormat = strFormat.toLowerCase (), ";xyz;vxyz;vibration;temperature;occupancy;partialcharge;") ? 1073741824 : 0);
 if (tok != 0) {
 this.addTokenToPrefix (JS.T.o (tok, strFormat));
 this.iHaveQuotedString = (tok == 4);
 }}
 return 2;
-}}var bs;
+}var bs;
 if (this.script.charAt (this.ichToken) == '{' || this.parenCount > 0) break;
 if ((bs = this.lookingAtBitset ()) != null) {
 this.addTokenToPrefix (JS.T.o (10, bs));
 return 2;
-}}if (!this.iHaveQuotedString && this.lookingAtImpliedString (this.tokCommand == 135270926, this.tokCommand == 135271426, this.nTokens > 1 || this.tokCommand != 135271429)) {
+}}if (!this.iHaveQuotedString && this.lookingAtImpliedString (false, this.tokCommand == 135271426, this.nTokens > 1 || this.tokCommand != 135271429)) {
 var str = this.script.substring (this.ichToken, this.ichToken + this.cchToken);
 if (this.tokCommand == 135271429) {
 if (str.startsWith ("javascript:")) {
@@ -1136,7 +1131,7 @@ this.forPoint3 = this.nSemiSkip = 0;
 this.nSemiSkip += 2;
 } else if (this.nTokens == 3 && this.tokAt (2) == 36868) {
 this.newContextVariable (this.ident);
-} else if ((this.nTokens == 3 || this.nTokens == 4) && this.theTok == 1276116993) {
+} else if ((this.nTokens == 3 || this.nTokens == 4) && this.theTok == 1073741980) {
 this.nSemiSkip -= 2;
 this.forPoint3 = 2;
 this.addTokenToPrefix (this.theToken);
@@ -1591,15 +1586,16 @@ ch = String.fromCharCode (unicode);
 return sb.toString ();
 }, "~B");
 Clazz.defineMethod (c$, "lookingAtLoadFormat", 
- function (allchar) {
+ function () {
 var ichT = this.ichToken;
+var allchar = JV.Viewer.isDatabaseCode (this.charAt (ichT));
 var ch;
 while ((Character.isLetterOrDigit (ch = this.charAt (ichT)) && (allchar || Character.isLetter (ch)) || allchar && (!this.eol (ch) && !Character.isWhitespace (ch)))) ++ichT;
 
 if (!allchar && ichT == this.ichToken || !JS.ScriptCompiler.isSpaceOrTab (ch)) return false;
 this.cchToken = ichT - this.ichToken;
 return true;
-}, "~B");
+});
 Clazz.defineMethod (c$, "lookingAtImpliedString", 
  function (allowSpace, allowEquals, allowSptParen) {
 var ichT = this.ichToken;

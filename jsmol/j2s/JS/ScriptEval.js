@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.ScriptExpr"], "JS.ScriptEval", ["java.lang.Boolean", "$.Float", "$.Thread", "java.util.Arrays", "$.Hashtable", "JU.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.JmolParallelProcessor", "J.atomdata.RadiusData", "J.c.ANIM", "$.PAL", "$.STR", "$.VDW", "J.i18n.GT", "J.io.JmolBinary", "JM.BondSet", "$.Group", "JS.FileLoadThread", "$.SV", "$.ScriptCompiler", "$.ScriptContext", "$.ScriptDelayThread", "$.ScriptInterruption", "$.ScriptManager", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.ColorEncoder", "$.Edge", "$.Elements", "$.Escape", "$.GData", "$.Logger", "$.Parser", "$.SimpleUnitCell", "$.Txt", "JV.ActionManager", "$.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
+Clazz.load (["JS.ScriptExpr"], "JS.ScriptEval", ["java.lang.Boolean", "$.Float", "$.Thread", "java.util.Hashtable", "JU.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.JmolParallelProcessor", "J.atomdata.RadiusData", "J.c.ANIM", "$.PAL", "$.STR", "$.VDW", "J.i18n.GT", "J.io.JmolBinary", "JM.BondSet", "$.Group", "JS.FileLoadThread", "$.SV", "$.ScriptCompiler", "$.ScriptContext", "$.ScriptDelayThread", "$.ScriptInterruption", "$.ScriptManager", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.ColorEncoder", "$.Edge", "$.Elements", "$.Escape", "$.GData", "$.Logger", "$.Measure", "$.Parser", "$.SimpleUnitCell", "$.Txt", "JV.ActionManager", "$.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.mathExt = null;
 this.smilesExt = null;
@@ -339,11 +339,7 @@ if (Clazz.exceptionOf (e1, JS.ScriptException)) {
 throw e1;
 }
 }
-var exec0 = this.executing;
-System.out.println (exec0 + "  " + this);
-var o = (e.evaluate (expr, asVariable, compileOnly));
-this.executing = exec0;
-return o;
+return (e.evaluate (expr, asVariable, compileOnly));
 }, "~O,~B,~B");
 Clazz.defineMethod (c$, "evaluate", 
  function (expr, asVariable, compileOnly) {
@@ -2353,7 +2349,7 @@ case 1048591:
 if (nSkip > 0) nSkip--;
  else pts[j++] = i;
 break;
-case 1276116993:
+case 1073741980:
 key = this.paramAsStr (i - 1);
 if (isForCheck) {
 i = this.slen;
@@ -2372,12 +2368,6 @@ bsOrList = JS.SV.getBitSet (vl, false);
 break;
 case 7:
 bsOrList = vl.getList ();
-break;
-case 6:
-var m = vl.getMap ();
-var keys =  new Array (m.keySet ().size ());
-java.util.Arrays.sort (keys);
-bsOrList = m.keySet ().toArray (keys);
 break;
 default:
 this.invArg ();
@@ -2401,9 +2391,9 @@ key = this.paramAsStr (j);
 isMinusMinus = key.equals ("--") || key.equals ("++");
 if (isMinusMinus) key = this.paramAsStr (++j);
 }var v = null;
-if (tok == 1276116993 || JS.T.tokAttr (this.tokAt (j), 1073741824) || (v = this.getContextVariableAsVariable (key)) != null) {
-if (tok != 1276116993 && !isMinusMinus && this.getToken (++j).tok != 269484436) this.invArg ();
-if (tok == 1276116993) {
+if (tok == 1073741980 || JS.T.tokAttr (this.tokAt (j), 1073741824) || (v = this.getContextVariableAsVariable (key)) != null) {
+if (tok != 1073741980 && !isMinusMinus && this.getToken (++j).tok != 269484436) this.invArg ();
+if (tok == 1073741980) {
 isOK = true;
 if (!isForCheck) this.pushContext (cmdToken, "FOR");
 var t = this.getForVar (key);
@@ -2421,7 +2411,7 @@ t.setModified (false);
 } else {
 if (isMinusMinus) j -= 2;
 this.setVariable (++j, this.slen - 1, key, false);
-}}if (tok != 1276116993) isOK = this.parameterExpressionBoolean (pts[0] + 1, pts[1]);
+}}if (tok != 1073741980) isOK = this.parameterExpressionBoolean (pts[0] + 1, pts[1]);
 pt++;
 if (!isOK) this.popContext (true, false);
 isForCheck = false;
@@ -3001,14 +2991,6 @@ if (!filename.equals ("string") && !filename.equals ("string[]")) loadScript.app
 }if (!isConcat && filename.startsWith ("=") && filename.endsWith ("/dssr")) {
 isConcat = true;
 filenames = [filename.substring (0, filename.length - 5), "=dssr/" + filename.substring (1, 5)];
-filename = "fileSet";
-loadScript = null;
-} else if (!isConcat && filename.startsWith ("*") && filename.indexOf ("/") > 1) {
-isConcat = true;
-var pt = filename.indexOf ("/");
-var id = filename.substring (1, pt);
-var ext = filename.substring (pt + 1);
-filenames = (ext.equals ("all") ? ["*" + id, "*ann/" + id, "*val/" + id] : ["*" + id, "*" + ext + "/" + id]);
 filename = "fileSet";
 loadScript = null;
 } else {
@@ -3934,7 +3916,7 @@ this.invArg ();
 }m4 =  new JU.M4 ();
 points[0] =  new JU.P3 ();
 nPoints = 1;
-var stddev = (this.chk ? 0 : JU.Measure.getTransformMatrix4 (ptsA, ptsB, m4, points[0]));
+var stddev = (this.chk ? 0 : JU.Measure.getTransformMatrix4 (ptsA, ptsB, m4, points[0], false));
 if (stddev > 0.001) ptsB = null;
 } else if (tok == 12) {
 m4 = this.theToken.value;
@@ -3975,7 +3957,7 @@ if (nPoints == 0 && translation != null) points[0] = this.vwr.ms.getAtomSetCente
 if (helicalPath && translation != null) {
 points[1] = JU.P3.newP (points[0]);
 points[1].add (translation);
-var ret = JU.Measure.computeHelicalAxis (points[0], points[1], q);
+var ret = JU.Measure.computeHelicalAxis (null, 135266306, points[0], points[1], q);
 points[0] = ret[0];
 var theta = (ret[3]).x;
 if (theta != 0) {
@@ -5445,7 +5427,7 @@ Clazz.defineMethod (c$, "cmdZoom",
 if (!isZoomTo) {
 var tok = (this.slen > 1 ? this.getToken (1).tok : 1048589);
 switch (tok) {
-case 1276116993:
+case 1073741980:
 case 1073742079:
 break;
 case 1048589:
@@ -5982,7 +5964,7 @@ zoom += currentZoom;
 var tok = this.tokAt (i);
 switch (tok) {
 case 1073742079:
-case 1276116993:
+case 1073741980:
 zoom = currentZoom * (tok == 1073742079 ? 0.5 : 2);
 i++;
 break;

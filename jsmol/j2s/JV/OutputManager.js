@@ -72,7 +72,7 @@ if (out == null) return errMsg = "ERROR: canceled";
 fileName = out.getFileName ();
 var comment = null;
 var stateData = null;
-params.put ("date", this.vwr.apiPlatform.getDateFormat (null));
+params.put ("date", this.vwr.apiPlatform.getDateFormat (false));
 if (type.startsWith ("JP")) {
 type = JU.PT.rep (type, "E", "");
 if (type.equals ("JPG64")) {
@@ -491,14 +491,14 @@ JU.Logger.info (J.i18n.GT._ ("Cannot set log file path."));
 value = null;
 } else {
 this.vwr.logFileName = path;
-this.vwr.g.setO ("_logFile", this.vwr.isApplet () ? value : path);
+this.vwr.g.setS ("_logFile", this.vwr.isApplet () ? value : path);
 }return value;
 }, "~S");
 Clazz.defineMethod (c$, "logToFile", 
 function (data) {
 try {
 var doClear = (data.equals ("$CLEAR$"));
-if (data.indexOf ("$NOW$") >= 0) data = JU.PT.rep (data, "$NOW$", this.vwr.apiPlatform.getDateFormat (null));
+if (data.indexOf ("$NOW$") >= 0) data = JU.PT.rep (data, "$NOW$", this.vwr.apiPlatform.getDateFormat (false));
 if (this.vwr.logFileName == null) {
 JU.Logger.info (data);
 return;

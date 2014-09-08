@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.JmolMathExtension"], "JS.MathExt", ["java.lang.Float", "java.util.Date", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M3", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.c.VDW", "J.i18n.GT", "JM.BondSet", "JS.SV", "$.ScriptParam", "$.T", "JU.BSUtil", "$.Escape", "$.JmolMolecule", "$.Logger", "$.Parser", "$.Point3fi", "$.Txt"], function () {
+Clazz.load (["JS.JmolMathExtension"], "JS.MathExt", ["java.lang.Float", "java.util.Date", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M3", "$.M4", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.Interface", "J.atomdata.RadiusData", "J.c.VDW", "J.i18n.GT", "JM.BondSet", "JS.SV", "$.ScriptParam", "$.T", "JU.BSUtil", "$.Escape", "$.JmolMolecule", "$.Logger", "$.Measure", "$.Parser", "$.Point3fi", "$.Txt"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.e = null;
@@ -82,7 +82,6 @@ case 135267841:
 case 135266319:
 case 135267842:
 return this.evaluatePlane (mp, args, tok);
-case 135266829:
 case 135287308:
 case 135271429:
 case 135270926:
@@ -97,9 +96,7 @@ case 135304707:
 return this.evaluatePrompt (mp, args);
 case 135267332:
 return this.evaluateRandom (mp, args);
-case 1276116993:
-return this.evaluateIn (mp, args);
-case 1276120578:
+case 1276120577:
 return this.evaluateReplace (mp, args);
 case 135267335:
 case 135267336:
@@ -331,7 +328,7 @@ return mp.addXList (ret);
 }} else {
 ptsA = this.e.getPointVector (args[0], 0);
 ptsB = this.e.getPointVector (args[1], 0);
-if (ptsA != null && ptsB != null) stddev = JU.Measure.getTransformMatrix4 (ptsA, ptsB, m, null);
+if (ptsA != null && ptsB != null) stddev = JU.Measure.getTransformMatrix4 (ptsA, ptsB, m, null, false);
 }return (isStdDev || Float.isNaN (stddev) ? mp.addXFloat (stddev) : mp.addXM4 (m));
 } catch (ex) {
 if (Clazz.exceptionOf (ex, Exception)) {
@@ -538,11 +535,26 @@ var tok = JS.T.getTokFromName (type);
 if (args.length > 2) {
 var pta = mp.ptValue (args[0], true);
 var ptb = mp.ptValue (args[1], true);
-if (tok == 0 || args[2].tok != 9) return false;
+if (args[2].tok != 9) return false;
 var dq = JU.Quat.newP4 (args[2].value);
-var data = JU.Measure.computeHelicalAxis (pta, ptb, dq);
-return (data == null ? false : mp.addXObj (JU.Escape.escapeHelical (type, tok, pta, ptb, data)));
-}var bs = (Clazz.instanceOf (args[0].value, JU.BS) ? args[0].value : this.vwr.ms.getAtoms (1095761939,  new Integer (args[0].asInt ())));
+switch (tok) {
+case 0:
+break;
+case 135266320:
+case 1073741854:
+case 1666189314:
+case 135266305:
+case 1746538509:
+return mp.addXObj (JU.Measure.computeHelicalAxis (null, tok, pta, ptb, dq));
+case 135266306:
+var data = JU.Measure.computeHelicalAxis (null, 1073742001, pta, ptb, dq);
+if (data == null) return false;
+return mp.addXAS (data);
+default:
+return mp.addXObj (JU.Measure.computeHelicalAxis (type, 135176, pta, ptb, dq));
+}
+} else {
+var bs = (Clazz.instanceOf (args[0].value, JU.BS) ? args[0].value : this.vwr.ms.getAtoms (1095761939,  new Integer (args[0].asInt ())));
 switch (tok) {
 case 135266320:
 return mp.addXObj (this.getHelixData (bs, 135266320));
@@ -560,7 +572,7 @@ var data = this.getHelixData (bs, 1073742001);
 if (data == null) return false;
 return mp.addXAS (data);
 }
-return false;
+}return false;
 }, "JS.ScriptMathProcessor,~A");
 Clazz.defineMethod (c$, "getHelixData", 
  function (bs, tokType) {
@@ -1273,22 +1285,6 @@ return mp.addXAF (f);
 }
 return false;
 }, "JS.ScriptMathProcessor,~A,~N");
-Clazz.defineMethod (c$, "evaluateIn", 
- function (mp, args) {
-var x1 = mp.getX ();
-switch (args.length) {
-case 1:
-var lst = args[0].getList ();
-if (lst != null) for (var i = 0, n = lst.size (); i < n; i++) if (JS.SV.areEqual (x1, lst.get (i))) return mp.addXInt (i + 1);
-
-break;
-default:
-for (var i = 0; i < args.length; i++) if (JS.SV.areEqual (x1, args[i])) return mp.addXInt (i + 1);
-
-break;
-}
-return mp.addXInt (0);
-}, "JS.ScriptMathProcessor,~A");
 Clazz.defineMethod (c$, "evaluateReplace", 
  function (mp, args) {
 var isAll = false;
@@ -1320,12 +1316,10 @@ return mp.addXStr (sFind == null ? JU.PT.clean (s) : isAll ? JU.PT.replaceAllCha
 }, "JS.ScriptMathProcessor,~A");
 Clazz.defineMethod (c$, "evaluateScript", 
  function (mp, args, tok) {
-if ((tok == 135266829 || tok == 135270926 || tok == 135287308) && args.length != 1 || args.length == 0 || args.length > 2) return false;
+if ((tok == 135270926 || tok == 135287308) && args.length != 1 || args.length == 0 || args.length > 2) return false;
 var s = JS.SV.sValue (args[0]);
 var sb =  new JU.SB ();
 switch (tok) {
-case 135266829:
-return mp.addXObj (this.vwr.evaluateExpressionAsVariable (s));
 case 135271429:
 var appID = (args.length == 2 ? JS.SV.sValue (args[1]) : ".");
 if (!appID.equals (".")) sb.append (this.vwr.jsEval (appID + "\1" + s));
@@ -1600,8 +1594,6 @@ case 1087375361:
 case 1073741864:
 case 1087373320:
 case 1073741916:
-case 1073741838:
-case 1073742189:
 return mp.addXBs (this.vwr.ms.getAtoms (tok, JS.SV.sValue (args[args.length - 1])));
 }
 break;
@@ -1642,12 +1634,20 @@ return mp.addXBs (this.vwr.ms.getAtomsWithinRadius (distance, bs, isWithinModelS
 }, "JS.ScriptMathProcessor,~A");
 Clazz.defineMethod (c$, "evaluateWrite", 
  function (mp, args) {
+if (args.length == 0) return false;
+var s = args[0].asString ().toUpperCase ();
+if (s.equalsIgnoreCase ("COORDS")) s = "COORD";
 switch (args.length) {
-case 0:
-return false;
 case 1:
-if (!args[0].asString ().toUpperCase ().equals ("PNGJ")) break;
-return mp.addXMap (this.vwr.getFileAsMap (null));
+if (s.equals ("PNGJ")) return mp.addXMap (this.vwr.getFileAsMap (null));
+if (s.equals ("COORD")) args = [JS.SV.newS (s), JS.SV.newS ("t.mol")];
+break;
+case 2:
+if (s.equals ("COORD")) {
+s = args[1].asString ().toUpperCase ();
+if (s.indexOf (".") < 0) s = "." + (s.length == 0 ? "MOL" : s);
+args = [JS.SV.newS ("COORD"), JS.SV.newS (s)];
+}break;
 }
 return mp.addXStr (this.e.getCmdExt ().write (args));
 }, "JS.ScriptMathProcessor,~A");

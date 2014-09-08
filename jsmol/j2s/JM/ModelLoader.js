@@ -236,18 +236,15 @@ Clazz.defineMethod (c$, "setAtomProperties",
 var modelCount = this.ms.mc;
 for (var i = this.baseModelIndex; i < modelCount; i++) {
 var atomProperties = this.ms.getInfo (i, "atomProperties");
-var groupList = this.ms.getInfo (i, "groupPropertyList");
 if (atomProperties == null) continue;
 for (var entry, $entry = atomProperties.entrySet ().iterator (); $entry.hasNext () && ((entry = $entry.next ()) || true);) {
 var key = entry.getKey ();
 var value = entry.getValue ();
 var bs = this.ms.getModelAtomBitSetIncludingDeleted (i, true);
-if (this.doAddHydrogens) {
-var isGroup = (groupList != null && JU.PT.isOneOf (key, groupList));
-value = this.jbr.fixPropertyValue (bs, value, isGroup);
-}key = "property_" + key.toLowerCase ();
+if (this.doAddHydrogens) value = this.jbr.fixPropertyValue (bs, value);
+key = "property_" + key.toLowerCase ();
 JU.Logger.info ("creating " + key + " for model " + this.ms.getModelName (i));
-this.vwr.setData (key, [key, value, bs, Integer.$valueOf (-1), Boolean.FALSE], this.ms.ac, 0, 0, 2147483647, 0);
+this.vwr.setData (key, [key, value, bs, Integer.$valueOf (0), Boolean.FALSE], this.ms.ac, 0, 0, 2147483647, 0);
 }
 }
 });
@@ -463,7 +460,7 @@ var isotope = iterAtom.getElementNumber ();
 if (addH && JU.Elements.getElementNumber (isotope) == 1) this.jbr.setHaveHsAlready (true);
 var name = iterAtom.getAtomName ();
 var charge = (addH ? this.getPdbCharge (group3, name) : iterAtom.getFormalCharge ());
-this.addAtom (isPdbThisModel, iterAtom.getSymmetry (), iterAtom.getAtomSite (), iterAtom.getUniqueID (), isotope, name, charge, iterAtom.getPartialCharge (), iterAtom.getTensors (), iterAtom.getOccupancy (), iterAtom.getBfactor (), iterAtom.getXYZ (), iterAtom.getIsHetero (), iterAtom.getSerial (), iterAtom.getSeqID (), group3, iterAtom.getVib (), iterAtom.getAltLoc (), iterAtom.getRadius ());
+this.addAtom (isPdbThisModel, iterAtom.getAtomSymmetry (), iterAtom.getAtomSite (), iterAtom.getUniqueID (), isotope, name, charge, iterAtom.getPartialCharge (), iterAtom.getTensors (), iterAtom.getOccupancy (), iterAtom.getBfactor (), iterAtom.getXYZ (), iterAtom.getIsHetero (), iterAtom.getAtomSerial (), group3, iterAtom.getVib (), iterAtom.getAlternateLocationID (), iterAtom.getRadius ());
 }
 if (this.groupCount > 0 && addH) {
 this.jbr.addImplicitHydrogenAtoms (adapter, this.groupCount - 1, this.isNewChain && !isLegacyHAddition ? 1 : 0);
@@ -486,16 +483,16 @@ Clazz.defineMethod (c$, "getPdbCharge",
 return (group3.equals ("ARG") && name.equals ("NH1") || group3.equals ("LYS") && name.equals ("NZ") || group3.equals ("HIS") && name.equals ("ND1") ? 1 : 0);
 }, "~S,~S");
 Clazz.defineMethod (c$, "addAtom", 
- function (isPDB, atomSymmetry, atomSite, atomUid, atomicAndIsotopeNumber, atomName, formalCharge, partialCharge, tensors, occupancy, bfactor, xyz, isHetero, atomSerial, atomSeqID, group3, vib, alternateLocationID, radius) {
+ function (isPDB, atomSymmetry, atomSite, atomUid, atomicAndIsotopeNumber, atomName, formalCharge, partialCharge, tensors, occupancy, bfactor, xyz, isHetero, atomSerial, group3, vib, alternateLocationID, radius) {
 var specialAtomID = 0;
 if (atomName != null) {
 if (isPDB && atomName.indexOf ('*') >= 0) atomName = atomName.$replace ('*', '\'');
 specialAtomID = JV.JC.lookupSpecialAtomID (atomName);
 if (isPDB && specialAtomID == 2 && "CA".equalsIgnoreCase (group3)) specialAtomID = 0;
-}var atom = this.ms.addAtom (this.iModel, this.nullGroup, atomicAndIsotopeNumber, atomName, atomSerial, atomSeqID, atomSite, xyz, radius, vib, formalCharge, partialCharge, occupancy, bfactor, tensors, isHetero, specialAtomID, atomSymmetry);
+}var atom = this.ms.addAtom (this.iModel, this.nullGroup, atomicAndIsotopeNumber, atomName, atomSerial, atomSite, xyz, radius, vib, formalCharge, partialCharge, occupancy, bfactor, tensors, isHetero, specialAtomID, atomSymmetry);
 atom.setAltLoc (alternateLocationID);
 this.htAtomMap.put (atomUid, atom);
-}, "~B,JU.BS,~N,~O,~N,~S,~N,~N,JU.Lst,~N,~N,JU.P3,~B,~N,~N,~S,JU.V3,~S,~N");
+}, "~B,JU.BS,~N,~O,~N,~S,~N,~N,JU.Lst,~N,~N,JU.P3,~B,~N,~S,JU.V3,~S,~N");
 Clazz.defineMethod (c$, "checkNewGroup", 
  function (adapter, chainID, group3, groupSequenceNumber, groupInsertionCode, addH, isLegacyHAddition) {
 var group3i = (group3 == null ? null : group3.intern ());

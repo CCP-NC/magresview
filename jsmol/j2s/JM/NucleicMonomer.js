@@ -325,7 +325,7 @@ if (this.group1 == '\0') this.group1 = g;
 }, "~S");
 Clazz.defineMethod (c$, "getBasePairs", 
 function () {
-if (!(this.bioPolymer).isDssrSet) this.bioPolymer.model.ms.vwr.getAnnotationParser ().setAllDSSRParametersForModel (this.bioPolymer.model.ms.vwr, this.bioPolymer.model.modelIndex);
+if (!(this.bioPolymer).isDssrSet) this.bioPolymer.model.ms.vwr.getDSSRParser ().setAllDSSRParametersForModel (this.bioPolymer.model.ms.vwr, this.bioPolymer.model.modelIndex);
 return this.bps;
 });
 Clazz.overrideMethod (c$, "getGroup1b", 

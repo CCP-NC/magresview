@@ -453,12 +453,7 @@ return (type == null ? this.getAtomName () : type);
 Clazz.defineMethod (c$, "getAtomNumber", 
 function () {
 var atomSerials = this.group.chain.model.ms.atomSerials;
-return (atomSerials == null ? this.i : atomSerials[this.i]);
-});
-Clazz.defineMethod (c$, "getSeqID", 
-function () {
-var ids = this.group.chain.model.ms.atomSeqIDs;
-return (ids == null ? 0 : ids[this.i]);
+return (atomSerials != null ? atomSerials[this.i] : this.i);
 });
 Clazz.defineMethod (c$, "isVisible", 
 function (flags) {
@@ -870,8 +865,6 @@ function (atom, tokWhat) {
 switch (tokWhat) {
 case 1095763969:
 return atom.getAtomNumber ();
-case 1095761940:
-return atom.getSeqID ();
 case 1095761922:
 return atom.atomID;
 case 1095761923:
@@ -913,17 +906,17 @@ case 1666189314:
 return atom.getRasMolRadius ();
 case 1095761939:
 return atom.getResno ();
-case 1095761941:
+case 1095761940:
 return atom.getAtomSite ();
 case 1641025539:
 return atom.getProteinStructureType ().getId ();
 case 1238369286:
 return atom.getProteinStructureSubType ().getId ();
-case 1095761942:
+case 1095761941:
 return atom.getStrucNo ();
 case 1297090050:
 return atom.getSymOp ();
-case 1095763991:
+case 1095763990:
 return atom.getValence ();
 }
 return 0;

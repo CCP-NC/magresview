@@ -34,7 +34,7 @@ return (type.length > 0 && type !== "<atom selection>");
 }, "~S");
 Clazz.overrideMethod (c$, "getProperty", 
 function (returnType, infoType, paramInfo) {
-if (JV.PropertyManager.propertyTypes.length != 132) JU.Logger.warn ("propertyTypes is not the right length: " + JV.PropertyManager.propertyTypes.length + " != " + 132);
+if (JV.PropertyManager.propertyTypes.length != 126) JU.Logger.warn ("propertyTypes is not the right length: " + JV.PropertyManager.propertyTypes.length + " != " + 126);
 var info;
 if (infoType.indexOf (".") >= 0 || infoType.indexOf ("[") >= 0) {
 var args = this.getArguments (infoType);
@@ -63,8 +63,9 @@ propertyName = propertyName.$replace (']', '\0').$replace ('[', '\0').$replace (
 propertyName = JU.PT.rep (propertyName, "\0\0", "\0");
 var names = JU.PT.split (JU.PT.trim (propertyName, "\0"), "\0");
 var args =  new Array (names.length);
-for (var i = 0, n; i < names.length; i++) args[i] = (names[i].startsWith ("'") || names[i].startsWith ("\"") ? JS.SV.newS (JU.PT.trim (names[i], "'\"")) : (n = JU.PT.parseInt (names[i])) == -2147483648 ? JS.SV.newS (names[i]) : JS.SV.newI (n));
-
+for (var i = 0, n; i < names.length; i++) {
+args[i] = ((n = JU.PT.parseInt (names[i])) == -2147483648 ? JS.SV.newV (4, names[i]) : JS.SV.newI (n));
+}
 return args;
 }, "~S");
 Clazz.overrideMethod (c$, "extractProperty", 
@@ -147,17 +148,17 @@ var keys =  new JU.Lst ();
 for (var k, $k = h.keySet ().iterator (); $k.hasNext () && ((k = $k.next ()) || true);) keys.addLast (k);
 
 return this.extractProperty (keys, args, ptr, null, true);
-}}var isWild = (key.startsWith ("*") || key.endsWith ("*") || key.indexOf (",") >= 0);
+}}var isWild = (key.startsWith ("*") || key.endsWith ("*"));
 if (isWild && v2 == null) v2 =  new JU.Lst ();
-if (isWild && key.length == 1) {
+if (isWild && key.length == 1 || key.equals ("*/")) {
 if (ptr == (args).length) {
 v2.addLast (property);
 return v2;
 }return this.extractProperty (property, args, ptr, v2, true);
-}if (key.contains (",")) {
+}if (key.startsWith ("*/")) {
 var mapNew = null;
 mapNew =  new java.util.Hashtable ();
-var tokens = JU.PT.split (key, ",");
+var tokens = JU.PT.split (key.substring (2), ",");
 for (var i = tokens.length; --i >= 0; ) JU.PT.getMapSubset (h, tokens[i], mapNew);
 
 if (ptr == (args).length) {
@@ -193,7 +194,7 @@ var pt = key.toUpperCase ().indexOf (" WHERE ");
 if (pt < 0) {
 argsNew[i].value = key;
 } else {
-argsNew[i] = JS.SV.newV (135280132, this.vwr.compileExpr (key.substring (pt + 6).trim ()));
+argsNew[i] = JS.SV.newV (135280132, this.vwr.comileExpr (key.substring (pt + 6).trim ()));
 argsNew[i].myName = key.substring (0, pt).trim ();
 }}}}
 return (argsNew == null ? args : argsNew);
@@ -321,13 +322,9 @@ case 19:
 return this.vwr.getStateInfo3 (myParam.toString (), 0, 0);
 case 12:
 return this.vwr.tm.getMatrixRotate ();
-case 42:
-return this.getAnnotationInfo (myParam, 1073741838);
-case 43:
-return this.getAnnotationInfo (myParam, 1073742189);
 }
-var data =  new Array (44);
-for (var i = 0; i < 44; i++) {
+var data =  new Array (42);
+for (var i = 0; i < 42; i++) {
 var paramType = JV.PropertyManager.getParamType (i);
 var paramDefault = this.getDefaultPropertyParam (i);
 var name = JV.PropertyManager.getPropertyName (i);
@@ -336,7 +333,7 @@ data[i] = (name.charAt (0) == 'X' ? "" : name + (paramType !== "" ? " " + JV.Pro
 java.util.Arrays.sort (data);
 var info =  new JU.SB ();
 info.append ("getProperty ERROR\n").append (infoType).append ("?\nOptions include:\n");
-for (var i = 0; i < 44; i++) if (data[i].length > 0) info.append ("\n getProperty ").append (data[i]);
+for (var i = 0; i < 42; i++) if (data[i].length > 0) info.append ("\n getProperty ").append (data[i]);
 
 return info.toString ();
 }, "~S,~O,~S");
@@ -785,7 +782,6 @@ break;
 case 1087373316:
 case 1073742120:
 case 1087373320:
-case 1087373319:
 var id = a.getChainID ();
 s = (id == 0 ? " " : a.getChainIDStr ());
 if (id > 255) s = JU.PT.esc (s);
@@ -794,7 +790,6 @@ case 1073742120:
 s = "[" + a.getGroup3 (false) + "]" + a.getSeqcodeString () + ":" + s;
 break;
 case 1087373320:
-case 1087373319:
 if (a.getModelIndex () != modelLast) {
 info.appendC ('\n');
 n = 0;
@@ -810,13 +805,10 @@ info.append ("Chain " + s + ":\n");
 glast = null;
 }var g = a.getGroup ();
 if (g !== glast) {
-glast = g;
-if (tok == 1087373319) {
-info.append (a.getGroup1 ('?'));
-} else {
 if ((n++) % 5 == 0 && n > 1) info.appendC ('\n');
 JU.Txt.leftJustify (info, "          ", "[" + a.getGroup3 (false) + "]" + a.getResno () + " ");
-}}continue;
+glast = g;
+}continue;
 }
 break;
 }
@@ -1090,17 +1082,6 @@ Clazz.defineMethod (c$, "getAuxiliaryInfo",
  function (atomExpression) {
 return this.vwr.ms.getAuxiliaryInfo (this.vwr.ms.getModelBS (this.vwr.getAtomBitSet (atomExpression), false));
 }, "~O");
-Clazz.defineMethod (c$, "getAnnotationInfo", 
- function (atomExpression, type) {
-var bsAtoms = this.vwr.getAtomBitSet (atomExpression);
-var iModel = this.vwr.ms.getModelBS (bsAtoms, false).nextSetBit (0);
-if (iModel < 0) return null;
-var modelinfo = this.vwr.ms.getModelAuxiliaryInfo (iModel);
-var objAnn = modelinfo.get (type == 1073741838 ? "annotations" : "validation");
-if (objAnn == null || objAnn.tok != 6) return null;
-this.vwr.getAnnotationParser ().initializeAnnotation (objAnn, type);
-return objAnn.getMap ().get ("_list");
-}, "~O,~N");
 Clazz.defineMethod (c$, "getMeasurementInfo", 
  function () {
 return this.vwr.getShapeProperty (6, "info");
@@ -1278,7 +1259,7 @@ return sb.toString ();
 }, "JU.BS,~N,~B");
 Clazz.defineStatics (c$,
 "atomExpression", "<atom selection>");
-c$.propertyTypes = c$.prototype.propertyTypes = ["appletInfo", "", "", "fileName", "", "", "fileHeader", "", "", "fileContents", "<pathname>", "", "fileContents", "", "", "animationInfo", "", "", "modelInfo", "<atom selection>", "{*}", "ligandInfo", "<atom selection>", "{*}", "shapeInfo", "", "", "measurementInfo", "", "", "centerInfo", "", "", "orientationInfo", "", "", "transformInfo", "", "", "atomList", "<atom selection>", "(visible)", "atomInfo", "<atom selection>", "(visible)", "bondInfo", "<atom selection>", "(visible)", "chainInfo", "<atom selection>", "(visible)", "polymerInfo", "<atom selection>", "(visible)", "moleculeInfo", "<atom selection>", "(visible)", "stateInfo", "<state type>", "all", "extractModel", "<atom selection>", "(visible)", "jmolStatus", "statusNameList", "", "jmolViewer", "", "", "messageQueue", "", "", "auxiliaryInfo", "<atom selection>", "{*}", "boundBoxInfo", "", "", "dataInfo", "<data type>", "types", "image", "<width=www,height=hhh>", "", "evaluate", "<expression>", "", "menu", "<type>", "current", "minimizationInfo", "", "", "pointGroupInfo", "<atom selection>", "(visible)", "fileInfo", "<type>", "", "errorMessage", "", "", "mouseInfo", "", "", "isosurfaceInfo", "", "", "isosurfaceData", "", "", "consoleText", "", "", "JSpecView", "<key>", "", "scriptQueueInfo", "", "", "nmrInfo", "<elementSymbol> or 'all' or 'shifts'", "all", "variableInfo", "<name>", "all", "annotationInfo", "<atom selection>", "{visible}", "validationInfo", "<atom selection>", "{visible}"];
+c$.propertyTypes = c$.prototype.propertyTypes = ["appletInfo", "", "", "fileName", "", "", "fileHeader", "", "", "fileContents", "<pathname>", "", "fileContents", "", "", "animationInfo", "", "", "modelInfo", "<atom selection>", "{*}", "ligandInfo", "<atom selection>", "{*}", "shapeInfo", "", "", "measurementInfo", "", "", "centerInfo", "", "", "orientationInfo", "", "", "transformInfo", "", "", "atomList", "<atom selection>", "(visible)", "atomInfo", "<atom selection>", "(visible)", "bondInfo", "<atom selection>", "(visible)", "chainInfo", "<atom selection>", "(visible)", "polymerInfo", "<atom selection>", "(visible)", "moleculeInfo", "<atom selection>", "(visible)", "stateInfo", "<state type>", "all", "extractModel", "<atom selection>", "(visible)", "jmolStatus", "statusNameList", "", "jmolViewer", "", "", "messageQueue", "", "", "auxiliaryInfo", "<atom selection>", "{*}", "boundBoxInfo", "", "", "dataInfo", "<data type>", "types", "image", "<width=www,height=hhh>", "", "evaluate", "<expression>", "", "menu", "<type>", "current", "minimizationInfo", "", "", "pointGroupInfo", "<atom selection>", "(visible)", "fileInfo", "<type>", "", "errorMessage", "", "", "mouseInfo", "", "", "isosurfaceInfo", "", "", "isosurfaceData", "", "", "consoleText", "", "", "JSpecView", "<key>", "", "scriptQueueInfo", "", "", "nmrInfo", "<elementSymbol> or 'all' or 'shifts'", "all", "variableInfo", "<name>", "all"];
 Clazz.defineStatics (c$,
 "PROP_APPLET_INFO", 0,
 "PROP_FILENAME", 1,
@@ -1322,8 +1303,6 @@ Clazz.defineStatics (c$,
 "PROP_SCRIPT_QUEUE_INFO", 39,
 "PROP_NMR_INFO", 40,
 "PROP_VAR_INFO", 41,
-"PROP_ANN_INFO", 42,
-"PROP_VAL_INFO", 43,
-"PROP_COUNT", 44,
+"PROP_COUNT", 42,
 "readableTypes", ["", "stateinfo", "extractmodel", "filecontents", "fileheader", "image", "menu", "minimizationInfo"]);
 });

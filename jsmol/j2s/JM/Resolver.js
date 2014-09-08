@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["J.api.JmolBioResolver"], "JM.Resolver", ["java.lang.Boolean", "$.NullPointerException", "java.util.Arrays", "$.Hashtable", "JU.BS", "$.Measure", "$.P3", "$.P4", "$.PT", "$.SB", "$.V3", "J.c.STR", "JM.Group", "JM.AlphaMonomer", "$.AlphaPolymer", "$.AminoMonomer", "$.AminoPolymer", "$.BioModel", "$.CarbohydrateMonomer", "$.CarbohydratePolymer", "$.Monomer", "$.NucleicMonomer", "$.NucleicPolymer", "$.PhosphorusMonomer", "$.PhosphorusPolymer", "JU.BSUtil", "$.Logger", "JV.JC"], function () {
+Clazz.load (["J.api.JmolBioResolver"], "JM.Resolver", ["java.lang.Boolean", "$.NullPointerException", "java.util.Arrays", "$.Hashtable", "JU.BS", "$.P3", "$.P4", "$.PT", "$.SB", "$.V3", "J.c.STR", "JM.Group", "JM.AlphaMonomer", "$.AlphaPolymer", "$.AminoMonomer", "$.AminoPolymer", "$.BioModel", "$.CarbohydrateMonomer", "$.CarbohydratePolymer", "$.Monomer", "$.NucleicMonomer", "$.NucleicPolymer", "$.PhosphorusMonomer", "$.PhosphorusPolymer", "JU.BSUtil", "$.Logger", "$.Measure", "JV.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.ml = null;
 this.ms = null;
@@ -94,8 +94,7 @@ this.bsAtomsForHs.setBits (iFirst, ac);
 this.bsAddedHydrogens.setBits (ac, ac + nH);
 var isHetero = this.ms.at[iFirst].isHetero ();
 var xyz = JU.P3.new3 (NaN, NaN, NaN);
-var a = this.ms.at[iFirst];
-for (var i = 0; i < nH; i++) this.ms.addAtom (a.mi, a.getGroup (), 1, "H", 0, a.getSeqID (), 0, xyz, NaN, null, 0, 0, 1, 0, null, isHetero, 0, null).deleteBonds (null);
+for (var i = 0; i < nH; i++) this.ms.addAtom (this.ms.at[iFirst].mi, this.ms.at[iFirst].getGroup (), 1, "H", 0, 0, xyz, NaN, null, 0, 0, 1, 0, null, isHetero, 0, null).deleteBonds (null);
 
 }, "J.api.JmolAdapter,~N,~N");
 Clazz.defineMethod (c$, "getBondInfo", 
@@ -359,20 +358,17 @@ this.ml.undeleteAtom (iAtom);
 this.ms.bondAtoms (atoms[iTo], atoms[iAtom], 1, this.ms.getDefaultMadFromOrder (1), null, 0, true, false);
 }, "~N,~N,~S,JU.P3");
 Clazz.overrideMethod (c$, "fixPropertyValue", 
-function (bsAtoms, data, toHydrogens) {
+function (bsAtoms, data) {
+var aData = JU.PT.split (data, "\n");
 var atoms = this.ms.at;
-var fData = data;
-var newData =  Clazz.newFloatArray (bsAtoms.cardinality (), 0);
-var lastData = 0;
-for (var pt = 0, iAtom = 0, i = bsAtoms.nextSetBit (0); i >= 0; i = bsAtoms.nextSetBit (i + 1), iAtom++) {
-if (atoms[i].getElementNumber () == 1) {
-if (!toHydrogens) continue;
-} else {
-lastData = fData[pt++];
-}newData[iAtom] = lastData;
+var newData =  new Array (bsAtoms.cardinality ());
+var lastData = "";
+for (var pt = 0, iAtom = 0, i = bsAtoms.nextSetBit (0); i >= 0; i = bsAtoms.nextSetBit (i), iAtom++) {
+if (atoms[i].getElementNumber () != 1) lastData = aData[pt++];
+newData[iAtom] = lastData;
 }
-return newData;
-}, "JU.BS,~O,~B");
+return JU.PT.join (newData, '\n', 0);
+}, "JU.BS,~S");
 c$.allocateBioPolymer = Clazz.defineMethod (c$, "allocateBioPolymer", 
 function (groups, firstGroupIndex, checkConnections) {
 var previous = null;

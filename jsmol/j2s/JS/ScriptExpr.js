@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.ScriptParam"], "JS.ScriptExpr", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "$.Map", "JU.BArray", "$.BS", "$.CU", "$.Lst", "$.M34", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.SB", "J.api.Interface", "JM.Atom", "$.BondSet", "$.Group", "$.ModelSet", "JS.SV", "$.ScriptContext", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.Elements", "$.Escape", "$.Logger", "$.Txt"], function () {
+Clazz.load (["JS.ScriptParam"], "JS.ScriptExpr", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "$.Map", "JU.BArray", "$.BS", "$.CU", "$.Lst", "$.M34", "$.M4", "$.P3", "$.P4", "$.PT", "$.SB", "J.api.Interface", "JM.Atom", "$.BondSet", "$.Group", "$.ModelSet", "JS.SV", "$.ScriptContext", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.Elements", "$.Escape", "$.Logger", "$.Measure", "$.Txt"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.debugHigh = false;
 this.cmdExt = null;
@@ -183,7 +183,7 @@ case 1087373318:
 case 1095766030:
 case 1095761936:
 case 1087373320:
-case 1095761941:
+case 1095761940:
 case 135267335:
 case 135267336:
 case 1238369286:
@@ -1497,7 +1497,7 @@ var nAtoms = this.vwr.getAtomCount ();
 var nbs = bs.cardinality ();
 if (propertyName.startsWith ("property_")) {
 var obj = (tv.tok == 7 ? JS.SV.flistValue (tv, tv.getList ().size () == nbs ? nbs : nAtoms) : tv.asString ());
-this.vwr.setData (propertyName, [propertyName, obj, JU.BSUtil.copy (bs), Integer.$valueOf (-1)], nAtoms, 0, 0, tv.tok == 7 ? 2147483647 : -2147483648, 0);
+this.vwr.setData (propertyName, [propertyName, obj, JU.BSUtil.copy (bs), Integer.$valueOf (tv.tok == 7 ? 1 : 0)], nAtoms, 0, 0, tv.tok == 7 ? 2147483647 : -2147483648, 0);
 break;
 }this.setBitsetProperty (bs, JS.T.getTokFromName (propertyName), tv.asInt (), tv.asFloat (), tv);
 }

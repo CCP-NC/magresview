@@ -27,7 +27,7 @@ if (this.stopped || this.eval.isStopped ()) {
 mode = -2;
 break;
 }{
-return Jmol._loadFileAsynchronously(this, this.vwr.html5Applet, this.fileName, null);
+return Jmol._loadFileAsynchronously(this, this.vwr.applet, this.fileName, null);
 }break;
 case -2:
 this.resumeEval ();

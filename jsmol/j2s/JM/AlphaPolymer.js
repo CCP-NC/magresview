@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["java.lang.Enum", "JM.BioPolymer"], "JM.AlphaPolymer", ["JU.BS", "$.Lst", "$.Measure", "$.P3", "J.c.STR", "JM.Helix", "$.Sheet", "$.Turn", "JU.Logger"], function () {
+Clazz.load (["java.lang.Enum", "JM.BioPolymer"], "JM.AlphaPolymer", ["JU.BS", "$.Lst", "$.P3", "J.c.STR", "JM.Helix", "$.Sheet", "$.Turn", "JU.Logger", "$.Measure"], function () {
 c$ = Clazz.declareType (JM, "AlphaPolymer", JM.BioPolymer);
 Clazz.makeConstructor (c$, 
 function (monomers) {
@@ -33,39 +33,39 @@ if ((indexStart = this.getIndex (startChainID, startSeqcode, i0, i1)) == -1 || (
 if (istart >= 0 && bsAssigned != null) {
 var pt = bsAssigned.nextSetBit (this.monomers[indexStart].firstAtomIndex);
 if (pt >= 0 && pt < this.monomers[indexEnd].lastAtomIndex) return;
-}if (this.addStructureProtected (type, structureID, serialID, strandCount, indexStart, indexEnd) && istart >= 0) bsAssigned.setBits (istart, iend + 1);
+}this.addStructureProtected (type, structureID, serialID, strandCount, indexStart, indexEnd);
+if (istart >= 0) bsAssigned.setBits (istart, iend + 1);
 }, "J.c.STR,~S,~N,~N,~N,~N,~N,~N,~N,~N,JU.BS");
 Clazz.defineMethod (c$, "addStructureProtected", 
 function (type, structureID, serialID, strandCount, indexStart, indexEnd) {
 if (indexEnd < indexStart) {
 JU.Logger.error ("AlphaPolymer:addSecondaryStructure error:  indexStart:" + indexStart + " indexEnd:" + indexEnd);
-return false;
+return;
 }var structureCount = indexEnd - indexStart + 1;
-var ps = null;
+var proteinstructure = null;
 switch (type) {
 case J.c.STR.HELIX:
 case J.c.STR.HELIXALPHA:
 case J.c.STR.HELIX310:
 case J.c.STR.HELIXPI:
-ps =  new JM.Helix (this, indexStart, structureCount, type);
+proteinstructure =  new JM.Helix (this, indexStart, structureCount, type);
 break;
 case J.c.STR.SHEET:
-ps =  new JM.Sheet (this, indexStart, structureCount, type);
+proteinstructure =  new JM.Sheet (this, indexStart, structureCount, type);
 break;
 case J.c.STR.TURN:
-ps =  new JM.Turn (this, indexStart, structureCount);
+proteinstructure =  new JM.Turn (this, indexStart, structureCount);
 break;
 default:
 JU.Logger.error ("unrecognized secondary structure type");
-return false;
+return;
 }
-ps.structureID = structureID;
-ps.serialID = serialID;
-ps.strandCount = strandCount;
+proteinstructure.structureID = structureID;
+proteinstructure.serialID = serialID;
+proteinstructure.strandCount = strandCount;
 for (var i = indexStart; i <= indexEnd; ++i) {
-(this.monomers[i]).setStructure (ps);
+(this.monomers[i]).setStructure (proteinstructure);
 }
-return true;
 }, "J.c.STR,~S,~N,~N,~N,~N");
 Clazz.overrideMethod (c$, "clearStructures", 
 function () {

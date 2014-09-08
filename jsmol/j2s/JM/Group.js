@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["java.lang.Short", "java.util.Hashtable", "JV.JC"], "JM.Group", ["JU.AU", "$.BS", "$.Quat", "J.c.STR", "JU.BSUtil", "$.Escape", "$.Logger"], function () {
+Clazz.load (["java.lang.Short", "java.util.Hashtable", "JV.JC"], "JM.Group", ["java.lang.Float", "JU.AU", "$.BS", "$.P3", "$.Quat", "$.V3", "J.c.STR", "JU.BSUtil", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.groupIndex = 0;
 this.group1 = '\0';
@@ -283,7 +283,19 @@ function (i) {
 }, "~N");
 Clazz.defineMethod (c$, "getHelixData", 
 function (tokType, qType, mStep) {
-return JU.Escape.escapeHelical (null, tokType, null, null, null);
+switch (tokType) {
+case 135266320:
+return  new JU.P3 ();
+case 1073741854:
+case 1666189314:
+return  new JU.V3 ();
+case 135266305:
+return Float.$valueOf (NaN);
+case 135266306:
+case 1073742001:
+return [];
+}
+return "";
 }, "~N,~S,~N");
 Clazz.defineMethod (c$, "isWithinStructure", 
 function (type) {

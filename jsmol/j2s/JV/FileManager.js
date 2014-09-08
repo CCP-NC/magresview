@@ -254,11 +254,8 @@ var url = (isApplet ?  new java.net.URL (this.appletDocumentBaseURL, name, null)
 if (checkOnly) return null;
 name = url.toString ();
 if (showMsg && name.toLowerCase ().indexOf ("password") < 0) JU.Logger.info ("FileManager opening 1 " + name);
-ret = this.vwr.apiPlatform.getURLContents (url, outputBytes, post, false);
-if (Clazz.instanceOf (ret, String) && (ret).startsWith ("java.") && name.startsWith ("http://ves-hx-89.ebi.ac.uk")) {
-name = "http://chemapps.stolaf.edu/jmol/jsmol/data/" + name.substring (name.lastIndexOf ("/") + 1) + (name.indexOf ("/val") >= 0 ? ".val" : ".ann") + ".json";
-ret = this.getBufferedInputStreamOrErrorMessageFromName (name, fullName, showMsg, checkOnly, outputBytes, allowReader, allowCached);
-}var bytes = null;
+ret = this.vwr.apiPlatform.getBufferedURLInputStream (url, outputBytes, post);
+var bytes = null;
 if (Clazz.instanceOf (ret, JU.SB)) {
 var sb = ret;
 if (allowReader && !JU.Rdr.isBase64 (sb)) return JU.Rdr.getBR (sb.toString ());

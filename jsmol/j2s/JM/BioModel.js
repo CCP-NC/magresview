@@ -40,8 +40,8 @@ if (this.bioPolymers[i].isNucleic ()) haveNucl = true;
  else if (Clazz.instanceOf (this.bioPolymers[i], JM.AminoPolymer)) haveProt = true;
 }
 var s = "";
-if (haveProt) s += (J.api.Interface.getOption ("dssx.DSSP")).calculateDssp (this.bioPolymers, this.bioPolymerCount, vHBonds, doReport, dsspIgnoreHydrogen, setStructure);
-if (haveNucl && this.auxiliaryInfo.containsKey ("dssr") && vHBonds != null) s += this.ms.vwr.getAnnotationParser ().getHBonds (this.ms, this.modelIndex, vHBonds, doReport);
+if (haveProt) (J.api.Interface.getOption ("dssx.DSSP")).calculateDssp (this.bioPolymers, this.bioPolymerCount, vHBonds, doReport, dsspIgnoreHydrogen, setStructure);
+if (haveNucl && this.auxiliaryInfo.containsKey ("dssr") && vHBonds != null) s += this.ms.vwr.getDSSRParser ().getHBonds (this.ms, this.modelIndex, vHBonds, doReport);
 return s;
 }, "JU.Lst,~B,~B,~B");
 Clazz.overrideMethod (c$, "setConformation", 

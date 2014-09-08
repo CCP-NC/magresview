@@ -14,17 +14,12 @@ this.fieldCount = 0;
 this.loopData = null;
 this.fileHeader = null;
 this.isHeader = true;
-this.nullString = "\0";
 this.fields = null;
 Clazz.instantialize (this, arguments);
 }, JU, "CifDataParser", null, javajs.api.GenericCifDataParser);
 Clazz.prepareFields (c$, function () {
 this.fileHeader =  new JU.SB ();
 });
-Clazz.defineMethod (c$, "setNullValue", 
-function (nullString) {
-this.nullString = nullString;
-}, "~S");
 Clazz.makeConstructor (c$, 
 function () {
 });
@@ -141,9 +136,9 @@ while (this.getNextDataToken () != null) {
 });
 Clazz.overrideMethod (c$, "getNextToken", 
 function () {
-while (!this.strHasMoreTokens ()) if (this.setStringNextLine () == null) return null;
+while (!this.hasMoreTokens ()) if (this.setStringNextLine () == null) return null;
 
-return this.nextStrToken ();
+return this.nextToken ();
 });
 Clazz.overrideMethod (c$, "getNextDataToken", 
 function () {
@@ -154,10 +149,10 @@ return this.getTokenPeeked ();
 });
 Clazz.overrideMethod (c$, "peekToken", 
 function () {
-while (!this.strHasMoreTokens ()) if (this.setStringNextLine () == null) return null;
+while (!this.hasMoreTokens ()) if (this.setStringNextLine () == null) return null;
 
 var ich = this.ich;
-this.strPeeked = this.nextStrToken ();
+this.strPeeked = this.nextToken ();
 this.ichPeeked = this.ich;
 this.ich = ich;
 return this.strPeeked;
@@ -253,7 +248,7 @@ break;
 this.setString (str);
 return str;
 });
-Clazz.defineMethod (c$, "strHasMoreTokens", 
+Clazz.defineMethod (c$, "hasMoreTokens", 
  function () {
 if (this.str == null) return false;
 var ch = '#';
@@ -261,7 +256,7 @@ while (this.ich < this.cch && ((ch = this.str.charAt (this.ich)) == ' ' || ch ==
 
 return (this.ich < this.cch && ch != '#');
 });
-Clazz.defineMethod (c$, "nextStrToken", 
+Clazz.defineMethod (c$, "nextToken", 
  function () {
 if (this.ich == this.cch) return null;
 var ichStart = this.ich;
@@ -270,7 +265,7 @@ if (ch != '\'' && ch != '"' && ch != '\1') {
 this.wasUnQuoted = true;
 while (this.ich < this.cch && (ch = this.str.charAt (this.ich)) != ' ' && ch != '\t') ++this.ich;
 
-if (this.ich == ichStart + 1) if (this.nullString != null && (this.str.charAt (ichStart) == '.' || this.str.charAt (ichStart) == '?')) return this.nullString;
+if (this.ich == ichStart + 1) if (this.str.charAt (ichStart) == '.' || this.str.charAt (ichStart) == '?') return "\0";
 var s = this.str.substring (ichStart, this.ich);
 return s;
 }this.wasUnQuoted = false;

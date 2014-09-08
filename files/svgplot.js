@@ -270,6 +270,8 @@ function SVGPlot(width, height, style, id)
         var x = this.data_series[ds_i].x;
         var y = this.data_series[ds_i].y;
         
+        var peak_labels = this.data_series[ds_i].peak_labels;
+        
         var pplot = [];
         
         var x_i_old = NaN;
@@ -279,6 +281,8 @@ function SVGPlot(width, height, style, id)
             
             var x_i = (x[i] - this.xrange[0])/(this.xrange[1] - this.xrange[0])*(this.x1y0[0] - this.x0y0[0])*this.tic_max + this.x0y0[0];
             var y_i = (y[i] - this.yrange[0])/(this.yrange[1] - this.yrange[0])*(this.x0y1[1] - this.x0y0[1])*this.tic_max + this.x0y0[1];
+            
+            var p_lab = (peak_labels !== undefined? peak_labels[i] : '');
             
             switch(style) {
                 case "pulses":                    
@@ -350,6 +354,22 @@ function SVGPlot(width, height, style, id)
                     break;
                 default:
                     break;
+            }
+            
+            if (p_lab != '') {
+                                
+                x_lab = x_i+5;
+                y_lab = y_i-5;
+                
+                pplot.push($('<text></text>').attr({
+                x : x_lab,
+                y : y_lab,
+                fill: this.data_col(ds_i),
+                'text-anchor': 'middle',
+                }).css({
+                    'font-size': this.ticl,
+                }).html(p_lab).addClass('p_label_' + i));
+                
             }
             
             x_i_old = x_i;
@@ -535,7 +555,9 @@ function SVGPlot(width, height, style, id)
     
     };
     
-    this.add_data_series = function(i, x_points, y_points, style, title) {
+    this.add_data_series = function(i, x_points, y_points, style, title, peak_labels) {
+        
+        // peak_labels is optional
         
         var data_len = Math.min(x_points.length, y_points.length);
         
@@ -543,6 +565,10 @@ function SVGPlot(width, height, style, id)
         y_points = y_points.slice(0, data_len);
         
         this.data_series[i] = {'x': x_points,'y': y_points,'style': style, 'title': String(title)};
+        
+        if (peak_labels !== undefined) {
+            this.data_series[i]['peak_labels'] = peak_labels;
+        }
         
         // Reset xrange and yrange
         

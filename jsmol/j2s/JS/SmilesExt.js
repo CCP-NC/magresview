@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.JmolSmilesExtension"], "JS.SmilesExt", ["java.lang.Float", "JU.AU", "$.BS", "$.Lst", "$.M4", "$.Measure", "$.P3", "JU.Escape", "$.Logger"], function () {
+Clazz.load (["JS.JmolSmilesExtension"], "JS.SmilesExt", ["java.lang.Float", "JU.AU", "$.BS", "$.Lst", "$.M4", "$.P3", "JU.Escape", "$.Logger", "$.Measure"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.e = null;
 this.sm = null;
@@ -42,7 +42,7 @@ for (var i = 0; i < maps.length; i++) {
 ptsB.clear ();
 for (var j = 0; j < maps[i].length; j++) ptsB.addLast (atoms[maps[i][j]]);
 
-var stddev = JU.Measure.getTransformMatrix4 (ptsA, ptsB, m, c);
+var stddev = JU.Measure.getTransformMatrix4 (ptsA, ptsB, m, c, false);
 JU.Logger.info ("getSmilesCorrelation stddev=" + stddev);
 if (vReturn != null) {
 if (stddev < tolerance) {
