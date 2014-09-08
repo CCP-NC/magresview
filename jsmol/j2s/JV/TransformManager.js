@@ -711,7 +711,6 @@ var pt = JU.P3.new3 (Clazz.doubleToInt (this.screenWidth / 2), Clazz.doubleToInt
 this.vwr.tm.unTransformPoint (pt, pt);
 pt.sub (this.fixedRotationCenter);
 ptCamera.add (pt);
-System.out.println ("TM no " + this.navigationOffset + " rpo " + this.referencePlaneOffset + " aa " + this.aperatureAngle + " sppa " + this.scalePixelsPerAngstrom + " vr " + this.visualRange + " sw/vr " + this.screenWidth / this.visualRange + " " + ptRef + " " + this.fixedRotationCenter);
 return [ptRef, ptCamera, this.fixedRotationCenter, JU.P3.new3 (this.cameraDistanceFromCenter, this.aperatureAngle, this.scalePixelsPerAngstrom)];
 });
 Clazz.defineMethod (c$, "setPerspectiveDepth", 
@@ -854,8 +853,8 @@ if (Clazz.exceptionOf (e, Exception)) {
 throw e;
 }
 }
-}this.vwr.g.setS ("_slabPlane", JU.Escape.eP4 (this.getSlabDepthPlane (false)));
-this.vwr.g.setS ("_depthPlane", JU.Escape.eP4 (this.getSlabDepthPlane (true)));
+}this.vwr.g.setO ("_slabPlane", JU.Escape.eP4 (this.getSlabDepthPlane (false)));
+this.vwr.g.setO ("_depthPlane", JU.Escape.eP4 (this.getSlabDepthPlane (true)));
 if (this.slabEnabled) return;
 this.slabValue = 0;
 this.depthValue = 2147483647;
@@ -993,7 +992,7 @@ this.matrixTransform.rotate2 (vectorAngstroms, vectorTransformed);
 }, "JU.V3,JU.V3");
 Clazz.defineMethod (c$, "move", 
 function (eval, dRot, dZoom, dTrans, dSlab, floatSecondsTotal, fps) {
-this.movetoThread = J.api.Interface.getOption ("thread.MoveThread");
+this.movetoThread = J.api.Interface.getOption ("thread.MoveToThread");
 this.movetoThread.setManager (this, this.vwr, [dRot, dTrans, [dZoom, dSlab, floatSecondsTotal, fps]]);
 if (floatSecondsTotal > 0) this.movetoThread.setEval (eval);
 this.movetoThread.run ();
@@ -1335,7 +1334,7 @@ this.vibrationPeriod = Math.abs (period);
 this.vibrationPeriodMs = Clazz.floatToInt (this.vibrationPeriod * 1000);
 if (period > 0) return;
 period = -period;
-}this.setVibrationOn (period > 0 && this.vwr.modelGetLastVibrationIndex (this.vwr.am.cmi, 0) >= 0);
+}this.setVibrationOn (period > 0 && (this.vwr.ms.getLastVibrationVector (this.vwr.am.cmi, 0) >= 0));
 }, "~N");
 Clazz.defineMethod (c$, "setVibrationT", 
 function (t) {

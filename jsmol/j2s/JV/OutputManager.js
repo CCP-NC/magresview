@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JV");
-Clazz.load (null, "JV.OutputManager", ["java.lang.Boolean", "java.util.Date", "$.Hashtable", "$.Map", "JU.Lst", "$.PT", "$.Rdr", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "JU.Logger", "$.Txt", "JV.FileManager", "$.JC", "$.Viewer"], function () {
+Clazz.load (null, "JV.OutputManager", ["java.lang.Boolean", "java.util.Date", "$.Hashtable", "$.Map", "JU.Lst", "$.PT", "$.Rdr", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "JU.Logger", "JV.FileManager", "$.JC", "$.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.privateKey = 0;
@@ -72,7 +72,7 @@ if (out == null) return errMsg = "ERROR: canceled";
 fileName = out.getFileName ();
 var comment = null;
 var stateData = null;
-params.put ("date", this.vwr.apiPlatform.getDateFormat (false));
+params.put ("date", this.vwr.apiPlatform.getDateFormat (null));
 if (type.startsWith ("JP")) {
 type = JU.PT.rep (type, "E", "");
 if (type.equals ("JPG64")) {
@@ -491,14 +491,14 @@ JU.Logger.info (J.i18n.GT._ ("Cannot set log file path."));
 value = null;
 } else {
 this.vwr.logFileName = path;
-this.vwr.g.setS ("_logFile", this.vwr.isApplet () ? value : path);
+this.vwr.g.setO ("_logFile", this.vwr.isApplet () ? value : path);
 }return value;
 }, "~S");
 Clazz.defineMethod (c$, "logToFile", 
 function (data) {
 try {
 var doClear = (data.equals ("$CLEAR$"));
-if (data.indexOf ("$NOW$") >= 0) data = JU.PT.rep (data, "$NOW$", this.vwr.apiPlatform.getDateFormat (false));
+if (data.indexOf ("$NOW$") >= 0) data = JU.PT.rep (data, "$NOW$", this.vwr.apiPlatform.getDateFormat (null));
 if (this.vwr.logFileName == null) {
 JU.Logger.info (data);
 return;
@@ -559,7 +559,7 @@ newName = this.addPngFileBytes (name, ret, iFile, crcMap, isSparDir, newName, pt
 newFileNames.addLast (name);
 }
 if (!sceneScriptOnly) {
-script = JU.Txt.replaceQuotedStrings (script, fileNames, newFileNames);
+script = JU.PT.replaceQuotedStrings (script, fileNames, newFileNames);
 v.addLast ("state.spt");
 v.addLast (null);
 v.addLast (script.getBytes ());
@@ -570,7 +570,7 @@ v.addLast (null);
 v.addLast (scripts[0].getBytes ());
 }v.addLast ("scene.spt");
 v.addLast (null);
-script = JU.Txt.replaceQuotedStrings (scripts[1], fileNames, newFileNames);
+script = JU.PT.replaceQuotedStrings (scripts[1], fileNames, newFileNames);
 v.addLast (script.getBytes ());
 }var sname = (haveSceneScript ? "scene.spt" : "state.spt");
 v.addLast ("JmolManifest.txt");

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["java.util.Hashtable"], "JS.SpaceGroup", ["java.lang.Character", "$.Float", "java.util.Arrays", "JU.AU", "$.Lst", "$.M4", "$.P3", "$.PT", "$.SB", "JS.HallInfo", "$.HallTranslation", "$.SymmetryOperation", "JU.Logger"], function () {
+Clazz.load (null, "JS.SpaceGroup", ["java.lang.Character", "$.Float", "java.util.Arrays", "$.Hashtable", "JU.AU", "$.Lst", "$.M4", "$.P3", "$.PT", "$.SB", "JS.HallInfo", "$.HallTranslation", "$.SymmetryOperation", "JU.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.index = 0;
 this.isSSG = false;
@@ -32,9 +32,6 @@ this.isBilbao = false;
 this.latticeOps = null;
 Clazz.instantialize (this, arguments);
 }, JS, "SpaceGroup");
-Clazz.prepareFields (c$, function () {
-this.xyzList =  new java.util.Hashtable ();
-});
 c$.getNull = Clazz.defineMethod (c$, "getNull", 
 function (doInit) {
 JS.SpaceGroup.getSpaceGroups ();
@@ -43,16 +40,20 @@ return  new JS.SpaceGroup (null, doInit);
 Clazz.makeConstructor (c$, 
  function (cifLine, doInit) {
 this.index = ++JS.SpaceGroup.sgIndex;
+this.init (doInit && cifLine == null);
 if (!doInit) return;
-if (cifLine == null) {
-this.addSymmetry ("x,y,z", 0, false);
-} else {
-this.buildSpaceGroup (cifLine);
-}}, "~S,~B");
+if (cifLine != null) this.buildSpaceGroup (cifLine);
+}, "~S,~B");
 Clazz.defineMethod (c$, "set", 
 function (doNormalize) {
 this.doNormalize = doNormalize;
 return this;
+}, "~B");
+Clazz.defineMethod (c$, "init", 
+ function (addXYZ) {
+this.xyzList =  new java.util.Hashtable ();
+this.operationCount = 0;
+if (addXYZ) this.addSymmetry ("x,y,z", 0, false);
 }, "~B");
 c$.createSpaceGroup = Clazz.defineMethod (c$, "createSpaceGroup", 
 function (desiredSpaceGroupIndex, name, data) {
@@ -198,7 +199,7 @@ if (sgDerived != null) return sgDerived;
 });
 Clazz.defineMethod (c$, "getDerivedSpaceGroup", 
 function () {
-if (this.index >= 0 && this.index < JS.SpaceGroup.SG.length || this.modDim > 0 || this.operations[0].timeReversal != 0) return this;
+if (this.index >= 0 && this.index < JS.SpaceGroup.SG.length || this.modDim > 0 || this.operations == null || this.operations.length == 0 || this.operations[0].timeReversal != 0) return this;
 if (this.finalOperations != null) this.setFinalOperations (null, 0, 0, false);
 var s = this.getCanonicalSeitzList ();
 return (s == null ? null : JS.SpaceGroup.findSpaceGroup (s));
@@ -268,7 +269,7 @@ return sg;
 Clazz.defineMethod (c$, "addOperation", 
  function (xyz0, opId, allowScaling) {
 if (xyz0 == null || xyz0.length < 3) {
-this.xyzList =  new java.util.Hashtable ();
+this.init (false);
 return -1;
 }var isSpecial = (xyz0.charAt (0) == '=');
 if (isSpecial) xyz0 = xyz0.substring (1);
@@ -307,8 +308,7 @@ return this.operationCount - 1;
 }, "JS.SymmetryOperation,~S,~B");
 Clazz.defineMethod (c$, "generateOperatorsFromXyzInfo", 
  function (xyzInfo) {
-this.addOperation (null, 0, false);
-this.addSymmetry ("x,y,z", 0, false);
+this.init (true);
 var terms = JU.PT.split (xyzInfo.toLowerCase (), ";");
 for (var i = 0; i < terms.length; i++) this.addSymmetry (terms[i], 0, false);
 
@@ -321,8 +321,7 @@ if (this.operationCount > 0) return;
 this.operations =  new Array (4);
 if (this.hallInfo == null || this.hallInfo.nRotations == 0) h = this.hallInfo =  new JS.HallInfo (this.hallSymbol);
 this.setLattice (this.hallInfo.latticeCode, this.hallInfo.isCentrosymmetric);
-this.addOperation (null, 0, false);
-this.addSymmetry ("x,y,z", 0, false);
+this.init (true);
 }var mat1 =  new JU.M4 ();
 var operation =  new JU.M4 ();
 var newOps =  new Array (7);
@@ -468,8 +467,8 @@ return '\0';
 Clazz.defineMethod (c$, "buildSpaceGroup", 
  function (cifLine) {
 var terms = JU.PT.split (cifLine.toLowerCase (), ";");
-this.isBilbao = (terms.length < 5);
 this.intlTableNumberFull = terms[0].trim ();
+this.isBilbao = (terms.length < 5 && !this.intlTableNumberFull.equals ("0"));
 var parts = JU.PT.split (this.intlTableNumberFull, ":");
 this.intlTableNumber = parts[0];
 this.intlTableNumberExt = (parts.length == 1 ? "" : parts[1]);

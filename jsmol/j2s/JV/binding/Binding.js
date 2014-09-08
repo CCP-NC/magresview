@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JV.binding");
-Clazz.load (["java.util.Hashtable"], "JV.binding.Binding", ["java.lang.Boolean", "java.util.Arrays", "JU.Lst", "$.PT", "$.SB", "J.api.Interface", "JU.Escape", "$.Logger", "$.Txt"], function () {
+Clazz.load (["java.util.Hashtable"], "JV.binding.Binding", ["java.lang.Boolean", "java.util.Arrays", "JU.Lst", "$.PT", "$.SB", "J.api.Interface", "JU.Escape", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.name = null;
 this.bindings = null;
@@ -214,7 +214,7 @@ return sb.toString ();
 Clazz.defineMethod (c$, "addInfo", 
  function (sb, list, name, info) {
 java.util.Arrays.sort (list);
-JU.Txt.leftJustify (sb, "                      ", name);
+JU.PT.leftJustify (sb, "                      ", name);
 sb.append ("\t");
 var sep = "";
 var len = sb.length ();

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.io");
-Clazz.load (["J.api.JmolZipUtilities"], "J.io.JmolUtil", ["java.io.BufferedInputStream", "$.BufferedReader", "java.lang.Character", "java.net.URL", "java.util.Hashtable", "$.StringTokenizer", "JU.LimitedLineReader", "$.Lst", "$.PT", "$.Rdr", "$.SB", "$.ZipTools", "J.adapter.smarter.AtomSetCollection", "J.api.Interface", "J.io.JmolBinary", "JU.Escape", "$.Logger", "JV.FileManager"], function () {
+Clazz.load (["J.api.JmolZipUtilities"], "J.io.JmolUtil", ["java.io.BufferedInputStream", "$.BufferedReader", "java.net.URL", "java.util.Hashtable", "$.StringTokenizer", "JU.LimitedLineReader", "$.Lst", "$.PT", "$.Rdr", "$.SB", "$.ZipTools", "J.adapter.smarter.AtomSetCollection", "J.api.Interface", "J.io.JmolBinary", "JU.Escape", "$.Logger", "JV.FileManager"], function () {
 c$ = Clazz.declareType (J.io, "JmolUtil", null, J.api.JmolZipUtilities);
 Clazz.makeConstructor (c$, 
 function () {
@@ -66,7 +66,7 @@ if (name.endsWith ("/")) name = name.substring (0, name.length - 1);
 var sep = (name.endsWith (".zip") ? "|" : "/");
 for (var i = 0; i < dirNums.length; i++) {
 var path = name + sep;
-path += (Character.isDigit (dirNums[i].charAt (0)) ? "Profile." + dirNums[i] : dirNums[i]) + "/";
+path += (JU.PT.isDigit (dirNums[i].charAt (0)) ? "Profile." + dirNums[i] : dirNums[i]) + "/";
 files[pt++] = path + "#JMOL_MODEL " + dirNums[i];
 files[pt++] = path + "input";
 files[pt++] = path + "archive";
@@ -391,7 +391,6 @@ return e.toString () + " opening " + fullPathName;
 throw e;
 }
 }
-return image;
 }, "JV.Viewer,~O,~S");
 Clazz.defineStatics (c$,
 "DELPHI_BINARY_MAGIC_NUMBER", "\24\0\0\0");

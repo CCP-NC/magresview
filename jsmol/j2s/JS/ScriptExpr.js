@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.ScriptParam"], "JS.ScriptExpr", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "$.Map", "JU.BArray", "$.BS", "$.CU", "$.Lst", "$.M34", "$.M4", "$.P3", "$.P4", "$.PT", "$.SB", "J.api.Interface", "JM.Atom", "$.BondSet", "$.Group", "$.ModelSet", "JS.SV", "$.ScriptContext", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.Elements", "$.Escape", "$.Logger", "$.Measure", "$.Txt"], function () {
+Clazz.load (["JS.ScriptParam"], "JS.ScriptExpr", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "$.Map", "JU.BArray", "$.BS", "$.CU", "$.Lst", "$.M34", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.SB", "J.api.Interface", "JM.Atom", "$.BondSet", "$.Group", "$.ModelSet", "JS.SV", "$.ScriptContext", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.Elements", "$.Escape", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.debugHigh = false;
 this.cmdExt = null;
@@ -183,7 +183,7 @@ case 1087373318:
 case 1095766030:
 case 1095761936:
 case 1087373320:
-case 1095761940:
+case 1095761941:
 case 135267335:
 case 135267336:
 case 1238369286:
@@ -263,7 +263,7 @@ switch (this.tokAt (i + 1)) {
 case 0:
 break;
 case 1141899270:
-case 1141899281:
+case 1141899282:
 case 1141899272:
 if (tok == 1048583) break;
 default:
@@ -607,7 +607,7 @@ case 269484437:
 case 269484438:
 var tok = instruction.tok;
 var tokWhat = instruction.intValue;
-if (tokWhat == 1095766024 && tok != 269484436) this.invArg ();
+if ((tokWhat == 1095766024) && tok != 269484436) this.invArg ();
 var data = null;
 if (tokWhat == 1716520985) {
 if (pc + 2 == code.length) this.invArg ();
@@ -843,7 +843,7 @@ Clazz.defineMethod (c$, "compareStringValues",
 switch (tokOperator) {
 case 269484436:
 case 269484437:
-return (JU.Txt.isMatch (propertyValue, comparisonValue, true, true) == (tokOperator == 269484436));
+return (JU.PT.isMatch (propertyValue, comparisonValue, true, true) == (tokOperator == 269484436));
 case 269484438:
 return JU.PT.isLike (propertyValue, comparisonValue);
 default:
@@ -910,6 +910,7 @@ switch (tokWhat) {
 default:
 ia = JM.Atom.atomPropertyInt (atom, tokWhat);
 break;
+case 1095761943:
 case 1095766024:
 return JU.BSUtil.copy (this.vwr.getConformation (-1, ival - 1, false));
 case 1297090050:
@@ -1046,6 +1047,7 @@ case 1146095626:
 case 1146095631:
 case 1146095627:
 case 1146095629:
+case 1146093584:
 case 1146093582:
 case 1766856708:
 case 1146095628:
@@ -1238,7 +1240,7 @@ vout.addLast (s);
 }
 break;
 case 3:
-var t = JM.Atom.atomPropertyTuple (atom, tok, this.ptTemp);
+var t = JM.Atom.atomPropertyTuple (this.vwr, atom, tok, this.ptTemp);
 if (t == null) this.errorStr (45, JS.T.nameOf (tok));
 switch (minmaxtype) {
 case 256:
@@ -1497,7 +1499,7 @@ var nAtoms = this.vwr.getAtomCount ();
 var nbs = bs.cardinality ();
 if (propertyName.startsWith ("property_")) {
 var obj = (tv.tok == 7 ? JS.SV.flistValue (tv, tv.getList ().size () == nbs ? nbs : nAtoms) : tv.asString ());
-this.vwr.setData (propertyName, [propertyName, obj, JU.BSUtil.copy (bs), Integer.$valueOf (tv.tok == 7 ? 1 : 0)], nAtoms, 0, 0, tv.tok == 7 ? 2147483647 : -2147483648, 0);
+this.vwr.setData (propertyName, [propertyName, obj, JU.BSUtil.copy (bs), Integer.$valueOf (-1)], nAtoms, 0, 0, tv.tok == 7 ? 2147483647 : -2147483648, 0);
 break;
 }this.setBitsetProperty (bs, JS.T.getTokFromName (propertyName), tv.asInt (), tv.asFloat (), tv);
 }

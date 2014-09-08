@@ -36,7 +36,6 @@ this.frames = null;
 this.uniqueSettings = null;
 this.atoms = null;
 this.haveScenes = false;
-this.baseAtomIndex = 0;
 this.baseModelIndex = 0;
 this.sceneOrder = null;
 this.bondCount = 0;
@@ -82,7 +81,7 @@ this.process (map);
 Clazz.overrideMethod (c$, "setAdditionalAtomParameters", 
 function (atom) {
 }, "J.adapter.smarter.Atom");
-Clazz.overrideMethod (c$, "finalizeReader", 
+Clazz.overrideMethod (c$, "finalizeSubclassReader", 
 function () {
 this.finalizeReaderPDB ();
 this.asc.setTensors ();

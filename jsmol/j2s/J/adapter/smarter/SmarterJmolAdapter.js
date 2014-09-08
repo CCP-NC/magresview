@@ -95,7 +95,13 @@ var reader = null;
 if (htParams.containsKey ("concatenate")) {
 var s = "";
 for (var i = 0; i < size; i++) {
-s += vwr.getFileAsString (names[i], false);
+var f = vwr.getFileAsString (names[i], false);
+if (i > 0 && size <= 3 && f.startsWith ("{")) {
+var type = (f.contains ("/outliers/") ? "validation" : "domains");
+var x = vwr.evaluateExpressionAsVariable (f);
+if (x != null && x.getMap () != null) htParams.put (type, x);
+continue;
+}s += f;
 if (!s.endsWith ("\n")) s += "\n";
 }
 size = 1;

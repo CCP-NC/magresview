@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapesurface");
-Clazz.load (["J.shapesurface.Isosurface", "JU.P3", "$.V3", "J.atomdata.RadiusData", "J.c.VDW"], "J.shapesurface.Contact", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Hashtable", "JU.BS", "$.CU", "$.Lst", "J.atomdata.AtomData", "J.c.HB", "J.jvxl.data.MeshData", "$.VolumeData", "JS.T", "JU.BSUtil", "$.ContactPair", "$.Escape", "$.Logger", "$.Measure", "$.TempArray"], function () {
+Clazz.load (["J.shapesurface.Isosurface", "JU.P3", "$.V3", "J.atomdata.RadiusData", "J.c.VDW"], "J.shapesurface.Contact", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Hashtable", "JU.BS", "$.CU", "$.Lst", "$.Measure", "J.atomdata.AtomData", "J.c.HB", "J.jvxl.data.MeshData", "$.VolumeData", "JS.T", "JU.BSUtil", "$.ContactPair", "$.Escape", "$.Logger", "$.TempArray"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.atoms = null;
 this.ac = 0;
@@ -44,7 +44,8 @@ var bsB = value[5];
 var rd = value[6];
 var saProbeRadius = (value[7]).floatValue ();
 var parameters = value[8];
-var command = value[9];
+var modelIndex = (value[9]).intValue ();
+var command = value[10];
 if (Float.isNaN (saProbeRadius)) saProbeRadius = 0;
 if (rd == null) rd =  new J.atomdata.RadiusData (null, saProbeRadius, J.atomdata.RadiusData.EnumType.OFFSET, J.c.VDW.AUTO);
 if (colorDensity) {
@@ -143,6 +144,7 @@ this.mergeMesh (null);
 break;
 }
 this.thisMesh.setMerged (false);
+if (modelIndex != -2147483648) this.thisMesh.modelIndex = modelIndex;
 this.thisMesh.jvxlData.vertexDataOnly = true;
 this.thisMesh.reinitializeLightingAndColor (this.vwr);
 if (contactType != 1073742036) {
@@ -245,7 +247,9 @@ var bs = JU.BSUtil.copy (bsA);
 bs.or (bsB);
 if (bs.isEmpty ()) return list;
 ad.bsSelected = bs;
-var isMultiModel = (this.atoms[bs.nextSetBit (0)].mi != this.atoms[bs.length () - 1].mi);
+var iModel = this.atoms[bs.nextSetBit (0)].mi;
+var isMultiModel = (iModel != this.atoms[bs.length () - 1].mi);
+ad.modelIndex = (isMultiModel ? -1 : iModel);
 var isSelf = bsA.equals (bsB);
 this.vwr.fillAtomData (ad, 2 | (isMultiModel ? 16 : 0) | 4);
 var maxRadius = 0;

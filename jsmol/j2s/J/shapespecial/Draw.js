@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapespecial");
-Clazz.load (["java.lang.Enum", "J.shape.MeshCollection", "JU.P3i", "$.V3"], "J.shapespecial.Draw", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.Lst", "$.P3", "$.PT", "$.SB", "J.shapespecial.DrawMesh", "JU.BSUtil", "$.C", "$.Escape", "$.Logger", "$.Measure", "$.MeshSurface", "$.Txt"], function () {
+Clazz.load (["java.lang.Enum", "J.shape.MeshCollection", "JU.P3i", "$.V3"], "J.shapespecial.Draw", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.Lst", "$.Measure", "$.P3", "$.PT", "$.SB", "J.shapespecial.DrawMesh", "JU.BSUtil", "$.C", "$.Escape", "$.Logger", "$.MeshSurface"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.dmeshes = null;
 this.thisMesh = null;
@@ -890,7 +890,7 @@ Clazz.defineMethod (c$, "getCommand",
 function (mesh) {
 if (mesh != null) return this.getCommand2 (mesh, mesh.modelIndex);
 var sb =  new JU.SB ();
-var key = (this.explicitID && this.previousMeshID != null && JU.Txt.isWild (this.previousMeshID) ? this.previousMeshID : null);
+var key = (this.explicitID && this.previousMeshID != null && JU.PT.isWild (this.previousMeshID) ? this.previousMeshID : null);
 var list = this.getMeshList (key, false);
 for (var i = list.size (); --i >= 0; ) {
 var m = list.get (i);

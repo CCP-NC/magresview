@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JV");
-Clazz.load (["javajs.api.BytePoster", "java.util.Hashtable"], "JV.FileManager", ["java.io.BufferedInputStream", "$.BufferedReader", "java.lang.Boolean", "java.net.URL", "$.URLEncoder", "java.util.Map", "JU.AU", "$.BArray", "$.Base64", "$.Lst", "$.PT", "$.Rdr", "$.SB", "J.api.Interface", "J.io.FileReader", "$.JmolBinary", "JS.SV", "JU.Logger", "$.Txt", "JV.Viewer"], function () {
+Clazz.load (["javajs.api.BytePoster", "java.util.Hashtable"], "JV.FileManager", ["java.io.BufferedInputStream", "$.BufferedReader", "java.lang.Boolean", "java.net.URL", "$.URLEncoder", "java.util.Map", "JU.AU", "$.BArray", "$.Base64", "$.Lst", "$.PT", "$.Rdr", "$.SB", "J.api.Interface", "J.io.FileReader", "$.JmolBinary", "JS.SV", "JU.Logger", "JV.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.jmb = null;
@@ -254,7 +254,7 @@ var url = (isApplet ?  new java.net.URL (this.appletDocumentBaseURL, name, null)
 if (checkOnly) return null;
 name = url.toString ();
 if (showMsg && name.toLowerCase ().indexOf ("password") < 0) JU.Logger.info ("FileManager opening 1 " + name);
-ret = this.vwr.apiPlatform.getBufferedURLInputStream (url, outputBytes, post);
+ret = this.vwr.apiPlatform.getURLContents (url, outputBytes, post, false);
 var bytes = null;
 if (Clazz.instanceOf (ret, JU.SB)) {
 var sb = ret;
@@ -805,7 +805,7 @@ name = dataPath + name.substring (pt);
 oldFileNames.addLast ("\"" + name0 + "\"");
 newFileNames.addLast ("\1\"" + name + "\"");
 }
-return JU.Txt.replaceStrings (script, oldFileNames, newFileNames);
+return JU.PT.replaceStrings (script, oldFileNames, newFileNames);
 }, "~S,~S,~B");
 c$.stripPath = Clazz.defineMethod (c$, "stripPath", 
 function (name) {

@@ -453,7 +453,12 @@ return (type == null ? this.getAtomName () : type);
 Clazz.defineMethod (c$, "getAtomNumber", 
 function () {
 var atomSerials = this.group.chain.model.ms.atomSerials;
-return (atomSerials != null ? atomSerials[this.i] : this.i);
+return (atomSerials == null ? this.i : atomSerials[this.i]);
+});
+Clazz.defineMethod (c$, "getSeqID", 
+function () {
+var ids = this.group.chain.model.ms.atomSeqIDs;
+return (ids == null ? 0 : ids[this.i]);
 });
 Clazz.defineMethod (c$, "isVisible", 
 function (flags) {
@@ -502,30 +507,31 @@ function (inModel) {
 return (this.group.chain.model.ms.getMoleculeIndex (this.i, inModel) + 1);
 }, "~B");
 Clazz.defineMethod (c$, "getFractionalCoord", 
- function (ch, asAbsolute, pt) {
-pt = this.getFractionalCoordPt (asAbsolute, pt);
+ function (fixJavaFloat, ch, asAbsolute, pt) {
+pt = this.getFractionalCoordPt (fixJavaFloat, asAbsolute, pt);
 return (ch == 'X' ? pt.x : ch == 'Y' ? pt.y : pt.z);
-}, "~S,~B,JU.P3");
+}, "~B,~S,~B,JU.P3");
 Clazz.defineMethod (c$, "getFractionalCoordPt", 
- function (asAbsolute, pt) {
+ function (fixJavaFloat, asAbsolute, pt) {
 var c = this.getUnitCell ();
 if (c == null) return this;
 if (pt == null) pt = JU.P3.newP (this);
  else pt.setT (this);
 c.toFractional (pt, asAbsolute);
+if (fixJavaFloat) JU.PT.fixPtFloats (pt, 100000.0);
 return pt;
-}, "~B,JU.P3");
+}, "~B,~B,JU.P3");
 Clazz.defineMethod (c$, "getUnitCell", 
 function () {
 return this.group.chain.model.ms.getUnitCellForAtom (this.i);
 });
 Clazz.defineMethod (c$, "getFractionalUnitCoord", 
- function (ch, pt) {
-pt = this.getFractionalUnitCoordPt (false, pt);
+ function (fixJavaFloat, ch, pt) {
+pt = this.getFractionalUnitCoordPt (fixJavaFloat, false, pt);
 return (ch == 'X' ? pt.x : ch == 'Y' ? pt.y : pt.z);
-}, "~S,JU.P3");
+}, "~B,~S,JU.P3");
 Clazz.defineMethod (c$, "getFractionalUnitCoordPt", 
-function (asCartesian, pt) {
+function (fixJavaFloat, asCartesian, pt) {
 var c = this.getUnitCell ();
 if (c == null) return this;
 if (pt == null) pt = JU.P3.newP (this);
@@ -536,8 +542,9 @@ if (asCartesian) c.toCartesian (pt, false);
 } else {
 c.toUnitCell (pt, null);
 if (!asCartesian) c.toFractional (pt, false);
-}return pt;
-}, "~B,JU.P3");
+}if (fixJavaFloat) JU.PT.fixPtFloats (pt, asCartesian ? 10000.0 : 100000.0);
+return pt;
+}, "~B,~B,JU.P3");
 Clazz.defineMethod (c$, "getFractionalUnitDistance", 
 function (pt, ptTemp1, ptTemp2) {
 var c = this.getUnitCell ();
@@ -612,24 +619,24 @@ function () {
 return this.getIdentity (true);
 });
 Clazz.defineMethod (c$, "getInfoXYZ", 
-function (useChimeFormat, pt) {
+function (fixJavaFloat, useChimeFormat, pt) {
 if (useChimeFormat) {
 var group3 = this.getGroup3 (true);
 var chainID = this.getChainID ();
-pt = this.getFractionalCoordPt (true, pt);
+pt = this.getFractionalCoordPt (fixJavaFloat, true, pt);
 return "Atom: " + (group3 == null ? this.getElementSymbol () : this.getAtomName ()) + " " + this.getAtomNumber () + (group3 != null && group3.length > 0 ? (this.isHetero () ? " Hetero: " : " Group: ") + group3 + " " + this.getResno () + (chainID != 0 && chainID != 32 ? " Chain: " + this.group.chain.getIDStr () : "") : "") + " Model: " + this.getModelNumber () + " Coordinates: " + this.x + " " + this.y + " " + this.z + (pt == null ? "" : " Fractional: " + pt.x + " " + pt.y + " " + pt.z);
 }return this.getIdentityXYZ (true, pt);
-}, "~B,JU.P3");
+}, "~B,~B,JU.P3");
 Clazz.defineMethod (c$, "getIdentityXYZ", 
 function (allInfo, pt) {
-pt = (this.group.chain.model.isJmolDataFrame ? this.getFractionalCoordPt (false, pt) : this);
+pt = (this.group.chain.model.isJmolDataFrame ? this.getFractionalCoordPt (!this.group.chain.model.ms.vwr.g.legacyJavaFloat, false, pt) : this);
 return this.getIdentity (allInfo) + " " + pt.x + " " + pt.y + " " + pt.z;
 }, "~B,JU.P3");
 Clazz.defineMethod (c$, "getIdentity", 
 function (allInfo) {
 var info =  new JU.SB ();
 var group3 = this.getGroup3 (true);
-if (group3 != null && group3.length > 0) {
+if (group3 != null && group3.length > 0 && !group3.equals ("UNK")) {
 info.append ("[");
 info.append (group3);
 info.append ("]");
@@ -651,7 +658,7 @@ info.appendI (this.getAtomNumber ());
 }if (this.altloc.charCodeAt (0) != 0) {
 info.append ("%");
 info.appendC (this.altloc);
-}if (this.group.chain.model.ms.mc > 1) {
+}if (this.group.chain.model.ms.mc > 1 && !this.group.chain.model.isJmolDataFrame) {
 info.append ("/");
 info.append (this.getModelNumberForLabel ());
 }info.append (" #");
@@ -754,9 +761,17 @@ Clazz.defineMethod (c$, "getVibrationVector",
 function () {
 return this.group.chain.model.ms.getVibration (this.i, false);
 });
+Clazz.defineMethod (c$, "getModulation", 
+function () {
+return this.group.chain.model.ms.getModulation (this.i);
+});
 Clazz.defineMethod (c$, "getVibrationCoord", 
 function (ch) {
 return this.group.chain.model.ms.getVibrationCoord (this.i, ch);
+}, "~S");
+Clazz.defineMethod (c$, "getModulationCoord", 
+function (ch) {
+return this.group.chain.model.ms.getModulationCoord (this.i, ch);
 }, "~S");
 Clazz.defineMethod (c$, "getPolymerLength", 
 function () {
@@ -865,8 +880,12 @@ function (atom, tokWhat) {
 switch (tokWhat) {
 case 1095763969:
 return atom.getAtomNumber ();
+case 1095761940:
+return atom.getSeqID ();
 case 1095761922:
 return atom.atomID;
+case 1095761943:
+return Math.max (0, atom.altloc.charCodeAt (0) - 32);
 case 1095761923:
 return atom.i;
 case 1095761924:
@@ -906,17 +925,17 @@ case 1666189314:
 return atom.getRasMolRadius ();
 case 1095761939:
 return atom.getResno ();
-case 1095761940:
+case 1095761941:
 return atom.getAtomSite ();
 case 1641025539:
 return atom.getProteinStructureType ().getId ();
 case 1238369286:
 return atom.getProteinStructureSubType ().getId ();
-case 1095761941:
+case 1095761942:
 return atom.getStrucNo ();
 case 1297090050:
 return atom.getSymOp ();
-case 1095763990:
+case 1095763991:
 return atom.getValence ();
 }
 return 0;
@@ -954,7 +973,7 @@ case 1113200652:
 case 1650071565:
 case 1113200654:
 return vwr.shm.getAtomShapeValue (tokWhat, atom.group, atom.i);
-case 1112541195:
+case 1112541194:
 return atom.getBondingRadius ();
 case 1112539139:
 return vwr.getNMRCalculation ().getChemicalShift (atom);
@@ -965,17 +984,17 @@ case 1112539152:
 case 1112539150:
 return atom.getGroupParameter (tokWhat);
 case 1112541188:
-return atom.getFractionalCoord ('X', true, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'X', true, ptTemp);
 case 1112541189:
-return atom.getFractionalCoord ('Y', true, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'Y', true, ptTemp);
 case 1112541190:
-return atom.getFractionalCoord ('Z', true, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'Z', true, ptTemp);
 case 1112541191:
-return atom.getFractionalCoord ('X', false, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'X', false, ptTemp);
 case 1112541192:
-return atom.getFractionalCoord ('Y', false, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'Y', false, ptTemp);
 case 1112541193:
-return atom.getFractionalCoord ('Z', false, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'Z', false, ptTemp);
 case 1114638362:
 return atom.getHydrophobicity ();
 case 1112539142:
@@ -984,7 +1003,7 @@ case 1112539143:
 return atom.getMass ();
 case 1129318401:
 return atom.getOccupancy100 () / 100;
-case 1112541196:
+case 1112541195:
 return atom.getPartialCharge ();
 case 1112539145:
 case 1112539146:
@@ -992,12 +1011,12 @@ case 1112539144:
 if (atom.group.chain.model.isJmolDataFrame && atom.group.chain.model.jmolFrameType.startsWith ("plot ramachandran")) {
 switch (tokWhat) {
 case 1112539145:
-return atom.getFractionalCoord ('X', false, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'X', false, ptTemp);
 case 1112539146:
-return atom.getFractionalCoord ('Y', false, ptTemp);
+return atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'Y', false, ptTemp);
 case 1112539144:
 if (atom.group.chain.model.isJmolDataFrame && atom.group.chain.model.jmolFrameType.equals ("plot ramachandran")) {
-var omega = atom.getFractionalCoord ('Z', false, ptTemp) - 180;
+var omega = atom.getFractionalCoord (!vwr.g.legacyJavaFloat, 'Z', false, ptTemp) - 180;
 return (omega < -180 ? 360 + omega : omega);
 }}
 }return atom.getGroupParameter (tokWhat);
@@ -1015,14 +1034,14 @@ return (vwr.isAtomSelected (atom.i) ? 1 : 0);
 case 1112539151:
 atom.group.chain.model.ms.getSurfaceDistanceMax ();
 return atom.getSurfaceDistance100 () / 100;
-case 1112541199:
+case 1112541196:
 return atom.getBfactor100 () / 100;
 case 1112539153:
-return atom.getFractionalUnitCoord ('X', ptTemp);
+return atom.getFractionalUnitCoord (!vwr.g.legacyJavaFloat, 'X', ptTemp);
 case 1112539154:
-return atom.getFractionalUnitCoord ('Y', ptTemp);
+return atom.getFractionalUnitCoord (!vwr.g.legacyJavaFloat, 'Y', ptTemp);
 case 1112539155:
-return atom.getFractionalUnitCoord ('Z', ptTemp);
+return atom.getFractionalUnitCoord (!vwr.g.legacyJavaFloat, 'Z', ptTemp);
 case 1649412120:
 return atom.getVanderwaalsRadiusFloat (vwr, J.c.VDW.AUTO);
 case 1649410049:
@@ -1034,6 +1053,18 @@ case 1112541203:
 return atom.getVibrationCoord ('Y');
 case 1112541204:
 return atom.getVibrationCoord ('Z');
+case 1112539159:
+return atom.getModulationCoord ('X');
+case 1112539156:
+return atom.getModulationCoord ('1');
+case 1112539157:
+return atom.getModulationCoord ('2');
+case 1112539158:
+return atom.getModulationCoord ('3');
+case 1112539160:
+return atom.getModulationCoord ('Y');
+case 1112539161:
+return atom.getModulationCoord ('Z');
 case 1313866249:
 return atom.getVolume (vwr, J.c.VDW.AUTO);
 case 1146095627:
@@ -1041,8 +1072,9 @@ case 1146095629:
 case 1146093582:
 case 1146095628:
 case 1146095631:
+case 1146093584:
 case 1146095626:
-return JM.Atom.atomPropertyTuple (atom, tokWhat, ptTemp).length ();
+return JM.Atom.atomPropertyTuple (vwr, atom, tokWhat, ptTemp).length ();
 }
 return JM.Atom.atomPropertyInt (atom, tokWhat);
 }, "JV.Viewer,JM.Atom,~N,JU.P3");
@@ -1098,27 +1130,29 @@ return atom.getSymmetryOperatorList ();
 return "";
 }, "JV.Viewer,JM.Atom,~N");
 c$.atomPropertyTuple = Clazz.defineMethod (c$, "atomPropertyTuple", 
-function (atom, tok, ptTemp) {
+function (vwr, atom, tok, ptTemp) {
 switch (tok) {
 case 1146095627:
-return atom.getFractionalCoordPt (!atom.group.chain.model.isJmolDataFrame, ptTemp);
+return atom.getFractionalCoordPt (!vwr.g.legacyJavaFloat, !atom.group.chain.model.isJmolDataFrame, ptTemp);
 case 1146095629:
-return atom.getFractionalCoordPt (false, ptTemp);
+return atom.getFractionalCoordPt (!vwr.g.legacyJavaFloat, false, ptTemp);
 case 1146093582:
-return (atom.group.chain.model.isJmolDataFrame ? atom.getFractionalCoordPt (false, ptTemp) : atom.getFractionalUnitCoordPt (false, ptTemp));
+return (atom.group.chain.model.isJmolDataFrame ? atom.getFractionalCoordPt (!vwr.g.legacyJavaFloat, false, ptTemp) : atom.getFractionalUnitCoordPt (!vwr.g.legacyJavaFloat, false, ptTemp));
 case 1146095628:
 return JU.P3.new3 (atom.sX, atom.group.chain.model.ms.vwr.getScreenHeight () - atom.sY, atom.sZ);
 case 1146095631:
 var v = atom.getVibrationVector ();
-if (v == null) v =  new JU.V3 ();
-return v;
+return (v == null ?  new JU.V3 () : v);
+case 1146093584:
+var ms = atom.getModulation ();
+return (ms == null ?  new JU.V3 () : ms.getV3 ());
 case 1146095626:
 return atom;
 case 1766856708:
 return JU.CU.colorPtFromInt (atom.group.chain.model.ms.vwr.getColorArgbOrGray (atom.getColix ()), ptTemp);
 }
 return null;
-}, "JM.Atom,~N,JU.P3");
+}, "JV.Viewer,JM.Atom,~N,JU.P3");
 Clazz.defineMethod (c$, "isWithinStructure", 
 function (type) {
 return this.group.isWithinStructure (type);

@@ -377,8 +377,9 @@ var minor = JU.PT.parseInt (tokens[2]);
 if (minor == -2147483648) minor = 0;
 if (main != -2147483648 && sub != -2147483648) {
 var ver = vwr.stateScriptVersionInt = main * 10000 + sub * 100 + minor;
-vwr.g.legacyAutoBonding = (ver < 110924);
+vwr.setBooleanProperty ("legacyautobonding", (ver < 110924));
 vwr.g.legacyHAddition = (ver < 130117);
+vwr.setBooleanProperty ("legacyjavafloat", (ver < 140206 || ver >= 140300 && ver < 140306));
 vwr.setIntProperty ("bondingVersion", ver < 140111 ? 0 : 1);
 return;
 }} catch (e) {

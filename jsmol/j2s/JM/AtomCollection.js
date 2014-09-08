@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["java.lang.Float", "JU.BS", "$.V3"], "JM.AtomCollection", ["java.lang.Character", "java.util.Arrays", "$.Hashtable", "JU.A4", "$.AU", "$.Lst", "$.M3", "$.P3", "$.PT", "J.api.Interface", "J.atomdata.RadiusData", "J.c.PAL", "$.STR", "$.VDW", "JM.Group", "JS.T", "JU.BSUtil", "$.Elements", "$.Escape", "$.Logger", "$.Measure", "$.Parser", "$.Txt", "$.Vibration", "JV.JC"], function () {
+Clazz.load (["java.lang.Float", "JU.BS", "$.V3"], "JM.AtomCollection", ["java.lang.Character", "java.util.Arrays", "$.Hashtable", "JU.A4", "$.AU", "$.Lst", "$.M3", "$.Measure", "$.P3", "$.PT", "J.api.Interface", "$.JmolModulationSet", "J.atomdata.RadiusData", "J.c.PAL", "$.STR", "$.VDW", "JM.Group", "JS.T", "JU.BSUtil", "$.Elements", "$.Escape", "$.Logger", "$.Parser", "$.Vibration", "JV.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.g3d = null;
@@ -8,6 +8,7 @@ this.ac = 0;
 this.atomNames = null;
 this.atomTypes = null;
 this.atomSerials = null;
+this.atomSeqIDs = null;
 this.vibrations = null;
 this.occupancies = null;
 this.bfactor100s = null;
@@ -69,6 +70,7 @@ this.tainted = null;
 this.atomNames = null;
 this.atomTypes = null;
 this.atomSerials = null;
+this.atomSeqIDs = null;
 this.vibrations = null;
 this.occupancies = null;
 this.bfactor100s = null;
@@ -82,6 +84,7 @@ this.tainted = mergeModelSet.tainted;
 this.atomNames = mergeModelSet.atomNames;
 this.atomTypes = mergeModelSet.atomTypes;
 this.atomSerials = mergeModelSet.atomSerials;
+this.atomSeqIDs = mergeModelSet.atomSeqIDs;
 this.vibrations = mergeModelSet.vibrations;
 this.occupancies = mergeModelSet.occupancies;
 this.bfactor100s = mergeModelSet.bfactor100s;
@@ -156,7 +159,7 @@ return (format == null ? this.at[i].getInfo () : this.getLabeler ().formatLabel 
 }, "~N,~S,JU.P3");
 Clazz.defineMethod (c$, "getAtomInfoXYZ", 
 function (i, useChimeFormat, ptTemp) {
-return this.at[i].getInfoXYZ (useChimeFormat, ptTemp);
+return this.at[i].getInfoXYZ (!this.vwr.g.legacyJavaFloat, useChimeFormat, ptTemp);
 }, "~N,~B,JU.P3");
 Clazz.defineMethod (c$, "getElementSymbol", 
 function (i) {
@@ -439,6 +442,10 @@ case 1095763969:
 this.taintAtom (i, 13);
 this.setAtomNumber (i, iValue);
 break;
+case 1095761940:
+this.taintAtom (i, 14);
+this.setAtomSeqID (i, iValue);
+break;
 case 1087375361:
 this.taintAtom (i, 1);
 this.setAtomType (i, sValue);
@@ -491,10 +498,10 @@ case 1129318401:
 if (fValue < 2 && fValue > 0.01) fValue = 100 * fValue;
 if (this.setOccupancy (i, fValue)) this.taintAtom (i, 7);
 break;
-case 1112541196:
+case 1112541195:
 if (this.setPartialCharge (i, fValue)) this.taintAtom (i, 8);
 break;
-case 1112541195:
+case 1112541194:
 if (this.setBondingRadius (i, fValue)) this.taintAtom (i, 6);
 break;
 case 1666189314:
@@ -506,10 +513,10 @@ break;
 case 1114638363:
 this.vwr.slm.setSelectedAtom (atom.i, (fValue != 0));
 break;
-case 1112541199:
+case 1112541196:
 if (this.setBFactor (i, fValue)) this.taintAtom (i, 9);
 break;
-case 1095763990:
+case 1095763991:
 atom.setValence (iValue);
 this.taintAtom (i, 10);
 break;
@@ -540,8 +547,8 @@ atom.setColixAtom (this.vwr.getColixAtomPalette (atom, J.c.PAL.CPK.id));
 }, "JM.Atom,~N");
 Clazz.defineMethod (c$, "getVibrationCoord", 
 function (atomIndex, c) {
-var v;
-if (this.vibrations == null || (v = this.vibrations[atomIndex]) == null) return 0;
+var v = this.getVibration (atomIndex, false);
+if (v == null) return 0;
 switch (c) {
 case 'X':
 return v.x;
@@ -551,11 +558,38 @@ default:
 return v.z;
 }
 }, "~N,~S");
+Clazz.defineMethod (c$, "getModulationCoord", 
+function (atomIndex, c) {
+var ms = this.getModulation (atomIndex);
+if (ms == null) return 0;
+var v = ms.getVibration (false);
+if (v == null) v = ms;
+switch (c) {
+case 'X':
+return v.x;
+case 'Y':
+return v.y;
+case 'Z':
+return v.z;
+case '1':
+case '2':
+case '3':
+var t = ms.getModulation ("T", null);
+var x = (c == '1' ? t.x : c == '2' ? t.y : t.z);
+return (x - Math.floor (x));
+}
+return 0;
+}, "~N,~S");
 Clazz.defineMethod (c$, "getVibration", 
 function (atomIndex, forceNew) {
 var v = (this.vibrations == null ? null : this.vibrations[atomIndex]);
-return (v == null && forceNew ?  new JU.Vibration () : v);
+return (Clazz.instanceOf (v, J.api.JmolModulationSet) ? (v).getVibration (forceNew) : v == null && forceNew ?  new JU.Vibration () : v);
 }, "~N,~B");
+Clazz.defineMethod (c$, "getModulation", 
+function (iAtom) {
+var v = (this.vibrations == null ? null : this.vibrations[iAtom]);
+return (v != null && v.modDim > 0 ? v : null);
+}, "~N");
 Clazz.defineMethod (c$, "setVibrationVector", 
 function (atomIndex, vib) {
 if (Float.isNaN (vib.x) || Float.isNaN (vib.y) || Float.isNaN (vib.z)) return;
@@ -564,12 +598,13 @@ if (Clazz.instanceOf (vib, JU.Vibration)) {
 this.vibrations[atomIndex] = vib;
 } else {
 if (this.vibrations[atomIndex] == null) this.vibrations[atomIndex] =  new JU.Vibration ();
-this.vibrations[atomIndex].setT (vib);
+this.vibrations[atomIndex].setXYZ (vib);
 }this.at[atomIndex].setVibrationVector ();
 }, "~N,JU.T3");
 Clazz.defineMethod (c$, "setVibrationVector2", 
  function (atomIndex, tok, fValue) {
 var v = this.getVibration (atomIndex, true);
+if (v == null) return;
 switch (tok) {
 case 1112541202:
 v.x = fValue;
@@ -601,6 +636,13 @@ function (atomIndex, atomno) {
 if (this.atomSerials == null) {
 this.atomSerials =  Clazz.newIntArray (this.at.length, 0);
 }this.atomSerials[atomIndex] = atomno;
+return true;
+}, "~N,~N");
+Clazz.defineMethod (c$, "setAtomSeqID", 
+function (atomIndex, seqID) {
+if (this.atomSeqIDs == null) {
+this.atomSeqIDs =  Clazz.newIntArray (this.at.length, 0);
+}this.atomSeqIDs[atomIndex] = seqID;
 return true;
 }, "~N,~N");
 Clazz.defineMethod (c$, "setOccupancy", 
@@ -660,7 +702,7 @@ return;
 case 12:
 this.loadCoordinates (dataString, true, true);
 return;
-case 14:
+case 15:
 fData =  Clazz.newFloatArray (this.ac, 0);
 bs = JU.BS.newN (this.ac);
 break;
@@ -678,12 +720,15 @@ n++;
 var pt = tokens.length - 1;
 var x = JU.PT.parseFloat (tokens[pt]);
 switch (type) {
-case 14:
+case 15:
 fData[atomIndex] = x;
 bs.set (atomIndex);
 continue;
 case 13:
 this.setAtomNumber (atomIndex, Clazz.floatToInt (x));
+break;
+case 14:
+this.setAtomSeqID (atomIndex, Clazz.floatToInt (x));
 break;
 case 0:
 this.setAtomName (atomIndex, tokens[pt]);
@@ -720,7 +765,7 @@ break;
 }
 this.taintAtom (atomIndex, type);
 }
-if (type == 14 && n > 0) this.vwr.setData (name, [name, fData, bs, Integer.$valueOf (1)], 0, 0, 0, 0, 0);
+if (type == 15 && n > 0) this.vwr.setData (name, [name, fData, bs, Integer.$valueOf (1)], 0, 0, 0, 0, 0);
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 JU.Logger.error ("AtomCollection.loadData error: " + e);
@@ -773,9 +818,9 @@ c$.getUserSettableType = Clazz.defineMethod (c$, "getUserSettableType",
 function (dataType) {
 var isExplicit = (dataType.indexOf ("property_") == 0);
 var check = (isExplicit ? dataType.substring (9) : dataType);
-for (var i = 0; i < 14; i++) if (JM.AtomCollection.userSettableValues[i].equalsIgnoreCase (check)) return i;
+for (var i = 0; i < 15; i++) if (JM.AtomCollection.userSettableValues[i].equalsIgnoreCase (check)) return i;
 
-return (isExplicit ? 14 : -1);
+return (isExplicit ? 15 : -1);
 }, "~S");
 Clazz.defineMethod (c$, "getTaintedAtoms", 
 function (type) {
@@ -791,7 +836,7 @@ for (var i = bsAtoms.nextSetBit (0); i >= 0; i = bsAtoms.nextSetBit (i + 1)) thi
 Clazz.defineMethod (c$, "taintAtom", 
 function (atomIndex, type) {
 if (!this.preserveState) return;
-if (this.tainted == null) this.tainted =  new Array (14);
+if (this.tainted == null) this.tainted =  new Array (15);
 if (this.tainted[type] == null) this.tainted[type] = JU.BS.newN (this.ac);
 this.tainted[type].set (atomIndex);
 if (type == 2) this.validateBspfForModel ((this).am[this.at[atomIndex].mi].trajectoryBaseIndex, false);
@@ -809,7 +854,7 @@ if (bs == null) {
 if (this.tainted == null) return;
 this.tainted[type] = null;
 return;
-}if (this.tainted == null) this.tainted =  new Array (14);
+}if (this.tainted == null) this.tainted =  new Array (15);
 if (this.tainted[type] == null) this.tainted[type] = JU.BS.newN (this.ac);
 JU.BSUtil.copy2 (bs, this.tainted[type]);
 }, "JU.BS,~N");
@@ -1586,7 +1631,7 @@ for (i = bsInfo.nextSetBit (0); i >= 0; i = bsInfo.nextSetBit (i + 1)) bsTemp.se
 for (i = this.ac; --i >= 0; ) if (bsTemp.get (this.getElementNumber (i))) bs.set (i);
 
 break;
-case 1095761940:
+case 1095761941:
 bsInfo = specInfo;
 bsTemp =  new JU.BS ();
 for (i = bsInfo.nextSetBit (0); i >= 0; i = bsInfo.nextSetBit (i + 1)) bsTemp.set (this.at[i].atomSite);
@@ -1707,13 +1752,13 @@ if (identifier.indexOf ("*") > 0) {
 return this.getSpecNameOrNull (identifier, true);
 }var len = identifier.length;
 var pt = 0;
-while (pt < len && Character.isLetter (identifier.charAt (pt))) ++pt;
+while (pt < len && JU.PT.isLetter (identifier.charAt (pt))) ++pt;
 
 bs = this.getSpecNameOrNull (identifier.substring (0, pt), false);
 if (pt == len) return bs;
 if (bs == null) bs =  new JU.BS ();
 var pt0 = pt;
-while (pt < len && Character.isDigit (identifier.charAt (pt))) ++pt;
+while (pt < len && JU.PT.isDigit (identifier.charAt (pt))) ++pt;
 
 var seqNumber = 0;
 try {
@@ -1756,7 +1801,7 @@ if (allowInitialStar) name = name.substring (1);
 for (var i = this.ac; --i >= 0; ) {
 var g3 = this.at[i].getGroup3 (true);
 if (g3 != null && g3.length > 0) {
-if (JU.Txt.isMatch (g3, name, checkStar, true)) {
+if (JU.PT.isMatch (g3, name, checkStar, true)) {
 if (bs == null) bs = JU.BS.newN (i + 1);
 bs.set (i);
 while (--i >= 0 && this.at[i].getGroup3 (true).equals (g3)) bs.set (i);
@@ -1770,7 +1815,7 @@ return bs;
 }, "~S,~B");
 Clazz.defineMethod (c$, "isAtomNameMatch", 
  function (atom, strPattern, checkStar, allowInitialStar) {
-return JU.Txt.isMatch (atom.getAtomName ().toUpperCase (), strPattern, checkStar, allowInitialStar);
+return JU.PT.isMatch (atom.getAtomName ().toUpperCase (), strPattern, checkStar, allowInitialStar);
 }, "JM.Atom,~S,~B,~B");
 Clazz.defineMethod (c$, "getSeqcodeBits", 
 function (seqcode, returnEmpty) {
@@ -1895,6 +1940,7 @@ this.deleteAtomTensors (bsAtoms);
 this.atomNames = JU.AU.deleteElements (this.atomNames, firstAtomIndex, nAtoms);
 this.atomTypes = JU.AU.deleteElements (this.atomTypes, firstAtomIndex, nAtoms);
 this.atomSerials = JU.AU.deleteElements (this.atomSerials, firstAtomIndex, nAtoms);
+this.atomSeqIDs = JU.AU.deleteElements (this.atomSeqIDs, firstAtomIndex, nAtoms);
 this.bfactor100s = JU.AU.deleteElements (this.bfactor100s, firstAtomIndex, nAtoms);
 this.hasBfactorRange = false;
 this.occupancies = JU.AU.deleteElements (this.occupancies, firstAtomIndex, nAtoms);
@@ -1904,7 +1950,7 @@ this.vibrations = JU.AU.deleteElements (this.vibrations, firstAtomIndex, nAtoms)
 this.nSurfaceAtoms = 0;
 this.bsSurface = null;
 this.surfaceDistance100s = null;
-if (this.tainted != null) for (var i = 0; i < 14; i++) JU.BSUtil.deleteBits (this.tainted[i], bsAtoms);
+if (this.tainted != null) for (var i = 0; i < 15; i++) JU.BSUtil.deleteBits (this.tainted[i], bsAtoms);
 
 }, "~N,~N,JU.BS");
 Clazz.defineMethod (c$, "getAtomIdentityInfo", 
@@ -2003,6 +2049,31 @@ for (var e, $e = this.atomTensors.entrySet ().iterator (); $e.hasNext () && ((e 
 
 return list;
 }, "~S");
+Clazz.defineMethod (c$, "scaleVectorsToMax", 
+function (max) {
+if (this.vibrations == null || max == 0) return;
+var m = 0;
+var bsVib = JU.BS.newN (this.ac);
+for (var i = this.vibrations.length; --i >= 0; ) {
+var v = this.getVibration (i, false);
+if (v != null && (v.modDim == -1 || v.modDim == -2)) {
+m = Math.max (m, v.length ());
+bsVib.set (i);
+}}
+if (m == 0 || m == max) return;
+m = max / m;
+var ok = false;
+for (var i = bsVib.nextSetBit (0); i >= 0; i = bsVib.nextSetBit (i + 1)) {
+var v = this.getVibration (i, false);
+var mod = this.getModulation (i);
+if (mod != null) mod.scaleVibration (m);
+ else v.scale (m);
+if (!ok) {
+this.taintAtom (i, 12);
+ok = true;
+}}
+this.tainted[12].or (bsVib);
+}, "~N");
 c$.$AtomCollection$AtomSorter$ = function () {
 Clazz.pu$h(self.c$);
 c$ = Clazz.decorateAsClass (function () {
@@ -2031,10 +2102,11 @@ Clazz.defineStatics (c$,
 "TAINT_VANDERWAALS", 11,
 "TAINT_VIBRATION", 12,
 "TAINT_ATOMNO", 13,
-"TAINT_MAX", 14,
+"TAINT_SEQID", 14,
+"TAINT_MAX", 15,
 "userSettableValues", null);
 {
-JM.AtomCollection.userSettableValues = "atomName atomType coord element formalCharge hydrophobicity ionic occupany partialCharge temperature valence vanderWaals vibrationVector atomNo".$plit (" ");
+JM.AtomCollection.userSettableValues = "atomName atomType coord element formalCharge hydrophobicity ionic occupany partialCharge temperature valence vanderWaals vibrationVector atomNo seqID".$plit (" ");
 }c$.sqrt3_2 = c$.prototype.sqrt3_2 = (Math.sqrt (3) / 2);
 c$.vRef = c$.prototype.vRef = JU.V3.new3 (3.14159, 2.71828, 1.41421);
 Clazz.defineStatics (c$,

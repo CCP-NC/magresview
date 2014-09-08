@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.jvxl.readers");
-Clazz.load (["J.jvxl.readers.VolumeFileReader"], "J.jvxl.readers.CastepDensityReader", ["java.lang.Character", "JU.SB"], function () {
+Clazz.load (["J.jvxl.readers.VolumeFileReader"], "J.jvxl.readers.CastepDensityReader", ["JU.PT", "$.SB"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.nFilePoints = 0;
 this.nSkip = 0;
@@ -9,13 +9,13 @@ Clazz.makeConstructor (c$,
 function () {
 Clazz.superConstructor (this, J.jvxl.readers.CastepDensityReader, []);
 });
-$_V(c$, "init2", 
+Clazz.overrideMethod (c$, "init2", 
 function (sg, br) {
 this.init2VFR (sg, br);
 this.canDownsample = this.isProgressive = false;
 this.isAngstroms = true;
 }, "J.jvxl.readers.SurfaceGenerator,java.io.BufferedReader");
-$_V(c$, "readParameters", 
+Clazz.overrideMethod (c$, "readParameters", 
 function () {
 this.jvxlFileHeaderBuffer =  new JU.SB ();
 while (this.readLine () != null && this.line.indexOf (".") < 0) {
@@ -39,11 +39,11 @@ if (this.isAnisotropic) this.setVectorAnisotropy (this.volumetricVectors[i]);
 while (this.readLine ().trim ().length > 0) {
 }
 });
-$_V(c$, "gotoData", 
+Clazz.overrideMethod (c$, "gotoData", 
 function (n, nPoints) {
 this.nSkip = n;
 }, "~N,~N");
-$_V(c$, "readSurfaceData", 
+Clazz.overrideMethod (c$, "readSurfaceData", 
 function (isMapData) {
 this.initializeSurfaceData ();
 this.voxelData =  Clazz.newFloatArray (this.nPointsX, this.nPointsY, this.nPointsZ, 0);
@@ -89,15 +89,15 @@ this.voxelData = null;
 }this.volumeData.setVoxelDataAsArray (this.voxelData);
 if (this.dataMin > this.params.cutoff) this.params.cutoff = 2 * this.dataMin;
 }, "~B");
-$_M(c$, "skipPoints", 
-($fz = function (n) {
+Clazz.defineMethod (c$, "skipPoints", 
+ function (n) {
 var pt = this.next[0];
 for (var i = 0; i < n; i++) {
-while (pt < this.line.length && Character.isWhitespace (this.line.charAt (pt++))) {
+while (pt < this.line.length && JU.PT.isWhitespace (this.line.charAt (pt++))) {
 }
-while (pt < this.line.length && !Character.isWhitespace (this.line.charAt (pt++))) {
+while (pt < this.line.length && !JU.PT.isWhitespace (this.line.charAt (pt++))) {
 }
 }
 this.next[0] = pt;
-}, $fz.isPrivate = true, $fz), "~N");
+}, "~N");
 });

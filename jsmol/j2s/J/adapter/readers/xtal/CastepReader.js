@@ -171,7 +171,7 @@ this.setAtomCoordTokens (atom, this.tokens, 3);
 });
 Clazz.defineMethod (c$, "readEnergy", 
  function (pt) {
-if (this.isTrajectory) this.asc.setTrajectory ();
+if (this.isTrajectory) this.applySymmetryAndSetTrajectory ();
 this.tokens = this.getTokens ();
 try {
 var energy = Double.$valueOf (Double.parseDouble (this.tokens[pt]));
@@ -189,6 +189,7 @@ throw e;
 Clazz.defineMethod (c$, "readPhononTrajectories", 
  function () {
 this.isTrajectory = (this.desiredVibrationNumber <= 0);
+if (this.isTrajectory) this.asc.setTrajectory ();
 this.doApplySymmetry = true;
 while (this.line != null && this.line.contains ("<-- E")) {
 this.asc.newAtomSetClear (false);
@@ -207,7 +208,7 @@ this.applySymmetryAndSetTrajectory ();
 this.discardLinesUntilContains ("<-- E");
 }
 });
-Clazz.overrideMethod (c$, "finalizeReader", 
+Clazz.overrideMethod (c$, "finalizeSubclassReader", 
 function () {
 if (this.isPhonon || this.isOutput) {
 this.isTrajectory = false;
@@ -368,19 +369,17 @@ this.readLines (2);
 var haveSpin = (this.line.indexOf ("Spin") >= 0);
 this.rd ();
 var atoms = this.asc.atoms;
-var spins = (haveSpin ?  new Array (atoms.length) : null);
-if (spins != null) for (var i = 0; i < spins.length; i++) spins[i] = "0";
+var spins = (haveSpin ?  Clazz.newFloatArray (atoms.length, 0) : null);
+if (spins != null) for (var i = 0; i < spins.length; i++) spins[i] = 0;
 
 while (this.rd () != null && this.line.indexOf ('=') < 0) {
 var index = this.readOutputAtomIndex ();
 var charge = this.parseFloatStr (this.tokens[haveSpin ? this.tokens.length - 2 : this.tokens.length - 1]);
 atoms[index].partialCharge = charge;
-if (haveSpin) spins[index] = this.tokens[this.tokens.length - 1];
+if (haveSpin) spins[index] = this.parseFloatStr (this.tokens[this.tokens.length - 1]);
 }
-if (haveSpin) {
-var data = JU.PT.join (spins, '\n', 0);
-this.asc.setAtomSetAtomProperty ("spin", data, -1);
-}});
+if (haveSpin) this.asc.setAtomProperties ("spin", spins, -1, false);
+});
 Clazz.defineMethod (c$, "readPhononUnitCell", 
  function () {
 this.abc = this.read3Vectors (this.line.indexOf ("bohr") >= 0);

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.cif");
-Clazz.load (["J.adapter.smarter.MSInterface"], "J.adapter.readers.cif.MSRdr", ["java.lang.Boolean", "$.Exception", "$.Float", "java.util.Hashtable", "JU.Lst", "$.M3", "$.Matrix", "$.P3", "$.SB", "J.adapter.readers.cif.Subsystem", "J.adapter.smarter.AtomSetCollectionReader", "JU.BSUtil", "$.BoxInfo", "$.Escape", "$.Logger", "$.Modulation", "$.ModulationSet"], function () {
+Clazz.load (["J.adapter.smarter.MSInterface"], "J.adapter.readers.cif.MSRdr", ["java.lang.Boolean", "$.Exception", "$.Float", "java.util.Hashtable", "JU.Lst", "$.M3", "$.Matrix", "$.P3", "$.PT", "J.adapter.readers.cif.Subsystem", "J.adapter.smarter.AtomSetCollectionReader", "JU.BSUtil", "$.BoxInfo", "$.Escape", "$.Logger", "$.Modulation", "$.ModulationSet", "$.Vibration"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.cr = null;
 this.modDim = 0;
@@ -15,8 +15,6 @@ this.modDebug = false;
 this.modSelected = -1;
 this.modLast = false;
 this.sigma = null;
-this.q1 = null;
-this.q1Norm = null;
 this.htModulation = null;
 this.htAtomMods = null;
 this.iopLast = -1;
@@ -83,6 +81,7 @@ var ch = id.charAt (0);
 switch (ch) {
 case 'O':
 case 'D':
+case 'M':
 case 'U':
 if (this.modType != null && this.modType.indexOf (ch) < 0 || this.modSelected > 0 && this.modSelected != 1) return;
 break;
@@ -144,10 +143,9 @@ this.atoms = this.cr.asc.atoms;
 this.cr.symmetry = this.cr.asc.getSymmetry ();
 if (this.cr.symmetry != null) this.nOps = this.cr.symmetry.getSpaceGroupOperationCount ();
 this.iopLast = -1;
-var sb =  new JU.SB ();
-for (var i = this.cr.asc.getLastAtomSetAtomIndex (); i < n; i++) this.modulateAtom (this.atoms[i], sb);
+var i0 = this.cr.asc.getLastAtomSetAtomIndex ();
+for (var i = i0; i < n; i++) this.modulateAtom (this.atoms[i]);
 
-this.cr.asc.setAtomSetAtomProperty ("modt", sb.toString (), -1);
 this.htAtomMods = null;
 if (this.minXYZ0 != null) this.trimAtomSet ();
 this.htSubsystems = null;
@@ -167,8 +165,6 @@ return;
 this.cr.appendUunitCellInfo ("q" + (i + 1) + "=" + this.fixPt (pt[0]) + " " + this.fixPt (pt[1]) + " " + this.fixPt (pt[2]));
 this.sigma.getArray ()[i] = [pt[0], pt[1], pt[2]];
 }
-this.q1 = this.sigma.getArray ()[0];
-this.q1Norm = JU.P3.new3 (this.q1[0] == 0 ? 0 : 1, this.q1[1] == 0 ? 0 : 1, this.q1[2] == 0 ? 0 : 1);
 var pt;
 var map =  new java.util.Hashtable ();
 for (var e, $e = this.htModulation.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
@@ -177,9 +173,10 @@ pt = e.getValue ();
 switch (key.charAt (0)) {
 case 'O':
 this.haveOccupancy = true;
-case 'U':
 case 'D':
-if (pt[2] == 1 && key.charAt (2) != 'S') {
+case 'M':
+case 'U':
+if (pt[2] == 1 && key.charAt (2) != 'S' && key.charAt (2) != 'T') {
 var ipt = key.indexOf ("?");
 if (ipt >= 0) {
 var s = key.substring (ipt + 1);
@@ -235,6 +232,7 @@ case 'U':
 utens = key.substring (4, key.indexOf (";"));
 case 'O':
 case 'D':
+case 'M':
 if (this.modAverage) break;
 var axis = key.charAt (pt_);
 type = this.getModType (key);
@@ -269,7 +267,7 @@ Clazz.overrideMethod (c$, "getModType",
 function (key) {
 var type = key.charAt (0);
 var id = key.charAt (2);
-return (id == 'S' ? 's' : id == '0' ? 'c' : type == 'O' ? 'o' : type == 'U' ? 'u' : 'f');
+return (id == 'S' ? 's' : id == 'T' ? 't' : id == '0' ? 'c' : type == 'O' ? 'o' : type == 'U' ? 'u' : type == 'M' ? 'm' : 'f');
 }, "~S");
 Clazz.defineMethod (c$, "calculateQCoefs", 
  function (p) {
@@ -358,7 +356,7 @@ if (JU.Logger.debuggingHigh) JU.Logger.debug ("MOD RDR adding " + id + " " + i +
 this.cr.asc.setU (atom, i, val + atom.anisoBorU[i]);
 }, "J.adapter.smarter.Atom,~S,~N");
 Clazz.defineMethod (c$, "modulateAtom", 
- function (a, sb) {
+ function (a) {
 if (this.modCoord && this.htSubsystems != null) {
 var ptc = JU.P3.newP (a);
 var spt = this.getSymmetry (a);
@@ -376,7 +374,7 @@ this.gammaE =  new JU.M3 ();
 this.getSymmetry (a).getSpaceGroupOperation (iop).getRotationScale (this.gammaE);
 }if (JU.Logger.debugging) {
 JU.Logger.debug ("setModulation iop = " + iop + " " + this.cr.symmetry.getSpaceGroupXyz (iop, false) + " " + a.bsSymmetry);
-}var ms =  new JU.ModulationSet ().setMod (a.index + " " + a.atomName, a, this.modDim, list, this.gammaE, this.getMatrices (a), iop, this.getSymmetry (a));
+}var ms =  new JU.ModulationSet ().setMod (a.index + " " + a.atomName, a, this.modDim, list, this.gammaE, this.getMatrices (a), iop, this.getSymmetry (a), Clazz.instanceOf (a.vib, JU.Vibration) ? a.vib : null);
 ms.calculate (null, false);
 if (!Float.isNaN (ms.vOcc)) {
 var pt = this.getMod ("J_O#0;" + a.atomName);
@@ -419,11 +417,7 @@ JU.Logger.debug ("setModulation Uij(final)=" + JU.Escape.eAF (a.anisoBorU) + "\n
 JU.Logger.debug ("setModulation tensor=" + JU.Escape.e ((a.tensors.get (1)).getInfo ("all")));
 }}}if (Float.isNaN (ms.x)) ms.set (0, 0, 0);
 a.vib = ms;
-if (this.modVib || a.foccupancy != 0) {
-var t = this.q1Norm.dot (a);
-if (Math.abs (t - Clazz.floatToInt (t)) > 0.001) t = Clazz.doubleToInt (Math.floor (t));
-sb.append ((Clazz.floatToInt (t)) + "\n");
-}}, "J.adapter.smarter.Atom,JU.SB");
+}, "J.adapter.smarter.Atom");
 Clazz.overrideMethod (c$, "getAtomSymmetry", 
 function (a, defaultSymmetry) {
 var ss;
@@ -494,12 +488,17 @@ var pt =  new JU.P3 ();
 if (bs == null) bs = asc.bsAtoms = JU.BSUtil.newBitSet2 (0, asc.ac);
 for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
 var a = atoms[i];
+var isOK = (!this.isCommensurate || this.modAverage || a.foccupancy >= 0.5);
+if (isOK) {
 pt.setT (a);
 if (a.vib != null) pt.add (a.vib);
 this.getSymmetry (a).toCartesian (pt, false);
 sym.toFractional (pt, false);
-if (!asc.xtalSymmetry.isWithinCell (3, pt, this.minXYZ0.x, this.maxXYZ0.x, this.minXYZ0.y, this.maxXYZ0.y, this.minXYZ0.z, this.maxXYZ0.z, 0.001) || this.isCommensurate && !this.modAverage && a.foccupancy < 0.5) {
-System.out.println (a.atomName + " " + a + " " + pt);
+if (this.cr.fixJavaFloat) JU.PT.fixPtFloats (pt, 100000.0);
+isOK = asc.xtalSymmetry.isWithinCell (3, pt, this.minXYZ0.x, this.maxXYZ0.x, this.minXYZ0.y, this.maxXYZ0.y, this.minXYZ0.z, this.maxXYZ0.z, 0.001);
+}if (isOK) {
+if (this.cr.fixJavaFloat) JU.PT.fixPtFloats (a, 100000.0);
+} else {
 bs.clear (i);
 }}
 });

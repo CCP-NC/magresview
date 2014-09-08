@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["JM.PhosphorusPolymer"], "JM.NucleicPolymer", ["JU.P4", "$.V3", "JM.HBond", "JU.Measure"], function () {
+Clazz.load (["JM.PhosphorusPolymer"], "JM.NucleicPolymer", ["JU.Measure", "$.P4", "$.V3", "JM.HBond"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.isDssrSet = false;
 Clazz.instantialize (this, arguments);

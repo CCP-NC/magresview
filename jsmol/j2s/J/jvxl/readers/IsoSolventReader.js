@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.jvxl.readers");
-Clazz.load (["JU.P3", "J.jvxl.readers.AtomDataReader", "JU.P4", "$.V3"], "J.jvxl.readers.IsoSolventReader", ["java.lang.Float", "java.util.Hashtable", "JU.BS", "$.Lst", "J.jvxl.data.MeshData", "JU.BSUtil", "$.Logger", "$.Measure", "$.MeshSurface", "$.TempArray"], function () {
+Clazz.load (["JU.P3", "J.jvxl.readers.AtomDataReader", "JU.P4", "$.V3"], "J.jvxl.readers.IsoSolventReader", ["java.lang.Float", "java.util.Hashtable", "JU.BS", "$.Lst", "$.Measure", "J.jvxl.data.MeshData", "JU.BSUtil", "$.Logger", "$.MeshSurface", "$.TempArray"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.cavityRadius = 0;
 this.envelopeRadius = 0;

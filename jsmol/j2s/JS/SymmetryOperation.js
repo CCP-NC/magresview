@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JU.M4"], "JS.SymmetryOperation", ["java.lang.Float", "JU.Lst", "$.Matrix", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "JU.Escape", "$.Logger", "$.Measure", "$.Parser"], function () {
+Clazz.load (["JU.M4"], "JS.SymmetryOperation", ["java.lang.Float", "JU.Lst", "$.Matrix", "$.Measure", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "JU.Escape", "$.Logger", "$.Parser"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.xyzOriginal = null;
 this.xyz = null;
@@ -132,8 +132,10 @@ this.isFinalized = true;
 this.isBio = (xyz.indexOf ("bio") >= 0);
 this.xyz = (this.isBio ? this.toString () : JS.SymmetryOperation.getXYZFromMatrix (this, false, false, false));
 return true;
-}if (xyz.indexOf (",m") >= 0) this.timeReversal = (xyz.indexOf (",m-1") >= 0 ? -1 : 1);
-var strOut = JS.SymmetryOperation.getMatrixFromString (this, xyz, this.linearRotTrans, allowScaling);
+}if (xyz.indexOf (",m") >= 0) {
+this.timeReversal = (xyz.indexOf (",m-1") >= 0 ? -1 : 1);
+allowScaling = true;
+}var strOut = JS.SymmetryOperation.getMatrixFromString (this, xyz, this.linearRotTrans, allowScaling);
 if (strOut == null) return false;
 this.setMatrix (isReverse);
 this.xyz = (isReverse ? JS.SymmetryOperation.getXYZFromMatrix (this, true, false, false) : strOut);
@@ -170,7 +172,7 @@ if (isTrans) {
 if (offset != null) {
 v /= 12;
 if (pt < offset.length) v += offset[pt++];
-}v = JS.SymmetryOperation.normalizeTwelfths ((v < 0 ? -1 : 1) * Math.round (Math.abs (v * 12)) / 12, this.doNormalize);
+}v = JS.SymmetryOperation.normalizeTwelfths ((v < 0 ? -1 : 1) * Math.abs (v * 12) / 12, this.doNormalize);
 rowPt++;
 }this.linearRotTrans[i] = v;
 }
@@ -302,39 +304,41 @@ return null;
 }, "JS.SymmetryOperation,~S,~A,~B");
 c$.xyzFraction = Clazz.defineMethod (c$, "xyzFraction", 
  function (n12ths, allPositive, halfOrLess) {
-n12ths = Math.round (n12ths);
+var n = n12ths;
 if (allPositive) {
-while (n12ths < 0) n12ths += 12;
+while (n < 0) n += 12;
 
 } else if (halfOrLess) {
-while (n12ths > 6) n12ths -= 12;
+while (n > 6) n -= 12;
 
-while (n12ths < -6.0) n12ths += 12;
+while (n < -6.0) n += 12;
 
-}var s = JS.SymmetryOperation.twelfthsOf (n12ths);
-return (s.charAt (0) == '0' ? "" : n12ths > 0 ? "+" + s : s);
+}var s = JS.SymmetryOperation.twelfthsOf (n);
+return (s.charAt (0) == '0' ? "" : n > 0 ? "+" + s : s);
 }, "~N,~B,~B");
 c$.twelfthsOf = Clazz.defineMethod (c$, "twelfthsOf", 
  function (n12ths) {
 var str = "";
-var i12ths = Math.round (n12ths);
-if (i12ths == 12) return "1";
-if (i12ths == -12) return "-1";
-if (i12ths < 0) {
-i12ths = -i12ths;
-if (i12ths % 12 != 0) str = "-";
-}var n = Clazz.doubleToInt (i12ths / 12);
-if (n < 1) return str + JS.SymmetryOperation.twelfths[i12ths % 12];
-var m = 0;
-switch (i12ths % 12) {
+if (n12ths < 0) {
+n12ths = -n12ths;
+str = "-";
+}var m = 12;
+var n = Math.round (n12ths);
+if (Math.abs (n - n12ths) > 0.01) {
+var f = n12ths / 12;
+var max = 20;
+for (m = 5; m < max; m++) {
+var fm = f * m;
+n = Math.round (fm);
+if (Math.abs (n - fm) < 0.01) break;
+}
+if (m == max) return str + f;
+} else {
+if (n == 12) return str + "1";
+if (n < 12) return str + JS.SymmetryOperation.twelfths[n % 12];
+switch (n % 12) {
 case 0:
-return str + n;
-case 1:
-case 5:
-case 7:
-case 11:
-m = 12;
-break;
+return "" + Clazz.doubleToInt (n / 12);
 case 2:
 case 10:
 m = 6;
@@ -350,8 +354,11 @@ break;
 case 6:
 m = 2;
 break;
+default:
+break;
 }
-return str + (Clazz.doubleToInt (i12ths * m / 12)) + "/" + m;
+n = (Clazz.doubleToInt (n * m / 12));
+}return str + n + "/" + m;
 }, "~N");
 c$.plusMinus = Clazz.defineMethod (c$, "plusMinus", 
  function (strT, x, sx) {
@@ -473,8 +480,7 @@ if (haveInversion) {
 pt1.sub2 (pt0, vt1);
 pt2.sub2 (pt0, vt2);
 pt3.sub2 (pt0, vt3);
-}var info;
-info = JU.Measure.computeHelicalAxis (null, 135266306, pta00, pt0, JU.Quat.getQuaternionFrame (pt0, pt1, pt2).div (JU.Quat.getQuaternionFrame (pta00, pta01, pta02)));
+}var info = JU.Measure.computeHelicalAxis (pta00, pt0, JU.Quat.getQuaternionFrame (pt0, pt1, pt2).div (JU.Quat.getQuaternionFrame (pta00, pta01, pta02)));
 var pa1 = info[0];
 var ax1 = info[1];
 var ang1 = Clazz.floatToInt (Math.abs (JU.PT.approx ((info[3]).x, 1)));

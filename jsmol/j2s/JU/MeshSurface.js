@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JU");
-Clazz.load (null, "JU.MeshSurface", ["java.lang.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.Lst", "$.P3", "$.P4", "$.PT", "$.SB", "JU.BSUtil", "$.BoxInfo", "$.C", "$.Escape", "$.Geodesic", "$.Measure", "$.TempArray"], function () {
+Clazz.load (null, "JU.MeshSurface", ["java.lang.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.Lst", "$.Measure", "$.P3", "$.P4", "$.PT", "$.SB", "JU.BSUtil", "$.BoxInfo", "$.C", "$.Escape", "$.Geodesic", "$.TempArray"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.spanningVectors = null;
 this.meshType = null;

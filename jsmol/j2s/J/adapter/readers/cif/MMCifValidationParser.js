@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.adapter.readers.cif");
-Clazz.load (null, "J.adapter.readers.cif.MMCifValidationParser", ["java.lang.Character", "java.util.Hashtable"], function () {
+Clazz.load (null, "J.adapter.readers.cif.MMCifValidationParser", ["java.lang.Character", "java.util.Hashtable", "JS.SV"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.asResidues = false;
 this.reader = null;
@@ -19,8 +19,11 @@ return this;
 Clazz.defineMethod (c$, "finalizeValidations", 
 function (modelMap) {
 this.mapAtomResIDs (modelMap);
-var retProps = this.reader.vwr.getAnnotationParser ().catalogValidations (this.reader.vwr, this.reader.validation, this.getModelAtomIndices (), this.resMap, (this.asResidues ? null : this.atomMap), modelMap);
-return (retProps == null || retProps.size () == 0 ? null : this.setProperties (retProps));
+var svMap = this.reader.validation;
+var retProps = this.reader.vwr.getAnnotationParser ().catalogValidations (this.reader.vwr, svMap, this.getModelAtomIndices (), this.resMap, (this.asResidues ? null : this.atomMap), modelMap);
+var note = (retProps == null || retProps.size () == 0 ? null : this.setProperties (retProps));
+svMap.getMap ().put ("_note", JS.SV.newS (note));
+return note;
 }, "java.util.Map");
 Clazz.defineMethod (c$, "mapAtomResIDs", 
  function (modelMap) {

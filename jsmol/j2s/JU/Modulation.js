@@ -22,12 +22,14 @@ this.utens = utens;
 this.params = params;
 this.qCoefs = qCoefs;
 switch (type) {
+case 'm':
 case 'f':
 case 'o':
 case 'u':
 this.a1 = params[0];
 this.a2 = params[1];
 break;
+case 't':
 case 's':
 case 'c':
 this.center = params[0];
@@ -46,9 +48,12 @@ Clazz.defineMethod (c$, "apply",
 function (ms, t) {
 var v = 0;
 var nt = 0;
+var isSpin = false;
 for (var i = this.qCoefs.length; --i >= 0; ) nt += this.qCoefs[i] * t[i][0];
 
 switch (this.type) {
+case 'm':
+isSpin = true;
 case 'f':
 case 'o':
 case 'u':
@@ -62,6 +67,8 @@ nt -= Math.floor (nt);
 ms.vOcc = (this.range (nt) ? 1 : 0);
 ms.vOcc0 = NaN;
 return;
+case 't':
+isSpin = true;
 case 's':
 nt -= Math.floor (nt);
 if (!this.range (nt)) return;
@@ -71,6 +78,20 @@ if (nt < this.left && this.left < this.center) nt += 1;
 }v = this.a1 * (nt - this.center);
 break;
 }
+if (isSpin) {
+var f = ms.getAxesLengths ();
+switch (this.axis) {
+case 'x':
+ms.mxyz.x += v / f[0];
+break;
+case 'y':
+ms.mxyz.y += v / f[1];
+break;
+case 'z':
+ms.mxyz.z += v / f[2];
+break;
+}
+} else {
 switch (this.axis) {
 case 'x':
 ms.x += v;
@@ -88,7 +109,7 @@ default:
 if (Float.isNaN (ms.vOcc)) ms.vOcc = 0;
 ms.vOcc += v;
 }
-}, "JU.ModulationSet,~A");
+}}, "JU.ModulationSet,~A");
 Clazz.defineMethod (c$, "range", 
  function (x4) {
 return (this.left < this.right ? this.left <= x4 && x4 <= this.right : this.left <= x4 || x4 <= this.right);
@@ -105,6 +126,8 @@ return info;
 Clazz.defineStatics (c$,
 "TWOPI", 6.283185307179586,
 "TYPE_DISP_FOURIER", 'f',
+"TYPE_SPIN_FOURIER", 'm',
+"TYPE_SPIN_SAWTOOTH", 't',
 "TYPE_DISP_SAWTOOTH", 's',
 "TYPE_OCC_FOURIER", 'o',
 "TYPE_OCC_CRENEL", 'c',

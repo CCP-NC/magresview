@@ -12,10 +12,10 @@ Clazz.superConstructor (this, J.adapter.readers.cif.MSCifRdr, []);
 Clazz.defineMethod (c$, "processEntry", 
 function () {
 var cr = this.cr;
-if (cr.key.equals ("_jana_cell_commen_t_section_1")) {
+if (cr.key.equals ("_cell_commen_t_section_1")) {
 this.isCommensurate = true;
 this.commensurateSection1 = cr.parseIntStr (cr.data);
-}if (cr.key.startsWith ("_jana_cell_commen_supercell_matrix")) {
+}if (cr.key.startsWith ("_cell_commen_supercell_matrix")) {
 this.isCommensurate = true;
 if (this.comSSMat == null) this.comSSMat = JU.M3.newM3 (null);
 var tokens = JU.PT.split (cr.key, "_");
@@ -26,12 +26,8 @@ if (r > 0 && c > 0) this.comSSMat.setElement (r - 1, c - 1, cr.parseFloatStr (cr
 Clazz.defineMethod (c$, "processLoopBlock", 
 function () {
 var cr = this.cr;
-if (cr.key.equals ("_cell_subsystem_code")) {
-this.processSubsystemLoopBlock ();
-return 1;
-}if (cr.key.equals ("_jana_cell_twin_matrix_id")) {
-this.processTwinMatrixLoopBlock ();
-}if (!cr.key.startsWith ("_cell_wave") && !cr.key.contains ("fourier") && !cr.key.contains ("_special_func")) return 0;
+if (cr.key.equals ("_cell_subsystem_code")) return this.processSubsystemLoopBlock ();
+if (!cr.key.startsWith ("_cell_wave") && !cr.key.contains ("fourier") && !cr.key.contains ("_special_func")) return 0;
 if (cr.asc.iSet < 0) cr.asc.newAtomSet ();
 cr.parseLoopParameters (J.adapter.readers.cif.MSCifRdr.modulationFields);
 var tok;
@@ -55,7 +51,8 @@ case 42:
 case 4:
 pt[0] = pt[1] = pt[2] = 0;
 case 13:
-case 19:
+case 25:
+case 50:
 case 35:
 case 43:
 case 44:
@@ -78,7 +75,8 @@ case 44:
 case 45:
 atomLabel = axis = "*";
 case 13:
-case 19:
+case 25:
+case 50:
 case 35:
 id = Character.toUpperCase (J.adapter.readers.cif.MSCifRdr.modulationFields[tok].charAt (11)) + "_";
 break;
@@ -88,34 +86,40 @@ break;
 case 46:
 id = "J_O";
 pt[0] = pt[2] = 1;
-case 24:
+case 55:
+if (id == null) id = "M_T";
+case 18:
 if (id == null) id = "D_S";
 case 30:
 if (id == null) id = "O_0";
 axis = "0";
 case 11:
-case 18:
+case 24:
+case 48:
 case 33:
 atomLabel = this.field;
 break;
 case 12:
+case 49:
 axis = this.field;
 if (this.modAxes != null && this.modAxes.indexOf (axis.toUpperCase ()) < 0) ignore = true;
 break;
 case 34:
 axis = this.field.toUpperCase ();
 break;
-case 21:
+case 27:
 case 31:
 case 15:
+case 52:
 case 37:
-case 53:
-case 49:
-case 51:
+case 66:
+case 62:
+case 64:
 pt[2] = 0;
 case 1:
 case 5:
-case 25:
+case 19:
+case 56:
 pt[0] = cr.parseFloatStr (this.field);
 break;
 case 8:
@@ -124,39 +128,46 @@ pt =  Clazz.newDoubleArray (this.modDim, 0);
 pt[0] = cr.parseFloatStr (this.field);
 break;
 case 16:
-case 22:
+case 28:
+case 53:
 case 38:
 pt[0] = cr.parseFloatStr (this.field);
 pt[2] = 1;
 break;
-case 50:
-case 20:
+case 63:
+case 26:
 axis = "0";
 case 2:
 case 6:
 case 9:
 case 17:
-case 23:
+case 29:
+case 54:
 case 39:
 case 32:
-case 26:
+case 20:
+case 57:
 case 47:
 case 14:
+case 51:
 case 36:
-case 48:
-case 52:
+case 61:
+case 65:
 pt[1] = cr.parseFloatStr (this.field);
 break;
 case 3:
 case 7:
 case 10:
-case 27:
+case 21:
+case 58:
 pt[2] = cr.parseFloatStr (this.field);
 break;
-case 28:
+case 22:
+case 59:
 c = cr.parseFloatStr (this.field);
 break;
-case 29:
+case 23:
+case 60:
 w = cr.parseFloatStr (this.field);
 break;
 }
@@ -171,14 +182,15 @@ case 'F':
 break;
 case 'D':
 case 'O':
+case 'M':
 case 'U':
 case 'J':
 if (atomLabel == null || axis == null) continue;
-if (id.equals ("D_S")) {
+if (id.equals ("D_S") || id.equals ("M_T")) {
 if (Double.isNaN (c) || Double.isNaN (w)) continue;
-if (pt[0] != 0) this.addMod ("D_S#x;" + atomLabel, fid, [c, w, pt[0]]);
-if (pt[1] != 0) this.addMod ("D_S#y;" + atomLabel, fid, [c, w, pt[1]]);
-if (pt[2] != 0) this.addMod ("D_S#z;" + atomLabel, fid, [c, w, pt[2]]);
+if (pt[0] != 0) this.addMod (id + "#x;" + atomLabel, fid, [c, w, pt[0]]);
+if (pt[1] != 0) this.addMod (id + "#y;" + atomLabel, fid, [c, w, pt[1]]);
+if (pt[2] != 0) this.addMod (id + "#z;" + atomLabel, fid, [c, w, pt[2]]);
 continue;
 }id += "#" + axis + ";" + atomLabel;
 break;
@@ -202,21 +214,8 @@ this.fieldProperty (cr, 0);
 var id = this.field;
 this.addSubsystem (id, this.getSparseMatrix (cr, "_w_", 1, 3 + this.modDim));
 }
+return 1;
 });
-Clazz.defineMethod (c$, "processTwinMatrixLoopBlock", 
- function () {
-var cr = this.cr;
-cr.parseLoopParameters (null);
-while (cr.parser.getData ()) {
-this.fieldProperty (cr, 0);
-var id = this.field;
-this.addTwin (id, this.getSparseMatrix (cr, "_matrix_", 1, 3));
-}
-});
-Clazz.defineMethod (c$, "addTwin", 
- function (id, m) {
-System.out.println ("twin " + id + " = " + m);
-}, "~S,JU.Matrix");
 Clazz.defineMethod (c$, "getSparseMatrix", 
  function (cr, term, i, dim) {
 var m =  new JU.Matrix (null, dim, dim);
@@ -246,9 +245,9 @@ Clazz.defineStatics (c$,
 "FWV_X", 5,
 "FWV_Y", 6,
 "FWV_Z", 7,
-"FWV_Q1_COEF", 8,
-"FWV_Q2_COEF", 9,
-"FWV_Q3_COEF", 10,
+"JANA_FWV_Q1_COEF", 8,
+"JANA_FWV_Q2_COEF", 9,
+"JANA_FWV_Q3_COEF", 10,
 "FWV_DISP_LABEL", 11,
 "FWV_DISP_AXIS", 12,
 "FWV_DISP_SEQ_ID", 13,
@@ -256,18 +255,18 @@ Clazz.defineStatics (c$,
 "FWV_DISP_SIN", 15,
 "FWV_DISP_MODULUS", 16,
 "FWV_DISP_PHASE", 17,
-"FWV_OCC_LABEL", 18,
-"FWV_OCC_SEQ_ID", 19,
-"FWV_OCC_COS", 20,
-"FWV_OCC_SIN", 21,
-"FWV_OCC_MODULUS", 22,
-"FWV_OCC_PHASE", 23,
-"DISP_SPEC_LABEL", 24,
-"DISP_SAW_AX", 25,
-"DISP_SAW_AY", 26,
-"DISP_SAW_AZ", 27,
-"DISP_SAW_C", 28,
-"DISP_SAW_W", 29,
+"DISP_SPEC_LABEL", 18,
+"DISP_SAW_AX", 19,
+"DISP_SAW_AY", 20,
+"DISP_SAW_AZ", 21,
+"DISP_SAW_C", 22,
+"DISP_SAW_W", 23,
+"FWV_OCC_LABEL", 24,
+"FWV_OCC_SEQ_ID", 25,
+"FWV_OCC_COS", 26,
+"FWV_OCC_SIN", 27,
+"FWV_OCC_MODULUS", 28,
+"FWV_OCC_PHASE", 29,
 "OCC_SPECIAL_LABEL", 30,
 "OCC_CRENEL_C", 31,
 "OCC_CRENEL_W", 32,
@@ -286,12 +285,25 @@ Clazz.defineStatics (c$,
 "FUP_ID", 45,
 "JANA_OCC_ABS_LABEL", 46,
 "JANA_OCC_ABS_O_0", 47,
-"DEPR_FD_COS", 48,
-"DEPR_FD_SIN", 49,
-"DEPR_FO_COS", 50,
-"DEPR_FO_SIN", 51,
-"DEPR_FU_COS", 52,
-"DEPR_FU_SIN", 53,
-"modulationFields", ["_cell_wave_vector_seq_id", "_cell_wave_vector_x", "_cell_wave_vector_y", "_cell_wave_vector_z", "_atom_site_fourier_wave_vector_seq_id", "_atom_site_fourier_wave_vector_x", "_atom_site_fourier_wave_vector_y", "_atom_site_fourier_wave_vector_z", "_jana_atom_site_fourier_wave_vector_q1_coeff", "_jana_atom_site_fourier_wave_vector_q2_coeff", "_jana_atom_site_fourier_wave_vector_q3_coeff", "_atom_site_displace_fourier_atom_site_label", "_atom_site_displace_fourier_axis", "_atom_site_displace_fourier_wave_vector_seq_id", "_atom_site_displace_fourier_param_cos", "_atom_site_displace_fourier_param_sin", "_atom_site_displace_fourier_param_modulus", "_atom_site_displace_fourier_param_phase", "_atom_site_occ_fourier_atom_site_label", "_atom_site_occ_fourier_wave_vector_seq_id", "_atom_site_occ_fourier_param_cos", "_atom_site_occ_fourier_param_sin", "_atom_site_occ_fourier_param_modulus", "_atom_site_occ_fourier_param_phase", "_atom_site_displace_special_func_atom_site_label", "_atom_site_displace_special_func_sawtooth_ax", "_atom_site_displace_special_func_sawtooth_ay", "_atom_site_displace_special_func_sawtooth_az", "_atom_site_displace_special_func_sawtooth_c", "_atom_site_displace_special_func_sawtooth_w", "_atom_site_occ_special_func_atom_site_label", "_atom_site_occ_special_func_crenel_c", "_atom_site_occ_special_func_crenel_w", "_atom_site_u_fourier_atom_site_label", "_atom_site_u_fourier_tens_elem", "_atom_site_u_fourier_wave_vector_seq_id", "_atom_site_u_fourier_param_cos", "_atom_site_u_fourier_param_sin", "_atom_site_u_fourier_param_modulus", "_atom_site_u_fourier_param_phase", "_atom_site_displace_fourier_id", "_atom_site_occ_fourier_id", "_atom_site_u_fourier_id", "_atom_site_displace_fourier_param_id", "_atom_site_occ_fourier_param_id", "_atom_site_u_fourier_param_id", "_jana_atom_site_occ_fourier_absolute_site_label", "_jana_atom_site_occ_fourier_absolute", "_atom_site_displace_fourier_cos", "_atom_site_displace_fourier_sin", "_atom_site_occ_fourier_cos", "_atom_site_occ_fourier_sin", "_atom_site_u_fourier_cos", "_atom_site_u_fourier_sin"],
+"FWV_SPIN_LABEL", 48,
+"FWV_SPIN_AXIS", 49,
+"FWV_SPIN_SEQ_ID", 50,
+"FWV_SPIN_COS", 51,
+"FWV_SPIN_SIN", 52,
+"FWV_SPIN_MODULUS", 53,
+"FWV_SPIN_PHASE", 54,
+"SPIN_SPEC_LABEL", 55,
+"SPIN_SAW_AX", 56,
+"SPIN_SAW_AY", 57,
+"SPIN_SAW_AZ", 58,
+"SPIN_SAW_C", 59,
+"SPIN_SAW_W", 60,
+"DEPR_FD_COS", 61,
+"DEPR_FD_SIN", 62,
+"DEPR_FO_COS", 63,
+"DEPR_FO_SIN", 64,
+"DEPR_FU_COS", 65,
+"DEPR_FU_SIN", 66,
+"modulationFields", ["_cell_wave_vector_seq_id", "_cell_wave_vector_x", "_cell_wave_vector_y", "_cell_wave_vector_z", "_atom_site_fourier_wave_vector_seq_id", "_atom_site_fourier_wave_vector_x", "_atom_site_fourier_wave_vector_y", "_atom_site_fourier_wave_vector_z", "_atom_site_fourier_wave_vector_q1_coeff", "_atom_site_fourier_wave_vector_q2_coeff", "_atom_site_fourier_wave_vector_q3_coeff", "_atom_site_displace_fourier_atom_site_label", "_atom_site_displace_fourier_axis", "_atom_site_displace_fourier_wave_vector_seq_id", "_atom_site_displace_fourier_param_cos", "_atom_site_displace_fourier_param_sin", "_atom_site_displace_fourier_param_modulus", "_atom_site_displace_fourier_param_phase", "_atom_site_displace_special_func_atom_site_label", "_atom_site_displace_special_func_sawtooth_ax", "_atom_site_displace_special_func_sawtooth_ay", "_atom_site_displace_special_func_sawtooth_az", "_atom_site_displace_special_func_sawtooth_c", "_atom_site_displace_special_func_sawtooth_w", "_atom_site_occ_fourier_atom_site_label", "_atom_site_occ_fourier_wave_vector_seq_id", "_atom_site_occ_fourier_param_cos", "_atom_site_occ_fourier_param_sin", "_atom_site_occ_fourier_param_modulus", "_atom_site_occ_fourier_param_phase", "_atom_site_occ_special_func_atom_site_label", "_atom_site_occ_special_func_crenel_c", "_atom_site_occ_special_func_crenel_w", "_atom_site_u_fourier_atom_site_label", "_atom_site_u_fourier_tens_elem", "_atom_site_u_fourier_wave_vector_seq_id", "_atom_site_u_fourier_param_cos", "_atom_site_u_fourier_param_sin", "_atom_site_u_fourier_param_modulus", "_atom_site_u_fourier_param_phase", "_atom_site_displace_fourier_id", "_atom_site_occ_fourier_id", "_atom_site_u_fourier_id", "_atom_site_displace_fourier_param_id", "_atom_site_occ_fourier_param_id", "_atom_site_u_fourier_param_id", "_atom_site_occ_fourier_absolute_site_label", "_atom_site_occ_fourier_absolute", "_atom_site_moment_fourier_atom_site_label", "_atom_site_moment_fourier_axis", "_atom_site_moment_fourier_wave_vector_seq_id", "_atom_site_moment_fourier_param_cos", "_atom_site_moment_fourier_param_sin", "_atom_site_moment_fourier_param_modulus", "_atom_site_moment_fourier_param_phase", "_atom_site_moment_special_func_atom_site_label", "_atom_site_moment_special_func_sawtooth_ax", "_atom_site_moment_special_func_sawtooth_ay", "_atom_site_moment_special_func_sawtooth_az", "_atom_site_moment_special_func_sawtooth_c", "_atom_site_moment_special_func_sawtooth_w", "_atom_site_displace_fourier_cos", "_atom_site_displace_fourier_sin", "_atom_site_occ_fourier_cos", "_atom_site_occ_fourier_sin", "_atom_site_u_fourier_cos", "_atom_site_u_fourier_sin"],
 "NONE", -1);
 });

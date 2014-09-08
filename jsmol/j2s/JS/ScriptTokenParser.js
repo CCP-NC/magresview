@@ -57,8 +57,7 @@ if (this.isNewSet) {
 if (size == 1) {
 this.atokenInfix[0] = JS.T.tv (135368713, 0, this.atokenInfix[0].value);
 this.isNewSet = false;
-}}if ((this.isNewSet || this.isSetBrace) && size < this.ptNewSetModifier + 2) return this.commandExpected ();
-return (size == 1 || !JS.T.tokAttr (this.tokCommand, 262144) ? true : this.error (0));
+}}return ((this.isNewSet || this.isSetBrace) && size < this.ptNewSetModifier + 2 ? this.commandExpected () : size == 1 || !JS.T.tokAttr (this.tokCommand, 262144) ? true : this.error (0));
 });
 Clazz.defineMethod (c$, "compileExpression", 
 function () {
@@ -445,6 +444,8 @@ case 1073741916:
 case 135267335:
 case 135267336:
 case 1238369286:
+case 1073741925:
+case 1073742189:
 this.addTokenToPostfix (4, this.theValue);
 if (!this.addNextTokenIf (269484080)) return false;
 allowComma = false;
@@ -482,7 +483,7 @@ case 135267841:
 case 1095761937:
 case 1087373320:
 case 3145760:
-case 1095761940:
+case 1095761941:
 case 1641025539:
 case 4:
 case 1649412120:
@@ -749,7 +750,7 @@ if (this.tokPeekIs (269484209)) this.getToken ();
  else if (!this.clauseSequenceSpec ()) return false;
 specSeen = true;
 tok = this.tokPeek ();
-}if (tok == 269484066 || tok == 269484209 || tok == 1073741824 || tok == 1112541205 || tok == 1112541206 || tok == 1112541207 || tok == 1141899280 || tok == 2 && !wasInteger) {
+}if (tok == 269484066 || tok == 269484209 || tok == 1073741824 || tok == 1112541205 || tok == 1112541206 || tok == 1112541207 || tok == 1141899281 || tok == 2 && !wasInteger) {
 if (!this.clauseChainSpec (tok)) return false;
 specSeen = true;
 tok = this.tokPeek ();

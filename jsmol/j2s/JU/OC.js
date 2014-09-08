@@ -13,6 +13,7 @@ this.sb = null;
 this.type = null;
 this.$isBase64 = false;
 this.os0 = null;
+this.bytes = null;
 Clazz.instantialize (this, arguments);
 }, JU, "OC", java.io.OutputStream);
 Clazz.defineMethod (c$, "setParams", 
@@ -29,6 +30,11 @@ this.isLocalFile = (fileName != null && !(fileName.startsWith ("http://") || fil
 if (asWriter && !this.$isBase64 && os != null) this.bw =  new java.io.BufferedWriter ( new java.io.OutputStreamWriter (os));
 return this;
 }, "javajs.api.BytePoster,~S,~B,java.io.OutputStream");
+Clazz.defineMethod (c$, "setBytes", 
+function (b) {
+this.bytes = b;
+return this;
+}, "~A");
 Clazz.defineMethod (c$, "getFileName", 
 function () {
 return this.fileName;
@@ -71,6 +77,25 @@ throw e;
 this.byteCount += s.length;
 return this;
 }, "~S");
+Clazz.defineMethod (c$, "reset", 
+function () {
+this.sb = null;
+try {
+{
+this.os = null;
+}if (this.os == null) this.os =  new java.io.ByteArrayOutputStream ();
+if (this.bw != null) {
+this.bw.close ();
+this.bw =  new java.io.BufferedWriter ( new java.io.OutputStreamWriter (this.os));
+}} catch (e) {
+if (Clazz.exceptionOf (e, Exception)) {
+System.out.println (e.toString ());
+} else {
+throw e;
+}
+}
+this.byteCount = 0;
+});
 Clazz.overrideMethod (c$, "write", 
 function (buf, i, len) {
 if (this.os == null) this.os =  new java.io.ByteArrayOutputStream ();
@@ -141,7 +166,7 @@ return JU.Base64.getBase64 (this.toByteArray ()).toString ();
 });
 Clazz.defineMethod (c$, "toByteArray", 
 function () {
-return (Clazz.instanceOf (this.os, java.io.ByteArrayOutputStream) ? (this.os).toByteArray () : null);
+return (this.bytes != null ? this.bytes : Clazz.instanceOf (this.os, java.io.ByteArrayOutputStream) ? (this.os).toByteArray () : null);
 });
 Clazz.defineMethod (c$, "close", 
 function () {

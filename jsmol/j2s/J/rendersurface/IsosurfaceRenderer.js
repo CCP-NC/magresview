@@ -52,7 +52,7 @@ this.showNumbers = this.vwr.getTestFlag (3);
 this.isosurface = this.shape;
 this.exportPass = (this.isExport ? 2 : 0);
 this.isNavigationMode = this.vwr.getBoolean (603979887);
-this.$showKey = (this.vwr.getBoolean (603979870) ? Boolean.TRUE : null);
+this.$showKey = (this.vwr.getBoolean (603979869) ? Boolean.TRUE : null);
 this.isosurface.keyXy = null;
 this.meshScale = -1;
 this.globalSlabValue = this.g3d.getSlab ();
@@ -334,8 +334,8 @@ colixC = JU.C.copyColixTranslucency (this.mesh.slabColix, vertexColixes[iC]);
 }if (this.iShowNormals) this.renderNormals ();
 } else {
 check &= polygon[3];
-if (iShowTriangles) check = 7;
 if (check == 0) continue;
+if (iShowTriangles) check = 7;
 this.pt1i.setT (this.screens[iA]);
 this.pt2i.setT (this.screens[iB]);
 this.pt3i.setT (this.screens[iC]);

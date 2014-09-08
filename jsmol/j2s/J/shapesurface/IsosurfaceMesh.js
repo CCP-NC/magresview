@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapesurface");
-Clazz.load (["J.shape.Mesh", "J.jvxl.data.JvxlData"], "J.shapesurface.IsosurfaceMesh", ["java.lang.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M4", "$.P3", "$.P4", "$.PT", "$.SB", "$.V3", "J.api.Interface", "J.jvxl.data.JvxlCoder", "JS.T", "JU.BoxInfo", "$.C", "$.ColorEncoder", "$.Escape", "$.Logger", "$.Measure", "JV.Viewer"], function () {
+Clazz.load (["J.shape.Mesh", "J.jvxl.data.JvxlData"], "J.shapesurface.IsosurfaceMesh", ["java.lang.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.SB", "$.V3", "J.api.Interface", "J.jvxl.data.JvxlCoder", "JS.T", "JU.BoxInfo", "$.C", "$.ColorEncoder", "$.Escape", "$.Logger", "JV.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.jvxlData = null;
 this.vertexIncrement = 1;
@@ -394,7 +394,7 @@ if (this.colorCommand.equals ("inherit")) {
 this.colorCommand = "#inherit;";
 return;
 }if (this.colorCommand == null) return;
-this.colorCommand = "color $" + (Character.isLetter (this.thisID.charAt (0)) && this.thisID.indexOf (" ") < 0 ? this.thisID : "\"" + this.thisID + "\"") + " \"" + this.colorCommand + "\" range " + (this.jvxlData.isColorReversed ? this.jvxlData.valueMappedToBlue + " " + this.jvxlData.valueMappedToRed : this.jvxlData.valueMappedToRed + " " + this.jvxlData.valueMappedToBlue);
+this.colorCommand = "color $" + (JU.PT.isLetter (this.thisID.charAt (0)) && this.thisID.indexOf (" ") < 0 ? this.thisID : "\"" + this.thisID + "\"") + " \"" + this.colorCommand + "\" range " + (this.jvxlData.isColorReversed ? this.jvxlData.valueMappedToBlue + " " + this.jvxlData.valueMappedToRed : this.jvxlData.valueMappedToRed + " " + this.jvxlData.valueMappedToBlue);
 });
 Clazz.defineMethod (c$, "setColorsFromJvxlData", 
 function (colorRgb) {

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.ScriptExpr"], "JS.ScriptEval", ["java.lang.Boolean", "$.Float", "$.Thread", "java.util.Hashtable", "JU.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.JmolParallelProcessor", "J.atomdata.RadiusData", "J.c.ANIM", "$.PAL", "$.STR", "$.VDW", "J.i18n.GT", "J.io.JmolBinary", "JM.BondSet", "$.Group", "JS.FileLoadThread", "$.SV", "$.ScriptCompiler", "$.ScriptContext", "$.ScriptDelayThread", "$.ScriptInterruption", "$.ScriptManager", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.ColorEncoder", "$.Edge", "$.Elements", "$.Escape", "$.GData", "$.Logger", "$.Measure", "$.Parser", "$.SimpleUnitCell", "$.Txt", "JV.ActionManager", "$.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
+Clazz.load (["JS.ScriptExpr"], "JS.ScriptEval", ["java.lang.Boolean", "$.Float", "$.Thread", "java.util.Arrays", "$.Hashtable", "JU.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.Quat", "$.SB", "$.V3", "J.api.JmolParallelProcessor", "J.atomdata.RadiusData", "J.c.ANIM", "$.PAL", "$.STR", "$.VDW", "J.i18n.GT", "J.io.JmolBinary", "JM.BondSet", "$.Group", "JS.FileLoadThread", "$.SV", "$.ScriptCompiler", "$.ScriptContext", "$.ScriptDelayThread", "$.ScriptInterruption", "$.ScriptManager", "$.ScriptMathProcessor", "$.T", "JU.BSUtil", "$.ColorEncoder", "$.Edge", "$.Elements", "$.Escape", "$.GData", "$.Logger", "$.Parser", "$.SimpleUnitCell", "JV.ActionManager", "$.FileManager", "$.JC", "$.StateManager", "$.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.mathExt = null;
 this.smilesExt = null;
@@ -339,7 +339,10 @@ if (Clazz.exceptionOf (e1, JS.ScriptException)) {
 throw e1;
 }
 }
-return (e.evaluate (expr, asVariable, compileOnly));
+var exec0 = this.executing;
+var o = (e.evaluate (expr, asVariable, compileOnly));
+this.executing = exec0;
+return o;
 }, "~O,~B,~B");
 Clazz.defineMethod (c$, "evaluate", 
  function (expr, asVariable, compileOnly) {
@@ -965,7 +968,7 @@ sb.append ("" + token.value);
 }continue;
 case 1048613:
 sb.appendC ('[');
-sb.append (JM.Group.getGroup3For (token.intValue));
+sb.append (JV.JC.getGroup3For (token.intValue));
 sb.appendC (']');
 continue;
 case 1048612:
@@ -1830,6 +1833,12 @@ var center = this.centerParameter (index + 1);
 this.setShapeProperty (33, "origin", center);
 this.checkLast (this.iToken);
 return;
+case 1141899272:
+var s = this.stringParameter (index + 1);
+if (!JU.PT.isOneOf (s, ";a;b;c;ab;ac;bc;abc;")) this.invArg ();
+this.setShapeProperty (33, "type", s);
+this.checkLast (this.iToken);
+return;
 case 1073742138:
 this.setFloatProperty ("axesScale", this.floatParameter (this.checkLast (++index)));
 return;
@@ -2004,7 +2013,7 @@ case 1095761936:
 case 1073742029:
 case 1048587:
 case 1073742074:
-case 1112541196:
+case 1112541195:
 case 1095761937:
 case 1716520985:
 case 1073742116:
@@ -2014,7 +2023,7 @@ case 1073742144:
 case 1112539150:
 case 1641025539:
 case 1112539151:
-case 1112541199:
+case 1112541196:
 case 603979967:
 case 1073742186:
 case 1649412120:
@@ -2349,7 +2358,7 @@ case 1048591:
 if (nSkip > 0) nSkip--;
  else pts[j++] = i;
 break;
-case 1073741980:
+case 1276116993:
 key = this.paramAsStr (i - 1);
 if (isForCheck) {
 i = this.slen;
@@ -2368,6 +2377,12 @@ bsOrList = JS.SV.getBitSet (vl, false);
 break;
 case 7:
 bsOrList = vl.getList ();
+break;
+case 6:
+var m = vl.getMap ();
+var keys =  new Array (m.keySet ().size ());
+java.util.Arrays.sort (keys);
+bsOrList = m.keySet ().toArray (keys);
 break;
 default:
 this.invArg ();
@@ -2391,9 +2406,9 @@ key = this.paramAsStr (j);
 isMinusMinus = key.equals ("--") || key.equals ("++");
 if (isMinusMinus) key = this.paramAsStr (++j);
 }var v = null;
-if (tok == 1073741980 || JS.T.tokAttr (this.tokAt (j), 1073741824) || (v = this.getContextVariableAsVariable (key)) != null) {
-if (tok != 1073741980 && !isMinusMinus && this.getToken (++j).tok != 269484436) this.invArg ();
-if (tok == 1073741980) {
+if (tok == 1276116993 || JS.T.tokAttr (this.tokAt (j), 1073741824) || (v = this.getContextVariableAsVariable (key)) != null) {
+if (tok != 1276116993 && !isMinusMinus && this.getToken (++j).tok != 269484436) this.invArg ();
+if (tok == 1276116993) {
 isOK = true;
 if (!isForCheck) this.pushContext (cmdToken, "FOR");
 var t = this.getForVar (key);
@@ -2411,7 +2426,7 @@ t.setModified (false);
 } else {
 if (isMinusMinus) j -= 2;
 this.setVariable (++j, this.slen - 1, key, false);
-}}if (tok != 1073741980) isOK = this.parameterExpressionBoolean (pts[0] + 1, pts[1]);
+}}if (tok != 1276116993) isOK = this.parameterExpressionBoolean (pts[0] + 1, pts[1]);
 pt++;
 if (!isOK) this.popContext (true, false);
 isForCheck = false;
@@ -2991,6 +3006,14 @@ if (!filename.equals ("string") && !filename.equals ("string[]")) loadScript.app
 }if (!isConcat && filename.startsWith ("=") && filename.endsWith ("/dssr")) {
 isConcat = true;
 filenames = [filename.substring (0, filename.length - 5), "=dssr/" + filename.substring (1, 5)];
+filename = "fileSet";
+loadScript = null;
+} else if (!isConcat && filename.startsWith ("*") && filename.indexOf ("/") > 1) {
+isConcat = true;
+var pt = filename.indexOf ("/");
+var id = filename.substring (1, pt);
+var ext = filename.substring (pt + 1);
+filenames = (ext.equals ("all") ? ["*" + id, "*dom/" + id, "*val/" + id] : ["*" + id, "*" + ext + "/" + id]);
 filename = "fileSet";
 loadScript = null;
 } else {
@@ -3916,7 +3939,7 @@ this.invArg ();
 }m4 =  new JU.M4 ();
 points[0] =  new JU.P3 ();
 nPoints = 1;
-var stddev = (this.chk ? 0 : JU.Measure.getTransformMatrix4 (ptsA, ptsB, m4, points[0], false));
+var stddev = (this.chk ? 0 : JU.Measure.getTransformMatrix4 (ptsA, ptsB, m4, points[0]));
 if (stddev > 0.001) ptsB = null;
 } else if (tok == 12) {
 m4 = this.theToken.value;
@@ -3957,7 +3980,7 @@ if (nPoints == 0 && translation != null) points[0] = this.vwr.ms.getAtomSetCente
 if (helicalPath && translation != null) {
 points[1] = JU.P3.newP (points[0]);
 points[1].add (translation);
-var ret = JU.Measure.computeHelicalAxis (null, 135266306, points[0], points[1], q);
+var ret = JU.Measure.computeHelicalAxis (points[0], points[1], q);
 points[0] = ret[0];
 var theta = (ret[3]).x;
 if (theta != 0) {
@@ -5351,10 +5374,17 @@ this.error (6);
 }
 break;
 case 3:
-if (this.tokAt (1) == 1073742138) {
+switch (this.tokAt (1)) {
+case 1073742138:
 if (!Float.isNaN (value = this.floatParameterRange (2, -100, 100))) this.setFloatProperty ("vectorScale", value);
 return;
-}}
+case 64:
+var max = this.floatParameter (2);
+if (!this.chk) this.vwr.ms.scaleVectorsToMax (max);
+return;
+}
+break;
+}
 this.setShapeSize (18,  new J.atomdata.RadiusData (null, value, type, null));
 });
 Clazz.defineMethod (c$, "cmdVibration", 
@@ -5378,6 +5408,10 @@ break;
 case 1073742138:
 if (!Float.isNaN (period = this.floatParameterRange (2, -100, 100))) this.setFloatProperty ("vibrationScale", period);
 return;
+case 64:
+var max = this.floatParameter (2);
+if (!this.chk) this.vwr.ms.scaleVectorsToMax (max);
+break;
 case 1073742090:
 this.setFloatProperty ("vibrationPeriod", this.floatParameter (2));
 return;
@@ -5427,7 +5461,7 @@ Clazz.defineMethod (c$, "cmdZoom",
 if (!isZoomTo) {
 var tok = (this.slen > 1 ? this.getToken (1).tok : 1048589);
 switch (tok) {
-case 1073741980:
+case 1276116993:
 case 1073742079:
 break;
 case 1048589:
@@ -5656,7 +5690,7 @@ case 1112539151:
 case 1112539150:
 this.vwr.autoCalculate (tok);
 break;
-case 1112541199:
+case 1112541196:
 if (this.vwr.g.rangeSelected) this.vwr.ms.clearBfactorRange ();
 break;
 case 1087373318:
@@ -5687,9 +5721,9 @@ var tok = (index == -1 ? 1649412120 : this.getToken (index).tok);
 switch (tok) {
 case 1112539137:
 case 1112539138:
-case 1112541195:
+case 1112541194:
 case 1114638362:
-case 1112541199:
+case 1112541196:
 case 1649412120:
 value = 1;
 factorType = J.atomdata.RadiusData.EnumType.FACTOR;
@@ -5964,7 +5998,7 @@ zoom += currentZoom;
 var tok = this.tokAt (i);
 switch (tok) {
 case 1073742079:
-case 1073741980:
+case 1276116993:
 zoom = currentZoom * (tok == 1073742079 ? 0.5 : 2);
 i++;
 break;
@@ -6100,7 +6134,7 @@ Clazz.defineMethod (c$, "setObjectProp",
  function (id, tokCommand, ptColor) {
 var data = [id, null];
 var s = "";
-var isWild = JU.Txt.isWild (id);
+var isWild = JU.PT.isWild (id);
 for (var iShape = 17; ; ) {
 if (this.getShapePropertyData (iShape, "checkID", data)) {
 this.setShapeProperty (iShape, "thisID", id);
@@ -6227,7 +6261,7 @@ break;
 case 1641025539:
 mad = -2;
 break;
-case 1112541199:
+case 1112541196:
 case 1073741922:
 mad = -4;
 break;

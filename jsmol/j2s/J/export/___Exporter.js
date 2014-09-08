@@ -160,7 +160,7 @@ return "ERROR EXPORTING FILE: " + ret;
 });
 Clazz.defineMethod (c$, "getExportDate", 
 function () {
-return this.vwr.apiPlatform.getDateFormat (false);
+return this.vwr.apiPlatform.getDateFormat (null);
 });
 Clazz.defineMethod (c$, "rgbFractionalFromColix", 
 function (colix) {

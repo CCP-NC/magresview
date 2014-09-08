@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["JM.Group"], "JM.Monomer", ["java.lang.Float", "JU.P3", "$.Quat", "J.c.STR", "JU.Logger", "$.Measure", "JV.JC"], function () {
+Clazz.load (["JM.Group"], "JM.Monomer", ["java.lang.Float", "JU.Measure", "$.P3", "$.Quat", "J.c.STR", "JM.ProteinStructure", "JU.Escape", "$.Logger", "JV.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.bioPolymer = null;
 this.offsets = null;
@@ -185,16 +185,16 @@ if (!Float.isNaN (f)) info.put ("mu", Float.$valueOf (f));
 f = this.getGroupParameter (1112539152);
 if (!Float.isNaN (f)) info.put ("theta", Float.$valueOf (f));
 var structure = this.getStructure ();
-if (structure != null) {
-info.put ("structureId", Integer.$valueOf (structure.strucNo));
-info.put ("structureType", structure.type.getBioStructureTypeName (false));
+if (Clazz.instanceOf (structure, JM.ProteinStructure)) {
+info.put ("structureId", Integer.$valueOf ((structure).strucNo));
+info.put ("structureType", (structure).type.getBioStructureTypeName (false));
 }info.put ("shapeVisibilityFlags", Integer.$valueOf (this.shapeVisibilityFlags));
 return info;
 }, "JU.P3");
 Clazz.overrideMethod (c$, "getStructureId", 
 function () {
 var structure = this.getStructure ();
-return (structure == null ? "" : structure.type.getBioStructureTypeName (false));
+return (Clazz.instanceOf (structure, JM.ProteinStructure) ? (structure).type.getBioStructureTypeName (false) : "");
 });
 Clazz.defineMethod (c$, "getConformation", 
 function (atoms, bsConformation, conformationIndex) {
@@ -257,8 +257,7 @@ var q1 = (mStep < 1 ? JU.Quat.getQuaternionFrameV (JV.JC.axisX, JV.JC.axisY, JV.
 if (q1 == null || q2 == null) return this.getHelixData (tokType, qType, mStep);
 var a = (mStep < 1 ? JU.P3.new3 (0, 0, 0) : prev.getQuaternionFrameCenter (qType));
 var b = this.getQuaternionFrameCenter (qType);
-if (a == null || b == null) return this.getHelixData (tokType, qType, mStep);
-return JU.Measure.computeHelicalAxis (tokType == 135176 ? "helixaxis" + this.getUniqueID () : null, tokType, a, b, q2.div (q1));
+return (a == null || b == null ? this.getHelixData (tokType, qType, mStep) : JU.Escape.escapeHelical ((tokType == 135176 ? "helixaxis" + this.getUniqueID () : null), tokType, a, b, JU.Measure.computeHelicalAxis (a, b, q2.div (q1))));
 }, "~N,~S,~N");
 Clazz.defineMethod (c$, "getUniqueID", 
 function () {

@@ -541,7 +541,9 @@ var args =  new Array (nParam);
 for (var i = nParam; --i >= 0; ) args[i] = this.getX ();
 
 this.xPt--;
-return (!this.chk ? this.getMathExt ().evaluate (this, op, args, tok) : op.tok == 269484241 ? true : this.addXBool (true));
+if (!this.chk) return this.getMathExt ().evaluate (this, op, args, tok);
+if (op.tok == 269484241) this.xPt--;
+return this.addXBool (true);
 }, "~N");
 Clazz.defineMethod (c$, "operate", 
  function () {
@@ -614,12 +616,13 @@ return this.addXBool (!x2.asBoolean ());
 }
 case 269484241:
 var iv = op.intValue & -481;
+if (this.chk) return this.addXObj (JS.SV.newS (""));
 if (this.vwr.allowArrayDotNotation) switch (x2.tok) {
 case 6:
 case 14:
 switch (iv) {
 case 1141899272:
-case 1141899281:
+case 1141899282:
 case 1141899270:
 break;
 default:
@@ -633,7 +636,7 @@ case 1073741824:
 return (x2.tok == 10 && this.getAllProperties (x2, op.value));
 case 1141899272:
 return this.addXStr (JS.ScriptMathProcessor.typeOf (x2));
-case 1141899281:
+case 1141899282:
 return this.getKeys (x2, (op.intValue & 480) == 480);
 case 1141899267:
 case 1276117012:
@@ -714,7 +717,10 @@ if ((lst = x2.getList ()) != null && (n = lst.size ()) > 0) this.getKeyList (lst
 }return;
 }for (var e, $e = map.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 var k = e.getKey ();
-keys.addLast (prefix + k);
+if (isAll && (k.length == 0 || !JU.PT.isLetter (k.charAt (0)))) {
+if (prefix.endsWith (".")) prefix = prefix.substring (0, prefix.length - 1);
+k = "[" + JU.PT.esc (k) + "]";
+}keys.addLast (prefix + k);
 if (isAll) this.getKeyList (e.getValue (), true, keys, prefix + k + ".");
 }
 }, "JS.SV,~B,JU.Lst,~S");
@@ -1272,7 +1278,7 @@ return this.addXFloat ((x2.value).y);
 case 1112541187:
 case 1112541207:
 return this.addXFloat ((x2.value).z);
-case 1141899280:
+case 1141899281:
 return this.addXFloat ((x2.value).w);
 }
 break;

@@ -86,7 +86,6 @@ this.data.append ("\n");
 binaryFileList = "|" + binaryFileList + "|";
 for (var i = 0; i < this.directory.size (); i++) {
 var thisEntry = this.directory.get (i);
-System.out.println ("reading " + thisEntry.entryName);
 if (!thisEntry.isEmpty && thisEntry.entryType != 5) {
 var name = thisEntry.entryName;
 if (name.endsWith (".gz")) name = name.substring (0, name.length - 3);
@@ -275,7 +274,7 @@ shortSID = this.SSAT[shortSID];
 } catch (e) {
 if (Clazz.exceptionOf (e, Exception)) {
 System.out.println (data.toString ());
-System.out.println (e.toString ());
+System.out.println ("reader error in CompoundDocument " + e.toString ());
 } else {
 throw e;
 }

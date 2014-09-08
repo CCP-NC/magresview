@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JS");
-Clazz.load (["JS.ScriptTokenParser", "JU.Lst"], "JS.ScriptCompiler", ["java.lang.Boolean", "$.Character", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M34", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "JM.BondSet", "$.Group", "JS.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptError", "$.ScriptFlowContext", "$.ScriptFunction", "$.ScriptManager", "$.ScriptParam", "$.T", "JU.Escape", "$.Logger", "JV.Viewer"], function () {
+Clazz.load (["JS.ScriptTokenParser", "JU.Lst"], "JS.ScriptCompiler", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.M34", "$.M4", "$.PT", "$.SB", "J.api.Interface", "J.i18n.GT", "J.io.JmolBinary", "JM.BondSet", "$.Group", "JS.ContextToken", "$.SV", "$.ScriptContext", "$.ScriptError", "$.ScriptFlowContext", "$.ScriptFunction", "$.ScriptManager", "$.ScriptParam", "$.T", "JU.Escape", "$.Logger", "JV.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.filename = null;
 this.isSilent = false;
@@ -72,6 +72,7 @@ this.logMessages = (!isSilent && !isPredefining && debugScript);
 this.preDefining = (filename === "#predefine");
 var doFull = true;
 var isOK = this.compile0 (doFull);
+this.atokenInfix = null;
 if (!isOK) this.handleError ();
 var sc =  new JS.ScriptContext ();
 isOK = (this.iBrace == 0 && this.parenCount == 0 && this.braceCount == 0 && this.bracketCount == 0);
@@ -655,6 +656,8 @@ this.lastToken = JS.T.tokenMinus;
 return 2;
 }
 }}}switch (this.tokCommand) {
+case 135270926:
+if (this.nTokens != 2 || this.lastToken.tok != 1073741925 && this.lastToken.tok != 1073742189) return 0;
 case 135271426:
 case 135271429:
 case 1276121098:
@@ -662,7 +665,9 @@ if (this.script.charAt (this.ichToken) == '@') {
 this.iHaveQuotedString = true;
 return 0;
 }if (this.tokCommand == 135271426) {
-if ((this.nTokens == 1 || this.nTokens == 2 && this.tokAt (1) == 1073741839) && this.lookingAtLoadFormat ()) {
+if (this.nTokens == 1 || this.nTokens == 2 && this.tokAt (1) == 1073741839) {
+var isDataBase = JV.Viewer.isDatabaseCode (this.charAt (this.ichToken));
+if (this.lookingAtLoadFormat (isDataBase)) {
 var strFormat = this.script.substring (this.ichToken, this.ichToken + this.cchToken);
 var token = JS.T.getTokenFromName (strFormat.toLowerCase ());
 switch (token == null ? 0 : token.tok) {
@@ -680,18 +685,18 @@ case 1073741849:
 this.addTokenToPrefix (token);
 break;
 default:
-var tok = (strFormat.indexOf ("=") == 0 || strFormat.indexOf ("$") == 0 ? 4 : JU.PT.isOneOf (strFormat = strFormat.toLowerCase (), ";xyz;vxyz;vibration;temperature;occupancy;partialcharge;") ? 1073741824 : 0);
+var tok = (isDataBase ? 4 : JU.PT.isOneOf (strFormat = strFormat.toLowerCase (), ";xyz;vxyz;vibration;temperature;occupancy;partialcharge;") ? 1073741824 : 0);
 if (tok != 0) {
 this.addTokenToPrefix (JS.T.o (tok, strFormat));
 this.iHaveQuotedString = (tok == 4);
 }}
 return 2;
-}var bs;
+}}var bs;
 if (this.script.charAt (this.ichToken) == '{' || this.parenCount > 0) break;
 if ((bs = this.lookingAtBitset ()) != null) {
 this.addTokenToPrefix (JS.T.o (10, bs));
 return 2;
-}}if (!this.iHaveQuotedString && this.lookingAtImpliedString (false, this.tokCommand == 135271426, this.nTokens > 1 || this.tokCommand != 135271429)) {
+}}if (!this.iHaveQuotedString && this.lookingAtImpliedString (this.tokCommand == 135270926, this.tokCommand == 135271426, this.nTokens > 1 || this.tokCommand != 135271429)) {
 var str = this.script.substring (this.ichToken, this.ichToken + this.cchToken);
 if (this.tokCommand == 135271429) {
 if (str.startsWith ("javascript:")) {
@@ -935,7 +940,7 @@ this.addTokenToPrefix (JS.T.tokenRightParen);
 this.needRightParen = false;
 }break;
 case 269484096:
-if (this.ichToken > 0 && Character.isWhitespace (this.script.charAt (this.ichToken - 1))) this.addTokenToPrefix (JS.T.tokenSpaceBeforeSquare);
+if (this.ichToken > 0 && JU.PT.isWhitespace (this.script.charAt (this.ichToken - 1))) this.addTokenToPrefix (JS.T.tokenSpaceBeforeSquare);
 this.bracketCount++;
 break;
 case 269484097:
@@ -1131,7 +1136,7 @@ this.forPoint3 = this.nSemiSkip = 0;
 this.nSemiSkip += 2;
 } else if (this.nTokens == 3 && this.tokAt (2) == 36868) {
 this.newContextVariable (this.ident);
-} else if ((this.nTokens == 3 || this.nTokens == 4) && this.theTok == 1073741980) {
+} else if ((this.nTokens == 3 || this.nTokens == 4) && this.theTok == 1276116993) {
 this.nSemiSkip -= 2;
 this.forPoint3 = 2;
 this.addTokenToPrefix (this.theToken);
@@ -1150,7 +1155,7 @@ this.newContextVariable (this.ident);
 break;
 } else if (this.ident.equals (",")) {
 return 2;
-} else if (!Character.isLetter (this.ident.charAt (0))) {
+} else if (!JU.PT.isLetter (this.ident.charAt (0))) {
 if (this.nTokens != 2) return this.ERROR (0);
 this.replaceCommand (JS.T.tokenSet);
 } else {
@@ -1244,7 +1249,7 @@ Clazz.defineMethod (c$, "checkUnquotedFileName",
  function () {
 var ichT = this.ichToken;
 var ch;
-while (++ichT < this.cchScript && !Character.isWhitespace (ch = this.script.charAt (ichT)) && ch != '#' && ch != ';' && ch != '}') {
+while (++ichT < this.cchScript && !JU.PT.isWhitespace (ch = this.script.charAt (ichT)) && ch != '#' && ch != ';' && ch != '}') {
 }
 var name = this.script.substring (this.ichToken, ichT).$replace ('\\', '/');
 this.cchToken = ichT - this.ichToken;
@@ -1586,16 +1591,15 @@ ch = String.fromCharCode (unicode);
 return sb.toString ();
 }, "~B");
 Clazz.defineMethod (c$, "lookingAtLoadFormat", 
- function () {
+ function (allchar) {
 var ichT = this.ichToken;
-var allchar = JV.Viewer.isDatabaseCode (this.charAt (ichT));
 var ch;
-while ((Character.isLetterOrDigit (ch = this.charAt (ichT)) && (allchar || Character.isLetter (ch)) || allchar && (!this.eol (ch) && !Character.isWhitespace (ch)))) ++ichT;
+while ((JU.PT.isLetterOrDigit (ch = this.charAt (ichT)) && (allchar || JU.PT.isLetter (ch)) || allchar && (!this.eol (ch) && !JU.PT.isWhitespace (ch)))) ++ichT;
 
 if (!allchar && ichT == this.ichToken || !JS.ScriptCompiler.isSpaceOrTab (ch)) return false;
 this.cchToken = ichT - this.ichToken;
 return true;
-});
+}, "~B");
 Clazz.defineMethod (c$, "lookingAtImpliedString", 
  function (allowSpace, allowEquals, allowSptParen) {
 var ichT = this.ichToken;
@@ -1631,7 +1635,7 @@ if (parenpt < 0 && (this.braceCount > 0 || this.iBrace > 0)) {
 isOK = false;
 continue;
 }default:
-if (Character.isWhitespace (ch)) {
+if (JU.PT.isWhitespace (ch)) {
 if (ptSpace < 0) ptSpace = ichT;
 } else {
 ptLastChar = ichT;
@@ -1653,12 +1657,12 @@ var pt0 = ichT;
 if (this.script.charAt (ichT) == '-') ++ichT;
 var isOK = false;
 var ch = 'X';
-while (Character.isDigit (ch = this.charAt (ichT))) {
+while (JU.PT.isDigit (ch = this.charAt (ichT))) {
 ++ichT;
 isOK = true;
 }
 if (ichT < this.cchScript && ch == '.') ++ichT;
-while (Character.isDigit (ch = this.charAt (ichT))) {
+while (JU.PT.isDigit (ch = this.charAt (ichT))) {
 ++ichT;
 isOK = true;
 }
@@ -1667,7 +1671,7 @@ isOK = (ch != 'E' && ch != 'e');
 if (isOK || ++ichT == this.cchScript) return NaN;
 ch = this.script.charAt (ichT);
 if (ch == '-' || ch == '+') ichT++;
-while (Character.isDigit (this.charAt (ichT))) {
+while (JU.PT.isDigit (this.charAt (ichT))) {
 ichT++;
 isOK = true;
 }
@@ -1682,14 +1686,14 @@ var ichT = this.ichToken;
 if (this.script.charAt (ichT) == '-') ++ichT;
 var digitSeen = false;
 var ch;
-while (Character.isDigit (ch = this.charAt (ichT++))) digitSeen = true;
+while (JU.PT.isDigit (ch = this.charAt (ichT++))) digitSeen = true;
 
 if (ch != '.') return false;
 var ch1;
 if (!this.eol (ch1 = this.charAt (ichT))) {
-if (Character.isLetter (ch1) || ch1 == '?' || ch1 == '*') return false;
-if (Character.isLetter (ch1 = this.charAt (ichT + 1)) || ch1 == '?') return false;
-}while (Character.isDigit (this.charAt (ichT))) {
+if (JU.PT.isLetter (ch1) || ch1 == '?' || ch1 == '*') return false;
+if (JU.PT.isLetter (ch1 = this.charAt (ichT + 1)) || ch1 == '?') return false;
+}while (JU.PT.isDigit (this.charAt (ichT))) {
 ++ichT;
 digitSeen = true;
 }
@@ -1705,13 +1709,13 @@ ch = '^';
 ++ichT;
 } else {
 if (this.script.charAt (ichT) == '-') ++ichT;
-while (Character.isDigit (ch = this.charAt (ichT))) ++ichT;
+while (JU.PT.isDigit (ch = this.charAt (ichT))) ++ichT;
 
 }if (ch != '^') return false;
 ichT++;
 if (ichT == this.cchScript) ch = ' ';
  else ch = this.script.charAt (ichT++);
-if (ch != ' ' && ch != '*' && ch != '?' && !Character.isLetter (ch)) return false;
+if (ch != ' ' && ch != '*' && ch != '?' && !JU.PT.isLetter (ch)) return false;
 this.cchToken = ichT - this.ichToken;
 return true;
 });
@@ -1721,7 +1725,7 @@ if (this.ichToken == this.cchScript) return 2147483647;
 var ichT = this.ichToken;
 if (this.script.charAt (this.ichToken) == '-') ++ichT;
 var ichBeginDigits = ichT;
-while (Character.isDigit (this.charAt (ichT))) ++ichT;
+while (JU.PT.isDigit (this.charAt (ichT))) ++ichT;
 
 if (ichBeginDigits == ichT) return 2147483647;
 this.cchToken = ichT - this.ichToken;
@@ -1755,10 +1759,10 @@ if (this.charAt (ichT) != '$') return false;
 if (this.charAt (++ichT) == '"') return false;
 while (ichT < this.cchScript) {
 var ch;
-if (Character.isWhitespace (ch = this.script.charAt (ichT))) {
+if (JU.PT.isWhitespace (ch = this.script.charAt (ichT))) {
 if (ichT == this.ichToken + 1) return false;
 break;
-}if (!Character.isLetterOrDigit (ch)) {
+}if (!JU.PT.isLetterOrDigit (ch)) {
 switch (ch) {
 default:
 return false;
@@ -1832,13 +1836,13 @@ if ((ch = this.charAt (ichT)) == '<' || ch == '=' || ch == '>') ++ichT;
 this.tokLastMath = 1;
 break;
 default:
-if (!Character.isLetter (ch) && !this.isDotDot) return false;
+if (!JU.PT.isLetter (ch) && !this.isDotDot) return false;
 case '~':
 case '_':
 case '\'':
 case '?':
 if (ch == '?') this.tokLastMath = 1;
-while (Character.isLetterOrDigit (ch = this.charAt (ichT)) || ch == '_' || ch == '*' && this.charAt (ichT - 1) == '?' || ch == '?' || ch == '~' || ch == '\'' || ch == '\\' && this.charAt (ichT + 1) == '?' || ch == '^' && ichT > ichT0 && Character.isDigit (this.charAt (ichT - 1))) ++ichT;
+while (JU.PT.isLetterOrDigit (ch = this.charAt (ichT)) || ch == '_' || ch == '*' && this.charAt (ichT - 1) == '?' || ch == '?' || ch == '~' || ch == '\'' || ch == '\\' && this.charAt (ichT + 1) == '?' || ch == '^' && ichT > ichT0 && JU.PT.isDigit (this.charAt (ichT - 1))) ++ichT;
 
 break;
 }

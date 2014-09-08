@@ -41,7 +41,7 @@ Clazz.overrideMethod (c$, "requestRepaintAndWait",
 function (why) {
 {
 if (typeof Jmol != "undefined" && Jmol._repaint)
-Jmol._repaint(this.vwr.applet, false);
+Jmol._repaint(this.vwr.html5Applet, false);
 this.repaintDone();
 }}, "~S");
 Clazz.overrideMethod (c$, "repaintIfReady", 
@@ -54,10 +54,8 @@ return true;
 Clazz.defineMethod (c$, "repaintNow", 
  function (why) {
 if (!this.vwr.haveDisplay) return;
-{
-if (typeof Jmol != "undefined" && Jmol._repaint)
-Jmol._repaint(this.vwr.applet,true);
-}}, "~S");
+this.vwr.apiPlatform.repaint (this.vwr.getDisplay ());
+}, "~S");
 Clazz.overrideMethod (c$, "repaintDone", 
 function () {
 this.repaintPending = false;

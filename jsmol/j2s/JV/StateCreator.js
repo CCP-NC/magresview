@@ -168,7 +168,7 @@ if (pt != null) {
 commands.append ("; set unitcell ").append (JU.Escape.eP (pt));
 loadUC = true;
 }commands.append (";\n");
-haveModulation = new Boolean (haveModulation | (this.vwr.modelGetLastVibrationIndex (i, 1276121113) >= 0)).valueOf ();
+haveModulation = new Boolean (haveModulation | (this.vwr.ms.getLastVibrationVector (i, 1276121113) >= 0)).valueOf ();
 }
 if (loadUC) this.vwr.shm.loadShape (32);
 this.getShapeState (commands, isAll, 32);
@@ -176,8 +176,8 @@ if (haveModulation) {
 var temp =  new java.util.Hashtable ();
 var ivib;
 for (var i = modelCount; --i >= 0; ) {
-if ((ivib = this.vwr.modelGetLastVibrationIndex (i, 1276121113)) >= 0) for (var j = models[i].firstAtomIndex; j <= ivib; j++) {
-var mset = ms.getVibration (j, false);
+if ((ivib = this.vwr.ms.getLastVibrationVector (i, 1276121113)) >= 0) for (var j = models[i].firstAtomIndex; j <= ivib; j++) {
+var mset = ms.getModulation (j);
 if (mset != null) JU.BSUtil.setMapBitSet (temp, j, j, mset.getState ());
 }
 }
@@ -902,7 +902,7 @@ function (taintWhat, bsSelected) {
 if (!this.vwr.g.preserveState) return "";
 var bs;
 var commands =  new JU.SB ();
-for (var type = 0; type < 14; type++) if (taintWhat < 0 || type == taintWhat) if ((bs = (bsSelected != null ? bsSelected : this.vwr.ms.getTaintedAtoms (type))) != null) this.getAtomicPropertyStateBuffer (commands, type, bs, null, null);
+for (var type = 0; type < 15; type++) if (taintWhat < 0 || type == taintWhat) if ((bs = (bsSelected != null ? bsSelected : this.vwr.ms.getTaintedAtoms (type))) != null) this.getAtomicPropertyStateBuffer (commands, type, bs, null, null);
 
 return commands.toString ();
 }, "~N,JU.BS");
@@ -918,11 +918,14 @@ var tainted = this.vwr.ms.tainted;
 if (bs != null) for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
 s.appendI (i + 1).append (" ").append (atoms[i].getElementSymbol ()).append (" ").append (atoms[i].getInfo ().$replace (' ', '_')).append (" ");
 switch (type) {
-case 14:
+case 15:
 if (i < fData.length) s.appendF (fData[i]);
 break;
 case 13:
 s.appendI (atoms[i].getAtomNumber ());
+break;
+case 14:
+s.appendI (atoms[i].getSeqID ());
 break;
 case 0:
 s.append (atoms[i].getAtomName ());

@@ -33,7 +33,7 @@ this.b$ =  new java.util.Hashtable ();
 Clazz.defineMethod (c$, "init", 
 function (applet) {
 this.appletObject = applet;
-this.htmlName = this.getJmolParameter ("name");
+this.htmlName = JU.PT.split ("" + this.getJmolParameter ("name"), "_object")[0];
 this.syncId = this.getJmolParameter ("syncId");
 this.fullName = this.htmlName + "__" + this.syncId + "__";
 System.out.println ("Jmol JavaScript applet " + this.fullName + " initializing");

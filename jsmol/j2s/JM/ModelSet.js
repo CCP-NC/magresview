@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JM");
-Clazz.load (["JM.BondCollection", "JU.BS", "$.Lst", "$.M3", "$.M4", "$.P3", "$.V3", "JU.BoxInfo"], "JM.ModelSet", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.A4", "$.AU", "$.P4", "$.PT", "$.Quat", "$.SB", "J.api.Interface", "$.JmolModulationSet", "J.atomdata.RadiusData", "J.bspt.Bspf", "J.c.PAL", "$.VDW", "JM.Atom", "$.AtomIteratorWithinModel", "$.AtomIteratorWithinModelSet", "$.Bond", "$.BondSet", "$.HBond", "$.Model", "$.StateScript", "JS.SV", "JU.BSUtil", "$.Elements", "$.Escape", "$.JmolMolecule", "$.Logger", "$.Measure", "$.Txt", "JV.JC"], function () {
+Clazz.load (["JM.BondCollection", "JU.BS", "$.Lst", "$.M3", "$.M4", "$.P3", "$.V3", "JU.BoxInfo"], "JM.ModelSet", ["java.lang.Boolean", "$.Float", "java.util.Hashtable", "JU.A4", "$.AU", "$.Measure", "$.P4", "$.PT", "$.Quat", "$.SB", "J.api.Interface", "$.JmolModulationSet", "J.atomdata.RadiusData", "J.bspt.Bspf", "J.c.PAL", "$.VDW", "JM.Atom", "$.AtomIteratorWithinModel", "$.AtomIteratorWithinModelSet", "$.Bond", "$.BondSet", "$.HBond", "$.Model", "$.StateScript", "JS.SV", "JU.BSUtil", "$.Elements", "$.Escape", "$.JmolMolecule", "$.Logger", "JV.JC"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.selectionHaloEnabled = false;
 this.echoShapeActive = false;
@@ -495,7 +495,7 @@ var mad = this.getDefaultMadFromOrder (1);
 this.am[modelIndex].dssrCache = null;
 for (var i = 0, n = this.am[modelIndex].ac + 1; i < vConnections.size (); i++, n++) {
 var atom1 = vConnections.get (i);
-var atom2 = this.addAtom (modelIndex, atom1.group, 1, "H" + n, n, n, pts[i], NaN, null, 0, 0, 100, NaN, null, false, 0, null);
+var atom2 = this.addAtom (modelIndex, atom1.group, 1, "H" + n, n, atom1.getSeqID (), n, pts[i], NaN, null, 0, 0, 100, NaN, null, false, 0, null);
 atom2.setMadAtom (this.vwr, rd);
 bs.set (atom2.i);
 this.bondAtoms (atom1, atom2, 1, mad, null, 0, false, false);
@@ -797,7 +797,7 @@ Clazz.defineMethod (c$, "setAPm",
 function (bs, tok, iValue, fValue, sValue, values, list) {
 this.setAPa (bs, tok, iValue, fValue, sValue, values, list);
 switch (tok) {
-case 1095763990:
+case 1095763991:
 case 1632634891:
 if (this.vwr.getBoolean (603979944)) this.assignAromaticBonds ();
 break;
@@ -1304,9 +1304,14 @@ return this.unitCells[modelIndex].getCellRange ();
 }, "~N");
 Clazz.defineMethod (c$, "getLastVibrationVector", 
 function (modelIndex, tok) {
-if (this.vibrations != null) for (var i = this.ac; --i >= 0; ) if ((modelIndex < 0 || this.at[i].mi == modelIndex) && this.vibrations[i] != null && this.vibrations[i].length () > 0 && (tok == 0 || (tok == 1276121113) == (Clazz.instanceOf (this.vibrations[i], J.api.JmolModulationSet)))) return i;
-
-return -1;
+if (this.vibrations != null) {
+var v;
+var a1 = (modelIndex < 0 || modelIndex >= this.mc - 1 ? this.ac : this.am[modelIndex + 1].firstAtomIndex);
+var a0 = (modelIndex <= 0 ? 0 : this.am[modelIndex].firstAtomIndex);
+for (var i = a1; --i >= a0; ) {
+if ((modelIndex < 0 || this.at[i].mi == modelIndex) && ((tok == 1276121113 || tok == 0) && (v = this.getModulation (i)) != null || (tok == 4166 || tok == 0) && (v = this.getVibration (i, false)) != null) && v.isNonzero ()) return i;
+}
+}return -1;
 }, "~N,~N");
 Clazz.defineMethod (c$, "getModulationList", 
 function (bs, type, t456) {
@@ -1552,17 +1557,12 @@ var bs;
 switch (tokType) {
 default:
 return this.getAtomBitsMDa (tokType, specInfo);
+case 1073741925:
+return this.getAnnotationBits ("domains", 1073741925, specInfo);
+case 1073742189:
+return this.getAnnotationBits ("validation", 1073742189, specInfo);
 case 1073741916:
-bs =  new JU.BS ();
-var p = this.vwr.getDSSRParser ();
-var dssr;
-for (var i = this.mc; --i >= 0; ) if ((dssr = this.getInfo (i, "dssr")) != null) {
-var cache = (this.am[i].dssrCache == null ? this.am[i].dssrCache =  new java.util.Hashtable () : this.am[i].dssrCache);
-var dssrv = cache.get (" DSSRV ");
-if (dssrv == null) cache.put (" DSSRV ", dssrv = JS.SV.getVariable (dssr));
-bs.or (p.getAtomBits (this.vwr, specInfo, dssrv, cache));
-}
-return bs;
+return this.getAnnotationBits ("dssr", 1073741916, specInfo);
 case 1678770178:
 case 1048585:
 return this.getAtomBitsMDb (tokType, specInfo);
@@ -1597,7 +1597,7 @@ return bs;
 case 3145754:
 var ia = (specInfo).nextSetBit (0);
 if (ia < 0) return  new JU.BS ();
-if (this.at[ia].getGroup3 (true) != null) return this.at[ia].group.getBSSideChain ();
+if (this.at[ia].group.$isProtein) return this.at[ia].group.getBSSideChain ();
 case 1095761936:
 return this.getMoleculeBitSet (specInfo);
 case 1087373320:
@@ -1644,6 +1644,25 @@ for (var i = this.ac; --i >= 0; ) if (this.isInLatticeCell (i, this.ptTemp1, thi
 return bs;
 }
 }, "~N,~O");
+Clazz.defineMethod (c$, "getAnnotationBits", 
+ function (name, tok, specInfo) {
+var bs =  new JU.BS ();
+var pa = this.vwr.getAnnotationParser ();
+var ann;
+for (var i = this.mc; --i >= 0; ) if ((ann = this.getInfo (i, name)) != null) bs.or (pa.getAtomBits (this.vwr, specInfo, this.getCachedAnnotationMap (i, name + " V ", ann), this.am[i].dssrCache, tok, i, this.am[i].bsAtoms));
+
+return bs;
+}, "~S,~N,~S");
+Clazz.defineMethod (c$, "getCachedAnnotationMap", 
+function (i, key, ann) {
+var cache = (this.am[i].dssrCache == null && ann != null ? this.am[i].dssrCache =  new java.util.Hashtable () : this.am[i].dssrCache);
+if (cache == null) return null;
+var annotv = cache.get (key);
+if (annotv == null && ann != null) {
+annotv = (Clazz.instanceOf (ann, JS.SV) ? ann : this.vwr.evaluateExpressionAsVariable (ann));
+cache.put (key, annotv);
+}return (Clazz.instanceOf (annotv, JS.SV) ? annotv : null);
+}, "~N,~S,~O");
 Clazz.defineMethod (c$, "isInLatticeCell", 
  function (i, cell, ptTemp, isAbsolute) {
 var iModel = this.at[i].mi;
@@ -1658,11 +1677,12 @@ var bsCheck = this.getIterativeModels (false);
 bs = JU.BSUtil.andNot (bs, this.vwr.getDeletedAtoms ());
 var iter = this.getSelectedAtomIterator (null, false, false, false, false);
 if (withinAllModels) {
+var fixJavaFloat = !this.vwr.g.legacyJavaFloat;
 var ptTemp =  new JU.P3 ();
 for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) for (var iModel = this.mc; --iModel >= 0; ) {
 if (!bsCheck.get (iModel)) continue;
 if (distance < 0) {
-this.getAtomsWithin (distance, this.at[i].getFractionalUnitCoordPt (true, ptTemp), bsResult, -1);
+this.getAtomsWithin (distance, this.at[i].getFractionalUnitCoordPt (fixJavaFloat, true, ptTemp), bsResult, -1);
 continue;
 }this.setIteratorForAtom (iter, iModel, i, distance, rd);
 iter.addAtoms (bsResult);
@@ -1776,9 +1796,9 @@ var autoAromatize = false;
 switch (connectOperation) {
 case 12291:
 return this.deleteConnections (minD, maxD, order, bsA, bsB, isBonds, matchNull);
-case 603979874:
+case 603979873:
 case 1073741852:
-if (order != 515) return this.autoBond (bsA, bsB, bsBonds, isBonds, matchHbond, connectOperation == 603979874);
+if (order != 515) return this.autoBond (bsA, bsB, bsBonds, isBonds, matchHbond, connectOperation == 603979873);
 idOrModifyOnly = autoAromatize = true;
 break;
 case 1087373321:
@@ -2206,7 +2226,7 @@ this.msInfo.put ("group3Lists", group3Lists);
 this.msInfo.put ("group3Counts", group3Counts);
 }this.unitCells = JU.AU.arrayCopyObject (this.unitCells, newModelCount);
 for (var i = this.mc; i < newModelCount; i++) {
-newModels[i] =  new JM.Model (this, i, -1, null, null, null);
+newModels[i] =  new JM.Model ().set (this, i, -1, null, null, null);
 newModels[i].loadState = " model create #" + i + ";";
 }
 this.am = newModels;
@@ -2275,8 +2295,8 @@ type = "occupancy " + occ.floatValue () + " " + type;
 if (sym != null) {
 type += sym;
 }var energy = "" + mo.get ("energy");
-if (Float.isNaN (JU.PT.parseFloat (energy))) sb.append (JU.Txt.sprintf ("model %-2s;  mo %-2i # %s\n", "sis", [this.getModelNumberDotted (m), Integer.$valueOf (i + 1), type]));
- else sb.append (JU.Txt.sprintf ("model %-2s;  mo %-2i # energy %-8.3f %s %s\n", "sifss", [this.getModelNumberDotted (m), Integer.$valueOf (i + 1), mo.get ("energy"), units, type]));
+if (Float.isNaN (JU.PT.parseFloat (energy))) sb.append (JU.PT.sprintf ("model %-2s;  mo %-2i # %s\n", "sis", [this.getModelNumberDotted (m), Integer.$valueOf (i + 1), type]));
+ else sb.append (JU.PT.sprintf ("model %-2s;  mo %-2i # energy %-8.3f %s %s\n", "sifss", [this.getModelNumberDotted (m), Integer.$valueOf (i + 1), mo.get ("energy"), units, type]));
 }
 }
 return sb.toString ();
@@ -2372,6 +2392,8 @@ if (this.atomTypes != null) for (var i = i0; i < ac; i++) this.atomTypes[i] = th
 
 if (this.atomSerials != null) for (var i = i0; i < ac; i++) this.atomSerials[i] = this.atomSerials[map[i]];
 
+if (this.atomSeqIDs != null) for (var i = i0; i < ac; i++) this.atomSeqIDs[i] = this.atomSeqIDs[map[i]];
+
 }, "~A,~N,~N");
 Clazz.defineMethod (c$, "growAtomArrays", 
 function (newLength) {
@@ -2384,9 +2406,10 @@ if (this.atomTensorList != null) this.atomTensorList = JU.AU.arrayCopyObject (th
 if (this.atomNames != null) this.atomNames = JU.AU.arrayCopyS (this.atomNames, newLength);
 if (this.atomTypes != null) this.atomTypes = JU.AU.arrayCopyS (this.atomTypes, newLength);
 if (this.atomSerials != null) this.atomSerials = JU.AU.arrayCopyI (this.atomSerials, newLength);
+if (this.atomSeqIDs != null) this.atomSeqIDs = JU.AU.arrayCopyI (this.atomSeqIDs, newLength);
 }, "~N");
 Clazz.defineMethod (c$, "addAtom", 
-function (modelIndex, group, atomicAndIsotopeNumber, atomName, atomSerial, atomSite, xyz, radius, vib, formalCharge, partialCharge, occupancy, bfactor, tensors, isHetero, specialAtomID, atomSymmetry) {
+function (modelIndex, group, atomicAndIsotopeNumber, atomName, atomSerial, atomSeqID, atomSite, xyz, radius, vib, formalCharge, partialCharge, occupancy, bfactor, tensors, isHetero, specialAtomID, atomSymmetry) {
 var atom =  new JM.Atom ().setAtom (modelIndex, this.ac, xyz, radius, atomSymmetry, atomSite, atomicAndIsotopeNumber, formalCharge, isHetero);
 this.am[modelIndex].ac++;
 this.am[modelIndex].bsAtoms.set (this.ac);
@@ -2412,10 +2435,13 @@ this.atomNames[this.ac] = atomName.intern ();
 }}if (atomSerial != -2147483648) {
 if (this.atomSerials == null) this.atomSerials =  Clazz.newIntArray (this.at.length, 0);
 this.atomSerials[this.ac] = atomSerial;
+}if (atomSeqID != 0) {
+if (this.atomSeqIDs == null) this.atomSeqIDs =  Clazz.newIntArray (this.at.length, 0);
+this.atomSeqIDs[this.ac] = atomSeqID;
 }if (vib != null) this.setVibrationVector (this.ac, vib);
 this.ac++;
 return atom;
-}, "~N,JM.Group,~N,~S,~N,~N,JU.P3,~N,JU.V3,~N,~N,~N,~N,JU.Lst,~B,~N,JU.BS");
+}, "~N,JM.Group,~N,~S,~N,~N,~N,JU.P3,~N,JU.V3,~N,~N,~N,~N,JU.Lst,~B,~N,JU.BS");
 Clazz.defineMethod (c$, "getInlineData", 
 function (modelIndex) {
 var data = null;
@@ -2587,9 +2613,9 @@ if (isOn) this.bsModulated =  new JU.BS ();
 var scale = this.vwr.getFloat (1276121113);
 var haveMods = false;
 for (var i = bs.nextSetBit (0); i >= 0; i = bs.nextSetBit (i + 1)) {
-var v = this.getVibration (i, false);
-if (!(Clazz.instanceOf (v, J.api.JmolModulationSet))) continue;
-(v).setModTQ (this.at[i], isOn, qtOffset, isQ, scale);
+var ms = this.getModulation (i);
+if (ms == null) continue;
+ms.setModTQ (this.at[i], isOn, qtOffset, isQ, scale);
 if (this.bsModulated != null) this.bsModulated.setBitTo (i, isOn);
 haveMods = true;
 }
@@ -2681,8 +2707,8 @@ Clazz.defineMethod (c$, "getUnitCellForAtom",
 function (index) {
 if (index < 0 || index > this.ac) return null;
 if (this.bsModulated != null) {
-var v = this.getVibration (index, false);
-var uc = (v == null ? null : v.getUnitCell ());
+var ms = this.getModulation (index);
+var uc = (ms == null ? null : ms.getUnitCell ());
 if (uc != null) return uc;
 }return this.getUnitCell (this.at[index].mi);
 }, "~N");
@@ -2869,6 +2895,10 @@ var v = JU.V3.newVsub (thisAtom, pt);
 var q = JU.Quat.newVA (v, 180);
 this.moveAtoms (null, q.getMatrix (), null, bsAtoms, thisAtom, true, false);
 }}, "JU.P3,JU.P4,~N,JU.BS,JU.BS");
+Clazz.defineMethod (c$, "setMSInfo", 
+function (key, val) {
+this.msInfo.put (key, val);
+}, "~S,~O");
 Clazz.defineStatics (c$,
 "hbondMin", 2.5);
 });

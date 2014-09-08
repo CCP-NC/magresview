@@ -121,7 +121,7 @@ this.appendLoadNote ("Multipole Analysis");
 return true;
 }return true;
 });
-Clazz.overrideMethod (c$, "finalizeReader", 
+Clazz.overrideMethod (c$, "finalizeSubclassReader", 
 function () {
 this.createAtomsFromCoordLines ();
 if (this.energy != null) this.setEnergy ();
@@ -313,7 +313,7 @@ return true;
 });
 c$.fixAtomName = Clazz.defineMethod (c$, "fixAtomName", 
  function (s) {
-return (s.length > 1 && Character.isLetter (s.charAt (1)) ? s.substring (0, 1) + Character.toLowerCase (s.charAt (1)) + s.substring (2) : s);
+return (s.length > 1 && JU.PT.isLetter (s.charAt (1)) ? s.substring (0, 1) + Character.toLowerCase (s.charAt (1)) + s.substring (2) : s);
 }, "~S");
 Clazz.defineMethod (c$, "getAtomicNumber", 
  function (token) {
@@ -504,20 +504,19 @@ return true;
 Clazz.defineMethod (c$, "readData", 
  function (name, nfields) {
 this.createAtomsFromCoordLines ();
-var s =  new Array (this.ac);
-for (var i = 0; i < this.ac; i++) s[i] = "0";
+var f =  Clazz.newFloatArray (this.ac, 0);
+for (var i = 0; i < this.ac; i++) f[i] = 0;
 
 var data = "";
-while (this.rd () != null && (this.line.length < 4 || Character.isDigit (this.line.charAt (3)))) data += this.line;
+while (this.rd () != null && (this.line.length < 4 || JU.PT.isDigit (this.line.charAt (3)))) data += this.line;
 
 data = JU.PT.rep (data, "-", " -");
 var tokens = J.adapter.smarter.AtomSetCollectionReader.getTokensStr (data);
 for (var i = 0, pt = nfields - 1; i < this.ac; i++, pt += nfields) {
 var iConv = this.getAtomIndexFromPrimitiveIndex (i);
-if (iConv >= 0) s[iConv] = tokens[pt];
+if (iConv >= 0) f[iConv] = this.parseFloatStr (tokens[pt]);
 }
-data = JU.PT.join (s, '\n', 0);
-this.asc.setAtomSetAtomProperty (name, data, -1);
+this.asc.setAtomProperties (name, f, -1, false);
 return true;
 }, "~S,~N");
 Clazz.defineMethod (c$, "getQuadrupoleTensors", 

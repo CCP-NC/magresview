@@ -547,7 +547,7 @@ data[i] = val;
 }, "J.adapter.smarter.Atom,~N,~N");
 Clazz.defineMethod (c$, "getXSymmetry", 
 function () {
-if (this.xtalSymmetry == null) this.xtalSymmetry = (J.api.Interface.getOption ("adapter.smarter.XtalSymmetry")).set (this);
+if (this.xtalSymmetry == null) this.xtalSymmetry = (J.api.Interface.getOption ("adapter.smarter.XtalSymmetry")).set (this.reader);
 return this.xtalSymmetry;
 });
 Clazz.defineMethod (c$, "getSymmetry", 
@@ -715,14 +715,14 @@ if (p == null) this.setAtomSetAuxiliaryInfoForSet ("modelProperties", p =  new j
 p.put (key, value);
 if (key.startsWith (".")) p.put (key.substring (1), value);
 }, "~S,~S,~N");
-Clazz.defineMethod (c$, "setAtomSetAtomProperty", 
-function (key, data, atomSetIndex) {
-if (!data.endsWith ("\n")) data += "\n";
+Clazz.defineMethod (c$, "setAtomProperties", 
+function (key, data, atomSetIndex, isGroup) {
+if (Clazz.instanceOf (data, String) && !(data).endsWith ("\n")) data = data + "\n";
 if (atomSetIndex < 0) atomSetIndex = this.iSet;
 var p = this.getAtomSetAuxiliaryInfoValue (atomSetIndex, "atomProperties");
 if (p == null) this.setAtomSetAuxiliaryInfoForSet ("atomProperties", p =  new java.util.Hashtable (), atomSetIndex);
 p.put (key, data);
-}, "~S,~S,~N");
+}, "~S,~O,~N,~B");
 Clazz.defineMethod (c$, "setAtomSetPartialCharges", 
 function (auxKey) {
 if (!this.atomSetAuxiliaryInfo[this.iSet].containsKey (auxKey)) {
@@ -774,7 +774,8 @@ return this.getAtomSetAuxiliaryInfoValue (atomSetIndex, "name");
 }, "~N");
 Clazz.defineMethod (c$, "getAtomSetAuxiliaryInfo", 
 function (atomSetIndex) {
-return this.atomSetAuxiliaryInfo[atomSetIndex >= this.atomSetCount ? this.atomSetCount - 1 : atomSetIndex];
+var i = (atomSetIndex >= this.atomSetCount ? this.atomSetCount - 1 : atomSetIndex);
+return (i < 0 ? null : this.atomSetAuxiliaryInfo[i]);
 }, "~N");
 Clazz.defineMethod (c$, "setAtomNames", 
 function (atomIdNames) {
@@ -838,10 +839,12 @@ for (var i = 0; i < a.trajectoryStepCount; i++) this.trajectorySteps.add (this.t
 this.setInfo ("trajectorySteps", this.trajectorySteps);
 }, "J.adapter.smarter.AtomSetCollection");
 Clazz.defineStatics (c$,
-"globalBooleans", ["someModelsHaveFractionalCoordinates", "someModelsHaveSymmetry", "someModelsHaveUnitcells", "someModelsHaveCONECT", "isPDB"],
+"globalBooleans", ["someModelsHaveFractionalCoordinates", "someModelsHaveSymmetry", "someModelsHaveUnitcells", "someModelsHaveCONECT", "isPDB", "someModelsHaveDomains", "someModelsHaveValidations"],
 "GLOBAL_FRACTCOORD", 0,
 "GLOBAL_SYMMETRY", 1,
 "GLOBAL_UNITCELLS", 2,
 "GLOBAL_CONECT", 3,
-"GLOBAL_ISPDB", 4);
+"GLOBAL_ISPDB", 4,
+"GLOBAL_DOMAINS", 5,
+"GLOBAL_VALIDATIONS", 6);
 });

@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.export");
-Clazz.load (["J.export.__RayTracerExporter"], "J.export._PovrayExporter", ["java.lang.Float", "$.Short", "JU.P4", "JU.Measure", "JV.Viewer"], function () {
+Clazz.load (["J.export.__RayTracerExporter"], "J.export._PovrayExporter", ["java.lang.Float", "$.Short", "JU.Measure", "$.P4", "JV.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.haveMacros = false;
 Clazz.instantialize (this, arguments);
