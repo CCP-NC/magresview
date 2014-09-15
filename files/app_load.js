@@ -357,7 +357,7 @@ function afterscript_callback(app, msg, scr_line)
 		{
 			if(atom_set.atomno > 0)
 			{
-				var jmol_atomno = safe_jmolEvaluate(mainJmol, "{*}.length", 1000);
+				var jmol_atomno = Jmol.evaluateVar(mainJmol, "{*}.length");
 				if(jmol_atomno != atom_set.atomno)
 				{
 					disable_NMR_controls();
@@ -537,8 +537,16 @@ function pick_callback(id, atom, i)
 		last_atom_picked = parseInt(atom.substring(atom.lastIndexOf('#') + 1));
 		range_sphere_handler();
 		vvleck_sphere_handler();
+		isc_closest_handler();
 		dip_label_handler();
 	}
+}
+
+// A convenient shortcut to get the name of the last atom picked
+
+function last_atom_picked_name()
+{
+	return Jmol.evaluate(mainJmol, "{{*}[" + last_atom_picked + "]}.atomname");
 }
 
 //Generates a color scale from blue to red for plotting purposes
@@ -591,6 +599,7 @@ function visual_accor_handler()
 {
 	euler_diff_calc_handler();
 	vvleck_sphere_handler();
+	isc_closest_handler();
 	download_link_handler();
 	snap_download_link_handler();
 }

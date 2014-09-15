@@ -21,6 +21,44 @@ function isc_dropdown_update()
 	}
 }
 
+function isc_closest_handler()
+{
+	// Edits the visibility of the ghosts of the "closest" periodic copies to the picked atom
+	// Works on the model of vvleck_sphere_handler
+
+	var closest_script = " define default_displaygroup " + default_displaygroup + ";";
+	var aexpr = '{*}[' + last_atom_picked + ']';
+	
+	//A bit of jQuery magic to check whether the active tab is the "Visualization" one. It just works.
+
+	var tab_active = $("#main_tabs").tabs("option", "active");
+	var acc_active = $("#visual_accordion").accordion("option", "active");
+	if(((tab_active == tab_index("#visual_accordion") &&								//Is the Visualization tab active?
+		acc_active == 2)							||					//Is the ISC accordion section active?
+		document.getElementById("isc_check").checked == true) )
+	{
+		closest_script += "fx0=" + aexpr + ".fx; fy0=" + aexpr + ".fy; fz0=" + aexpr + ".fz;";
+		closest_script += "fxmin=fx0-0.5; fxmax=fx0+0.5;";
+		closest_script += "fymin=fy0-0.5; fymax=fy0+0.5;";
+		closest_script += "fzmin=fz0-0.5; fzmax=fz0+0.5;";
+		closest_script += "display default_displaygroup or {fx>fxmin and fx<=fxmax and fy>fymin and fy<=fymax and fz>fzmin and fz<=fzmax};";
+		closest_script += "color {fx>fxmin and fx<=fxmax and fy>fymin and fy<=fymax and fz>fzmin and fz<=fzmax} and not default_displaygroup translucent;";
+	}
+	else
+	{
+		//To prevent erroneously deleting "range" ghosts
+		if ($("#main_tabs").tabs("option", "active") != tab_index("#file_gen")    ||
+			document.getElementById("file_type_drop").value != "json" 		      ||		//Is the JSON file generation active?
+			document.getElementById("sel_file_drop").value.indexOf("range") <= -1 ||			//Is one of the 'range' options selected?
+			document.getElementById("range_sphere_check").checked == false)					//Is the box "Visualize range sphere" ticked?
+		{
+			closest_script += "display default_displaygroup;";
+		}
+	}
+	
+	Jmol.script(mainJmol, closest_script);						       
+}
+
 function isc_label_handler()
 {	
 	var isc_plot_on = document.getElementById("isc_check").checked;
@@ -32,7 +70,7 @@ function isc_label_handler()
 
 	if (isc_plot_on)
 	{
-		var isc_info = isc_info_eval(Jmol.evaluate(mainJmol, "{{*}[" + last_atom_picked + "]}.atomname"), isc_tag);
+		var isc_info = isc_info_eval(last_atom_picked, isc_tag);
 
 		//Deactivate dipolar measures
 
@@ -48,10 +86,10 @@ function isc_label_handler()
 			for (j in isc_info)
 			{
 				var isc = isc_info[j];
-				if (isNaN(isc_min) || isc[1] < isc_min)
-					isc_min = isc[1];
-				if (isNaN(isc_max) || isc[1] > isc_max)
-					isc_max = isc[1];
+				if (isNaN(isc_min) || Math.abs(isc[1]) < isc_min)
+					isc_min = Math.abs(isc[1]);
+				if (isNaN(isc_max) || Math.abs(isc[1]) > isc_max)
+					isc_max = Math.abs(isc[1]);
 			}
 
 			document.getElementById("isc_min").value = isc_min;
@@ -71,7 +109,7 @@ function isc_label_handler()
 		{
 			var isc = isc_info[j];
 
-			if (isc[1] > isc_max || isc[1] < isc_min)
+			if (Math.abs(isc[1]) > isc_max || Math.abs(isc[1]) < isc_min)
 				continue;
 
 			if (isc[1] > 0)
@@ -79,7 +117,7 @@ function isc_label_handler()
 			else
 				isc_plot_jmol_script += "color measure {255 0 128};";
 
-			isc_plot_jmol_script += "measure {*}[" + last_atom_picked + "] {selected and " + isc[0] + "} \"" + isc[1] + " Hz\";";
+			isc_plot_jmol_script += "measure {*}[" + last_atom_picked + "] {*}[" + isc[0] + "] \"" + isc[1] + " Hz\";";
 
 		}
 
@@ -102,9 +140,22 @@ function isc_drop_handler()
 	isc_label_handler();	
 }
 
-function isc_info_eval(a_name, tag)
+function isc_info_eval(a_num, tag)
 {
-	var isc_info_raw = Jmol.evaluate(mainJmol, "measure({" + a_name + " and unitcell} {unitcell}, \"" + tag + "_hz\")").split('\n');
+	// First define the group of closest periodic copies to the atom a_num
+
+	var aexpr = '{*}[' + a_num + ']';
+	var fcoords = Jmol.evaluateVar(mainJmol, aexpr + '.fxyz');
+
+	var fxmin = fcoords[0]-0.5; var fxmax = fcoords[0]+0.5;
+	var fymin = fcoords[1]-0.5; var fymax = fcoords[1]+0.5;
+	var fzmin = fcoords[2]-0.5; var fzmax = fcoords[2]+0.5;
+
+	var closest = '{fx>'+fxmin+' and fx<='+fxmax+' and fy>'+fymin+' and fy<='+fymax+' and fz>'+fzmin+' and fz<='+fzmax+'}';
+
+	console.log("measure(" + aexpr + " " + closest + ", \"" + tag + "_hz\")");
+
+	var isc_info_raw = Jmol.evaluate(mainJmol, "measure(" + aexpr + " " + closest + ", \"" + tag + "_hz\")").split('\n');
 	var isc_info = []
 
 	for (var j = 0; j < isc_info_raw.length; ++j)
@@ -112,9 +163,11 @@ function isc_info_eval(a_name, tag)
 		if (isc_info_raw[j] == '')
 			continue;
 		isc_line = isc_info_raw[j].split('\t');
-		if (parseFloat(isc_line[1]) == 0.0)
+		console.log(isc_line);
+		if (parseFloat(isc_line[1]) == 0.0 || isNaN(parseFloat(isc_line[1])))
 			continue;
-		isc_info.push([(isc_line[4].split(' '))[0], parseFloat(isc_line[1])]);
+		// In this way each isc_info element contains [#number of the atom coupled with, isc intensity in Hz]
+		isc_info.push([parseInt((isc_line[4].split(' '))[1].replace('#','')), parseFloat(isc_line[1])]);
 	}
 
 	return isc_info;
