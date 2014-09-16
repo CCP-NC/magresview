@@ -151,7 +151,7 @@ function isc_info_eval(a_num, tag)
 	var fymin = fcoords[1]-0.5; var fymax = fcoords[1]+0.5;
 	var fzmin = fcoords[2]-0.5; var fzmax = fcoords[2]+0.5;
 
-	var closest = '{fx>'+fxmin+' and fx<='+fxmax+' and fy>'+fymin+' and fy<='+fymax+' and fz>'+fzmin+' and fz<='+fzmax+'}';
+	var closest = '{fx>'+fxmin+' and fx<='+fxmax+' and fy>'+fymin+' and fy<='+fymax+' and fz>'+fzmin+' and fz<='+fzmax+' and selected}';
 
 	console.log("measure(" + aexpr + " " + closest + ", \"" + tag + "_hz\")");
 
