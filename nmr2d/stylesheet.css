@@ -1,0 +1,118 @@
+ html, body {
+  width:100%;
+  height:100%;
+  background: rgb(30, 30, 30);
+  box-sizing: border-box;
+  moz-box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  color: rgb(245, 245, 235);
+  font-weight: bold;
+  font-size: 11pt;
+}
+
+.section_div {
+	position: absolute;
+}
+
+#image_div {
+	width: 60%;
+	height: 100%;
+	top: 0%;
+	left: 0%;
+	background-color: rgb(35,35,35);
+}
+
+#control_div {
+	width: 40%;
+	height: 100%;
+	top: 0%;
+	left: 60%;
+}
+
+.box_div {
+	position: relative;
+	width: 90%;
+	left: 5%;
+}
+
+.row_div {
+	position: relative;
+	height: 25pt;
+	line-height: 25pt;
+}
+
+.header {
+  font-size: 13pt;
+  color: rgb(255, 128, 0);
+}
+
+.load_button {
+
+	position: absolute;
+	top: 0;
+	width: 20%;
+	height: 20pt;
+
+}
+
+.load_button_true {
+
+	visibility: hidden;
+
+}
+
+.visual_button {
+
+	background-color: rgb(35,35,35);
+	border-radius: 10pt;
+	border: solid;
+	border-width: 2pt;
+	border-color: rgb(245,245,235);
+	text-align: center;
+	line-height: 20pt;
+	cursor: default;
+
+}
+
+.create_button {
+
+	position: absolute;	
+	top: 0pt;
+	width: 20%;
+	height: 20pt;
+}
+
+.create_size {
+
+	position: absolute;
+	left: 22%;
+
+}
+
+.dragbox_div {
+
+	position: relative;
+	top: 10%;
+	left: 10%;
+	height: 80%;
+	width: 80%;
+	border: dashed;
+	border-width: 5pt;
+	border-radius: 20pt;
+	border-color: rgb(245,245,235);
+	text-align: center;
+	font-size: 30pt;
+
+}
+
+#main_plot {
+
+	position: absolute;
+	display: none;
+	border: solid;
+	border-width: 3pt;
+	border-color: rgb(255,128,0);
+	border-radius: 5pt;
+
+}
