@@ -116,3 +116,16 @@
 	border-radius: 5pt;
 
 }
+
+.sel_species {
+	width: 70pt;
+}
+
+.axes_drop_table {
+
+	text-align: right;
+	border-spacing: 7pt;
+	font-weight: bold;
+	font-size: 11pt;
+
+}

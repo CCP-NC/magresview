@@ -140,13 +140,12 @@ function svg_spectrum_plot(from_change)
 
 function launch_NMR2D() {
 
-
     var data_set = {}
     init_data_set(data_set);
     compile_data_set(data_set, {'t': 'all'}, true);
 
     console.log("Launching NMR2D...");
-    var nmr2d_win = window.open('nmr2d/nmr2d_graph.html');
+    var nmr2d_win = window.open('nmr2d/nmr2d_graph.html', '', 'toolbar=no');
     if (!nmr2d_win.opener)
         nmr2d_win.opener = window;
 

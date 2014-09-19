@@ -9,9 +9,10 @@
     <link href="stylesheet.css" rel="stylesheet" type="text/css">
 
     <meta content="">
-    <style>
 
+    <style>
     </style>
+
   </head>
   <body>
 
@@ -48,12 +49,47 @@
 
   		<div class='box_div'>
 	  		<p class="header" >Select species</p>
-	  		X axis: <select id="sel_species_x" class="sel_species">
-		  	</select>
-		  	&nbsp;&nbsp;
-	  		Y axis: <select id="sel_species_y" class="sel_species">
-		  	</select>
+      <table class="axes_drop_table">
+        <tr>
+          <td>
+    	  		X axis: <select id="sel_species_x" class="sel_species">
+    		  	</select>
+          </td>
+          <td>
+    	  		Y axis: <select id="sel_species_y" class="sel_species">
+    		  	</select>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            X axis order: <select id="sel_order_x" class="sel_order">
+              <option value='1'>1Q</option>
+              <option value='2'>2Q</option>
+            </select>
+          </td>
+          <td>
+            Y axis order: <select id="sel_order_y" class="sel_order">
+              <option value='1'>1Q</option>
+              <option value='2'>2Q</option>
+            </select>
+          </td>
+        </tr>
+        </table>
   		</div>
+
+      <div class='box_div'>
+        <p class="header" >Axes scale</p>
+        X<sub>0</sub>: <input id="x_0_val" type="text" value="0" size="4" > &nbsp;&nbsp;
+        X<sub>1</sub>: <input id="x_1_val" type="text" value="0" size="4" > &nbsp;&nbsp;
+        <input type="button" value="Pick X axis">
+        <input type="checkbox" id="display_x_ax" checked=true> Visible
+        <br><br>
+        Y<sub>0</sub>: <input id="y_0_val" type="text" value="0" size="4" > &nbsp;&nbsp;
+        Y<sub>1</sub>: <input id="y_1_val" type="text" value="0" size="4" > &nbsp;&nbsp;
+        <input type="button" value="Pick Y axis">
+        <input type="checkbox" id="display_y_ax" checked=true> Visible
+      </div>
+
 
   	</div>
 
