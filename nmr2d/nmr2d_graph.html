@@ -79,13 +79,13 @@
 
       <div class='box_div'>
         <p class="header" >Axes scale</p>
-        X<sub>0</sub>: <input id="x_0_val" type="text" value="0" size="4" > &nbsp;&nbsp;
-        X<sub>1</sub>: <input id="x_1_val" type="text" value="0" size="4" > &nbsp;&nbsp;
+        X<sub>0</sub>: <input id="x_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
+        X<sub>1</sub>: <input id="x_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         <input type="button" value="Pick X axis">
         <input type="checkbox" id="display_x_ax" checked=true> Visible
         <br><br>
-        Y<sub>0</sub>: <input id="y_0_val" type="text" value="0" size="4" > &nbsp;&nbsp;
-        Y<sub>1</sub>: <input id="y_1_val" type="text" value="0" size="4" > &nbsp;&nbsp;
+        Y<sub>0</sub>: <input id="y_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
+        Y<sub>1</sub>: <input id="y_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         <input type="button" value="Pick Y axis">
         <input type="checkbox" id="display_y_ax" checked=true> Visible
       </div>

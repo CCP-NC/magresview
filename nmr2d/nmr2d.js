@@ -1,11 +1,13 @@
 var data_set = {};
 var atom_set = {};
 
-
 var axis_limits = {'x': [[0.0, 0.0], [1.0, 0.0]], 'y': [[0.0, 0.0], [0.0, 1.0]]};
 var axis_scales = {'x': [0.0, 0.0], 'y': [0.0, 0.0]};
 
 var default_border = 0.1	// Default ratio between bordered thickness and full area
+
+var max_img_width  = 0.95 	// Maximum width for loaded png images
+var max_img_height = 0.9	// Maximum height for loaded png images
 
 function document_ready_callback() {
 
@@ -33,10 +35,15 @@ function document_ready_callback() {
     window.opener.init_data_set(data_set);
     window.opener.compile_data_set(data_set, {'t': 'all'}, true);
 
+    // Get the maximum size for an image
+
+    max_img_width = Math.floor($("#image_div").width()*max_img_width);
+    max_img_height = Math.floor($("#image_div").height()*max_img_height);
+
 	dndrop_init();
 	update_species();
 	reset_scale('x');
-	reset_scale('y');
+	reset_scale('y');	
 
 }
 
@@ -79,8 +86,6 @@ function reset_scale(axis)
 			var id = parseInt(atom_list[i]['id']);
 			for (var j=0; j < ms_list.length; ++j)
 			{
-				console.log(id);
-				console.log(ms_list[j]['atom_id']);
 				if (ms_list[j]['atom_id'] == id)
 				{
 					if (isNaN(min) || ms_list[j]['mview_data'][0] < min)
@@ -116,6 +121,24 @@ function dndrop_init()
 	});
 }
 
+function axes_scale_handler(evt)
+{
+	//Compatibility code - see console.js for details
+	evt = window.event || evt;
+	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
+	
+	if (myKey == 13)
+	{
+		axis_scales['x'][0] = parseFloat($('#x_0_val').val());
+		axis_scales['x'][1] = parseFloat($('#x_1_val').val());
+		axis_scales['y'][0] = parseFloat($('#y_0_val').val());
+		axis_scales['y'][1] = parseFloat($('#y_1_val').val());
+
+		draw_axis('x');
+		draw_axis('y');
+	}
+}
+
 function load_image_file(evt) {
 
 	// Check for the various File API support.
@@ -141,6 +164,19 @@ function load_image_file(evt) {
 			var w = this.width;
 			var h = this.height;
 
+			// Check that the sizes are okay, if they're too big resize
+
+			if (w > max_img_width)
+			{
+				h = h*max_img_width/w;
+				w = max_img_width;
+			}
+			if (h > max_img_height)
+			{
+				w = w*max_img_height/h;
+				h = max_img_height;
+			}
+
 			clean_up_svg(w, h)
 			.append('image')
 			.attr({'xlink:href': $(this).attr('src'),
@@ -163,7 +199,16 @@ function create_empty_plot() {
 	// If someone wrote something that doesn't make sense, let's get outta here
 
 	if (isNaN(w) || isNaN(h))
+	{
+		alert("Invalid values for new image size");
 		return;
+	}
+
+	if (w > max_img_width || h > max_img_height)
+	{
+		alert("New image size must be smaller than " + max_img_width + "x" + max_img_height);
+		return;
+	}
 
 	clean_up_svg(w, h);
 
@@ -194,76 +239,63 @@ function clean_up_svg(w, h)
 	$('#image_div').css('display', 'none').height();
 	$('#image_div').css('display', 'block');
 
-	// Resetting the points defining the corners of the plotting area, based on the default border
+	// Applying margins for the plot
+	main_plot
+	.append("g")
+	.attr("width", w*(1.0-2.0*default_border))
+	.attr("height", h*(1.0-2.0*default_border))
+    .attr("transform", "translate(" + w*default_border + "," + h*default_border + ")");
 
-	axis_limits['x'][0] = [w*default_border, h*(1.0-default_border)];
-	axis_limits['x'][1] = [w*(1.0-default_border), h*(1.0-default_border)];
-	axis_limits['y'][0] = [w*default_border, h*default_border];
-	axis_limits['y'][1] = [w*default_border, h*(1.0-default_border)];
+	draw_axis('x');
+	draw_axis('y');
 
 	return main_plot;
 
 }
 
-function draw_axis(axis, update)
+function draw_axis(axis)
 {
+	console.log("(Re-)Drawing " + axis);
+
 	// Leave if the plot isn't visible already
 
 	if ($('#main_plot').css('display') == 'none')
 		return;
 
-	var plot = d3.select('#main_plot');
-	var linestyle = {
-		'stroke': 'rgb(255,128,0)',
-		'stroke-width': 3,
-		'stroke-linecap': 'round',
-	};
+	//var width = $("#main_plot").width()*(1.0-2.0*default_border);
+	//var height = $("#main_plot").height()*(1.0-2.0*default_border);
 
-	var axis_i = ['x', 'y'].indexOf(axis);
-	var not_axis = {'x': 'y', 'y': 'x'}[axis];
+	var plot_area = d3.select('#main_plot').select('g');
+	var width = plot_area.attr('width');
+	var height = plot_area.attr('height');
 
-	if ($('#display_'+axis+'_ax').prop('checked'))
-	{
-		// Draw axis
+	var ax = d3.scale.linear().domain(axis_scales[axis]).range([{'x': 0, 'y': height}[axis], {'x': width, 'y': 0}[axis]]);
+    var fullAxis = d3.svg.axis().scale(ax).ticks(4).orient({'x': "bottom", 'y': "left"}[axis]);
+    var axisLabel = $("#sel_species_" + axis).val() + " (" + $("#sel_order_"+axis).val() + "Q, ppm)";
 
-		// New or updating?
+    ax_sel =plot_area.select('.'+axis+'.axis');
 
-		if (update)
-			axis_sel = plot.select(axis+'_axis')
-		else
-			axis_sel = plot.append('line')
+    // If not present, create it
+    if (ax_sel.empty())
+	    ax_sel = d3.select('#main_plot').select('g').append('g').attr("class", axis+" axis");
 
-		axis_sel.attr({
-			'class': axis+'_axis axis',
-			'x1': axis_limits[axis][0][0],
-			'x2': axis_limits[axis][1][0],
-			'y1': axis_limits[axis][0][1],
-			'y2': axis_limits[axis][1][1]
-		})
-		.style(linestyle);
+	ax_sel
+      .attr("transform", "translate(0," + {'x': height, 'y': 0}[axis] + ")")
+      .call(fullAxis);
 
-		// Draw min and max values and labels
+   	// Now the label
 
-		var labels = [''+axis_scales[axis][axis_i], $('#sel_species_'+axis).val() + ' (' + $('#sel_order_'+axis).val() + 'Q, ppm)', ''+axis_scales[axis][1-axis_i]];
-		var lab_range = d3.scale.ordinal()
-		.domain(labels)
-		.rangeRoundBands([axis_limits[axis][0][axis_i], (axis_limits[axis][1][axis_i]/2.0*3.0)]);
+   	axlab_sel = plot_area.select('.'+axis+'.axislabel');
 
-		if (update)
-			label_sel = plot.selectAll('.'+axis+'_label').data(labels)
-		else
-			label_sel = plot.selectAll('.'+axis+'_label').data(labels).enter()
+   	if (axlab_sel.empty())
+	   	axlab_sel = d3.select('#main_plot').select('g').append('text').attr('class', axis+' axislabel');
 
-		.append('text')
-		.attr({
-			'class': axis+'_label label',
-			'fill': 'rgb(255,128,0)',
-			'font-size': '11pt',
-		})
-		.attr(not_axis, axis_limits[axis][0][1-axis_i]+(1-2*axis_i)*18.0)
-		.attr(axis, function(d) {return lab_range(d)-12.0;})
-		.attr('transform', function(d) {return 'rotate(-' +(90*axis_i) + ' ' + (axis_limits[axis][0][1-axis_i]+(1-2*axis_i)*18.0) + ',' + (lab_range(d)-12.0) + ')';})
-		.html(function(d) {return d;});
-	}
+	axlab_sel
+		.attr("transform", 
+			"translate(" + {'x': width/2.0, 'y': -default_border/1.5*width}[axis] + "," + 
+				{'x': height*(1.0+default_border), 'y': height/2.0}[axis] + ")" + 
+			" rotate(" + {'x': 0, 'y': -90}[axis] + ")")
+		.html(axisLabel);
+
 
 }

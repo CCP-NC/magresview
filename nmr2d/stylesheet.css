@@ -127,5 +127,43 @@
 	border-spacing: 7pt;
 	font-weight: bold;
 	font-size: 11pt;
-
 }
+
+.x.axis line {
+	stroke: rgb(255,128,0);
+}
+
+.x.axis text {
+	fill: rgb(255,128,0);
+}
+
+.x.axis path {
+	stroke: rgb(255,128,0);
+	stroke-width: 1;
+	fill: none;
+}
+
+.x.axislabel {
+	fill: rgb(255,128,0);	
+	text-anchor: middle;
+}
+
+.y.axis line {
+	stroke: rgb(255,128,0);
+}
+
+.y.axis text {
+	fill: rgb(255,128,0);
+}
+
+.y.axis path {
+	stroke: rgb(255,128,0);
+	stroke-width: 1;
+	fill: none;
+}
+
+.y.axislabel {
+	fill: rgb(255,128,0);	
+	text-anchor: middle;
+}
+

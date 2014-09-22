@@ -145,7 +145,7 @@ function launch_NMR2D() {
     compile_data_set(data_set, {'t': 'all'}, true);
 
     console.log("Launching NMR2D...");
-    var nmr2d_win = window.open('nmr2d/nmr2d_graph.html', '', 'toolbar=no');
+    var nmr2d_win = window.open('nmr2d/nmr2d_graph.html', '', 'toolbar=no,height=' + winH + ',width=' + winW);
     if (!nmr2d_win.opener)
         nmr2d_win.opener = window;
 
