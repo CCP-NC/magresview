@@ -1,7 +1,8 @@
 var data_set = {};
 var atom_set = {};
 
-var axis_limits = {'x': [[0.0, 0.0], [1.0, 0.0]], 'y': [[0.0, 0.0], [0.0, 1.0]]};
+var axis_points = {'x': {'p0': [0.0, 0.0], 'range': [0.0, 0.0], 'angle': 0.0}, 'y': {'p0': [0.0, 0.0], 'range': [0.0, 0.0], 'angle': 0.0}};
+// NOTE: angle not implemented yet and may never be if not explicitly required
 var axis_scales = {'x': [0.0, 0.0], 'y': [0.0, 0.0]};
 
 var default_border = 0.1	// Default ratio between bordered thickness and full area
@@ -178,7 +179,7 @@ function load_image_file(evt) {
 			}
 
 			clean_up_svg(w, h)
-			.append('image')
+			.insert('image', 'g')
 			.attr({'xlink:href': $(this).attr('src'),
 			'width': w,
 			'height': h});
@@ -240,11 +241,25 @@ function clean_up_svg(w, h)
 	$('#image_div').css('display', 'block');
 
 	// Applying margins for the plot
+
+	gw = w*(1.0-2.0*default_border);
+	gh = h*(1.0-2.0*default_border);
+
 	main_plot
 	.append("g")
-	.attr("width", w*(1.0-2.0*default_border))
-	.attr("height", h*(1.0-2.0*default_border))
+	.attr("width", gw)
+	.attr("height", gh)
     .attr("transform", "translate(" + w*default_border + "," + h*default_border + ")");
+
+	// Reset axis vector definitions
+
+	axis_points.x.p0 = [0, gh];
+	axis_points.x.range = [0, gw];
+	axis_points.x.angle = 0.0;
+
+	axis_points.y.p0 = [0, 0];
+	axis_points.y.range = [gh, 0];
+	axis_points.y.angle = 0.0;
 
 	draw_axis('x');
 	draw_axis('y');
@@ -269,7 +284,7 @@ function draw_axis(axis)
 	var width = plot_area.attr('width');
 	var height = plot_area.attr('height');
 
-	var ax = d3.scale.linear().domain(axis_scales[axis]).range([{'x': 0, 'y': height}[axis], {'x': width, 'y': 0}[axis]]);
+	var ax = d3.scale.linear().domain(axis_scales[axis]).range(axis_points[axis].range);
     var fullAxis = d3.svg.axis().scale(ax).ticks(4).orient({'x': "bottom", 'y': "left"}[axis]);
     var axisLabel = $("#sel_species_" + axis).val() + " (" + $("#sel_order_"+axis).val() + "Q, ppm)";
 
@@ -280,7 +295,7 @@ function draw_axis(axis)
 	    ax_sel = d3.select('#main_plot').select('g').append('g').attr("class", axis+" axis");
 
 	ax_sel
-      .attr("transform", "translate(0," + {'x': height, 'y': 0}[axis] + ")")
+      .attr("transform", "translate( "+ axis_points[axis].p0[0] + "," + axis_points[axis].p0[1] + " )")
       .call(fullAxis);
 
    	// Now the label
@@ -290,12 +305,28 @@ function draw_axis(axis)
    	if (axlab_sel.empty())
 	   	axlab_sel = d3.select('#main_plot').select('g').append('text').attr('class', axis+' axislabel');
 
+	// Calculate label positions
+	ax_bbox = ax_sel.node().getBBox();
+	lab_x = axis_points[axis].p0[0] + ax_bbox.x + (axis=='x'?1:-1)*ax_bbox.width/2.0;
+	lab_y = axis_points[axis].p0[1] + ax_bbox.y + (axis=='x'?3:1)*ax_bbox.height/2.0;
+
 	axlab_sel
-		.attr("transform", 
-			"translate(" + {'x': width/2.0, 'y': -default_border/1.5*width}[axis] + "," + 
-				{'x': height*(1.0+default_border), 'y': height/2.0}[axis] + ")" + 
+		.attr("transform", "translate(" + 
+				lab_x + "," + lab_y + ")" +
 			" rotate(" + {'x': 0, 'y': -90}[axis] + ")")
 		.html(axisLabel);
 
+	// This hides immediately the axis upon redrawing if that's the case
+	axes_visibility_handler(axis);
 
 }
+
+function axes_visibility_handler(axis)
+{
+	// Changes visibility for an axis
+	var vis = $('#display_' + axis + '_ax').prop('checked');
+	var plot = d3.select('#main_plot');
+
+	plot.selectAll('.' + axis).attr('display', {true: 'inline', false: 'none'}[vis]);
+}
+
