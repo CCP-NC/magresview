@@ -179,7 +179,7 @@ function load_image_file(evt) {
 			}
 
 			clean_up_svg(w, h)
-			.insert('image', 'g')
+			.insert('image', '.plot_area')
 			.attr({'xlink:href': $(this).attr('src'),
 			'width': w,
 			'height': h});
@@ -249,7 +249,8 @@ function clean_up_svg(w, h)
 	.append("g")
 	.attr("width", gw)
 	.attr("height", gh)
-    .attr("transform", "translate(" + w*default_border + "," + h*default_border + ")");
+    .attr("transform", "translate(" + w*default_border + "," + h*default_border + ")")
+    .classed("plot_area", true);
 
 	// Reset axis vector definitions
 
@@ -280,7 +281,7 @@ function draw_axis(axis)
 	//var width = $("#main_plot").width()*(1.0-2.0*default_border);
 	//var height = $("#main_plot").height()*(1.0-2.0*default_border);
 
-	var plot_area = d3.select('#main_plot').select('g');
+	var plot_area = d3.select('#main_plot').select('.plot_area');
 	var width = plot_area.attr('width');
 	var height = plot_area.attr('height');
 
@@ -330,3 +331,188 @@ function axes_visibility_handler(axis)
 	plot.selectAll('.' + axis).attr('display', {true: 'inline', false: 'none'}[vis]);
 }
 
+function pick_axis(axis)
+{
+	// Pick an axis by clicking on the main plot
+
+	// First, if the plot isn't even visible, scrap everything
+
+	if ($('#main_plot').css('display') == 'none')
+		return;
+
+	// Now set up to pick the first point
+
+	// 0. Preliminary. Disable the button, write a suggestion message
+
+	$('.pick_button').attr('disabled', true);
+	$('#main_plot').css('cursor', 'crosshair');
+	$('#pick_message').html('Pick the first point for the ' + axis.toUpperCase() + ' axis');
+
+	// 1. Create an indicator
+
+	d3.select('#main_plot')
+	.append('circle')
+	.classed(axis+'0sel seldot', true)
+	.attr({
+		'cx': 0,
+		'cy': 0,
+		'r':  8,
+	});
+
+	// 2. Create an event handler to have it follow the mouse
+
+	$('#main_plot').on('mousemove', function(e) {
+
+		var p = $(this).offset();
+		var m = ($(this).outerWidth()-$(this).innerWidth())/2
+
+		d3.select('.'+axis+'0sel').attr({
+			'cx': e.clientX - p.left - m,
+			'cy': e.clientY - p.top - m,
+		});
+
+	});
+
+	// 3. And another to control the effect of a click
+
+	$('#main_plot').on('click', function(e) {
+
+		var p = $(this).offset();
+		var m = ($(this).outerWidth()-$(this).innerWidth())/2
+		var p_rel = $(this).find('.plot_area').attr('transform');
+
+		// Set the p0 of the currently used axis to the relevant value
+
+		axis_points[axis].p0 = [e.clientX - d3.transform(p_rel).translate[0] - p.left - m,
+		e.clientY - d3.transform(p_rel).translate[1] - p.top - m];
+
+		$('#main_plot').off('click');
+		$('#main_plot').off('mousemove');
+
+		$('#pick_message').html('Pick the second point for the ' + axis.toUpperCase() + ' axis');
+
+		// 4. Now reset: second seldot, and new callbacks
+
+		d3.select('#main_plot')
+		.append('circle')
+		.classed(axis+'1sel seldot', true)
+		.attr({
+			'cx': e.clientX - p.left - m,
+			'cy': e.clientY - p.top - m,
+			'r': 8,			
+		});
+
+		$('#main_plot').on('mousemove', function(e) {
+
+			var p = $(this).offset();
+			var m = ($(this).outerWidth()-$(this).innerWidth())/2
+
+			switch(axis)
+			{
+				case 'x':
+					d3.select('.x1sel').attr({
+						'cx': e.clientX - p.left - m,
+					});
+					break;			
+				case 'y':
+					d3.select('.y1sel').attr({
+						'cy': e.clientY - p.top - m,
+					});
+					break;
+				default:
+					break;
+			}
+
+		});
+
+		$('#main_plot').on('click', function(e) {
+
+			// Yo dawg I heard you like callbacks
+
+			var p = $(this).offset();
+			var m = ($(this).outerWidth()-$(this).innerWidth())/2
+			var p_rel = $(this).find('.plot_area').attr('transform');
+
+			var rx = e.clientX - p.left - m - d3.transform(p_rel).translate[0];
+			var ry = e.clientY - p.top - m - d3.transform(p_rel).translate[1];
+			axis_points[axis].range = {
+				'x': [0.0, rx-axis_points[axis].p0[0]],
+				'y': [0.0, ry-axis_points[axis].p0[1]]
+			}[axis];
+
+			/*if (axis == 'x' && rx < axis_points[axis].p0[0])
+			{
+				axis_points[axis].p0 = [rx, ry];
+			}*/
+
+			$('#main_plot').off('click');
+			$('#main_plot').off('mousemove');
+
+			d3.selectAll('.seldot').remove();
+
+			draw_axis(axis);
+
+			$('#pick_message').html('');
+			$('#main_plot').css('cursor', 'initial');
+			$('.pick_button').attr('disabled', false);
+
+		});
+
+
+	});
+
+
+}
+
+function plot_data()
+{
+	// The actual plotting function!
+
+
+	// 1. Compile a list of shifts for both axes
+
+	var sp1 = $('#sel_species_x').val();
+	var sp2 = $('#sel_species_y').val();
+
+	var ms1 = [];
+	var ms2 = [];
+
+	var atom_list = data_set['atoms']['atom'];
+	var ms_list   = data_set['magres']['ms'];
+
+	for (var i=0; i < atom_list.length; ++i)
+	{
+		var is_sp1 = atom_list[i]['label'] == sp1;
+		var is_sp2 = atom_list[i]['label'] == sp2;
+		if (is_sp1 || is_sp2)
+		{
+			var id = parseInt(atom_list[i]['id']);
+			for (var j=0; j < ms_list.length; ++j)
+			{
+				if (ms_list[j]['atom_id'] == id)
+				{
+					if (is_sp1)
+						ms1.push(ms_list[j]['mview_data'][0]);
+					if (is_sp2)
+						ms2.push(ms_list[j]['mview_data'][0]);
+				}
+			}
+		}
+	}
+
+	var q1 = $('#sel_order_x').val();
+	var q2 = $('#sel_order_y').val();
+
+	var datapoints = [];
+
+	for (var i=0; i < ms1.length; ++i)
+	{
+		for (var j=0; j < ms2.length; ++j)
+		{
+			datapoints.push({'msx': ms1[i]*q1, 'msy': ms2[j]*q2});
+		}
+	}
+
+	
+
+}

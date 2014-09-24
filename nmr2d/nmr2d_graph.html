@@ -81,13 +81,16 @@
         <p class="header" >Axes scale</p>
         X<sub>0</sub>: <input id="x_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         X<sub>1</sub>: <input id="x_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
-        <input type="button" value="Pick X axis">
+        <input type="button" class="pick_button" id="pick_x_button" onclick="pick_axis('x')" value="Pick X axis">
         <input type="checkbox" id="display_x_ax" onclick="axes_visibility_handler('x')" checked=true> Visible
         <br><br>
         Y<sub>0</sub>: <input id="y_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         Y<sub>1</sub>: <input id="y_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
-        <input type="button" value="Pick Y axis">
+        <input type="button" class="pick_button" id="pick_y_button" onclick="pick_axis('y')" value="Pick Y axis">
         <input type="checkbox" id="display_y_ax" onclick="axes_visibility_handler('y')" checked=true> Visible
+        <br>
+        <p id="pick_message"></p>
+
       </div>
 
 

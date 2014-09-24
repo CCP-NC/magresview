@@ -167,3 +167,11 @@
 	text-anchor: middle;
 }
 
+.seldot {
+	fill: rgb(255, 128, 0);
+	stroke: none;
+}
+
+#pick_message {
+	color: rgb(200, 0, 0);
+}
