@@ -52,23 +52,23 @@
       <table class="axes_drop_table">
         <tr>
           <td>
-    	  		X axis: <select id="sel_species_x" class="sel_species">
+    	  		X axis: <select id="sel_species_x" class="sel_species" onchange="sel_species_handler('x')">
     		  	</select>
           </td>
           <td>
-    	  		Y axis: <select id="sel_species_y" class="sel_species">
+    	  		Y axis: <select id="sel_species_y" class="sel_species" onchange="sel_species_handler('y')">
     		  	</select>
           </td>
         </tr>
         <tr>
           <td>
-            X axis order: <select id="sel_order_x" class="sel_order">
+            X axis order: <select id="sel_order_x" class="sel_order" onchange="sel_species_handler('x')">
               <option value='1'>1Q</option>
               <option value='2'>2Q</option>
             </select>
           </td>
           <td>
-            Y axis order: <select id="sel_order_y" class="sel_order">
+            Y axis order: <select id="sel_order_y" class="sel_order" onchange="sel_species_handler('y')">
               <option value='1'>1Q</option>
               <option value='2'>2Q</option>
             </select>

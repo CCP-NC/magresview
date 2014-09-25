@@ -1634,7 +1634,7 @@ function compile_data_set(ds, ac, use_all)
 
 	//If required, cycle through dipolar couplings
 	
-	if (document.getElementById("dip_file_check").checked == true)
+	if (document.getElementById("dip_file_check").checked == true || use_all == true)
 	{
 		ds.magres.units.push(["dip", "Hz"]);
 		ds.magres.dip = [];

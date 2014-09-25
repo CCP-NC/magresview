@@ -1,6 +1,11 @@
 var data_set = {};
 var atom_set = {};
 
+var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
+var id_ms_list = {};		// ms classified by id
+var id_dip_list = {};		// dip classified by id
+var id_isc_list = {};		// isc classified by id
+
 var axis_points = {'x': {'p0': [0.0, 0.0], 'range': [0.0, 0.0], 'angle': 0.0}, 'y': {'p0': [0.0, 0.0], 'range': [0.0, 0.0], 'angle': 0.0}};
 // NOTE: angle not implemented yet and may never be if not explicitly required
 var axis_scales = {'x': [0.0, 0.0], 'y': [0.0, 0.0]};
@@ -31,10 +36,13 @@ function document_ready_callback() {
 	})
 
 	// Fetch the atomic data from the main MagresView window
+
     atom_set = window.opener.atom_set;
 
     window.opener.init_data_set(data_set);
     window.opener.compile_data_set(data_set, {'t': 'all'}, true);
+
+    compile_lists();
 
     // Get the maximum size for an image
 
@@ -46,6 +54,61 @@ function document_ready_callback() {
 	reset_scale('x');
 	reset_scale('y');	
 
+}
+
+function compile_lists()
+{
+	var atom_raw_list = data_set['atoms']['atom'];
+	var ms_raw_list   = data_set['magres']['ms'];
+	var dip_raw_list   = data_set['magres']['dip'];
+	var isc_raw_list   = data_set['magres']['isc']; // This will be null if there are no isc
+
+	// Compile an id-by-species list
+	for(var i=0; i < atom_raw_list.length; ++i)
+	{
+		var a = atom_raw_list[i];
+		if (a.label in species_id_list)
+			species_id_list[a.label].push(a.id);
+		else
+			species_id_list[a.label] = [a.id];
+	}
+
+	// Now an ms-by-id one
+	for (var i=0; i < ms_raw_list.length; ++i)
+	{
+		var ms = ms_raw_list[i];
+		id_ms_list[ms.atom_id] = ms.mview_data[0];
+	}
+
+	// Now a dip-by-id one. Each id only contains the pairing with the ids higher or equal
+	for (var i=0; i < dip_raw_list.length; ++i)
+	{
+		var dip = dip_raw_list[i];
+		var min_id = Math.min(dip.atom1_id, dip.atom2_id);
+		var max_id = Math.max(dip.atom1_id, dip.atom2_id);
+
+		if (!(min_id in id_dip_list))
+			id_dip_list[min_id] = {};
+
+		id_dip_list[min_id][max_id] = dip.mview_data[0];
+
+	}
+
+	if (isc_raw_list != null)
+	{
+		for (var i=0; i < isc_raw_list.length; ++i)
+		{
+			var isc = isc_raw_list[i];
+			var min_id = Math.min(isc.atom1_id, isc.atom2_id);
+			var max_id = Math.max(isc.atom1_id, isc.atom2_id);
+
+			if (!(min_id in id_isc_list))
+				id_isc_list[min_id] = {};
+
+			id_isc_list[min_id][max_id] = isc.mview_data[0];
+
+		}
+	}
 }
 
 function update_species()
@@ -64,6 +127,12 @@ function update_species()
 
 }
 
+function sel_species_handler(axis)
+{
+	reset_scale(axis);
+	redraw_all();
+}
+
 function reset_scale(axis)
 {	
 	// Invalid value
@@ -71,38 +140,24 @@ function reset_scale(axis)
 		return;
 
 	var sp = $('#sel_species_' + axis).val();
+	var q  = $('#sel_order_' + axis).val();
 
 	var min = NaN; 
 	var max = NaN;
 
 	// Find minimum and maximum
 
-	var atom_list = data_set['atoms']['atom'];
-	var ms_list   = data_set['magres']['ms'];
-
-	for (var i=0; i < atom_list.length; ++i)
+	for (var i=0; i< species_id_list[sp].length; ++i)
 	{
-		if (atom_list[i]['label'] == sp)
-		{
-			var id = parseInt(atom_list[i]['id']);
-			for (var j=0; j < ms_list.length; ++j)
-			{
-				if (ms_list[j]['atom_id'] == id)
-				{
-					if (isNaN(min) || ms_list[j]['mview_data'][0] < min)
-					{
-						min = ms_list[j]['mview_data'][0];
-					}
-					if (isNaN(max) || ms_list[j]['mview_data'][0] > max)
-					{
-						max = ms_list[j]['mview_data'][0];
-					}
-				}
-			}
-		}
+		var id = species_id_list[sp][i];
+		var ms = id_ms_list[id];
+		if (isNaN(min) || ms < min)
+			min = ms;
+		if (isNaN(max) || ms > max)
+			max = ms;
 	}
 
-	axis_scales[axis] = [Math.floor(min), Math.ceil(max)];
+	axis_scales[axis] = [Math.floor(min*q), Math.ceil(max*q)];
 
 	$('#'+axis+'_0_val').val(axis_scales[axis][0]);
 	$('#'+axis+'_1_val').val(axis_scales[axis][1]);
@@ -135,8 +190,7 @@ function axes_scale_handler(evt)
 		axis_scales['y'][0] = parseFloat($('#y_0_val').val());
 		axis_scales['y'][1] = parseFloat($('#y_1_val').val());
 
-		draw_axis('x');
-		draw_axis('y');
+		redraw_all();
 	}
 }
 
@@ -212,6 +266,7 @@ function create_empty_plot() {
 	}
 
 	clean_up_svg(w, h);
+	redraw_all();
 
 }
 
@@ -451,6 +506,7 @@ function pick_axis(axis)
 			d3.selectAll('.seldot').remove();
 
 			draw_axis(axis);
+			plot_data();
 
 			$('#pick_message').html('');
 			$('#main_plot').css('cursor', 'initial');
@@ -469,50 +525,61 @@ function plot_data()
 	// The actual plotting function!
 
 
-	// 1. Compile a list of shifts for both axes
+	// 1. Compile a list of points to be plotted
 
 	var sp1 = $('#sel_species_x').val();
 	var sp2 = $('#sel_species_y').val();
-
-	var ms1 = [];
-	var ms2 = [];
-
-	var atom_list = data_set['atoms']['atom'];
-	var ms_list   = data_set['magres']['ms'];
-
-	for (var i=0; i < atom_list.length; ++i)
-	{
-		var is_sp1 = atom_list[i]['label'] == sp1;
-		var is_sp2 = atom_list[i]['label'] == sp2;
-		if (is_sp1 || is_sp2)
-		{
-			var id = parseInt(atom_list[i]['id']);
-			for (var j=0; j < ms_list.length; ++j)
-			{
-				if (ms_list[j]['atom_id'] == id)
-				{
-					if (is_sp1)
-						ms1.push(ms_list[j]['mview_data'][0]);
-					if (is_sp2)
-						ms2.push(ms_list[j]['mview_data'][0]);
-				}
-			}
-		}
-	}
 
 	var q1 = $('#sel_order_x').val();
 	var q2 = $('#sel_order_y').val();
 
 	var datapoints = [];
 
-	for (var i=0; i < ms1.length; ++i)
+	for (var i=0; i < species_id_list[sp1].length; ++i)
 	{
-		for (var j=0; j < ms2.length; ++j)
+		var id1 = species_id_list[sp1][i];
+		for (var j=0; j < species_id_list[sp2].length; ++j)
 		{
-			datapoints.push({'msx': ms1[i]*q1, 'msy': ms2[j]*q2});
+			var id2 = species_id_list[sp2][j];
+			datapoints.push({'msx': id_ms_list[id1]*q1, 'msy': id_ms_list[id2]*q2});
 		}
 	}
 
-	
+	// 2. Do the plotting
 
+	var x = d3.scale.linear().domain(axis_scales.x).range(axis_points.x.range);
+	var y = d3.scale.linear().domain(axis_scales.y).range(axis_points.y.range);
+
+	var plot_sel = d3.select('.plot_area')
+	.selectAll('.plotdot')
+	.data(datapoints);
+
+	// .enter	
+	plot_sel.enter()
+	.append('circle')
+	.classed('plotdot', true)
+	.attr('cx',  function(d) { return x(d.msx);} )
+	.attr('cy',  function(d) { return y(d.msy);} )
+	.attr('r', 4)
+	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
+
+	// .update
+	plot_sel
+	.attr('cx',  function(d) { return x(d.msx);} )
+	.attr('cy',  function(d) { return y(d.msy);} )
+	.attr('r', 4)
+	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
+
+	// .exit
+	plot_sel.exit()
+	.remove();
+
+
+}
+
+function redraw_all()
+{
+	draw_axis('x');
+	draw_axis('y');
+	plot_data();
 }
