@@ -1,5 +1,6 @@
 var data_set = {};
 var atom_set = {};
+var shift_list = {};
 
 var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
 var id_ms_list = {};		// ms classified by id
@@ -29,11 +30,15 @@ function document_ready_callback() {
 	})	
 	.mouseout(function() {
 		$(this).css("background-color", "rgb(35,35,35)");
-	})
+	});
 
 	$('.load_button_fake').click(function() {
 		$('.load_button_true').click();
-	})
+	});
+
+	// Update the size field
+
+	psize_slide_handler();
 
 	// Fetch the atomic data from the main MagresView window
 
@@ -41,6 +46,13 @@ function document_ready_callback() {
 
     window.opener.init_data_set(data_set);
     window.opener.compile_data_set(data_set, {'t': 'all'}, true);
+
+    for (var s = 0; s < atom_set.speciesno; ++s)
+    {
+		var lab = atom_set.atom_species_labels[s];
+    	var ref = parseFloat(window.opener.document.getElementById('ref_input_' + lab).value);
+		shift_list[lab] = ref;
+    }
 
     compile_lists();
 
@@ -109,6 +121,11 @@ function compile_lists()
 
 		}
 	}
+	else
+	{
+		// Disable the related option in psize_coup
+		$('#psize_coup').find('#isc_opt').attr('disabled', true)
+	}
 }
 
 function update_species()
@@ -147,10 +164,11 @@ function reset_scale(axis)
 
 	// Find minimum and maximum
 
-	for (var i=0; i< species_id_list[sp].length; ++i)
+	for (var i=0; i<species_id_list[sp].length; ++i)
 	{
 		var id = species_id_list[sp][i];
 		var ms = id_ms_list[id];
+		ms = isNaN(shift_list[sp])?ms:(shift_list[sp]-ms);
 		if (isNaN(min) || ms < min)
 			min = ms;
 		if (isNaN(max) || ms > max)
@@ -237,6 +255,11 @@ function load_image_file(evt) {
 			.attr({'xlink:href': $(this).attr('src'),
 			'width': w,
 			'height': h});
+
+			// Now do the plot
+
+			redraw_all();
+
 
 		});
 
@@ -333,6 +356,11 @@ function draw_axis(axis)
 	if ($('#main_plot').css('display') == 'none')
 		return;
 
+	// Or if this axis isn't visible, because then who cares
+	if (!axes_visibility_handler(axis))
+		return;
+
+
 	//var width = $("#main_plot").width()*(1.0-2.0*default_border);
 	//var height = $("#main_plot").height()*(1.0-2.0*default_border);
 
@@ -371,10 +399,6 @@ function draw_axis(axis)
 				lab_x + "," + lab_y + ")" +
 			" rotate(" + {'x': 0, 'y': -90}[axis] + ")")
 		.html(axisLabel);
-
-	// This hides immediately the axis upon redrawing if that's the case
-	axes_visibility_handler(axis);
-
 }
 
 function axes_visibility_handler(axis)
@@ -384,6 +408,8 @@ function axes_visibility_handler(axis)
 	var plot = d3.select('#main_plot');
 
 	plot.selectAll('.' + axis).attr('display', {true: 'inline', false: 'none'}[vis]);
+
+	return vis;
 }
 
 function pick_axis(axis)
@@ -411,7 +437,7 @@ function pick_axis(axis)
 	.attr({
 		'cx': 0,
 		'cy': 0,
-		'r':  8,
+		'r':  5,
 	});
 
 	// 2. Create an event handler to have it follow the mouse
@@ -454,7 +480,7 @@ function pick_axis(axis)
 		.attr({
 			'cx': e.clientX - p.left - m,
 			'cy': e.clientY - p.top - m,
-			'r': 8,			
+			'r': 5,			
 		});
 
 		$('#main_plot').on('mousemove', function(e) {
@@ -520,6 +546,15 @@ function pick_axis(axis)
 
 }
 
+function psize_slide_handler()
+{
+	var val = $('#psize_slide').val();
+	$('#psize_val').html(val);
+	val = $('#psize_opcty').val();
+	$('#psize_opcty_val').html(val);
+	redraw_all();
+}
+
 function plot_data()
 {
 	// The actual plotting function!
@@ -535,14 +570,62 @@ function plot_data()
 
 	var datapoints = [];
 
+	var psize_coup = $('#psize_coup').val();
+	var psize = parseFloat($('#psize_slide').val());
+	var opcty = parseFloat($('#psize_opcty').val());
+
+	var max_r = 0;
+
 	for (var i=0; i < species_id_list[sp1].length; ++i)
 	{
 		var id1 = species_id_list[sp1][i];
+		var ms1 = id_ms_list[id1];
+		ms1 = isNaN(shift_list[sp1])?ms1:(shift_list[sp1]-ms1);
+
 		for (var j=0; j < species_id_list[sp2].length; ++j)
 		{
 			var id2 = species_id_list[sp2][j];
-			datapoints.push({'msx': id_ms_list[id1]*q1, 'msy': id_ms_list[id2]*q2});
+			var ms2 = id_ms_list[id2];
+			ms2 = isNaN(shift_list[sp2])?ms2:(shift_list[sp2]-ms2);
+
+			var r = 0;
+			var idmin = Math.min(id1, id2);
+			var idmax = Math.max(id1, id2);
+			if (idmin != idmax)
+			{
+				switch(psize_coup)
+				{
+					case 'dip':
+						r = Math.abs(id_dip_list[idmin][idmax]);
+						break;
+					case 'isc':
+						r = Math.abs(id_isc_list[idmin][idmax]);
+						break;
+					default:
+						r = 1;
+						break;
+				}
+				if (r > max_r)
+					max_r = r;
+			}
+			else
+			{
+				r = NaN;
+			}
+
+
+			datapoints.push({'msx': id_ms_list[id1]*q1, 'msy': id_ms_list[id2]*q2, 'r': r});
 		}
+	}
+
+	// 1.5 Normalize the r values to psize
+
+
+	for (var i = 0; i < datapoints.length; ++i)
+	{
+		datapoints[i].r *= psize/max_r;
+		if (isNaN(datapoints[i].r))
+			datapoints[i].r = psize;
 	}
 
 	// 2. Do the plotting
@@ -558,20 +641,25 @@ function plot_data()
 	plot_sel.enter()
 	.append('circle')
 	.classed('plotdot', true)
-	.attr('cx',  function(d) { return x(d.msx);} )
-	.attr('cy',  function(d) { return y(d.msy);} )
-	.attr('r', 4)
-	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
+	.attr('cx',  0 )
+	.attr('cy',  0 )
+	.attr('r', 0);
 
 	// .update
 	plot_sel
+	.transition()
+	.duration(800)
+	.style('opacity', opcty)
 	.attr('cx',  function(d) { return x(d.msx);} )
 	.attr('cy',  function(d) { return y(d.msy);} )
-	.attr('r', 4)
+	.attr('r',   function(d) { return d.r;     } )
 	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
 
 	// .exit
 	plot_sel.exit()
+	.transition()
+	.duration(800)
+	.style('opacity', 0.0)
 	.remove();
 
 
@@ -579,6 +667,11 @@ function plot_data()
 
 function redraw_all()
 {
+	// First, if the plot isn't even visible, scrap everything
+
+	if ($('#main_plot').css('display') == 'none')
+		return;
+
 	draw_axis('x');
 	draw_axis('y');
 	plot_data();

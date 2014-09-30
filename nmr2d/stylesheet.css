@@ -168,8 +168,8 @@
 }
 
 .seldot {
-	fill: rgb(255, 128, 0);
-	stroke: none;
+	stroke: rgb(255, 128, 0);
+	fill: none;
 }
 
 .plotdot {

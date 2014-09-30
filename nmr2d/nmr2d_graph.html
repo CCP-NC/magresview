@@ -78,20 +78,56 @@
   		</div>
 
       <div class='box_div'>
+        <p class="header"> Points</p>
+
+        <table style="font-weight: inherit">
+          <tr>
+            <td>
+              Size: <select id="psize_coup" onchange="redraw_all()">
+                <option id="dip_opt" value='dip'>Dipolar coupling</option>
+                <option id="isc_opt" value='isc'>J-coupling</option>
+                <option id="fix_opt" value='fix'>None (fixed size)</option>
+              </select>
+            </td>
+            <td>
+              Max size:
+            </td>
+            <td>
+               <input type="range" id="psize_slide" onchange="psize_slide_handler(event)" min="5" max="20"> <span id="psize_val"></span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              &nbsp;
+            </td>
+            <td>
+              Opacity:
+            </td>
+            <td>
+               <input type="range" id="psize_opcty" onchange="psize_slide_handler(event)" min="0.1" max="1" step="0.1" value="1.0"> <span id="psize_opcty_val"></span>
+             </td>
+          </tr>
+        </table>
+
+
+      </div>
+
+      <div class='box_div'>
         <p class="header" >Axes scale</p>
         X<sub>0</sub>: <input id="x_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         X<sub>1</sub>: <input id="x_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         <input type="button" class="pick_button" id="pick_x_button" onclick="pick_axis('x')" value="Pick X axis">
-        <input type="checkbox" id="display_x_ax" onclick="axes_visibility_handler('x')" checked=true> Visible
+        <input type="checkbox" id="display_x_ax" onclick="draw_axis('x')" checked=true> Visible
         <br><br>
         Y<sub>0</sub>: <input id="y_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         Y<sub>1</sub>: <input id="y_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
         <input type="button" class="pick_button" id="pick_y_button" onclick="pick_axis('y')" value="Pick Y axis">
-        <input type="checkbox" id="display_y_ax" onclick="axes_visibility_handler('y')" checked=true> Visible
+        <input type="checkbox" id="display_y_ax" onclick="draw_axis('y')" checked=true> Visible
         <br>
         <p id="pick_message"></p>
 
       </div>
+
 
 
   	</div>

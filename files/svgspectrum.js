@@ -81,13 +81,14 @@ function svg_spectrum_plot(from_change)
             var lab = atom_set.atom_species_labels[l];
             
             var ms_shifts = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.tensor('ms', 'isotropy')");
-	    if (plabs_on) {
-		var ms_labels = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.atomname");		
-		// To take care of the case where only one atom is present
-		if (typeof(ms_labels) != 'object') {
-		    ms_labels = [ms_labels];
-		}
-	    }
+            
+    	    if (plabs_on) {
+        		var ms_labels = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.atomname");		
+        		// To take care of the case where only one atom is present
+            		if (typeof(ms_labels) != 'object') {
+            		    ms_labels = [ms_labels];
+            		}
+    	    }
 	    
             var peaks = [];
             
