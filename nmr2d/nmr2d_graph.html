@@ -6,7 +6,8 @@
     <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="nmr2d.js"></script>
 
-    <link href="stylesheet.css" rel="stylesheet" type="text/css">
+    <link id="html_style" href="stylesheet.css" rel="stylesheet" type="text/css">
+    <link id="svg_style"  href="svg_stylesheet.css" rel="stylesheet" type="text/css">
 
     <meta content="">
 
@@ -131,7 +132,7 @@
       <div class='box_div'>
         <p class="header">Download plot</p>
         <div id="virtual_download_button" class="row_div">
-          <a id="plot_download" class="download_button visual_button" href="" >Download SVG</a>
+          <a id="plot_download" class="download_button visual_button" onclick="svg_download()" href="" >Download SVG</a>
           <!--<div class="download_button visual_button download_button_fake" onclick="download_button_click()">Load file</div>-->
         </div>
 
@@ -148,6 +149,51 @@
   		$(document).ready(document_ready_callback);
 
   	</script>
+
+    <div class='svgstyle_box'>
+      .x.axis line {
+        stroke: rgb(0, 40, 75);
+      }
+
+      .x.axis text {
+        stroke: rgb(0, 40, 75);
+      }
+
+      .x.axis path {
+        stroke: rgb(0, 40, 75);
+        stroke-width: 2;
+        fill: none;
+      }
+
+      .x.axislabel {
+        stroke: rgb(0, 40, 75);
+        text-anchor: middle;
+      }
+
+      .y.axis line {
+        stroke: rgb(0, 40, 75);
+      }
+
+      .y.axis text {
+        stroke: rgb(0, 40, 75);
+      }
+
+      .y.axis path {
+        stroke: rgb(0, 40, 75);
+        stroke-width: 2;
+        fill: none;
+      }
+
+      .y.axislabel {
+        stroke: rgb(0, 40, 75);
+        text-anchor: middle;
+      }
+
+      .plotdot {
+        fill: rgb(50, 100, 150);
+        stroke: none;
+      }
+    </div>
 
   </body>
 </html>

@@ -676,12 +676,17 @@ function redraw_all()
 	draw_axis('y');
 	plot_data();
 
-	// Now put everything in URI form associated with the download button
+}
+
+function svg_download()
+{
+	// Put everything in URI form associated with the download button
 
 	$('.download_button')
 	.attr('target', '_blank')
 	.attr('download', 'nmr2d.svg')
-	.attr('href', "data:text/plain," + $('<div>').append($('#main_plot').clone()).html()
+	.attr('href', "data:text/plain," + 
+		$('<div>').append($('#main_plot').clone().prepend($('<style>').html($('.svgstyle_box').html()))).html()
 	.replace(/%/g, '%25')			//The % symbol must be replaced first, or everything goes down the drain!
 	.replace(/\n/g, '%0A')
 	.replace(/\t/g, '%09')
@@ -689,5 +694,7 @@ function redraw_all()
 	.replace(/#/g, '%23')
 	.replace(/"/g, '%22')
 	.replace(/'/g, '%27'));
+
+	return true;
 
 }

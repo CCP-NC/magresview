@@ -1,0 +1,47 @@
+.x.axis line {
+	stroke: rgb(255,128,0);
+}
+
+.x.axis text {
+	fill: rgb(200, 80,0);
+}
+
+.x.axis path {
+	stroke: rgb(255,128,0);
+	stroke-width: 2;
+	fill: none;
+}
+
+.x.axislabel {
+	fill: rgb(200, 80,0);
+	text-anchor: middle;
+}
+
+.y.axis line {
+	stroke: rgb(255,128,0);
+}
+
+.y.axis text {
+	fill: rgb(200, 80,0);
+}
+
+.y.axis path {
+	stroke: rgb(255,128,0);
+	stroke-width: 2;
+	fill: none;
+}
+
+.y.axislabel {
+	fill: rgb(200, 80,0);
+	text-anchor: middle;
+}
+
+.seldot {
+	stroke: rgb(255, 128, 0);
+	fill: none;
+}
+
+.plotdot {
+	fill: rgb(255, 128, 0);
+	stroke: none;
+}
