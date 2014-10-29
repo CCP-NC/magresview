@@ -51,8 +51,8 @@
 
 	position: absolute;
 	top: 0;
-	width: 20%;
-	height: 20pt;
+	width: 22%;
+	height: 25pt;
 
 }
 
@@ -69,23 +69,29 @@
 	border-width: 2pt;
 	border-color: rgb(245,245,235);
 	text-align: center;
-	line-height: 20pt;
+	font-size: 11pt;
+	line-height: 25pt;
 	cursor: default;
 
+}
+
+.reftab_button {
+	width: 22%;
+	height: 25pt;	
 }
 
 .create_button {
 
 	position: absolute;	
 	top: 0pt;
-	width: 20%;
-	height: 20pt;
+	width: 22%;
+	height: 25pt;
 }
 
 .create_size {
 
 	position: absolute;
-	left: 22%;
+	left: 24%;
 
 }
 
@@ -135,8 +141,8 @@
 .download_button {
 	position: absolute;
 	top: 0;
-	width: 20%;
-	height: 20pt;
+	width: 22%;
+	height: 25pt;
   	color: rgb(245, 245, 235);
   	text-decoration: none;
 }
@@ -147,4 +153,38 @@
 
 div.svgstyle_box {
 	display: none;
+}
+
+div.popupdiv {
+	font-weight: normal;
+	font-size: 80%;
+	text-align: left;
+    position: absolute;
+  z-index: 2;
+}
+
+.ref_table {
+  
+  border-collapse: collapse;
+  border: 1px solid rgb(245,245,235);
+  text-align: center;
+  background-color: rgb(245,245,235);
+  
+}
+
+.ref_td {
+  
+  border: 1px solid rgb(245,245,235);
+  text-align: center;
+  width: 120pt;
+  background-color: rgb(20, 20, 20);
+  
+}
+
+.ref_input {
+  
+  background-color: rgb(20, 20, 20);
+  color: inherit;
+  text-align: center;
+  
 }

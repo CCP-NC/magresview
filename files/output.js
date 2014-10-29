@@ -1340,7 +1340,7 @@ function init_data_set(data_set)
 
 //Fill in the data_set with the required atoms
 
-function compile_data_set(ds, ac, use_all)
+function compile_data_set(ds, ac, use_all, ignore_refs)
 {
 	var eul_conv = "zyz"; //May be changed in future
 	var conv_table = {
@@ -1534,7 +1534,7 @@ function compile_data_set(ds, ac, use_all)
 			var ms_reference = parseFloat(document.getElementById('ref_input_' + ds.atoms.isotopes[a_no][1]).value);
 			var a_sigma = ms_info[i+1][0];
 			var a_iso = ms_info[i+2][0];
-			if (!isNaN(ms_reference))
+			if (!isNaN(ms_reference) && ignore_refs != true)
 			{
 				a_iso = ms_reference - a_iso;
 			}

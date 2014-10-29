@@ -122,13 +122,13 @@ function svg_spectrum_plot(from_change)
     if (from_change) {
         document.getElementById("spec_xrange_min").value = spec_plot.xrange[0];
         document.getElementById("spec_xrange_max").value = spec_plot.xrange[1];
-        document.getElementById("spec_xrange_tics").value = spec_plot.xtics;
+        document.getElementById("spec_xrange_tics").value = spec_plot.xticn+1;
     }
     else
     {
         spec_plot.xrange[0] = parseFloat(document.getElementById("spec_xrange_min").value);
         spec_plot.xrange[1] = parseFloat(document.getElementById("spec_xrange_max").value);
-        spec_plot.xtics     = parseFloat(document.getElementById("spec_xrange_tics").value);
+        spec_plot.xticn     = parseInt(document.getElementById("spec_xrange_tics").value)-1;
     }
 
     if (style == 'pulses')
@@ -157,10 +157,6 @@ function svg_spectrum_plot(from_change)
 //Snippet to launch the NMR2D tool, that has its own scripts and code
 
 function launch_NMR2D() {
-
-    var data_set = {}
-    init_data_set(data_set);
-    compile_data_set(data_set, {'t': 'all'}, true);
 
     console.log("Launching NMR2D...");
     var nmr2d_win = window.open('nmr2d/nmr2d_graph.html', '', 'toolbar=no,height=' + winH + ',width=' + winW);

@@ -60,9 +60,9 @@ function SVGPlot(width, height, style, id)
     
     this.xrange = [0, 1];
     this.yrange = [0, 1];
-    
-    this.xtics = (this.xrange[1]-this.xrange[0])/4.0;
-    this.ytics = (this.yrange[1]-this.yrange[0])/4.0;
+
+    this.xticn = 4;
+    this.yticn = 4;
 
     this.ticl = Math.min(this.h*0.03, this.w*0.03);
     this.tic_max = 0.92;
@@ -532,8 +532,6 @@ function SVGPlot(width, height, style, id)
         
         if (this.has_x_tics)
         {
-            this.xticn = Math.abs(Math.floor((this.xrange[1]-this.xrange[0])/this.xtics));
-
             for (var i = 0; i <= this.xticn; ++i) {
                             
                 console.log('SVGPlot - Creating X tics, n.' + (i+1) + '...');
@@ -549,8 +547,6 @@ function SVGPlot(width, height, style, id)
     
         if (this.has_y_tics)
         {
-            this.yticn = Math.abs(Math.floor((this.yrange[1]-this.yrange[0])/this.ytics));
-
             for (var i = 0; i <= this.yticn; ++i) {
                             
                 console.log('SVGPlot - Creating Y tics, n.' + (i+1) + '...');
@@ -591,8 +587,8 @@ function SVGPlot(width, height, style, id)
         
         if (this.data_series_n > 1) {
             
-            this.xrange[1] = Math.min(this.nearest_round_num(min_x, false), this.xrange[0]);
-            this.xrange[0] = Math.max(this.nearest_round_num(max_x, true), this.xrange[1]);
+            this.xrange[1] = Math.min(this.nearest_round_num(min_x, false), this.xrange[1]);
+            this.xrange[0] = Math.max(this.nearest_round_num(max_x, true), this.xrange[0]);
             this.yrange[0] = Math.min(this.nearest_round_num(min_y, false), this.yrange[0]);
             this.yrange[1] = Math.max(this.nearest_round_num(max_y, true), this.yrange[1]);
 
@@ -605,9 +601,6 @@ function SVGPlot(width, height, style, id)
             this.yrange[1] = this.nearest_round_num(max_y, true);
         }
         
-        this.xtics = Math.abs((this.xrange[1]-this.xrange[0])/4.0);
-        this.ytics = Math.abs((this.yrange[1]-this.yrange[0])/4.0);
-
     }
     
     this.remove_data_series = function(i) {

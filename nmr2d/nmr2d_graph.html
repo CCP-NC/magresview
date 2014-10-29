@@ -4,10 +4,14 @@
 
     <script type="text/javascript" src="../d3/d3.min.js"></script>
     <script type="text/javascript" src="../jquery/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../jquery/js/jquery-ui.min.js"></script>
     <script type="text/javascript" src="nmr2d.js"></script>
+
+    <link rel="icon" type="image/png" href="images/favico.png">
 
     <link id="html_style" href="stylesheet.css" rel="stylesheet" type="text/css">
     <link id="svg_style"  href="svg_stylesheet.css" rel="stylesheet" type="text/css">
+    <link id="jqueryUI_style" href="../jquery/css/vader/jquery-ui.css" rel="stylesheet">
 
     <meta content="">
 
@@ -32,7 +36,7 @@
 	  		<div id="virtual_load_button" class="row_div">
 		  		<input type="file" class="load_button load_button_true" autocomplete="off"
 		  		onchange="load_image_file(event)"></input>
-		  		<div class="load_button visual_button load_button_fake">Load file</div>
+		  		<div class="load_button visual_button">Load file</div>
 		  	</div>
 			<div class="row_div">
 				or
@@ -76,6 +80,9 @@
           </td>
         </tr>
         </table>
+        <br>
+        <div class="reftab_button visual_button" onclick="$('#ref_table_popup').dialog('open')">Reference table</div>        
+
   		</div>
 
       <div class='box_div'>
@@ -149,6 +156,17 @@
   		$(document).ready(document_ready_callback);
 
   	</script>
+
+    <div id="ref_table_popup" title="Reference table" class="popupdiv">
+      
+      <table id="ref_table" class="ref_table">
+        <tr>
+          <td>Element</td>
+          <td>Reference (ppm)</td>
+        </tr>
+      </table>
+        
+    </div>
 
     <div class='svgstyle_box'>
       .x.axis line {

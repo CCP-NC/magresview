@@ -1,6 +1,6 @@
 var data_set = {};
 var atom_set = {};
-var shift_list = {};
+var reference_list = {};
 
 var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
 var id_ms_list = {};		// ms classified by id
@@ -45,13 +45,13 @@ function document_ready_callback() {
     atom_set = window.opener.atom_set;
 
     window.opener.init_data_set(data_set);
-    window.opener.compile_data_set(data_set, {'t': 'all'}, true);
+    window.opener.compile_data_set(data_set, {'t': 'all'}, true, true);   // Ignore shifts, they will be read later
 
     for (var s = 0; s < atom_set.speciesno; ++s)
     {
 		var lab = atom_set.atom_species_labels[s];
     	var ref = parseFloat(window.opener.document.getElementById('ref_input_' + lab).value);
-		shift_list[lab] = ref;
+		reference_list[lab] = ref;
     }
 
     compile_lists();
@@ -62,9 +62,55 @@ function document_ready_callback() {
     max_img_height = Math.floor($("#image_div").height()*max_img_height);
 
 	dndrop_init();
+	ref_table_init();
 	update_species();
 	reset_scale('x');
 	reset_scale('y');	
+
+}
+
+function ref_table_init()
+{
+	$("#ref_table_popup").dialog({
+		autoOpen: false, 
+		modal: true, 
+		position: {my: 'right', at: 'right', of: window}, 
+		width: '330pt', 
+		close: ref_table_popup_handler});
+
+	var header = $('<tr></tr>');
+	header.append($('<td></td>').html("Element").addClass("ref_td"));
+	header.append($('<td></td>').html("Reference (ppm)").addClass("ref_td"));
+
+	$('.ref_table').html('').append(header);
+	
+	for (var s = 0; s < atom_set.speciesno; ++s)
+	{
+		var t_row = $('<tr></tr>');
+		var lab = atom_set.atom_species_labels[s];
+		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'ref_label_' + atom_set.atom_species_labels[s]).addClass('ref_td'));
+		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({
+			'id': 'ref_input_' + lab, 
+			'value': reference_list[lab]})));
+		
+		$('.ref_table').append(t_row);
+	}
+	
+}
+
+function ref_table_popup_handler()
+{
+	// Update the reference list, then the plot and everything else, really
+
+	for (var s = 0; s < atom_set.speciesno; ++s)
+	{
+		var lab = atom_set.atom_species_labels[s];
+		reference_list[lab] = parseFloat($('#ref_input_' + lab).val());		
+	}
+
+	reset_scale('x');
+	reset_scale('y');
+	redraw_all();
 
 }
 
@@ -168,14 +214,17 @@ function reset_scale(axis)
 	{
 		var id = species_id_list[sp][i];
 		var ms = id_ms_list[id];
-		ms = isNaN(shift_list[sp])?ms:(shift_list[sp]-ms);
+		ms = isNaN(reference_list[sp])?ms:(reference_list[sp]-ms);
 		if (isNaN(min) || ms < min)
 			min = ms;
 		if (isNaN(max) || ms > max)
 			max = ms;
 	}
 
-	axis_scales[axis] = [Math.floor(min*q), Math.ceil(max*q)];
+	axis_0 = Math.ceil(max*q);
+	axis_1 = Math.floor(min*q);
+
+	axis_scales[axis] = [axis_0, axis_1];
 
 	$('#'+axis+'_0_val').val(axis_scales[axis][0]);
 	$('#'+axis+'_1_val').val(axis_scales[axis][1]);
@@ -580,13 +629,13 @@ function plot_data()
 	{
 		var id1 = species_id_list[sp1][i];
 		var ms1 = id_ms_list[id1];
-		ms1 = isNaN(shift_list[sp1])?ms1:(shift_list[sp1]-ms1);
+		ms1 = isNaN(reference_list[sp1])?ms1:(reference_list[sp1]-ms1);
 
 		for (var j=0; j < species_id_list[sp2].length; ++j)
 		{
 			var id2 = species_id_list[sp2][j];
 			var ms2 = id_ms_list[id2];
-			ms2 = isNaN(shift_list[sp2])?ms2:(shift_list[sp2]-ms2);
+			ms2 = isNaN(reference_list[sp2])?ms2:(reference_list[sp2]-ms2);
 
 			var r = 0;
 			var idmin = Math.min(id1, id2);
@@ -614,7 +663,7 @@ function plot_data()
 			}
 
 
-			datapoints.push({'msx': id_ms_list[id1]*q1, 'msy': id_ms_list[id2]*q2, 'r': r});
+			datapoints.push({'msx': ms1*q1, 'msy': ms2*q2, 'r': r});
 		}
 	}
 
