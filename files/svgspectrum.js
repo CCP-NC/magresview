@@ -88,6 +88,15 @@ function svg_spectrum_plot(from_change)
             		if (typeof(ms_labels) != 'object') {
             		    ms_labels = [ms_labels];
             		}
+
+                // Remove element name (temporary code)
+
+                for (var i = 0; i < ms_labels.length; ++i)
+                {
+                    ms_labels[i] = ms_labels[i].split('_')[1];
+                }
+
+
     	    }
 	    
             var peaks = [];
@@ -102,7 +111,7 @@ function svg_spectrum_plot(from_change)
                 if (!isNaN(ref)) {
                     ms_shifts[i] = ref - ms_shifts[i];
                 }
-                peaks.push(1);
+                peaks.push(1.0);
             }
             
             spec_plot.add_data_series(l, ms_shifts, peaks, style, lab, ms_labels);
@@ -113,13 +122,21 @@ function svg_spectrum_plot(from_change)
     if (from_change) {
         document.getElementById("spec_xrange_min").value = spec_plot.xrange[0];
         document.getElementById("spec_xrange_max").value = spec_plot.xrange[1];
+        document.getElementById("spec_xrange_tics").value = spec_plot.xtics;
     }
     else
     {
         spec_plot.xrange[0] = parseFloat(document.getElementById("spec_xrange_min").value);
         spec_plot.xrange[1] = parseFloat(document.getElementById("spec_xrange_max").value);
+        spec_plot.xtics     = parseFloat(document.getElementById("spec_xrange_tics").value);
     }
-    
+
+    if (style == 'pulses')
+    {
+        spec_plot.yrange[0] = 0.0;
+        spec_plot.yrange[1] = 1.3;
+    }
+
     spec_plot.show('#spec_container');
     
     // Prepare the downloadable version

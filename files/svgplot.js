@@ -61,7 +61,9 @@ function SVGPlot(width, height, style, id)
     this.xrange = [0, 1];
     this.yrange = [0, 1];
     
-    this.ticn = 4;    
+    this.xtics = (this.xrange[1]-this.xrange[0])/4.0;
+    this.ytics = (this.yrange[1]-this.yrange[0])/4.0;
+
     this.ticl = Math.min(this.h*0.03, this.w*0.03);
     this.tic_max = 0.92;
     
@@ -179,8 +181,8 @@ function SVGPlot(width, height, style, id)
     }
     
     this.tic_gen = function(ax, i) {
-            
-            var tic_pos = {'x': i*this.tic_max*(this.x1y0[0]-this.x0y0[0])/this.ticn + this.x0y0[0], 'y': i*this.tic_max*(this.x0y1[1]-this.x0y0[1])/this.ticn + this.x0y0[1]}[ax];
+
+            var tic_pos = {'x': i*this.tic_max*(this.x1y0[0]-this.x0y0[0])/this.xticn + this.x0y0[0], 'y': i*this.tic_max*(this.x0y1[1]-this.x0y0[1])/this.yticn + this.x0y0[1]}[ax];
             
             return $('<line></line>').attr({
                 x1: {'x': tic_pos, 'y': this.x0y0[0]}[ax],
@@ -196,8 +198,8 @@ function SVGPlot(width, height, style, id)
     
     this.ticlabel_gen = function(ax, i) {
         
-        var tic_pos = {'x': i*this.tic_max*(this.x1y0[0]-this.x0y0[0])/this.ticn + this.x0y0[0], 'y': i*this.tic_max*(this.x0y1[1]-this.x0y0[1])/this.ticn + this.x0y0[1]}[ax];
-        var tic_val = {'x': i/this.ticn*(this.xrange[1]-this.xrange[0]) + this.xrange[0], 'y': i/this.ticn*(this.yrange[1]-this.yrange[0]) + this.yrange[0]}[ax].toFixed(2);
+        var tic_pos = {'x': i*this.tic_max*(this.x1y0[0]-this.x0y0[0])/this.xticn + this.x0y0[0], 'y': i*this.tic_max*(this.x0y1[1]-this.x0y0[1])/this.yticn + this.x0y0[1]}[ax];
+        var tic_val = {'x': i/this.xticn*(this.xrange[1]-this.xrange[0]) + this.xrange[0], 'y': i/this.yticn*(this.yrange[1]-this.yrange[0]) + this.yrange[0]}[ax].toFixed(2);
         
         return $('<text></text>').attr({
             x: {'x': tic_pos, 'y': this.x0y0[0] - this.w*0.06}[ax],
@@ -294,7 +296,7 @@ function SVGPlot(width, height, style, id)
                     }).css({
                        'fill': 'none',
                        'stroke': this.data_col(ds_i),
-                       'stroke-width': 1.2*this.style.axes_stroke,
+                       'stroke-width': 0.8*this.style.axes_stroke,
                     }));
                     break;
                 case "points":
@@ -358,7 +360,8 @@ function SVGPlot(width, height, style, id)
             
             if (p_lab != '') {
                                 
-                x_lab = x_i+5;
+                //x_lab = x_i+5; // Temporarily changed this
+                x_lab = x_i+1;
                 y_lab = y_i-5;
                 
                 pplot.push($('<text></text>').attr({
@@ -504,7 +507,7 @@ function SVGPlot(width, height, style, id)
         this.jq_rep.append(this.key_gen());
         
         console.log('SVGPlot - Creating axes and labels...')
-        
+
         if (this.has_x_axis)
         {
             var x_axis = this.axis_gen('x');
@@ -527,32 +530,39 @@ function SVGPlot(width, height, style, id)
         
         // Create tics
         
-        if (this.has_x_tics || this.has_y_tics)
+        if (this.has_x_tics)
         {
-            for (var i = 0; i <= this.ticn; ++i) {
-                            
-                console.log('SVGPlot - Creating tics, n.' + (i+1) + '...');
-                
-                if (this.has_x_tics)
-                {
-                    var newticx = this.tic_gen('x', i);
-                    var newticlabelx = this.ticlabel_gen('x', i);
-                    
-                    this.jq_rep.append(newticx);
-                    this.jq_rep.append(newticlabelx);
-                }
+            this.xticn = Math.abs(Math.floor((this.xrange[1]-this.xrange[0])/this.xtics));
 
-                if (this.has_y_tics)
-                {
-                    var newticy = this.tic_gen('y', i);
-                    var newticlabely = this.ticlabel_gen('y', i);
-                    
-                    this.jq_rep.append(newticy);
-                    this.jq_rep.append(newticlabely);
-                }
+            for (var i = 0; i <= this.xticn; ++i) {
+                            
+                console.log('SVGPlot - Creating X tics, n.' + (i+1) + '...');
+                
+                var newticx = this.tic_gen('x', i);
+                var newticlabelx = this.ticlabel_gen('x', i);
+                
+                this.jq_rep.append(newticx);
+                this.jq_rep.append(newticlabelx);
+
             }        
         }
     
+        if (this.has_y_tics)
+        {
+            this.yticn = Math.abs(Math.floor((this.yrange[1]-this.yrange[0])/this.ytics));
+
+            for (var i = 0; i <= this.yticn; ++i) {
+                            
+                console.log('SVGPlot - Creating Y tics, n.' + (i+1) + '...');
+
+                var newticy = this.tic_gen('y', i);
+                var newticlabely = this.ticlabel_gen('y', i);
+                
+                this.jq_rep.append(newticy);
+                this.jq_rep.append(newticlabely);
+                
+            }        
+        }
     };
     
     this.add_data_series = function(i, x_points, y_points, style, title, peak_labels) {
@@ -581,19 +591,23 @@ function SVGPlot(width, height, style, id)
         
         if (this.data_series_n > 1) {
             
-            this.xrange[0] = Math.min(this.nearest_round_num(min_x, false), this.xrange[0]);
-            this.xrange[1] = Math.max(this.nearest_round_num(max_x, true), this.xrange[1]);
+            this.xrange[1] = Math.min(this.nearest_round_num(min_x, false), this.xrange[0]);
+            this.xrange[0] = Math.max(this.nearest_round_num(max_x, true), this.xrange[1]);
             this.yrange[0] = Math.min(this.nearest_round_num(min_y, false), this.yrange[0]);
             this.yrange[1] = Math.max(this.nearest_round_num(max_y, true), this.yrange[1]);
+
         }
         else
         {
-            this.xrange[0] = this.nearest_round_num(min_x, false);
-            this.xrange[1] = this.nearest_round_num(max_x, true);
+            this.xrange[1] = this.nearest_round_num(min_x, false);
+            this.xrange[0] = this.nearest_round_num(max_x, true);
             this.yrange[0] = this.nearest_round_num(min_y, false);
             this.yrange[1] = this.nearest_round_num(max_y, true);
         }
         
+        this.xtics = Math.abs((this.xrange[1]-this.xrange[0])/4.0);
+        this.ytics = Math.abs((this.yrange[1]-this.yrange[0])/4.0);
+
     }
     
     this.remove_data_series = function(i) {
