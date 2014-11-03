@@ -1,0 +1,60 @@
+/*    'default': {
+        bkg_color: '#ffffff',
+        axes_color: '#000000',
+        axes_stroke: 2,
+        text_color: '#000000',
+        data_col_table: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'],
+    },
+    
+    'grey': {
+        bkg_color: '#eeeeee',
+        axes_color: '#333333',
+        axes_stroke: 4,        
+        text_color: '#333333',        
+        data_col_table: ['#cc3300', '#00cc33', '#3300cc', '#cccc33', '#cc33cc', '#33cccc'],
+    },
+    
+    'mview': {
+        bkg_color: '#303030',
+        axes_color: '#f5f5eb',
+        axes_stroke: 3,        
+        text_color: '#f5f5eb',        
+        data_col_table: ['#ff8800', '#0088ff', '#88ff00', '#ffff88', '#ff88ff', '#88ffff'],        
+    }
+*/
+
+.defaultsvg.bkg {
+    fill: rgb(255, 255, 255);
+}
+
+.mviewsvg.bkg {
+    fill: rgb(30, 30, 30);       
+}
+
+.defaultsvg.axis path {
+    stroke: rgb(0, 0, 0);
+    stroke-width: 2;
+    fill: none;
+}
+
+.mviewsvg.axis path {
+    stroke: rgb(200, 80, 0);
+    stroke-width: 2;
+    fill: none;
+}
+
+.defaultsvg.axis line {
+    stroke: rgb(0, 0, 0);
+}
+
+.mviewsvg.axis line {
+    stroke: rgb(200, 80, 0);
+}
+
+.defaultsvg.axis text {
+    fill: rgb(0, 0, 0);
+}
+
+.mviewsvg.axis text {
+    fill: rgb(200, 80, 0);
+}
