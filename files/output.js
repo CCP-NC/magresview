@@ -300,27 +300,6 @@ function range_file_r_handler(evt)
 	}
 }
 
-//Clears out the Download link if it's not required
-
-function download_link_handler()
-{
-	var active = $("#main_tabs").tabs("option", "active");
-	if(active == tab_index("#file_gen"))				//Is the File generation tab active?
-	{
-		if(current_framework == "Java")
-		{
-			$("#file_download").addClass("hidden");
-			$("#file_download").attr("href", "");
-		}
-	}
-	else
-	{
-		$("#file_download").addClass("hidden");		
-		$("#file_download").attr("href", "");
-	}
-	
-}
-
 //Draws a sphere visualizing the selected range
 
 function range_sphere_handler()

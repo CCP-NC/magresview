@@ -20,7 +20,7 @@ function console_input(evt)
 	var evt = window.event || evt;
 	// This one for compatibility with Firefox, which uses 'charCode'. Because unified standards are for pansies.
 	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
-	var in_line = document.getElementById("jmol_console").value;
+	var in_line = $("#jmol_console").val();
 	
 	// Execution of a command (ENTER)
 	if (myKey == 13)
@@ -29,11 +29,11 @@ function console_input(evt)
 		document.getElementById("jmol_console").value = "";
 
 		//Check that the command didn't alter the model - if it did, disable NMR functionalities and clear atom_set data
-		//This is done by activating the proper callback function
-		script_callback_flag_consoleline = true;
+		//This is done by signaling the proper callback function
+		cmd_script = in_line + "; message 'mview_console_command';";
 		
 		//Run the command
-		Jmol.script(mainJmol, in_line);
+		Jmol.script(mainJmol, cmd_script);
 		
 		//Add the command to history
 		console_history.shift();

@@ -40,6 +40,10 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	 
      -->    
 	
+  <script src="d3/d3.min.js"></script>
+
+  <!-- d3 is another very useful Javascript library. It does similar things to jQuery, but has the added benefit of being very good at handling data. Used for plots. -->
+
 	<!-- Version definition -->
 	     
 	<script type="text/javascript" >
@@ -336,8 +340,16 @@ It provides the possibility to load example files from a dropdown menu but it ma
     
     <!-- Spectrum plotting - general SVG plotting functionality and specific ones -->
     
+    <!-- 
     <script type="text/javascript" src="files/svgplot.js"></script>
     <script type="text/javascript" src="files/svgspectrum.js"></script>
+    -->
+
+    <script type="text/javascript" src="files/svgd3spec.js"></script>
+
+    <!-- Unified control of state changes -->
+    
+    <script type="text/javascript" src="files/state_change.js"></script>
 
     <!-- JSON parser and stringifier, for passing values to the Python script -->
 
@@ -358,7 +370,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
       		heightStyle: "content",
       		autoHeight: false,
       		activate: function(event, ui) {
-      			visual_accor_handler();
+            global_state_machine.handle_change('state');
 		}
     		});
     		
@@ -370,10 +382,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 		$("#main_tabs").tabs({
 			activate: function(event, ui) {
-				sel_file_drop_handler();
-				visual_accor_handler();
+        global_state_machine.handle_change('state');
 				iso_drop_update();
-				align_radio_handler();
 				svg_spectrum_plot(true);
 			}
 		});

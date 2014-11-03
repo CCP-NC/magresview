@@ -342,50 +342,38 @@ function appready_callback()
 //This proves to be often required as the Jmol scripts tend to be slow, and thus we need to handle asynchronously any action that has to be performed necessarily after their execution.
 //A series of boolean global flags keeps track of what needs to be done.
 
-var script_callback_flag_consoleline = false;
-var script_callback_flag_selectiondrop = false;
-
 function afterscript_callback(app, msg, scr_line)
 {
 	
 	console.log(msg);
 	console.log(scr_line);
 
-	if(msg == "Script completed")
+	//If a console line has just been fed, and the command has been executed, check whether it altered the model
+	//and if it did, disable NMR functionalities and clear atom_set data
+	if (msg.indexOf("mview_console_command") > 0)
 	{
-		//If a console line has just been fed, and the command has been executed, check whether it altered the model
-		//and if it did, disable NMR functionalities and clear atom_set data
-		if (script_callback_flag_consoleline == true)
+		if(atom_set.atomno > 0)
 		{
-			if(atom_set.atomno > 0)
+			var jmol_atomno = Jmol.evaluateVar(mainJmol, "{*}.length");
+			console.log(jmol_atomno);
+			if(jmol_atomno != atom_set.atomno)
 			{
-				var jmol_atomno = Jmol.evaluateVar(mainJmol, "{*}.length");
-				if(jmol_atomno != atom_set.atomno)
-				{
-					disable_NMR_controls();
-					reset_atom_set();
-					alert("Console actions that alter the model will disable NMR functionalities.\nPlease reload your model.");
-				}
-			}		
-			script_callback_flag_consoleline = false;
-		}
+				disable_NMR_controls();
+				reset_atom_set();
+				alert("Console actions that alter the model will disable NMR functionalities.\nPlease reload your model.");
+			}
+		}		
+		script_callback_flag_consoleline = false;
 	}
-	else if (msg.indexOf("atoms selected") > 0)
-	{	
-		//If the selected group has changed, wait for the new selection to take effect, and then update the plots
-		//This is required in order to reset the maximum and minimum when replotting after a change of selection, or as a result the transparency scale will be wrong
-		//(and potentially broken)
-		document.getElementById("isc_min").disabled = true;
-		document.getElementById("isc_max").disabled = true;
-
-		plot_update();
-		iso_drop_update();
-		svg_spectrum_plot(true);
-		script_callback_flag_selectiondrop = false;
-	}
-	else if (msg.indexOf("atoms hidden") > 0)
+	else if (msg.indexOf("displayed_change") > 0)
 	{
-		sel_drop_handler(false);
+		// A change in what is displayed
+		global_state_machine.handle_change('display');
+	}
+	else if (msg.indexOf("selected_change") > 0)
+	{	
+		// A change in what is selected
+		global_state_machine.handle_change('selection');
 	}
 }
 
@@ -503,14 +491,18 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		sticks_check_handler();
 		euler_diff_calc_handler(); 	//Takes care also of setting the picking to measure distance
 
-		vvleck_sphere_handler();
-		
+		// Initializing the state machine
+		global_state_machine = new state_machine();
+
 		q_units_choice_handler();
 		t_conv_choice_handler();
 
 		//Just to make sure that no one downloads a file belonging to another system
 		$("#file_download").addClass("hidden");
 		$("#eul_file_download").addClass("hidden");
+
+		global_state_machine.handle_change('state');
+
 	}
 }
 
@@ -537,10 +529,13 @@ function pick_callback(id, atom, i)
 	{
 		document.getElementById("range_atom_picked").innerHTML = "" + atom.substring(atom.indexOf(':') + 1, atom.lastIndexOf(' '));
 		last_atom_picked = parseInt(atom.substring(atom.lastIndexOf('#') + 1));
-		range_sphere_handler();
-		vvleck_sphere_handler();
-		isc_closest_handler();
+		global_state_machine.handle_change('state');
+		isc_label_handler();
 		dip_label_handler();
+	}
+	else
+	{
+		Jmol.script(mainJmol, "message 'selected_change';");
 	}
 }
 
@@ -549,61 +544,6 @@ function pick_callback(id, atom, i)
 function last_atom_picked_name()
 {
 	return Jmol.evaluate(mainJmol, "{{*}[" + last_atom_picked + "]}.atomname");
-}
-
-//Generates a color scale from blue to red for plotting purposes
-
-function color_scale(v)
-{
-	var r, g, b;
-	
-	if (v < 0)
-		v = 0;
-	if (v > 1)
-		v = 1;
-		
-	if (v <= 0.5)
-	{
-		//linear interpolation between blue and green
-		r = 0;
-		if (v <= 0.25)
-		{
-			g = Math.floor(v/(0.5-v)*255);
-			b = 255;
-		}
-		else
-		{
-			g = 255;
-			b = Math.floor((0.5-v)/v*255);
-		}
-	}	
-
-	if (v > 0.5)
-	{
-		//linear interpolation between blue and green
-		b = 0;
-		if (v <= 0.75)
-		{
-			r = Math.floor((v-0.5)/(1.0-v)*255);
-			g = 255;
-		}
-		else
-		{
-			r = 255;
-			g = Math.floor((1.0-v)/(v-0.5)*255);
-		}
-	}
-	
-	return [r, g, b];
-}
-
-function visual_accor_handler()
-{
-	euler_diff_calc_handler();
-	vvleck_sphere_handler();
-	isc_closest_handler();
-	download_link_handler();
-	snap_download_link_handler();
 }
 
 //Handler for switching between Jmol and JSmol
@@ -663,7 +603,6 @@ function switch_handler(was_clicked) {
 			break;
 		
 	}
-	
 	
 }
 

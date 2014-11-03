@@ -40,27 +40,27 @@ function sel_drop_handler(from_change)
 	var sp = document.getElementById("sel_drop").value;
 	var dropd_atoms = document.getElementById("sel_atom_drop");
 	
-	script_callback_flag_selectiondrop = true;
+	select_script = "";
 	
 	if (sp == "all")
 	{
 		dropd_atoms.disabled = true;
 		dropd_atoms.options.length = 1;
-		Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed");
+		select_script += "set pickingstyle select none; set picking measure distance; select displayed;";
 	}
 	else if (sp == "custom")
 	{
 		dropd_atoms.disabled = true;
 		dropd_atoms.options.length = 1;
 		document.getElementById("halos_check").checked = true;
-		Jmol.script(mainJmol, "selectionhalos on; set pickingstyle select drag; set picking select atom");
+		select_script += "selectionhalos on; set pickingstyle select drag; set picking select atom;";
 	}
 	else
 	{
 		if (atom_set.atom_species_sites == null)
 		{
 			dropd_atoms.disabled = true;
-			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and {_" + sp + "};");
+			select_script += "set pickingstyle select none; set picking measure distance; select displayed and {_" + sp + "};";
 		}
 		else if (from_change)	// from_change prevents resetting the selection when sel_drop_handler is not called as a callback of sel_drop
 		{
@@ -68,12 +68,18 @@ function sel_drop_handler(from_change)
 			dropd_atoms.options.length = atom_set.atom_species_sites[sp].length + 1;
 			for (var i = 1; i < dropd_atoms.options.length; ++i)
 				dropd_atoms.options[i] = new Option(atom_set.atom_species_sites[sp][i-1], atom_set.atom_species_sites[sp][i-1]);
-			Jmol.script(mainJmol, "set pickingstyle select none; set picking measure distance; select displayed and " + sp + "_*");
+			select_script += "set pickingstyle select none; set picking measure distance; select displayed and " + sp + "_*;";
 		}
 		else
 		{
 			sel_atom_drop_handler();
 		}
+	}
+
+	if (select_script != "")
+	{
+		select_script += "message 'selected_change';";
+		Jmol.script(mainJmol, select_script);
 	}
 	
 }
@@ -83,15 +89,17 @@ function sel_atom_drop_handler(turn_flag_on)
 	var sp = document.getElementById("sel_drop").value;
 	var ind = document.getElementById("sel_atom_drop").value;
 	
-	script_callback_flag_selectiondrop = true;
+	select_atom_script = "";
 
 	if (sp == "all")
-		Jmol.script(mainJmol, "select displayed");
+		select_atom_script += "select displayed;";
 	else if (ind == "all")
-		Jmol.script(mainJmol, "select displayed and " + sp + "_*");
+		select_atom_script += "select displayed and " + sp + "_*;";
 	else
-		Jmol.script(mainJmol, "select displayed and " + sp + "_" + ind);
+		select_atom_script += "select displayed and " + sp + "_" + ind + ";";
 
+	select_atom_script += "message 'selected_change';";
+	Jmol.script(mainJmol, select_atom_script);
 }
 
 function halos_check_handler()

@@ -313,24 +313,3 @@ function snap_handler()
 	}
 	
 }
-
-//Clears out the Snapshot download link if it's not required
-
-function snap_download_link_handler()
-{
-	var active = $("#main_tabs").tabs("option", "active");
-	if(active == tab_index("#options_accordion"))				//Is the Options tab active?
-	{
-		if(current_framework == "Java")
-		{
-			$("#snap_download").addClass("hidden");
-			$("#snap_download").attr("href", "");
-		}
-	}
-	else
-	{
-		$("#snap_download").addClass("hidden");		
-		$("#snap_download").attr("href", "");
-	}
-	
-}

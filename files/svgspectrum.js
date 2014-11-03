@@ -1,3 +1,12 @@
+//MagresView 
+//by Simone Sturniolo
+//
+//Copyright 2014 Science and Technology Facilities Council
+//This software is distributed under the terms of the GNU General Public License (GNU GPL)
+//Please refer to the file COPYING for the text of the license
+
+//This file creates SVG plots of arbitrary quantities (here used for spectra)
+
 function spec_style_drop_handler() {
     
     var sty = document.getElementById('spec_style_drop').value;

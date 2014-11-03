@@ -30,6 +30,8 @@ var label_components = ["", "", ""];				//This will hold the various pieces of t
 
 var atom_set = {
 
+	atomno: 0,															//Total number of atoms in the system (used to check that no atom is deleted)
+
 	speciesno: 0,														//Total number of species (by crystallographic label) in the system
 		
 	atom_species_labels: [],											//Array: number -> label
@@ -64,6 +66,8 @@ function reset_system()
 	}
 
 	atom_set = {
+
+		atomno: 0,
 
 		speciesno: 0,
 				
@@ -393,6 +397,7 @@ function get_atom_info()
 		atom_set.has_isc = false;
 	}
 
+	atom_set.atomno = Jmol.evaluateVar(mainJmol, "{*}.length");
 	atom_set.speciesno = atom_set.atom_species_labels.length;
 
 }
