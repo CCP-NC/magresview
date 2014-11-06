@@ -17,10 +17,20 @@ function svg_spectrum_plot(from_change)
     // First, gather the data
 
     if (!atom_set.has_ms) {
-        // WTH are we doing here?
+        // WTH are we doing here? Disable everything and go home
+        $("#spec_xrange_min").attr('disabled', true);
+        $("#spec_xrange_max").attr('disabled', true);
+        $("#spec_xrange_step").attr('disabled', true);
+        $('#spec_plot_svg').css('display', 'none');      
         return;
     }
-    
+    else
+    {
+        $("#spec_xrange_min").attr('disabled', false);
+        $("#spec_xrange_max").attr('disabled', false);
+        $("#spec_xrange_step").attr('disabled', false);        
+    }
+
     // Ask Jmol for info
     
     spectrum_data = {};
@@ -80,6 +90,10 @@ function svg_spectrum_plot(from_change)
         $("#spec_xrange_step").val((xmax-xmin)/4.0);
     }
 
+    svg_plot_clean();
+    draw_axis();
+    plot_data(spectrum_data);
+
 }
 
 function svg_plot_clean()
@@ -94,7 +108,8 @@ function svg_plot_clean()
     var main_plot = d3.select('#spec_plot_svg')
     .html('')
     .style({'width': plot_W,
-    'height': plot_H,});
+    'height': plot_H,
+    'display': 'inline',});
 
     // Now add a rectangle as background
 
@@ -167,7 +182,142 @@ function draw_axis()
 
 }
 
-function plot_data(from_change)
+function plot_data(data)
 {
+    var x1 = parseFloat($("#spec_xrange_min").val());
+    var x2 = parseFloat($("#spec_xrange_max").val());
 
+    var style = $('#spec_style_drop').val();
+
+    var lor_points = parseInt($('#spec_interp_n').val());
+    var lor_width = parseFloat($('#spec_broad').val());
+
+    var plot_area = d3.select('#spec_plot_svg').select('.plot_area');
+    var width = plot_area.attr('width');
+    var height = plot_area.attr('height');
+
+    var ax = d3.scale.linear().domain([x1, x2]).range([0, width]);
+    var ay = d3.scale.linear().domain([1.0, 0.0]).range([0, height]);
+
+    var lorentzian = function(x, x0, w, h) {
+        return h/(1.0+Math.pow((x-x0)/w, 2.0));
+    }
+
+    var lorp = [];
+    for (var i = 0; i < lor_points; ++i)
+    {
+        lorp.push(i);
+    }
+
+    for (el in data)
+    {
+        switch(style)
+        {
+            case 'pulses':
+
+                var puls = plot_area.selectAll('.pulses_' + el).data(data[el].ms);
+
+                // Create missing pulses
+
+                puls.enter().append('rect')
+                .attr({
+                    'x': function(d) {return ax(d)-1;},
+                    'y': ay(0.0),
+                    'width': 2,
+                    'height': 0,
+                })
+                .style({
+                    'fill': 'rgb(255,128,0)',
+                })
+                .transition()
+                .attr({
+                    'y': ay(0.5),
+                    'height': ay(0.5),
+                });
+                break;
+
+            case 'peaks':
+
+                // Create a Lorentzian line
+
+                var lorx = d3.scale.linear().domain([0, lor_points]).range([String(x1), String(x2)]);   // Yes, cast to string. Apparently this makes d3 work here. No, I don't understand it either.
+
+                // We need to estimate a normalization factor
+                // A factor rescales taking into account the effect of spline interpolation, which lowers the peaks
+
+                var lorline = [];
+                var max_y = 0;
+
+                var lorline_func = d3.svg.line()
+                                .x(function(d) { lorline.push({'x': ax(lorx(d))}); return lorline[d].x;})
+                                .y(function(d) {
+
+                                    var y = 0.0;
+
+                                    for (var p_i = 0; p_i < data[el].ms.length; ++p_i)
+                                    {   
+                                        y += lorentzian(lorx(d), data[el].ms[p_i], lor_width, 0.2);
+                                    }
+
+                                    lorline[d].y = y;
+                                    if (y > max_y)
+                                        max_y = y;
+
+                                    return ay(y);
+                                })
+                                .interpolate('cardinal');
+
+                var lorline_norm = d3.svg.line()
+                                .x(function(d) { return lorline[d].x;})
+                                .y(function(d) {
+                                    return ay(lorline[d].y/max_y*0.7);
+                                })
+                                .interpolate('cardinal');
+
+                var lineGraph = plot_area.append("path")
+                            .attr("d", lorline_func(lorp))
+                            .attr({
+                                "stroke": "rgb(255,128,0)",
+                                "stroke-width": 2,
+                                "fill": "none",
+                            })
+                            .transition()
+                            .attr("d", lorline_norm(lorp));
+
+                break;
+        }
+
+    }
+    
+}
+
+function spec_style_drop_handler() 
+{
+    var sty = $('#spec_style_drop').val();
+    
+    switch (sty) {
+        case "peaks":
+            $('#spec_interp_n').attr('disabled', false);
+            $('#spec_broad').attr('disabled', false);
+            break;
+        default:
+            $('#spec_interp_n').attr('disabled', true);
+            $('#spec_broad').attr('disabled', true);
+            break;
+    }
+
+    svg_spectrum_plot(false);
+}
+
+function spec_replot_handler(evt)
+{
+    //Compatibility code - see console.js for details
+    var evt = window.event || evt;
+    var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
+    
+    if (myKey == 13)
+    {
+        evt.preventDefault();
+        svg_spectrum_plot(false);
+    }
 }

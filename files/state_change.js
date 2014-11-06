@@ -146,7 +146,7 @@ function state_machine() {
 
         state_change_script += "display " + display_group + ";";                                 // Display the proper atoms
         state_change_script += "color {displayed and not default_displaygroup} translucent;"     // Color 
-        state_change_script += "message 'displayed_change'";                                    // Explicitly triggers the call to a display change
+        state_change_script += "message 'displayed_change';";                                    // Explicitly triggers the call to a display change
 
         // Now add the align script (another thing controlled purely by state)
 

@@ -355,7 +355,6 @@ function afterscript_callback(app, msg, scr_line)
 		if(atom_set.atomno > 0)
 		{
 			var jmol_atomno = Jmol.evaluateVar(mainJmol, "{*}.length");
-			console.log(jmol_atomno);
 			if(jmol_atomno != atom_set.atomno)
 			{
 				disable_NMR_controls();

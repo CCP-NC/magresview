@@ -175,8 +175,6 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		$("#main_tabs").tabs({
 			activate: function(event, ui) {
         global_state_machine.handle_change('state');
-				iso_drop_update();
-				svg_spectrum_plot(true);
 			}
 		});
 		
@@ -572,22 +570,22 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					  Interpolation points: &nbsp;
 					  <input type="text" id="spec_interp_n" value='100' maxlength='4' size='4'
 					  title='Select the number of interpolation points for the spline drawing the Lorentzian curve. Warning: high number of points might result in slow updates'
-					  onkeypress='spec_interp_n_handler(event)' disabled=true>
+					  onkeypress='spec_replot_handler(event)' disabled=true>
 					  <br><br>
 					  Line broadening: &nbsp;
 					  <input type="text" id="spec_broad" value='1' maxlength='4' size='4'
 					  title='Select the Lorentzian curve broadening in ppm.'
-					  onkeypress='spec_interp_n_handler(event)' disabled=true> &nbsp; ppm
+					  onkeypress='spec_replot_handler(event)' disabled=true> &nbsp; ppm
 					  <br><br>
 					  <input type="checkbox" id="spec_plabel_check" autocomplete="off" onchange="spec_plab_handler()" checked>Show atom labels next to the peaks
 					  
 					  <div id="spec_options_2_div" class="ctrl_right">
 					    X axis range: &nbsp; <input type="text" id="spec_xrange_min" value='0' maxlength='4' size='4'
-					  title='X range - minimum' onkeypress='spec_xrange_handler(event)'> &nbsp; - &nbsp;
+					  title='X range - minimum' onkeypress='spec_replot_handler(event)'> &nbsp; - &nbsp;
             <input type="text" id="spec_xrange_max" value='1' maxlength='4' size='4'
-					  title='X range - maximum' onkeypress='spec_xrange_handler(event)'> &nbsp; 
+					  title='X range - maximum' onkeypress='spec_replot_handler(event)'> &nbsp; 
             (step: <input type="text" id="spec_xrange_step" value='0' maxlength='4' size='4'
-            title='X range - space between tics' onkeypress='spec_xrange_handler(event)'> &nbsp;)
+            title='X range - space between tics' onkeypress='spec_replot_handler(event)'> &nbsp;)
             ppm
 					  <br><br>
 					  
