@@ -416,12 +416,7 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 {
 	if (state == 3)
 	{
-		// This to avoid blocking the application if one is loading with the spec plot tab active
-		if(($("#main_tabs").tabs("option", "active") == tab_index("#spec_plot")))
-		{
-			$("#main_tabs").tabs("option", "active", 0);
-		}
-		
+	
 		switch (is_mol_crystal())
 		{
 			case 1:

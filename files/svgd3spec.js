@@ -11,8 +11,8 @@ var svg_border_width = 0.1;    // Border between full plot size and inner area
 
 function svg_spectrum_plot(from_change)
 {
-    var style = $('#spec_style_drop').val();
-    var plabs_on = $('#spec_plabel_check').attr('checked');
+var style = $('#spec_style_drop').val();
+var plabs_on = $('#spec_plabel_check').prop('checked');
 
     // First, gather the data
 
@@ -51,10 +51,10 @@ function svg_spectrum_plot(from_change)
                 }
 
             // Remove element name (temporary code)
-            for (var i = 0; i < ms_labels.length; ++i)
+            /*for (var i = 0; i < ms_labels.length; ++i)
             {
                 ms_labels[i] = ms_labels[i].split('_')[1];
-            }
+            }*/
         }
         
         var ref = parseFloat($('#ref_input_' + lab).val());
@@ -107,9 +107,18 @@ function svg_plot_clean()
 
     var main_plot = d3.select('#spec_plot_svg')
     .html('')
-    .style({'width': plot_W,
-    'height': plot_H,
-    'display': 'inline',});
+    .style('display', 'inline')
+    .style({
+        'width': plot_W,
+        'height': plot_H,
+    });
+
+    // This for Firefox compatibility - for whatever reason, d3 does not work here
+    $('#spec_plot_svg')
+    .css({
+        'width': plot_W,
+        'height': plot_H,
+    });
 
     // Now add a rectangle as background
 
@@ -169,7 +178,8 @@ function draw_axis()
     var height = plot_area.attr('height');
 
     var ax = d3.scale.linear().domain([min, max]).range([0, width]);
-    var fullAxis = d3.svg.axis().scale(ax).tickValues(d3.range(min, max+step, step)).orient("bottom");
+    var tickRange = d3.range(min, max + ((max-min)%step==0?step:0), step);
+    var fullAxis = d3.svg.axis().scale(ax).tickValues(tickRange).orient("bottom");
 
     ax_sel = plot_area.select('.axis');
 
@@ -188,6 +198,9 @@ function plot_data(data)
     var x2 = parseFloat($("#spec_xrange_max").val());
 
     var style = $('#spec_style_drop').val();
+    var plabs_on = $('#spec_plabel_check').prop('checked');
+
+    console.log(plabs_on);
 
     var lor_points = parseInt($('#spec_interp_n').val());
     var lor_width = parseFloat($('#spec_broad').val());
@@ -203,10 +216,42 @@ function plot_data(data)
         return h/(1.0+Math.pow((x-x0)/w, 2.0));
     }
 
-    var lorp = [];
-    for (var i = 0; i < lor_points; ++i)
+    var lorp = d3.range(0, lor_points);
+
+    el_i = 0;  // Keeping track of the colour
+
+    // Creating a legend
+
+    var legend = plot_area.append('g')
+    .classed('mviewsvg legend', true)
+    .attr('transform', 'translate( '+ width*0.9 + ', 0 )');
+
+    // Also a force layout for labels
+
+    if (plabs_on)
     {
-        lorp.push(i);
+        var force_labels = d3.layout.force()
+        .size([width,height])
+        .linkStrength(0.8)
+        .friction(0.7)
+        .linkDistance(40)
+        .charge(function(d, i) {
+            if (d.fixed)
+                return 0;
+            else
+                return -80;
+        })
+        .chargeDistance(width/5.0)
+        .gravity(0.0)
+        .theta(0.8)
+        .alpha(0.1);
+
+        var label_nodes = [];
+        var label_links = [];
+
+        var el_labels = [];
+        var el_links =  [];
+
     }
 
     for (el in data)
@@ -220,14 +265,12 @@ function plot_data(data)
                 // Create missing pulses
 
                 puls.enter().append('rect')
+                .classed('mviewsvg col' + el_i%6 + ' pulses pulses_' + el, true)
                 .attr({
                     'x': function(d) {return ax(d)-1;},
                     'y': ay(0.0),
                     'width': 2,
                     'height': 0,
-                })
-                .style({
-                    'fill': 'rgb(255,128,0)',
                 })
                 .transition()
                 .attr({
@@ -270,23 +313,120 @@ function plot_data(data)
                 var lorline_norm = d3.svg.line()
                                 .x(function(d) { return lorline[d].x;})
                                 .y(function(d) {
-                                    return ay(lorline[d].y/max_y*0.7);
+                                    return ay(lorline[d].y/max_y*0.5);
                                 })
                                 .interpolate('cardinal');
 
                 var lineGraph = plot_area.append("path")
+                            .classed('mviewsvg col' + el_i%6 + ' peaks lorline_' + el, true)
                             .attr("d", lorline_func(lorp))
-                            .attr({
-                                "stroke": "rgb(255,128,0)",
-                                "stroke-width": 2,
-                                "fill": "none",
-                            })
                             .transition()
                             .attr("d", lorline_norm(lorp));
 
                 break;
         }
 
+        // Now add the legend line
+
+        legend.append('text')
+        .classed('mviewsvg col' + el_i%6, true)
+        .attr('y', el_i*15)
+        .html(el);
+
+        legend.append('line')
+        .classed('mviewsvg col' + el_i%6, true)
+        .attr({
+            'x1': 20,
+            'y1': el_i*15-3,
+            'x2': 40,
+            'y2': el_i*15-3
+        })
+        .style('stroke-width', 2);
+
+        if (plabs_on)
+        {
+            // Label creation
+
+            nodelen = label_nodes.length;
+
+            data[el].ms.forEach(function (e, i, a) {
+
+                // The anchor
+                label_nodes.push({
+                    'index': nodelen+2*i,
+                    'x': ax(e),
+                    'y': ay(0.6),
+                    'fixed': true,
+                    'text': '',
+                });
+
+                // The label
+                label_nodes.push({
+                    'index': nodelen+2*i+1,
+                    'x': (ax(e)-width/2.0)*10.0+width/2.0,
+                    'y': ay(0.8),
+                    'text': data[el].labels[i],
+                    'el_i': el_i,
+                    'base_x': ax(e),
+                });
+
+                // The link
+                label_links.push({
+                    'source': nodelen+2*i,
+                    'target': nodelen+2*i+1,
+                });
+            });
+        }
+        
+        ++el_i;
+
+    }
+
+    if (plabs_on)
+    {
+        // Actually initialize the label system
+
+        force_labels.nodes(label_nodes)
+                    .links(label_links);
+       
+        el_labels = plot_area.selectAll('mviewsvg el_labels')
+        .data(label_nodes)
+        .enter().append('text')
+        .attr({
+            'x': function(d) {return d.x},
+            'y': function(d) {return d.y},
+            'class': function(d) { return 'mviewsvg el_labels col'+d.el_i;},
+            'text-anchor': 'middle',
+        })
+        .html(function(d) {return d.text});
+
+        el_links = plot_area.selectAll('mviewsvg el_links')
+        .data(label_links)
+        .enter().append('line')
+        .attr({
+            'x1': function(d) {return d.source.x},
+            'y1': function(d) {return d.source.y},
+            'x2': function(d) {return d.target.x},
+            'y2': function(d) {return d.target.y},
+        });
+
+        var tick = function() {
+            el_labels.attr({
+                'x': function(d) { return d.x},
+                'y': function(d) { if (!d.fixed) {d.y = ay(0.75);} return d.y;},
+            });
+            el_links.attr({
+                'x1': function(d) {return d.source.x;},
+                'y1': function(d) {return d.source.y;},
+                'x2': function(d) {return d.target.x;},
+                'y2': function(d) {return ay(0.72);},
+                'class': function(d) { return 'mviewsvg el_links col' + d.target.el_i;},
+            });
+        }
+
+        force_labels.on("tick", tick);
+
+        force_labels.start();
     }
     
 }
@@ -320,4 +460,15 @@ function spec_replot_handler(evt)
         evt.preventDefault();
         svg_spectrum_plot(false);
     }
+}
+
+//Snippet to launch the NMR2D tool, that has its own scripts and code
+
+function launch_NMR2D() {
+
+    console.log("Launching NMR2D...");
+    var nmr2d_win = window.open('nmr2d/nmr2d_graph.html', '', 'toolbar=no,height=' + winH + ',width=' + winW);
+    if (!nmr2d_win.opener)
+        nmr2d_win.opener = window;
+
 }
