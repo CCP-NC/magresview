@@ -200,8 +200,6 @@ function plot_data(data)
     var style = $('#spec_style_drop').val();
     var plabs_on = $('#spec_plabel_check').prop('checked');
 
-    console.log(plabs_on);
-
     var lor_points = parseInt($('#spec_interp_n').val());
     var lor_width = parseFloat($('#spec_broad').val());
 
@@ -470,5 +468,43 @@ function launch_NMR2D() {
     var nmr2d_win = window.open('nmr2d/nmr2d_graph.html', '', 'toolbar=no,height=' + winH + ',width=' + winW);
     if (!nmr2d_win.opener)
         nmr2d_win.opener = window;
+
+}
+
+// This callback creates the file to download when you right click
+
+function svg_download_update() {
+
+    // So, this is a little contrived, but bear with me
+
+    // First: we need to clone the currently existing SVG plot. We do so with jQuery because apparently d3 lacks the ability    
+    var svg_clone = $('#spec_plot_svg').clone();
+    // Second: but now we need to put it into d3, because that can do SVG class manipulation much better, and we need to change the style
+    var d3_svg_clone = d3.select(svg_clone[0]);
+    // Still with me? Good. Third, we swap classes from mviewsvg to defaultsvg (this is easy)
+    d3_svg_clone.selectAll('.mviewsvg').classed('defaultsvg', true).classed('mviewsvg', false);
+    // Fourth, we now need a text representation of this. A text representation which needs to contain the stylesheet for defaultsvg as well!
+    // So we start by building it...
+    var svg_downloadable = $('<svg>');
+    // ...then we append the stylesheet...
+    svg_downloadable.append($('#svg_defaultstyle').clone());
+    // ...and finally, the actual plot code. 
+    svg_downloadable.append(d3_svg_clone.node().innerHTML);
+    // Now we create a mock div element for the sole sake of pasting the plot inside, so we can get a text representation of it...
+    var svg_URI = $('<div>').append(svg_downloadable).html();
+    // And last but not least, we perform a few substitutions which make the URI work
+    svg_URI.replace(/%/g, '%25')           //The % symbol must be replaced first, or everything goes down the drain!
+    .replace(/\n/g, '%0A')
+    .replace(/\t/g, '%09')
+    .replace(/&/g, '%26')
+    .replace(/#/g, '%23')
+    .replace(/"/g, '%22')
+    .replace(/'/g, '%27');
+    svg_URI = "data:text/plain," + svg_URI;
+
+    // Now we have our URI, we're all happy, let's attach it to the download link!
+    $('#plot_download').attr('href', svg_URI);
+
+    return;
 
 }

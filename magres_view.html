@@ -20,9 +20,9 @@ It provides the possibility to load example files from a dropdown menu but it ma
 <html>
   <head>
 
-  <!-- CSS stylesheets -->
-  <link href="stylesheet.css" rel="stylesheet">
-  <link href="svg_stylesheet.css" rel="stylesheet">
+    <!-- CSS stylesheets -->
+	<link href="stylesheet.css" rel="stylesheet">
+	<link href="svg_stylesheet.css" rel="stylesheet">
 
 	<!-- JMol applet scripts loading -->
 	    
@@ -31,24 +31,21 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	<!-- This section serves the purpose of loading jQuery, jQuery UI, and the graphic theme "Vader" -->	  		
   	
 	<link href="jquery/css/vader/jquery-ui.css" rel="stylesheet">
-  <link rel="icon" type="image/png" href="images/favico.png">
+  	<link rel="icon" type="image/png" href="images/favico.png">
 	<script src="jquery/js/jquery-ui.min.js"></script>
     
     <!-- jQuery is a Javascript library that allows lots of new functionalities, extending in fact the language to be more efficient and flexible.
     jQuery UI introduces lots of nice interface tweaks, allowing for the use of tabs, expanding sections, sliders, animations, and so on.
-    In this project, jQuery UI is used to provide an interface as simple, efficient and pleasant as possible. Though the use of the core
-    jQuery library could probably shorten the code as well, I'd rather avoid that for the sake of maintainability - so that any
-    developer who wants to work with the core of the page only needs to know Javascript.
-    The use of jQuery exclusive constructs is thus discouraged if not strictly necessary, and even in that case, it should preferably be
-    amply commented.
+    In this project, jQuery UI is used to provide an interface as simple, efficient and pleasant as possible. jQuery selectors and functions are also occasionally used,
+    especially in the newer parts of the code.
 
-	 jQuery is distributed under the MIT License. For further information refer to the headers of the jQuery source code files and to the web page http://jquery.org/license/  
+    jQuery is distributed under the MIT License. For further information refer to the headers of the jQuery source code files and to the web page http://jquery.org/license/  
 	 
      -->    
 	
-  <script src="d3/d3.min.js"></script>
+  	<script src="d3/d3.min.js"></script>
 
-  <!-- d3 is another very useful Javascript library. It does similar things to jQuery, but has the added benefit of being very good at handling data. Used for plots. -->
+  	<!-- d3 is another very useful Javascript library. It does similar things to jQuery, but has the added benefit of being very good at handling data. Used for plots. -->
 
 	<!-- Version definition -->
 	     
@@ -188,6 +185,82 @@ It provides the possibility to load example files from a dropdown menu but it ma
   		});  		
   		
   </script>
+
+  <!-- The default style for the SVG 1D spectral plot - exported in the downloadable version of the plot -->
+  <style id="svg_defaultstyle">
+	.defaultsvg.bkg {
+	    fill: rgb(255, 255, 255);
+	}
+
+	.defaultsvg.axis path {
+	    stroke: rgb(0, 0, 0);
+	    stroke-width: 2;
+	    fill: none;
+	}
+
+	.defaultsvg.axis line {
+	    stroke: rgb(0, 0, 0);
+	}
+
+	.defaultsvg.axis text {
+	    fill: rgb(0, 0, 0);
+	}  
+
+	.defaultsvg.pulses {
+	    stroke: none !important;
+	}
+
+	.defaultsvg.peaks {
+	    stroke-width: 2;
+	    fill: none !important;
+	}
+
+	.defaultsvg.col0 {
+	    stroke: rgb(255,0,0);
+	    fill:   rgb(255,0,0);
+	}
+
+	.defaultsvg.col1 {
+	    stroke: rgb(0,0,255);
+	    fill:   rgb(0,0,255);
+	}
+
+	.defaultsvg.col2 {
+	    stroke: rgb(0,255,0);
+	    fill:   rgb(0,255,0);
+	}
+
+	.defaultsvg.col3 {
+	    stroke: rgb(255,255,0);
+	    fill:   rgb(255,255,0);
+	}
+
+	.defaultsvg.col4 {
+	    stroke: rgb(0,255,255);
+	    fill:   rgb(0,255,255);
+	}
+
+	.defaultsvg.col5 {
+	    stroke: rgb(255,0,255);
+	    fill:   rgb(255,0,255);
+	}
+
+	.defaultsvg.legend text {
+	    stroke: none !important;
+	    font-size: 9px;
+	}
+
+	.defaultsvg.el_labels {
+	    stroke: none !important;
+	    font-size: 9px;
+	}
+
+	.defaultsvg.el_links {
+	    fill: none !important;
+	    stroke-width: 1;
+	}  
+
+	</style>
 
   </head>
   <body id="main_page_body">  
@@ -591,7 +664,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					  <input id="spec_reftable_butt" type="button" value="Reference table" onclick="    $('#ref_table_popup').dialog('open');"
 					  title="Open a table to set up the chemical shift reference values for the various elements. To see the original shielding value, leave the field blank."></input>
 					  <br><br>
-					  <a id="plot_download" href="" target="_blank" download="magres.svg">Download spectrum</a>
+					  <a id="plot_download" href="" target="_blank" onclick="svg_download_update()" download="magres.svg">Download spectrum</a>
             <br><br>
             <input id="nmr2d_butt" type="button" value="NMR2D Tool" onclick="launch_NMR2D()" disabled="disabled"></input>
 					  </div>
@@ -841,4 +914,5 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
   Distributed under the GNU General Public License
   </div>
   </body>
+
 </html>
