@@ -91,7 +91,7 @@ function ref_table_init()
 		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'ref_label_' + atom_set.atom_species_labels[s]).addClass('ref_td'));
 		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({
 			'id': 'ref_input_' + lab, 
-			'value': reference_list[lab]})));
+			'value': (isNaN(reference_list[lab])? '' : reference_list[lab])})));
 		
 		$('.ref_table').append(t_row);
 	}

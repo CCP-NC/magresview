@@ -307,7 +307,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 							  
 							  if (window.location.protocol != "file:") {
 							    $("#load_button").addClass("nodisplay");
-							    document.write('<select id="file_load_drop" style="width: 100pt;" onchange="file_load_drop_handler(event)"> \
+							    document.write('<select id="file_load_drop" style="width: 100pt;" onmouseup="file_load_drop_handler(event)"> \
 									    <option value="#user_file#">Load user file...</option> \
 									    </select>');
 							  }
@@ -639,7 +639,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					  Plot style: &nbsp;
 					  <select id="spec_style_drop" autocomplete="off" onchange="spec_style_drop_handler()" title="Select the style of the spectral plot. WARNING: Lorentzian broadening can be slow, especially with high numbers of points">
 					    <option value="pulses">Pulses</option>
-					    <option value="peaks">Lorentzian broadening (slow)</option>
+					    <option value="peaks">Lorentzian broadening</option>
 					  </select>
 					  <br><br>
 					  Interpolation points: &nbsp;

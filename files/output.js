@@ -1723,7 +1723,7 @@ function ref_table_gen() {
 	{
 		var t_row = $('<tr></tr>');
 		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'ref_label_' + atom_set.atom_species_labels[s]));
-		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({'id': 'ref_input_' + atom_set.atom_species_labels[s], 'value': NaN})));
+		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({'id': 'ref_input_' + atom_set.atom_species_labels[s], 'value': ''})));
 		
 		$('.ref_table').append(t_row);
 	}

@@ -11,8 +11,8 @@ var svg_border_width = 0.1;    // Border between full plot size and inner area
 
 function svg_spectrum_plot(from_change)
 {
-var style = $('#spec_style_drop').val();
-var plabs_on = $('#spec_plabel_check').prop('checked');
+    var style = $('#spec_style_drop').val();
+    var plabs_on = $('#spec_plabel_check').prop('checked');
 
     // First, gather the data
 
@@ -324,58 +324,64 @@ function plot_data(data)
                 break;
         }
 
-        // Now add the legend line
+        // Now add the legend line, only if the element is present
 
-        legend.append('text')
-        .classed('mviewsvg col' + el_i%6, true)
-        .attr('y', el_i*15)
-        .html(el);
-
-        legend.append('line')
-        .classed('mviewsvg col' + el_i%6, true)
-        .attr({
-            'x1': 20,
-            'y1': el_i*15-3,
-            'x2': 40,
-            'y2': el_i*15-3
-        })
-        .style('stroke-width', 2);
-
-        if (plabs_on)
+        if (data[el].ms.length > 0)
         {
-            // Label creation
+            row_i = legend.selectAll('text')[0].length; // Number of lines already present
 
-            nodelen = label_nodes.length;
+            legend.append('text')
+            .classed('mviewsvg col' + el_i%6, true)
+            .attr('y', row_i*15)
+            .html(el);
 
-            data[el].ms.forEach(function (e, i, a) {
+            legend.append('line')
+            .classed('mviewsvg col' + el_i%6, true)
+            .attr({
+                'x1': 20,
+                'y1': row_i*15-3,
+                'x2': 40,
+                'y2': row_i*15-3
+            })
+            .style('stroke-width', 2);
 
-                // The anchor
-                label_nodes.push({
-                    'index': nodelen+2*i,
-                    'x': ax(e),
-                    'y': ay(0.6),
-                    'fixed': true,
-                    'text': '',
+            if (plabs_on)
+            {
+                // Label creation
+
+                nodelen = label_nodes.length;
+
+                data[el].ms.forEach(function (e, i, a) {
+
+                    // The anchor
+                    label_nodes.push({
+                        'index': nodelen+2*i,
+                        'x': ax(e),
+                        'y': ay(0.6),
+                        'fixed': true,
+                        'text': '',
+                    });
+
+                    // The label
+                    label_nodes.push({
+                        'index': nodelen+2*i+1,
+                        'x': (ax(e)-width/2.0)*10.0+width/2.0,
+                        'y': ay(0.8),
+                        'text': data[el].labels[i],
+                        'el_i': el_i,
+                        'base_x': ax(e),
+                    });
+
+                    // The link
+                    label_links.push({
+                        'source': nodelen+2*i,
+                        'target': nodelen+2*i+1,
+                    });
                 });
-
-                // The label
-                label_nodes.push({
-                    'index': nodelen+2*i+1,
-                    'x': (ax(e)-width/2.0)*10.0+width/2.0,
-                    'y': ay(0.8),
-                    'text': data[el].labels[i],
-                    'el_i': el_i,
-                    'base_x': ax(e),
-                });
-
-                // The link
-                label_links.push({
-                    'source': nodelen+2*i,
-                    'target': nodelen+2*i+1,
-                });
-            });
+            }
+            
         }
-        
+
         ++el_i;
 
     }
