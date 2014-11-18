@@ -42,6 +42,18 @@
 }
 
 .plotdot {
-	fill: rgb(255, 128, 0);
-	stroke: none;
+	stroke: rgb(255, 128, 0);
+	stroke-width: 2.0;
+	fill: none;
+}
+
+.lablines {
+	stroke: rgb(255, 128, 0);
+	stroke-width: 0.5;
+	stroke-dasharray: 2,5;
+	fill: none;	
+}
+
+.labtext {
+	fill: rgb(200, 80,0);
 }

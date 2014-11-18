@@ -204,6 +204,7 @@ function state_machine() {
     this.handle_select_change = function()
     {
         //If the selected group has changed, wait for the new selection to take effect, and then update the plots
+        
         //This is required in order to reset the maximum and minimum when replotting after a change of selection, or as a result the transparency scale will be wrong
         //(and potentially broken)
         $("#isc_min").attr("disabled", true);

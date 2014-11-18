@@ -126,6 +126,7 @@ function enable_NMR_controls()
 		document.getElementById("ms_ltype_2").disabled = false;
 		document.getElementById("ms_ltype_3").disabled = false;
 		document.getElementById("ms_ltype_shield").disabled = false;
+		document.getElementById("ms_ltype_reftable").disabled = false;
 		document.getElementById("ms_shield_ref").disabled = false;
 		document.getElementById("ms_ell_scale").disabled = false;
 		document.getElementById("eultype1_ms").disabled = false;
@@ -203,6 +204,7 @@ function disable_NMR_controls()
 			document.getElementById("ms_ltype_2").disabled = true;
 			document.getElementById("ms_ltype_3").disabled = true;
 			document.getElementById("ms_ltype_shield").disabled = true;
+			document.getElementById("ms_ltype_reftable").disabled = true;
 			document.getElementById("ms_shield_ref").disabled = true;
 			document.getElementById("ms_ell_scale").value = "0";
 			document.getElementById("ms_ell_scale").disabled = true;

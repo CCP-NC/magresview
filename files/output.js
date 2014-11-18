@@ -1735,6 +1735,7 @@ function ref_table_popup_handler()
 	var active = $("#main_tabs").tabs("option", "active");
 	if(active == tab_index("#spec_plot"))
 		svg_spectrum_plot(true);
+	plot_update();
 }
 
 //Useful bit of code for Euler angles output

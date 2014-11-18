@@ -3,6 +3,7 @@ var atom_set = {};
 var reference_list = {};
 
 var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
+var id_label_list = {};		// label classified by id
 var id_ms_list = {};		// ms classified by id
 var id_dip_list = {};		// dip classified by id
 var id_isc_list = {};		// isc classified by id
@@ -121,7 +122,7 @@ function compile_lists()
 	var dip_raw_list   = data_set['magres']['dip'];
 	var isc_raw_list   = data_set['magres']['isc']; // This will be null if there are no isc
 
-	// Compile an id-by-species list
+	// Compile an id-by-species and a label-by-id list
 	for(var i=0; i < atom_raw_list.length; ++i)
 	{
 		var a = atom_raw_list[i];
@@ -129,6 +130,8 @@ function compile_lists()
 			species_id_list[a.label].push(a.id);
 		else
 			species_id_list[a.label] = [a.id];
+
+		id_label_list[a.id] = a.label + '_' + a.index;
 	}
 
 	// Now an ms-by-id one
@@ -152,6 +155,7 @@ function compile_lists()
 
 	}
 
+	// Now an isc_by_id one. Same rules as for the dip one apply
 	if (isc_raw_list != null)
 	{
 		for (var i=0; i < isc_raw_list.length; ++i)
@@ -608,7 +612,6 @@ function plot_data()
 {
 	// The actual plotting function!
 
-
 	// 1. Compile a list of points to be plotted
 
 	var sp1 = $('#sel_species_x').val();
@@ -618,6 +621,8 @@ function plot_data()
 	var q2 = $('#sel_order_y').val();
 
 	var datapoints = [];
+	var x_lablines   = [];
+	var y_lablines   = [];
 
 	var psize_coup = $('#psize_coup').val();
 	var psize = parseFloat($('#psize_slide').val());
@@ -628,12 +633,14 @@ function plot_data()
 	for (var i=0; i < species_id_list[sp1].length; ++i)
 	{
 		var id1 = species_id_list[sp1][i];
+		var lab1 = id_label_list[id1];
 		var ms1 = id_ms_list[id1];
 		ms1 = isNaN(reference_list[sp1])?ms1:(reference_list[sp1]-ms1);
 
 		for (var j=0; j < species_id_list[sp2].length; ++j)
 		{
 			var id2 = species_id_list[sp2][j];
+			var lab2 = id_label_list[id2];
 			var ms2 = id_ms_list[id2];
 			ms2 = isNaN(reference_list[sp2])?ms2:(reference_list[sp2]-ms2);
 
@@ -665,6 +672,19 @@ function plot_data()
 
 			datapoints.push({'msx': ms1*q1, 'msy': ms2*q2, 'r': r});
 		}
+
+		x_lablines.push({'ms': ms1*q1, 'lab': lab1});
+
+	}
+
+	for (var j=0; j < species_id_list[sp2].length; ++j)
+	{
+		var id2 = species_id_list[sp2][j];
+		var lab2 = id_label_list[id2];
+		var ms2 = id_ms_list[id2];
+
+		y_lablines.push({'ms': ms2*q2, 'lab': lab2});
+
 	}
 
 	// 1.5 Normalize the r values to psize
@@ -691,7 +711,7 @@ function plot_data()
 	.append('circle')
 	.classed('plotdot', true)
 	.attr('cx',  0 )
-	.attr('cy',  0 )
+	.attr('cy',  axis_points.y.range[0])
 	.attr('r', 0);
 
 	// .update
@@ -711,7 +731,135 @@ function plot_data()
 	.style('opacity', 0.0)
 	.remove();
 
+	// 3. Add label dotted lines (if required)
 
+	draw_lablines(x_lablines, y_lablines, x, y, opcty);
+
+
+}
+
+function draw_lablines(x_lablines, y_lablines, x, y, opcty)
+{
+
+	var show_lablines = $('#label_on_check').prop('checked');
+
+	var x_lablines_sel = d3.select('.plot_area')
+	.selectAll('.x.lablines')
+	.data(x_lablines);
+
+	// .enter
+	x_lablines_sel.enter()
+	.append('line')
+	.classed('x lablines', true)
+	.attr('x1', 0)
+	.attr('y1', axis_points.y.range[0])
+	.attr('x2', 0)
+	.attr('y2', axis_points.y.range[0]);
+
+	// .update
+	x_lablines_sel
+	.transition()
+	.duration(800)
+	.style('opacity', opcty*show_lablines)
+	.attr('x1', function(d) {return x(d.ms);})
+	.attr('y1', function(d) {return axis_points.y.range[0];})
+	.attr('x2', function(d) {return x(d.ms);})
+	.attr('y2', function(d) {return axis_points.y.range[1];});
+
+	// .exit
+	x_lablines_sel
+	.exit()
+	.transition()
+	.duration(800)
+	.style('opacity', 0.0)
+	.remove();
+
+	var x_labtext_sel = d3.select('.plot_area')
+	.selectAll('.x.labtext')
+	.data(x_lablines);
+
+	// .enter
+	x_labtext_sel.enter()
+	.append('text')
+	.classed('x labtext', true)
+	.attr('x', 0)
+	.attr('y', axis_points.y.range[1])
+
+	// .update
+	x_labtext_sel
+	.html(function(d) {return d.lab;})
+	.attr('transform', function(d) {return 'rotate(-90 0,0)';})
+	.transition()
+	.duration(800)
+	.style('opacity', 1.0*show_lablines)
+	.attr('transform', function(d) {return ' translate('+x(d.ms)+','+axis_points.y.range[1]+') rotate(-90 0,0)';});
+
+	// .exit
+	x_labtext_sel
+	.exit()
+	.transition()
+	.duration(800)
+	.style('opacity', 0.0)
+	.remove();
+
+	var y_lablines_sel = d3.select('.plot_area')
+	.selectAll('.y.lablines')
+	.data(y_lablines);
+
+	// .enter
+	y_lablines_sel.enter()
+	.append('line')
+	.classed('y lablines', true)
+	.attr('x1', 0)
+	.attr('y1', axis_points.y.range[0])
+	.attr('x2', 0)
+	.attr('y2', axis_points.y.range[0]);
+
+	// .update
+	y_lablines_sel
+	.transition()
+	.duration(800)
+	.style('opacity', opcty*show_lablines)
+	.attr('x1', function(d) {return axis_points.x.range[0];})
+	.attr('y1', function(d) {return y(d.ms);})
+	.attr('x2', function(d) {return axis_points.x.range[1];})
+	.attr('y2', function(d) {return y(d.ms);});
+
+	// .exit
+	y_lablines_sel
+	.exit()
+	.transition()
+	.duration(800)
+	.style('opacity', 0.0)
+	.remove();
+
+	var y_labtext_sel = d3.select('.plot_area')
+	.selectAll('.y.labtext')
+	.data(y_lablines);
+
+	// .enter
+	y_labtext_sel.enter()
+	.append('text')
+	.classed('y labtext', true)
+	.attr('x', axis_points.x.range[1])
+	.attr('y', axis_points.y.range[0]);
+
+	// .update
+	y_labtext_sel
+	.html(function(d) {return d.lab;})
+	.transition()
+	.duration(800)
+	.style('opacity', 1.0*show_lablines)
+	.attr('x', axis_points.x.range[1])
+	.attr('y', function(d) {return y(d.ms);});
+
+	// .exit
+	y_labtext_sel
+	.exit()
+	.transition()
+	.duration(800)
+	.style('opacity', 0.0)
+	.remove();
 }
 
 function redraw_all()

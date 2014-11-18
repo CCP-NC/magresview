@@ -361,7 +361,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					
 					<br>
 
-					<div id="main_tabs" style="font-size: 90%; position: absolute; z-index: 1">
+					<div id="main_tabs" style="font-size: 90%; position: absolute; z-index: 1; width: 100%">
 					
 					<!-- This is a jQuery TAB. It needs two things:
 								1) the content of the tabs organized in different divisions identified by an id;
@@ -437,7 +437,10 @@ It provides the possibility to load example files from a dropdown menu but it ma
 											onchange="ms_plot_handler(event)" autocomplete="off" disabled="disabled">Ellipsoids</input>
 											<br>
 											Scale (0 = auto): <input type="text" id="ms_ell_scale" maxlength="5" size="3" autocomplete="off" disabled="disabled" onkeypress="ms_ell_scale_handler(event)" value="0"></input> 
-											<br><br>
+											<br>
+											<br>
+											<br>
+											<br>
 											<br>
 											<br>
 											<br>
@@ -458,13 +461,22 @@ It provides the possibility to load example files from a dropdown menu but it ma
 												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_1"
 												title="Isotropic component, defined as (s_1+s_2+s_3)/3"
 												value="0" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled" checked>Isotropic component, absolute (<span style="color: rgb(255, 128, 0)">ppm</span>)</input> <br> 
+
 												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_shield"
 												title="Isotropic component (see above) subtracted from a reference shielding value"
-												value="shield" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled">Isotropic component, with shielding
+												value="shield" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled">Isotropic component, with global shielding:
 												<input type="text" id="ms_shield_ref" size="3" value="0" onkeypress="ms_shield_ref_handler(event)" autocomplete="off" disabled="disabled"></input> (<span style="color: rgb(255, 128, 0)">ppm</span>) </input> <br> 
+
+												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_reftable"
+												title="Isotropic component (see above) subtracted from a reference shielding values provided in reference table"
+												value="shield_reftable" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled">Isotropic component, with shielding from reference table:
+												&nbsp;<input type="button" id="ms_reftable_butt" value="Reference table" onclick="$('#ref_table_popup').dialog('open');">
+												</input> <br>
+
 												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_2"
 												title="Anisotropy, defined as s_3-(s_1+s_2)/2"
 												value="1" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled"><span id="ms_par_1">Anisotropy</span> (<span style="color: rgb(255, 128, 0)">ppm</span>)</input> <br>
+
 												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_3"
 												title="Asymmetry, defined as (s_2-s_1)/(s_3-s_iso)" 
 												value="2" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled"><span id="ms_par_2">Asymmetry</span> </input> <br>
@@ -535,7 +547,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 											onchange="isc_label_handler(event)" autocomplete="off" disabled="disabled">
 											Labels (isotropic coupling, Hz, <span style="color: rgb(128, 255, 0)">positive</span> or <span style="color: rgb(255, 0, 128)">negative</span>)</input>
 								
-											<br><br>
+											<br><br><br>
 
 		
 								<div id="isc_label_div" class="ctrl_right">
@@ -551,7 +563,6 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 				  				<input type="text" id="isc_max" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
 				  				title="Maximum value of the magnitude of the isotropic J-coupling to visualize"></input>
 				  												<span style="color: rgb(128, 255, 0)">Hz</span>
-		
 								</div>
 							
 							<h3  id="dip_head" class="head">Calculate dipolar couplings</h3>
@@ -638,7 +649,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					    <div id="spec_options_div" class="ctrl_left">
 					  Plot style: &nbsp;
 					  <select id="spec_style_drop" autocomplete="off" onchange="spec_style_drop_handler()" title="Select the style of the spectral plot. WARNING: Lorentzian broadening can be slow, especially with high numbers of points">
-					    <option value="pulses">Pulses</option>
+					    <option value="pulses">Sticks</option>
 					    <option value="peaks">Lorentzian broadening</option>
 					  </select>
 					  <br><br>
@@ -664,7 +675,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
             ppm
 					  <br><br>
 					  
-					  <input id="spec_reftable_butt" type="button" value="Reference table" onclick="    $('#ref_table_popup').dialog('open');"
+					  <input id="spec_reftable_butt" type="button" value="Reference table" onclick="$('#ref_table_popup').dialog('open');"
 					  title="Open a table to set up the chemical shift reference values for the various elements. To see the original shielding value, leave the field blank."></input>
 					  <br><br>
 					  <a id="plot_download" href="" target="_blank" onclick="svg_download_update()" download="magres.svg">Download spectrum</a>
@@ -904,7 +915,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 		  hover_load();
 		  
 		  if (window.location.protocol != "file:") {
-		    inspect_example_folder()
+		    inspect_example_folder();
 		  }
 		  
 		});

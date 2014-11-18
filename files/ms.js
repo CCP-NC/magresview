@@ -80,7 +80,22 @@ function ms_label_handler()
 		 	{
 		 		shielding_ref = document.getElementById("ms_shield_ref").value;
 		 		l_type = -1;
-		 		ms_plot_jmol_script += "{all}.property_cs = {all}.tensor(\"ms\", \"isotropy\").mul(-1).add(" + shielding_ref + ");";
+		 		ms_plot_jmol_script += "{all}.property_cs = {all}.tensor('ms', 'isotropy').mul(-1).add(" + shielding_ref + ");";
+		 	}
+		 	else if (l_type_radios[i].value == "shield_reftable")
+		 	{
+		 		l_type = -1;
+
+		 		for (var l = 0; l < atom_set.speciesno; ++l) {
+
+		 			var lab = atom_set.atom_species_labels[l];
+			        var ref = parseFloat($('#ref_input_' + lab).val());
+
+			        // If not present, treat it as zero
+			        ref = isNaN(ref)?0:ref;
+
+		 			ms_plot_jmol_script += "{" + lab + "_*}.property_cs = {" + lab + "_*}.tensor('ms', 'isotropy').mul(-1).add(" + ref + ");";
+		 		}
 		 	}
 		 	else
 		 	{
