@@ -293,11 +293,11 @@ function euldiff_butt_handler()
 	if (atom1 == atom2 && type1 == type2)
 		return;
 	
-	console.log("(" + quat1 + " \\ " + quat2 + ")" + conv_table[eul_conv]);
+	//console.log("(" + quat1 + " \\ " + quat2 + ")" + conv_table[eul_conv]);
 
 	eul = Jmol.evaluate(mainJmol, "(" + quat1 + " \\ " + quat2 + ")" + conv_table[eul_conv]).split('\n');
 
-	console.log(eul);
+	//console.log(eul);
 
 	euldiff_out_window(atom1, type1, atom2, type2, eul);
 }
