@@ -104,19 +104,23 @@ function vvleck_sphere_handler()
 			sphere_script += "display default_displaygroup;";
 		}
 	}
+
+	sphere_script += "message 'displayed_change';";
 	
 	Jmol.script(mainJmol, sphere_script);						       
 }
 
 function dip_label_handler()
 {	
-/*	Waiting for Jmol to implement this functionality
+	/*	Waiting for Jmol to implement this functionality
 	
-	var f_h = parseFloat(document.getElementById("h_Hdir").value);
-	var f_k = parseFloat(document.getElementById("k_Hdir").value)
-	var f_l = parseFloat(document.getElementById("l_Hdir").value);
-	
+		var f_h = parseFloat(document.getElementById("h_Hdir").value);
+		var f_k = parseFloat(document.getElementById("k_Hdir").value)
+		var f_l = parseFloat(document.getElementById("l_Hdir").value);
+		
 	*/
+
+	console.log("dip_label_handler called");
 
 	var dip_plot_on = document.getElementById('dipolar_check').checked;
 
@@ -181,12 +185,14 @@ function vvleck_eval(is_iso)
 
 	}
 
+	rss_dip = Math.sqrt(rss_dip)/(2.0*Math.PI);	// Convention requires this to be kHz, not 10^3 rad/s
+
 	// Show the results
 	document.getElementById("vvleck_popup").innerHTML = "RSS dipolar coupling calculated around:<br>";
 	document.getElementById("vvleck_popup").innerHTML += name + "&nbsp;";
 	document.getElementById("vvleck_popup").innerHTML += "with a cutoff of " + r + "&Aring;<br>";
 	document.getElementById("vvleck_popup").innerHTML += "<br>";
-	document.getElementById("vvleck_popup").innerHTML += "RSS coupling = " + Math.sqrt(rss_dip).toFixed(2) + " kHz<br>";
+	document.getElementById("vvleck_popup").innerHTML += "RSS coupling = " + rss_dip.toFixed(2) + " kHz<br>";
 	
 	$("#vvleck_popup").dialog("open");
 }

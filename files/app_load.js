@@ -526,8 +526,6 @@ function pick_callback(id, atom, i)
 		document.getElementById("range_atom_picked").innerHTML = "" + atom.substring(atom.indexOf(':') + 1, atom.lastIndexOf(' '));
 		last_atom_picked = parseInt(atom.substring(atom.lastIndexOf('#') + 1));
 		global_state_machine.handle_change('state');
-		isc_label_handler();
-		dip_label_handler();
 	}
 	else
 	{
