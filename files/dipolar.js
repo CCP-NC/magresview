@@ -128,6 +128,11 @@ function dip_label_handler()
 
 	var r = parseFloat(document.getElementById("vvleck_r").value);
 
+	// Label precision for couplings: default value is 2
+
+	var prec = parseInt(document.getElementById("opt_coup_lab_prec").value);	
+	prec = isNaN(prec)? 2 : prec;		// If it's NaN or something, use default value	
+
 	if (dip_plot_on)
 	{
 		//Deactivate isc measures 
@@ -148,7 +153,7 @@ function dip_label_handler()
 	for (var i = 0; i < dip_const.length; ++i) {
 		dip_const[i] = parseFloat(dip_const[i])/(2.0*Math.PI);
 		dip_plot_jmol_script_correct += 'script inline @{"select measure ({"+(' + i + ')+"})"};';
-		dip_plot_jmol_script_correct += 'measure @{"2:"+' + dip_const[i] + '%2.2 +" kHz"};';
+		dip_plot_jmol_script_correct += 'measure @{"2:"+' + dip_const[i] + '%' + prec + ' + " kHz"};';
 	}
 	
 	Jmol.script(mainJmol, dip_plot_jmol_script_correct);

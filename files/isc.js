@@ -68,6 +68,11 @@ function isc_label_handler()
 
 	isc_plot_jmol_script = "measure delete;";
 
+	// Label precision for couplings: default value is 2
+
+	var prec = parseInt(document.getElementById("opt_coup_lab_prec").value);	
+	prec = isNaN(prec)? 2 : prec;		// If it's NaN or something, use default value	
+
 	if (isc_plot_on)
 	{
 		var isc_info = isc_info_eval(last_atom_picked, isc_tag);
@@ -83,13 +88,13 @@ function isc_label_handler()
 			isc_min = NaN;
 			isc_max = NaN;
 
-			for (j in isc_info)
+			for (id in isc_info)
 			{
-				var isc = isc_info[j];
-				if (isNaN(isc_min) || Math.abs(isc[1]) < isc_min)
-					isc_min = Math.abs(isc[1]);
-				if (isNaN(isc_max) || Math.abs(isc[1]) > isc_max)
-					isc_max = Math.abs(isc[1]);
+				var isc = isc_info[id];
+				if (isNaN(isc_min) || Math.abs(isc) < isc_min)
+					isc_min = Math.abs(isc);
+				if (isNaN(isc_max) || Math.abs(isc) > isc_max)
+					isc_max = Math.abs(isc);
 			}
 
 			document.getElementById("isc_min").value = isc_min;
@@ -105,19 +110,19 @@ function isc_label_handler()
 			isc_max = parseFloat(document.getElementById("isc_max").value);
 		}
 
-		for (j in isc_info)
+		for (id in isc_info)
 		{
-			var isc = isc_info[j];
+			var isc = isc_info[id];
 
-			if (Math.abs(isc[1]) > isc_max || Math.abs(isc[1]) < isc_min)
+			if (Math.abs(isc) > isc_max || Math.abs(isc) < isc_min)
 				continue;
 
-			if (isc[1] > 0)
+			if (isc > 0)
 				isc_plot_jmol_script += "color measure {128 255 0};";
 			else
 				isc_plot_jmol_script += "color measure {255 0 128};";
 
-			isc_plot_jmol_script += "measure {*}[" + last_atom_picked + "] {*}[" + isc[0] + "] \"" + isc[1] + " Hz\";";
+			isc_plot_jmol_script += "measure {*}[" + last_atom_picked + "] {*}[" + id + "] \"" + isc.toFixed(prec) + " Hz\";";
 
 		}
 
@@ -153,21 +158,21 @@ function isc_info_eval(a_num, tag)
 
 	var closest = '{fx>'+fxmin+' and fx<='+fxmax+' and fy>'+fymin+' and fy<='+fymax+' and fz>'+fzmin+' and fz<='+fzmax+' and selected}';
 
-	console.log("measure(" + aexpr + " " + closest + ", \"" + tag + "_hz\")");
-
 	var isc_info_raw = Jmol.evaluate(mainJmol, "measure(" + aexpr + " " + closest + ", \"" + tag + "_hz\")").split('\n');
-	var isc_info = []
+	var isc_info = {};	// An object is more convenient
 
 	for (var j = 0; j < isc_info_raw.length; ++j)
 	{
 		if (isc_info_raw[j] == '')
 			continue;
 		isc_line = isc_info_raw[j].split('\t');
-		console.log(isc_line);
 		if (parseFloat(isc_line[1]) == 0.0 || isNaN(parseFloat(isc_line[1])))
 			continue;
-		// In this way each isc_info element contains [#number of the atom coupled with, isc intensity in Hz]
-		isc_info.push([parseInt((isc_line[4].split(' '))[1].replace('#','')), parseFloat(isc_line[1])]);
+		// In this way each isc_info element has  #number of the atom coupled with as key and isc intensity in Hz as value
+		var key = parseInt(isc_line[4].split(' ')[1].replace('#',''));
+
+		isc_info[key] =  parseFloat(isc_line[1]);
+		console.log(j, isc_info);
 	}
 
 	return isc_info;
