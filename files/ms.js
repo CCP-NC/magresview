@@ -71,16 +71,24 @@ function ms_label_handler()
 	var l_type = 0;
 	
 	var conv = document.getElementById("t_conv_choice").value;
+
+	// Label precision: default value is 1
+
+	var prec = parseInt(document.getElementById("opt_lab_prec").value);	
+	prec = isNaN(prec)? 1 : prec;		// If it's NaN or something, use default value
 	
 	var ms_plot_jmol_script = "";
+
+	// This part sends to JMol the reference values for chemical shielding, if either option that makes use of that is selected
 
 	for (var i = 0, length = l_type_radios.length; i < length; i++) {
 		 if (l_type_radios[i].checked) {
 		 	if(l_type_radios[i].value == "shield")
 		 	{
-		 		shielding_ref = document.getElementById("ms_shield_ref").value;
 		 		l_type = -1;
-		 		ms_plot_jmol_script += "{all}.property_cs = {all}.tensor('ms', 'isotropy').mul(-1).add(" + shielding_ref + ");";
+
+		 		shielding_ref = document.getElementById("ms_shield_ref").value;
+		 		ms_plot_jmol_script += "{all}.property_ms_cs = {all}.tensor('ms', 'isotropy').mul(-1).add(" + shielding_ref + ");";
 		 	}
 		 	else if (l_type_radios[i].value == "shield_reftable")
 		 	{
@@ -94,7 +102,7 @@ function ms_label_handler()
 			        // If not present, treat it as zero
 			        ref = isNaN(ref)?0:ref;
 
-		 			ms_plot_jmol_script += "{" + lab + "_*}.property_cs = {" + lab + "_*}.tensor('ms', 'isotropy').mul(-1).add(" + ref + ");";
+		 			ms_plot_jmol_script += "{" + lab + "_*}.property_ms_cs = {" + lab + "_*}.tensor('ms', 'isotropy').mul(-1).add(" + ref + ");";
 		 		}
 		 	}
 		 	else
@@ -104,24 +112,29 @@ function ms_label_handler()
 		 }
 	}
 	
+	label_components[1] = "";
+
+	// Build the label component piece by piece
+
 	if(ms_plot_on)
-	{
+	{	
+		var prop = "";
 		switch(l_type)
 		{
 			case 0:
-				label_components[1] = "iso = %.2[property_ms_iso] ppm";
+				prop = "iso";
 				break; 
 			case 1:
 				switch(conv)
 				{
 					case "haeb":
-						label_components[1] = "aniso = %.2[property_ms_aniso] ppm";
+						prop = "aniso";
 						break;
 					case "haeb_red":
-						label_components[1] = "red_aniso = %.2[property_ms_red_aniso] ppm";
+						prop = "red_aniso";
 						break;
 					case "herber":
-						label_components[1] = "span = %.2[property_ms_span] ppm";
+						prop = "span";
 						break;
 				}
 				break; 
@@ -130,20 +143,23 @@ function ms_label_handler()
 				{
 					case "haeb":
 					case "haeb_red":
-						label_components[1] = "asymm = %.2[property_ms_asymm]";
+						prop = "asymm";
 						break;
 					case "herber":	
-						label_components[1] = "skew = %.2[property_ms_skew]";
+						prop = "skew";
 						break;
 				}
 				break; 
 			case -1:
-				label_components[1] = "cs = %.2[property_cs] ppm";
+				prop = "cs";
 				break;
 		}
+
+		// Build the final string
+
+		label_components[1] = prop + " = %." + prec + "[property_ms_" + prop + "]" + (l_type != 2? " ppm": "");
+
 	}
-	else
-		label_components[1] = "";
 	
 	ms_plot_jmol_script += label_composer();
 

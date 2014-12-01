@@ -219,6 +219,21 @@ function label_composer()
 	return label_row;
 }
 
+function opt_lab_prec_handler(evt)
+{
+	// A handler for changes in precision, just needs to ask a replot if Enter was pressed
+
+	//Compatibility code - see console.js for details
+	var evt = window.event || evt;
+	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
+	
+	if (myKey == 13)	// ENTER key
+	{
+		evt.preventDefault();	
+		plot_update();
+	}
+}
+
 function q_units_choice_handler()
 {
 	document.getElementById("q_units").innerHTML = document.getElementById("q_units_choice").value;

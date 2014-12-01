@@ -1,6 +1,6 @@
 <!DOCTYPE html  PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd" encoding="UTF-8">
 
-<!-- MagresView v 1.0.9
+<!-- MagresView v 1.4
 by Simone Sturniolo
 
 A JMol based web viewer for ab-initio calculated NMR parameters stored in the .magres file format.
@@ -781,10 +781,10 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 
 					<h3 class="head">Plotting options</h3>
 					<div>
-						Ellipsoid translucency (0 = solid, 1 = invisible): <input type="text" id="opt_transl" maxlength="4" size="4" value="0.5" autocomplete="off"
+						Ellipsoid translucency (0 = solid, 1 = invisible): &nbsp; <input type="text" id="opt_transl" maxlength="4" size="4" value="0.5" autocomplete="off"
 						title="Insert value desired for ellipsoid translucency" onkeypress="opt_transl_handler(event)" onchange="opt_transl_handler(event)"></input>
 						<br>
-						Ellipsoid type: <select id="opt_type" autocomplete="off"
+						Ellipsoid type: &nbsp; <select id="opt_type" autocomplete="off"
 						title="Choose the type of visualization for ellipsoids. Can speed up rendering when using JSmol (Filled = slower, Axes Only = faster)."
 						onchange="opt_type_handler(event)">
 						  <option value="fill">Filled</option>
@@ -792,13 +792,13 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 						  <option value="axes">Axes Only</option>
 						</select>
 						<br>
-						ISC graph thickness (0.4 = default): <input type="text" id="opt_width" maxlength="4" size="4" value="0.4" autocomplete="off"
+						ISC graph thickness (0.4 = default): &nbsp; <input type="text" id="opt_width" maxlength="4" size="4" value="0.4" autocomplete="off"
 						title="Insert value desired for ISC graph line thickness" onkeypress="opt_width_handler(event)" onchange="opt_width_handler(event)"></input>			
 					</div>
 
 					<h3 class="head">Euler angles</h3>
 					<div>
-					Convention: <select id="opt_euler_drop"
+					Convention: &nbsp; <select id="opt_euler_drop"
 					title="Choose here the convention you want to be used for the calculation of Euler angle differences. This will have no effect on the output to simulation programs">
 						<option value="zyz">Rose (ZYZ)</option>
 						<option value="zxz">Goldstein(ZXZ)</option>
@@ -807,14 +807,16 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					
 					<h3 class="head">Units and conventions</h3>
 					<div>
-					Quadrupolar constants: <select id="q_units_choice"
+					Quadrupolar constants: &nbsp; <select id="q_units_choice"
 					title="Choose here the units to be used in quadrupolar constant labels"
 					onchange="q_units_choice_handler(event)">
 						<option value="MHz">MHz</option>
 						<option value="kHz">kHz</option>
 					</select>
 					<br><br>
-					Tensor conventions: <select id="t_conv_choice"
+					Label precision: &nbsp; <input type="text" id="opt_lab_prec" size="1" maxlength="1" value="1" onkeypress="opt_lab_prec_handler(event)"></input> decimal places
+					<br><br>
+					Tensor conventions: &nbsp; <select id="t_conv_choice"
 					title="Choose the convention you prefer for tensor representation. CASTEP output uses the Haeberlen one by default"
 					onchange="t_conv_choice_handler(event)" autocomplete="off">
 						<option value="haeb">Haeberlen</option>

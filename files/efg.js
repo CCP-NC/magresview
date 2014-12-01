@@ -86,6 +86,11 @@ function efg_label_handler()
 	
 	var q_units = document.getElementById("q_units_choice").value;	
 	
+	// Label precision: default value is 1
+
+	var prec = parseInt(document.getElementById("opt_lab_prec").value);	
+	prec = isNaN(prec)? 1 : prec;		// If it's NaN or something, use default value	
+
 	for (var i = 0, length = l_type_radios.length; i < length; i++) {
 		 if (l_type_radios[i].checked) {
 		     l_type = parseInt(l_type_radios[i].value);
@@ -96,24 +101,27 @@ function efg_label_handler()
 	
 	var efg_plot_jmol_script = "";
 	
+	label_components[2] = "";
+
 	if(efg_plot_on)
 	{
+		var prop = "";
 		switch(l_type)
 		{
 			case 0:
-				label_components[2] = "Vzz = %.2[property_" + tag + "_vzz] au";
+				prop = "vzz";
 				break; 
 			case 1:
 				switch(conv)
 				{
 					case "haeb":
-						label_components[2] = "aniso = %.2[property_" + tag + "_aniso] au";
+						prop = "aniso";
 						break;
 					case "haeb_red":
-						label_components[2] = "red_aniso = %.2[property_" + tag + "_red_aniso] au";
+						prop = "red_aniso";
 						break;
 					case "herber":
-						label_components[2] = "span = %.2[property_" + tag + "_span] au";
+						prop = "span";
 						break;
 				}
 				break; 
@@ -121,20 +129,21 @@ function efg_label_handler()
 				switch (conv) {
 					case "haeb":
 					case "haeb_red":
-						label_components[2] = "asymm = %.2[property_" + tag + "_asymm]";
+						prop = "asymm";
 						break;
 					case "herber":
-						label_components[2] = "skew = %.2[property_" + tag + "_skew]";
+						prop = "skew";
 						break;
 				}
 				break; 
 			case 3:
-				label_components[2] = "chi = %.2[property_" + tag + "_chi_" + q_units + "] " + q_units;
+				prop = "chi";
 				break;
 		}
+
+		// The expression is a bit conditional because of units
+		label_components[2] = prop + " = %." + prec + "[property_" + tag + "_" + prop + (l_type == 3? "_" + q_units : "") + "]" + (l_type < 2? " au" : (l_type == 3? " " + q_units : ""));
 	}
-	else
-		label_components[2] = "";
 	
 	efg_plot_jmol_script += label_composer();
 
