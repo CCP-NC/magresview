@@ -207,10 +207,9 @@ break;
 case 1073741824:
 case 4:
 var str = this.paramAsStr (i);
-if (str.equalsIgnoreCase ("xy")) return JU.P4.new4 (0, 0, 1, 0);
-if (str.equalsIgnoreCase ("xz")) return JU.P4.new4 (0, 1, 0, 0);
-if (str.equalsIgnoreCase ("yz")) return JU.P4.new4 (1, 0, 0, 0);
-this.iToken += 2;
+if (str.equalsIgnoreCase ("xy")) plane = JU.P4.new4 (0, 0, isNegated ? -1 : 1, 0);
+ else if (str.equalsIgnoreCase ("xz")) plane = JU.P4.new4 (0, isNegated ? -1 : 1, 0, 0);
+ else if (str.equalsIgnoreCase ("yz")) plane = JU.P4.new4 (isNegated ? -1 : 1, 0, 0, 0);
 break;
 case 1048586:
 case 8:
@@ -436,7 +435,7 @@ return (this.theToken.value).floatValue ();
 return 0;
 }, "~N");
 Clazz.defineMethod (c$, "getPointArray", 
-function (i, nPoints) {
+function (i, nPoints, allowNull) {
 var points = (nPoints < 0 ? null :  new Array (nPoints));
 var vp = (nPoints < 0 ?  new JU.Lst () : null);
 var tok = (i < 0 ? 7 : this.getToken (i++).tok);
@@ -446,7 +445,7 @@ var v = (this.theToken).getList ();
 if (nPoints >= 0 && v.size () != nPoints) this.invArg ();
 nPoints = v.size ();
 if (points == null) points =  new Array (nPoints);
-for (var j = 0; j < nPoints; j++) if ((points[j] = JS.SV.ptValue (v.get (j))) == null) this.invArg ();
+for (var j = 0; j < nPoints; j++) if ((points[j] = JS.SV.ptValue (v.get (j))) == null && !allowNull) this.invArg ();
 
 return points;
 case 1073742195:
@@ -479,7 +478,7 @@ if (tok != 269484097) this.invArg ();
 if (points == null) points = vp.toArray ( new Array (vp.size ()));
 if (nPoints > 0 && points[nPoints - 1] == null) this.invArg ();
 return points;
-}, "~N,~N");
+}, "~N,~N,~B");
 Clazz.defineMethod (c$, "listParameter", 
 function (i, nMin, nMax) {
 var v =  new JU.Lst ();

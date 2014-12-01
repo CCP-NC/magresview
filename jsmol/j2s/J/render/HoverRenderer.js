@@ -28,12 +28,12 @@ text.setXYZs (hover.xy.x, hover.xy.y, 1, -2147483648);
 return true;
 }if (this.vwr != null && (label.indexOf ("%{") >= 0 || label.indexOf ("@{") >= 0)) label = this.vwr.formatText (label);
 text.setText (label);
-J.render.TextRenderer.render (text, this.vwr, this.g3d, 0, antialias ? 2 : 1, false, null, this.tempXY);
+J.render.TextRenderer.render (text, this.g3d, 0, antialias ? 2 : 1, false, null, this.tempXY);
 return true;
 });
 Clazz.defineMethod (c$, "fixLabel", 
 function (atom, label) {
 if (label == null) return null;
-return (this.vwr.ms.isJmolDataFrameForModel (atom.getModelIndex ()) && label.equals ("%U") ? "%W" : label);
+return (this.vwr.ms.isJmolDataFrameForModel (atom.mi) && label.equals ("%U") ? "%W" : label);
 }, "JM.Atom,~S");
 });

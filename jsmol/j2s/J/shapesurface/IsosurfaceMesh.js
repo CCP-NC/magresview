@@ -1,5 +1,5 @@
 Clazz.declarePackage ("J.shapesurface");
-Clazz.load (["J.shape.Mesh", "J.jvxl.data.JvxlData"], "J.shapesurface.IsosurfaceMesh", ["java.lang.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M4", "$.Measure", "$.P3", "$.P4", "$.PT", "$.SB", "$.V3", "J.api.Interface", "J.jvxl.data.JvxlCoder", "JS.T", "JU.BoxInfo", "$.C", "$.ColorEncoder", "$.Escape", "$.Logger", "JV.Viewer"], function () {
+Clazz.load (["J.shape.Mesh"], "J.shapesurface.IsosurfaceMesh", ["java.lang.Float", "java.util.Hashtable", "JU.AU", "$.BS", "$.CU", "$.Lst", "$.M4", "$.Measure", "$.P3", "$.P3i", "$.P4", "$.PT", "$.SB", "$.V3", "J.api.Interface", "J.jvxl.data.JvxlCoder", "$.JvxlData", "JS.T", "JU.BoxInfo", "$.C", "$.ColorEncoder", "$.Escape", "$.Logger", "JV.Viewer"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.jvxlData = null;
 this.vertexIncrement = 1;
@@ -20,13 +20,10 @@ this.bsVdw = null;
 this.colorPhased = false;
 Clazz.instantialize (this, arguments);
 }, J.shapesurface, "IsosurfaceMesh", J.shape.Mesh);
-Clazz.prepareFields (c$, function () {
-this.jvxlData =  new J.jvxl.data.JvxlData ();
-});
 Clazz.makeConstructor (c$, 
 function (thisID, colix, index) {
-Clazz.superConstructor (this, J.shapesurface.IsosurfaceMesh, []);
 this.mesh1 (thisID, colix, index);
+this.jvxlData =  new J.jvxl.data.JvxlData ();
 this.checkByteCount = 2;
 this.jvxlData.version = JV.Viewer.getJmolVersion ();
 }, "~S,~N,~N");
@@ -321,9 +318,9 @@ var atoms = vwr.ms.at;
 for (var i = this.mergeVertexCount0; i < this.vc; i++) {
 var iAtom = this.vertexSource[i];
 if (iAtom < 0 || !bs.get (iAtom)) continue;
-this.jvxlData.vertexColors[i] = vwr.getColorArgbOrGray (this.vcs[i] = JU.C.copyColixTranslucency (this.colix, atoms[iAtom].getColix ()));
+this.jvxlData.vertexColors[i] = vwr.getColorArgbOrGray (this.vcs[i] = JU.C.copyColixTranslucency (this.colix, atoms[iAtom].colixAtom));
 var colix = (colixes == null ? 0 : colixes[atomMap[iAtom]]);
-if (colix == 0) colix = atoms[iAtom].getColix ();
+if (colix == 0) colix = atoms[iAtom].colixAtom;
 this.vcs[i] = JU.C.copyColixTranslucency (this.colix, colix);
 }
 }, "JV.Viewer,~A,~A,JU.BS");
@@ -461,7 +458,7 @@ this.jvxlData.nVertexColors = this.vc;
 var atoms = vwr.ms.at;
 for (var i = this.mergeVertexCount0; i < this.vc; i++) {
 var pt = this.vertexSource[i];
-if (pt >= 0 && pt < atoms.length) this.jvxlData.vertexColors[i] = vwr.getColorArgbOrGray (this.vcs[i] = JU.C.copyColixTranslucency (this.colix, atoms[pt].getColix ()));
+if (pt >= 0 && pt < atoms.length) this.jvxlData.vertexColors[i] = vwr.getColorArgbOrGray (this.vcs[i] = JU.C.copyColixTranslucency (this.colix, atoms[pt].colixAtom));
 }
 return;
 }this.jvxlData.vertexColors = null;
@@ -572,9 +569,54 @@ if (vertexCount > 0) for (var j = 0; j < 3; j++) p[j] += vertexCount;
 return ipt;
 }, "JU.MeshSurface,~N,~N,~A");
 Clazz.overrideMethod (c$, "getUnitCell", 
-function () {
-return (this.spanningVectors == null ? null : J.api.Interface.getSymmetry ().getUnitCell (this.spanningVectors, true, null));
-});
+function (vwr) {
+return (this.unitCell != null || (this.unitCell = vwr.ms.am[this.modelIndex].biosymmetry) != null || (this.unitCell = vwr.getModelUnitCell (this.modelIndex)) != null || this.spanningVectors != null && (this.unitCell = J.api.Interface.getSymmetry (vwr, "symmetry").getUnitCell (this.spanningVectors, true, null)) != null ? this.unitCell : null);
+}, "JV.Viewer");
+Clazz.defineMethod (c$, "processLattice", 
+function (vwr) {
+if (this.getUnitCell (vwr) == null) return;
+var minXYZ =  new JU.P3i ();
+var maxXYZ = JU.P3i.new3 (Clazz.floatToInt (this.lattice.x), Clazz.floatToInt (this.lattice.y), Clazz.floatToInt (this.lattice.z));
+this.jvxlData.processLattice = this.lattice;
+this.lattice = null;
+this.unitCell.setMinMaxLatticeParameters (minXYZ, maxXYZ);
+var nCells = (maxXYZ.x - minXYZ.x) * (maxXYZ.y - minXYZ.y) * (maxXYZ.z - minXYZ.z);
+var latticeOffset =  new JU.P3 ();
+var vc0 = this.vc;
+var vcNew = nCells * this.vc;
+this.vs = JU.AU.arrayCopyPt (this.vs, vcNew);
+this.vvs = (this.vvs == null ? null : JU.AU.ensureLengthA (this.vvs, vcNew));
+var pc0 = this.pc;
+var pcNew = nCells * this.pc;
+this.pis = JU.AU.arrayCopyII (this.pis, pcNew);
+var off = 0;
+this.normixes = JU.AU.arrayCopyShort (this.normixes, vcNew);
+for (var tx = minXYZ.x; tx < maxXYZ.x; tx++) for (var ty = minXYZ.y; ty < maxXYZ.y; ty++) for (var tz = minXYZ.z; tz < maxXYZ.z; tz++) {
+if (tx == 0 && ty == 0 && tz == 0) continue;
+latticeOffset.set (tx, ty, tz);
+this.unitCell.toCartesian (latticeOffset, false);
+for (var i = 0; i < vc0; i++) {
+this.normixes[this.vc] = this.normixes[i];
+var v = JU.P3.newP (this.vs[i]);
+v.add (latticeOffset);
+this.addVCVal (v, this.vvs[i], false);
+}
+off += vc0;
+for (var i = 0; i < pc0; i++) {
+var p = JU.AU.arrayCopyI (this.pis[i], -1);
+p[0] += off;
+p[1] += off;
+p[2] += off;
+this.addPolygonC (p, 0, null);
+}
+}
+
+
+var xyzMin =  new JU.P3 ();
+var xyzMax =  new JU.P3 ();
+this.setBox (xyzMin, xyzMax);
+this.jvxlData.boundingBox = [xyzMin, xyzMax];
+}, "JV.Viewer");
 Clazz.overrideMethod (c$, "slabBrillouin", 
 function (unitCellPoints) {
 var vectors = (unitCellPoints == null ? this.spanningVectors : unitCellPoints);

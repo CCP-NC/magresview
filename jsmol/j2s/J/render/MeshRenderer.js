@@ -63,14 +63,14 @@ this.mesh = mesh;
 if (!this.setVariables ()) return false;
 if (!this.doRender) return mesh.title != null;
 this.latticeOffset.set (0, 0, 0);
-if (mesh.lattice == null && mesh.symops == null || mesh.modelIndex < 0) {
+if (mesh.modelIndex < 0 || mesh.lattice == null && mesh.symops == null) {
 for (var i = this.vertexCount; --i >= 0; ) if (this.vertices[i] != null) this.tm.transformPtScr (this.vertices[i], this.screens[i]);
 
 this.render2 (this.isExport);
 } else {
 var vTemp =  new JU.P3 ();
-var unitcell;
-if ((unitcell = mesh.unitCell) == null && (unitcell = this.vwr.ms.am[mesh.modelIndex].biosymmetry) == null && (unitcell = this.vwr.getModelUnitCell (mesh.modelIndex)) == null) unitcell = mesh.getUnitCell ();
+var unitcell = mesh.getUnitCell (this.vwr);
+if (unitcell != null) {
 if (mesh.symops != null) {
 if (mesh.symopNormixes == null) mesh.symopNormixes = JU.AU.newShort2 (mesh.symops.length);
 var verticesTemp = null;
@@ -99,7 +99,6 @@ this.render2 (this.isExport);
 }
 mesh.colix = c;
 } else {
-if (unitcell != null) {
 var minXYZ =  new JU.P3i ();
 var maxXYZ = JU.P3i.new3 (Clazz.floatToInt (mesh.lattice.x), Clazz.floatToInt (mesh.lattice.y), Clazz.floatToInt (mesh.lattice.z));
 unitcell.setMinMaxLatticeParameters (minXYZ, maxXYZ);
@@ -121,7 +120,7 @@ Clazz.defineMethod (c$, "setVariables",
  function () {
 if (this.mesh.visibilityFlags == 0) return false;
 if (this.mesh.bsSlabGhost != null) this.g3d.setC (this.mesh.slabColix);
-this.isGhostPass = (this.mesh.bsSlabGhost != null && (this.isExport ? this.exportPass == 2 : this.g3d.isPass2 ()));
+this.isGhostPass = (this.mesh.bsSlabGhost != null && (this.isExport ? this.exportPass == 2 : this.vwr.gdata.isPass2));
 this.isTranslucentInherit = (this.isGhostPass && JU.C.getColixTranslucent3 (this.mesh.slabColix, false, 0) == 1);
 this.isTranslucent = this.isGhostPass || JU.C.isColixTranslucent (this.mesh.colix);
 if (this.isTranslucent || this.volumeRender || this.mesh.bsSlabGhost != null) this.needTranslucent = true;
@@ -141,7 +140,7 @@ this.bsPolygons = (this.isGhostPass ? this.mesh.bsSlabGhost : this.selectedPolyO
 this.renderLow = (!this.isExport && !this.vwr.checkMotionRendering (1073742018));
 this.frontOnly = this.renderLow || !this.tm.slabEnabled && this.mesh.frontOnly && !this.mesh.isTwoSided && !this.selectedPolyOnly && (this.meshSlabValue == -2147483648 || this.meshSlabValue >= 100);
 this.screens = this.vwr.allocTempScreens (this.vertexCount);
-if (this.frontOnly) this.transformedVectors = this.g3d.getTransformedVertexVectors ();
+if (this.frontOnly) this.transformedVectors = this.vwr.gdata.getTransformedVertexVectors ();
 if (this.transformedVectors == null) this.frontOnly = false;
 }return true;
 });
@@ -150,7 +149,7 @@ function (colix) {
 if (this.isGhostPass) return true;
 if (this.volumeRender && !this.isTranslucent) colix = JU.C.getColixTranslucent3 (colix, true, 0.8);
 this.colix = colix;
-if (JU.C.isColixLastAvailable (colix)) this.g3d.setColor (this.mesh.color);
+if (JU.C.isColixLastAvailable (colix)) this.vwr.gdata.setColor (this.mesh.color);
 return this.g3d.setC (colix);
 }, "~N");
 Clazz.defineMethod (c$, "isPolygonDisplayable", 
@@ -218,7 +217,7 @@ continue;
 }var check;
 if (this.mesh.isTriangleSet) {
 var normix = this.normixes[i];
-if (!this.g3d.isDirectedTowardsCamera (normix)) continue;
+if (!this.vwr.gdata.isDirectedTowardsCamera (normix)) continue;
 if (fill) {
 if (iShowTriangles) {
 this.g3d.fillTriangle (this.screens[iA], this.colix, normix, this.screens[iB], this.colix, normix, this.screens[iC], this.colix, normix, 0.1);

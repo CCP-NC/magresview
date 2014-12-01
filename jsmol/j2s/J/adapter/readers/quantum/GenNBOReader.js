@@ -63,7 +63,7 @@ var fileName = this.htParams.get ("fullPathName");
 var pt = fileName.lastIndexOf (".");
 if (pt < 0) pt = fileName.length;
 fileName = fileName.substring (0, pt) + ext;
-var data = this.vwr.getFileAsString (fileName, false);
+var data = this.vwr.getFileAsString3 (fileName, false, null);
 if (data.length == 0 || data.indexOf ("java.io.FileNotFound") >= 0) throw  new Exception (" supplemental file " + fileName + " was not found");
 return data;
 }, "~S");

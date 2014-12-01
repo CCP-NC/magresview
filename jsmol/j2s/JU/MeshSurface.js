@@ -53,9 +53,6 @@ this.mergePolygonCount0 = 0;
 this.isMerged = false;
 Clazz.instantialize (this, arguments);
 }, JU, "MeshSurface");
-Clazz.makeConstructor (c$, 
-function () {
-});
 c$.newMesh = Clazz.defineMethod (c$, "newMesh", 
 function (isAlt, vertices, vertexCount, polygonIndexes, normals, nNormals) {
 var ms =  new JU.MeshSurface ();
@@ -650,6 +647,15 @@ for (var i = 0; i < vertexCount; i++) vectors[i] = JU.Geodesic.getVertexVector (
 
 return JU.MeshSurface.newMesh (true, vectors, 0, faces, vectors, 0);
 }, "~N");
+Clazz.defineMethod (c$, "setBox", 
+function (xyzMin, xyzMax) {
+xyzMin.set (3.4028235E38, 3.4028235E38, 3.4028235E38);
+xyzMax.set (-3.4028235E38, -3.4028235E38, -3.4028235E38);
+for (var i = 0; i < this.vc; i++) {
+var p = this.vs[i];
+if (!Float.isNaN (p.x)) JU.BoxInfo.addPoint (p, xyzMin, xyzMax, 0);
+}
+}, "JU.P3,JU.P3");
 Clazz.defineStatics (c$,
 "SEED_COUNT", 25);
 });

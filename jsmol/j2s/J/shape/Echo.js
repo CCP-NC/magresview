@@ -67,7 +67,7 @@ valign = 3;
 halign = 2;
 } else if ("bottom" === target) {
 valign = 2;
-}text = JM.Text.newEcho (this.vwr, this.gdata, this.gdata.getFont3DFS ("Serif", 20), target, 10, valign, halign, 0);
+}text = JM.Text.newEcho (this.vwr, this.vwr.gdata.getFont3DFS ("Serif", 20), target, 10, valign, halign, 0);
 text.setAdjustForWindow (true);
 this.objects.put (target, text);
 if (this.currentFont != null) text.setFont (this.currentFont, true);

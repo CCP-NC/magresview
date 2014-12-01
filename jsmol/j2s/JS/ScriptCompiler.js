@@ -59,7 +59,6 @@ this.vPush =  new JU.Lst ();
 });
 Clazz.makeConstructor (c$, 
 function (vwr) {
-Clazz.superConstructor (this, JS.ScriptCompiler, []);
 this.vwr = vwr;
 }, "JV.Viewer");
 Clazz.defineMethod (c$, "compile", 
@@ -674,6 +673,7 @@ switch (token == null ? 0 : token.tok) {
 case 1073742015:
 case 1073742077:
 case 1073741839:
+case 1610616855:
 if (this.nTokens != 1) return 4;
 case 135270408:
 case 1229984263:
@@ -859,6 +859,7 @@ this.setEqualPt = this.ichToken;
 return 0;
 }return 2;
 case 1150985:
+if (this.tokCommand == 4103 && this.nTokens == 1) return 0;
 case 364548:
 if (this.flowContext != null) this.flowContext.forceEndIf = false;
 case 364547:
@@ -1231,7 +1232,7 @@ return 0;
 });
 c$.newScriptParallelProcessor = Clazz.defineMethod (c$, "newScriptParallelProcessor", 
  function (name, tok) {
-var jpp = J.api.Interface.getInterface ("JS.ScriptParallelProcessor");
+var jpp = J.api.Interface.getInterface ("JS.ScriptParallelProcessor", null, null);
 jpp.set (name, tok);
 return jpp;
 }, "~S,~N");

@@ -69,6 +69,13 @@ for (var i = 0; i < 6; i++) this.setUnitCellItem (i, this.parseFloat ());
 
 this.rd ();
 return true;
+}if (this.line.startsWith ("[CELLAXES]")) {
+var f =  Clazz.newFloatArray (9, 0);
+this.fillFloatArray (null, 0, f);
+this.addPrimitiveLatticeVector (0, f, 0);
+this.addPrimitiveLatticeVector (1, f, 3);
+this.addPrimitiveLatticeVector (2, f, 6);
+return true;
 }return false;
 });
 Clazz.overrideMethod (c$, "finalizeSubclassReader", 
@@ -318,7 +325,7 @@ var firstModel = (this.optOnly || this.desiredModelNumber >= 0 ? 0 : 1);
 this.modelNumber = firstModel;
 var haveModel = false;
 if (this.desiredModelNumber == 0 || this.desiredModelNumber == nGeom) this.desiredModelNumber = nGeom;
- else if (this.asc.atomSetCount > 0) this.finalizeMOData (null);
+ else if (this.asc.atomSetCount > 0) this.finalizeMOData (this.moData);
 for (var i = 0; i < nGeom; i++) {
 this.readLines (2);
 if (this.doGetModel (++this.modelNumber, null)) {

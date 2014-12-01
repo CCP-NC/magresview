@@ -41,7 +41,7 @@ if (this.bioPolymers[i].isNucleic ()) haveNucl = true;
  else if (Clazz.instanceOf (this.bioPolymers[i], JM.AminoPolymer)) haveProt = true;
 }
 var s = "";
-if (haveProt) s += (J.api.Interface.getOption ("dssx.DSSP")).calculateDssp (this.bioPolymers, this.bioPolymerCount, vHBonds, doReport, dsspIgnoreHydrogen, setStructure);
+if (haveProt) s += (J.api.Interface.getOption ("dssx.DSSP", this.ms.vwr, "ms")).calculateDssp (this.bioPolymers, this.bioPolymerCount, vHBonds, doReport, dsspIgnoreHydrogen, setStructure);
 if (haveNucl && this.auxiliaryInfo.containsKey ("dssr") && vHBonds != null) s += this.ms.vwr.getAnnotationParser ().getHBonds (this.ms, this.modelIndex, vHBonds, doReport);
 return s;
 }, "JU.Lst,~B,~B,~B");
@@ -184,7 +184,7 @@ function (seqcodeA, seqcodeB, chainID, bs, caseSensitive) {
 var id;
 for (var i = this.chainCount; --i >= 0; ) {
 var chain = this.chains[i];
-if (chainID == -1 || chainID == (id = chain.chainID) || !caseSensitive && id < 256 && chainID == JM.AtomCollection.chainToUpper (id)) for (var index = 0; index >= 0; ) index = this.chains[i].selectSeqcodeRange (index, seqcodeA, seqcodeB, bs);
+if (chainID == -1 || chainID == (id = chain.chainID) || !caseSensitive && id > 0 && id < 300 && chainID == JM.AtomCollection.chainToUpper (id)) for (var index = 0; index >= 0; ) index = this.chains[i].selectSeqcodeRange (index, seqcodeA, seqcodeB, bs);
 
 }
 }, "~N,~N,~N,JU.BS,~B");
@@ -470,7 +470,7 @@ function () {
 if (this.modelIndex < 0) return "";
 var info = this.auxiliaryInfo.get ("fileHeader");
 if (info != null) return info;
-info = this.ms.vwr.getCurrentFileAsString ();
+info = this.ms.vwr.getCurrentFileAsString ("biomodel");
 var ichMin = info.length;
 for (var i = JM.BioModel.pdbRecords.length; --i >= 0; ) {
 var ichFound;

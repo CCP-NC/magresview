@@ -442,7 +442,7 @@ q = null;
 q = dq.rightDifference (dqprev);
 val1 = JM.BioPolymer.getQuaternionStraightness (id, dqprev, dq);
 val2 = JM.BioPolymer.get3DStraightness (id, dqprev, dq);
-(aprev.getGroup ()).setGroupParameter (1112539150, useQuaternionStraightness ? val1 : val2);
+(aprev.group).setGroupParameter (1112539150, useQuaternionStraightness ? val1 : val2);
 }dqprev = dq;
 }aprev = anext;
 qprev = qnext;
@@ -497,7 +497,7 @@ strExtra += JU.PT.sprintf ("  %10.5p %10.5p %10.5p", "p", [(monomer).getNitrogen
 } else if (derivType == 2 && !Float.isNaN (val1)) {
 strExtra += JU.PT.sprintf (" %10.5f %10.5f", "F", [[val1, val2]]);
 }}if (pdbATOM == null) continue;
-bsWritten.set ((a.getGroup ()).leadAtomIndex);
+bsWritten.set ((a.group).leadAtomIndex);
 pdbATOM.append (vwr.ms.getLabeler ().formatLabelAtomArray (vwr, a, tokens, '\0', null, ptTemp));
 pdbATOM.append (JU.PT.sprintf ("%8.2f%8.2f%8.2f      %6.3f          %2s    %s\n", "ssF", [a.getElementSymbolIso (false).toUpperCase (), strExtra, [x * factor, y * factor, z * factor, w * factor]]));
 if (atomLast != null && atomLast.getPolymerIndexInModel () == a.getPolymerIndexInModel ()) {

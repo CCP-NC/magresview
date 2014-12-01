@@ -415,7 +415,8 @@ var rA;
 var rB;
 var rG;
 if (this.q1 == 0 && this.q2 == 0) {
-return [this.getTheta (), 0, 0];
+var theta = this.getTheta ();
+return [this.q3 < 0 ? -theta : theta, 0, 0];
 }rA = Math.atan2 (2 * (this.q2 * this.q3 + this.q0 * this.q1), 2 * (-this.q1 * this.q3 + this.q0 * this.q2));
 rB = Math.acos (this.q3 * this.q3 - this.q2 * this.q2 - this.q1 * this.q1 + this.q0 * this.q0);
 rG = Math.atan2 (2 * (this.q2 * this.q3 - this.q0 * this.q1), 2 * (this.q0 * this.q2 + this.q1 * this.q3));
@@ -427,7 +428,8 @@ var rA;
 var rB;
 var rG;
 if (this.q1 == 0 && this.q2 == 0) {
-return [this.getTheta (), 0, 0];
+var theta = this.getTheta ();
+return [this.q3 < 0 ? -theta : theta, 0, 0];
 }rA = Math.atan2 (2 * (this.q1 * this.q3 - this.q0 * this.q2), 2 * (this.q0 * this.q1 + this.q2 * this.q3));
 rB = Math.acos (this.q3 * this.q3 - this.q2 * this.q2 - this.q1 * this.q1 + this.q0 * this.q0);
 rG = Math.atan2 (2 * (this.q1 * this.q3 + this.q0 * this.q2), 2 * (-this.q2 * this.q3 + this.q0 * this.q1));

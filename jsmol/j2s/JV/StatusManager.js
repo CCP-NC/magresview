@@ -98,6 +98,7 @@ return s;
 Clazz.defineMethod (c$, "setCallbackFunction", 
 function (callbackType, callbackFunction) {
 var callback = J.c.CBK.getCallback (callbackType);
+System.out.println ("callback set for " + callbackType + " " + callbackFunction + " " + callback);
 if (callback != null) {
 var pt = (callbackFunction == null ? 0 : callbackFunction.length > 7 && callbackFunction.toLowerCase ().indexOf ("script:") == 0 ? 7 : callbackFunction.length > 11 && callbackFunction.toLowerCase ().indexOf ("jmolscript:") == 0 ? 11 : 0);
 if (pt == 0) this.jmolScriptCallbacks.remove (callback);
@@ -337,7 +338,7 @@ return (this.jsl == null ? null : this.jsl.getRegistryInfo ());
 Clazz.defineMethod (c$, "dialogAsk", 
 function (type, fileName) {
 var isImage = type.equals ("Save Image");
-var sd = J.api.Interface.getOption ("dialog.Dialog");
+var sd = J.api.Interface.getOption ("dialog.Dialog", this.vwr, "status");
 if (sd == null) return null;
 sd.setupUI (false);
 if (isImage) sd.setImageInfo (this.qualityJPG, this.qualityPNG, this.imageType);

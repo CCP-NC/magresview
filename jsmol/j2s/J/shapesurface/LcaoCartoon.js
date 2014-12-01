@@ -178,7 +178,7 @@ axes[1].set (1, 0, 0);
 }if (this.isMolecular || isCpk || this.thisType.equalsIgnoreCase ("s") || this.vwr.getHybridizationAndAxes (iAtom, axes[0], axes[1], this.thisType) != null) {
 this.setPropI ((this.isRadical ? "radical" : this.isLonePair ? "lonePair" : "lcaoCartoon"), axes, null);
 }if (isCpk) {
-var colix = this.vwr.ms.getAtomColix (iAtom);
+var colix = this.vwr.ms.at[iAtom].colixAtom;
 if (JU.C.isColixTranslucent (colix)) {
 this.setPropI ("translucentLevel", Float.$valueOf (JU.C.getColixTranslucencyLevel (colix)), null);
 this.setPropI ("translucency", "translucent", null);

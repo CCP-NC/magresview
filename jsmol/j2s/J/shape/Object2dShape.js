@@ -124,7 +124,7 @@ function () {
 this.currentObject = null;
 this.isAll = false;
 });
-Clazz.overrideMethod (c$, "setVisibilityFlags", 
+Clazz.overrideMethod (c$, "setModelVisibilityFlags", 
 function (bsModels) {
 if (!this.isHover) for (var t, $t = this.objects.values ().iterator (); $t.hasNext () && ((t = $t.next ()) || true);) t.setVisibility (t.modelIndex < 0 || bsModels.get (t.modelIndex));
 

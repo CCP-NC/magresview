@@ -50,7 +50,7 @@ if (haveVolumeData) {
 for (var i = this.params.title.length; --i >= 0; ) this.fixTitleLine2 (i, mo);
 
 } else {
-this.q = J.api.Interface.getOption (className);
+this.q = J.api.Interface.getOption (className, this.sg.getAtomDataServer (), "file");
 if (this.isNci) {
 this.qpc = this.q;
 } else if (this.linearCombination == null) {

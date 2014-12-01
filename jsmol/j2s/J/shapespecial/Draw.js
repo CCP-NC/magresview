@@ -751,7 +751,7 @@ n++;
 if (n == 0) return;
 m.axis.scale (1 / n);
 }, "J.shapespecial.DrawMesh");
-Clazz.overrideMethod (c$, "setVisibilityFlags", 
+Clazz.overrideMethod (c$, "setModelVisibilityFlags", 
 function (bsModels) {
 for (var i = 0; i < this.meshCount; i++) {
 var m = this.dmeshes[i];
@@ -795,7 +795,7 @@ function (x, y, bsVisible) {
 if (!this.vwr.getDrawHover ()) return false;
 if (JU.C.isColixTranslucent (this.colix)) return false;
 if (!this.findPickedObject (x, y, false, bsVisible)) return false;
-if (this.gdata.isDisplayAntialiased ()) {
+if (this.vwr.gdata.antialiasEnabled) {
 x <<= 1;
 y <<= 1;
 }var s = (this.pickedMesh.title == null ? this.pickedMesh.thisID : this.pickedMesh.title[0]);
@@ -822,7 +822,7 @@ return true;
 Clazz.defineMethod (c$, "move2D", 
  function (mesh, vertexes, iVertex, x, y, moveAll) {
 if (vertexes == null || vertexes.length == 0) return;
-if (this.gdata.isAntialiased ()) {
+if (this.vwr.gdata.isAntialiased ()) {
 x <<= 1;
 y <<= 1;
 }var pt =  new JU.P3 ();
@@ -850,7 +850,7 @@ mesh.setCenters ();
 Clazz.defineMethod (c$, "findPickedObject", 
  function (x, y, isPicking, bsVisible) {
 var dmin2 = 100;
-if (this.gdata.isAntialiased ()) {
+if (this.vwr.gdata.isAntialiased ()) {
 x <<= 1;
 y <<= 1;
 dmin2 <<= 1;

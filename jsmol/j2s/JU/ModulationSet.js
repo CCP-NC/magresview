@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JU");
-Clazz.load (["J.api.JmolModulationSet", "JU.Vibration", "JU.P3"], "JU.ModulationSet", ["java.lang.Float", "java.util.Hashtable", "JU.Lst", "$.Matrix", "$.V3", "JU.Escape", "$.Logger"], function () {
+Clazz.load (["J.api.JmolModulationSet", "JU.Vibration", "JU.P3"], "JU.ModulationSet", ["java.lang.Float", "java.util.Hashtable", "JU.Lst", "$.Matrix", "$.PT", "$.V3", "JU.Escape", "$.Logger"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vOcc = NaN;
 this.htUij = null;
@@ -10,22 +10,21 @@ this.iop = 0;
 this.r0 = null;
 this.vib = null;
 this.mxyz = null;
-this.mscale = 1;
 this.symmetry = null;
 this.gammaE = null;
 this.gammaIinv = null;
 this.sigma = null;
-this.sI = null;
 this.tau = null;
 this.enabled = false;
 this.$scale = 1;
 this.qtOffset = null;
 this.isQ = false;
-this.t = null;
+this.rI = null;
 this.modTemp = null;
 this.strop = null;
 this.isSubsystem = false;
-this.tFactor = null;
+this.tFactorInv = null;
+this.rsvs = null;
 this.ptTemp = null;
 this.v0 = null;
 this.axesLengths = null;
@@ -48,64 +47,71 @@ function () {
 Clazz.superConstructor (this, JU.ModulationSet, []);
 });
 Clazz.defineMethod (c$, "setMod", 
-function (id, r0, modDim, mods, gammaE, factors, iop, symmetry, v) {
-this.r0 = JU.P3.newP (r0);
-this.vib = v;
-if (v != null) this.mxyz =  new JU.V3 ();
-this.modDim = modDim;
+function (id, r00, r0, d, mods, gammaE, factors, iop, symmetry, v) {
+this.id = id + "_" + symmetry.getSpaceGroupName ();
+this.strop = symmetry.getSpaceGroupXyz (iop, false);
+this.r0 = r0;
+this.modDim = d;
+this.rI =  new JU.Matrix (null, d, 1);
 this.mods = mods;
 this.iop = iop;
 this.symmetry = symmetry;
-this.strop = symmetry.getSpaceGroupXyz (iop, false);
-this.id = id + "_" + symmetry.getSpaceGroupName ();
+this.gammaE = gammaE;
 this.sigma = factors[0];
-this.tFactor = factors[1];
-this.isSubsystem = (this.tFactor != null);
-if (this.isSubsystem) {
-this.tFactor = this.tFactor.inverse ();
-}this.gammaE = gammaE;
-var rsvs = symmetry.getOperationRsVs (iop);
-this.gammaIinv = rsvs.getSubmatrix (3, 3, modDim, modDim).inverse ();
-this.sI = rsvs.getSubmatrix (3, 3 + modDim, modDim, 1);
-this.tau = this.gammaIinv.mul (this.sigma.mul (JU.Matrix.newT (r0, true)).sub (this.sI));
-if (JU.Logger.debuggingHigh) JU.Logger.debug ("MODSET create r=" + JU.Escape.eP (r0) + " si=" + JU.Escape.e (this.sI.getArray ()) + " ginv=" + this.gammaIinv.toString ().$replace ('\n', ' '));
-this.t =  new JU.Matrix (null, modDim, 1);
+if (factors[1] != null) {
+this.isSubsystem = true;
+this.tFactorInv = factors[1].inverse ();
+}if (v != null) {
+this.vib = v;
+this.vib.modScale = 1;
+this.mxyz =  new JU.V3 ();
+}var vR00 = JU.Matrix.newT (r00, true);
+var vR0 = JU.Matrix.newT (r0, true);
+this.rsvs = symmetry.getOperationRsVs (iop);
+this.gammaIinv = this.rsvs.getSubmatrix (3, 3, d, d).inverse ();
+var gammaM = this.rsvs.getSubmatrix (3, 0, d, 3);
+var sI = this.rsvs.getSubmatrix (3, 3 + d, d, 1);
+this.tau = this.gammaIinv.mul (this.sigma.mul (vR0).sub (gammaM.mul (vR00)).sub (sI));
+if (JU.Logger.debuggingHigh) JU.Logger.debug ("MODSET create " + id + " r0=" + JU.Escape.eP (r0) + " tau=" + this.tau);
 return this;
-}, "~S,JU.P3,~N,JU.Lst,JU.M3,~A,~N,J.api.SymmetryInterface,JU.Vibration");
-Clazz.overrideMethod (c$, "getUnitCell", 
+}, "~S,JU.P3,JU.P3,~N,JU.Lst,JU.M3,~A,~N,J.api.SymmetryInterface,JU.Vibration");
+Clazz.overrideMethod (c$, "getSubSystemUnitCell", 
 function () {
 return (this.isSubsystem ? this.symmetry : null);
 });
 Clazz.defineMethod (c$, "calculate", 
-function (fracT, isQ) {
+function (tuv, isQ) {
 this.x = this.y = this.z = 0;
-if (this.mxyz != null) this.mxyz.set (0, 0, 0);
 this.htUij = null;
 this.vOcc = NaN;
-var a = this.t.getArray ();
-for (var i = 0; i < this.modDim; i++) a[i][0] = 0;
-
+if (this.mxyz != null) this.mxyz.set (0, 0, 0);
+var a;
 if (isQ && this.qtOffset != null) {
 var q =  new JU.Matrix (null, 3, 1);
 a = q.getArray ();
 a[0][0] = this.qtOffset.x;
 a[1][0] = this.qtOffset.y;
 a[2][0] = this.qtOffset.z;
-a = (this.t = this.sigma.mul (q)).getArray ();
-}if (fracT != null) {
+a = (this.rI = this.sigma.mul (q)).getArray ();
+} else {
+a = this.rI.getArray ();
+for (var i = 0; i < this.modDim; i++) a[i][0] = 0;
+
+}if (tuv != null) {
 switch (this.modDim) {
 default:
-a[2][0] += fracT.z;
+a[2][0] += tuv.z;
 case 2:
-a[1][0] += fracT.y;
+a[1][0] += tuv.y;
 case 1:
-a[0][0] += fracT.x;
+a[0][0] += tuv.x;
 break;
 }
-if (this.isSubsystem) this.t = this.tFactor.mul (this.t);
-}this.t = this.gammaIinv.mul (this.t).add (this.tau);
-var ta = this.t.getArray ();
-for (var i = this.mods.size (); --i >= 0; ) this.mods.get (i).apply (this, ta);
+}if (this.isSubsystem) {
+this.rI = this.tFactorInv.mul (this.rI);
+}this.rI = this.tau.add (this.gammaIinv.mul (this.rI));
+var arI = this.rI.getArray ();
+for (var i = this.mods.size (); --i >= 0; ) this.mods.get (i).apply (this, arI);
 
 this.gammaE.rotate (this);
 if (this.mxyz != null) this.gammaE.rotate (this.mxyz);
@@ -139,17 +145,22 @@ var isReset = (Float.isNaN (scale));
 if (isReset) scale = -1;
 this.ptTemp.setT (this);
 this.ptTemp.scale (this.$scale * scale);
+if (a != null) {
 this.symmetry.toCartesian (this.ptTemp, true);
 a.add (this.ptTemp);
-if (this.mxyz == null) return;
+}if (this.mxyz != null) this.setVib (isReset);
+}, "JU.T3,~N");
+Clazz.defineMethod (c$, "setVib", 
+ function (isReset) {
 this.vib.setT (this.v0);
 if (isReset) return;
 this.ptTemp.setT (this.mxyz);
-this.ptTemp.scale (this.$scale * scale);
+this.ptTemp.scale (this.$scale * this.$scale);
 this.symmetry.toCartesian (this.ptTemp, true);
-this.ptTemp.scale (this.mscale);
+JU.PT.fixPtFloats (this.ptTemp, 10000.0);
+this.ptTemp.scale (this.vib.modScale);
 this.vib.add (this.ptTemp);
-}, "JU.T3,~N");
+}, "~B");
 Clazz.overrideMethod (c$, "getState", 
 function () {
 var s = "";
@@ -162,17 +173,21 @@ function (asEnabled) {
 return (asEnabled ? this : this.r0);
 }, "~B");
 Clazz.overrideMethod (c$, "getModulation", 
-function (type, t456) {
+function (type, tuv) {
 this.getModTemp ();
-if (type.equals ("D")) {
-return JU.P3.newP (t456 == null ? this.r0 : this.modTemp.calculate (t456, false));
-}if (type.equals ("M")) {
-return JU.P3.newP (t456 == null ? this.v0 : this.modTemp.calculate (t456, false).mxyz);
-}if (type.equals ("T")) {
-this.modTemp.calculate (t456, false);
-var ta = this.modTemp.t.getArray ();
-return JU.P3.new3 (ta[0][0], (this.modDim > 1 ? ta[1][0] : 0), (this.modDim > 1 ? ta[2][0] : 0));
-}return null;
+switch (type) {
+case 'D':
+return JU.P3.newP (tuv == null ? this.r0 : this.modTemp.calculate (tuv, false));
+case 'M':
+return JU.P3.newP (tuv == null ? this.v0 : this.modTemp.calculate (tuv, false).mxyz);
+case 'T':
+this.modTemp.calculate (tuv, false);
+var ta = this.modTemp.rI.getArray ();
+return JU.P3.new3 (ta[0][0], (this.modDim > 1 ? ta[1][0] : 0), (this.modDim > 2 ? ta[2][0] : 0));
+case 'O':
+return Float.$valueOf ((tuv == null ? this.vOcc : this.modTemp.calculate (tuv, false).vOcc) * 100);
+}
+return null;
 }, "~S,JU.T3");
 Clazz.overrideMethod (c$, "setTempPoint", 
 function (a, t456, vibScale, scale) {
@@ -196,11 +211,10 @@ this.modTemp.r0 = this.r0;
 this.modTemp.v0 = this.v0;
 this.modTemp.vib = this.vib;
 this.modTemp.symmetry = this.symmetry;
-this.modTemp.t = this.t;
+this.modTemp.rI = this.rI;
 if (this.mxyz != null) {
 this.modTemp.mxyz =  new JU.V3 ();
-}}this.modTemp.mscale = this.mscale;
-});
+}}});
 Clazz.overrideMethod (c$, "getInfo", 
 function (info) {
 var modInfo =  new java.util.Hashtable ();
@@ -208,9 +222,7 @@ modInfo.put ("id", this.id);
 modInfo.put ("r0", this.r0);
 modInfo.put ("tau", this.tau.getArray ());
 modInfo.put ("modDim", Integer.$valueOf (this.modDim));
-modInfo.put ("gammaE", this.gammaE);
-modInfo.put ("gammaIinv", this.gammaIinv.getArray ());
-modInfo.put ("sI", this.sI.getArray ());
+modInfo.put ("rsvs", this.rsvs);
 modInfo.put ("sigma", this.sigma.getArray ());
 modInfo.put ("symop", Integer.$valueOf (this.iop + 1));
 modInfo.put ("strop", this.strop);
@@ -223,9 +235,12 @@ info.put ("modulation", modInfo);
 }, "java.util.Map");
 Clazz.overrideMethod (c$, "setXYZ", 
 function (v) {
-if (this.vib == null || v.length () == 0 && this.vib.modDim == -2) return;
-this.mscale *= v.length () / this.vib.length ();
-this.vib.setT (v);
+if (this.vib == null) return;
+if (this.vib.modDim == -2) {
+if (v.x == 1.4E-45 && v.y == 1.4E-45) {
+this.vib.modScale = v.z;
+return;
+}}this.vib.setT (v);
 }, "JU.T3");
 Clazz.overrideMethod (c$, "getVibration", 
 function (forceNew) {
@@ -239,7 +254,7 @@ return (this.mxyz == null ? this : this.mxyz);
 Clazz.overrideMethod (c$, "scaleVibration", 
 function (m) {
 if (this.vib != null) this.vib.scale (m);
-this.mscale *= m;
+this.vib.modScale *= m;
 }, "~N");
 Clazz.overrideMethod (c$, "setMoment", 
 function () {

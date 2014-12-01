@@ -662,9 +662,7 @@ case 1766856708:
 switch (x2.tok) {
 case 4:
 case 7:
-s = JS.SV.sValue (x2);
-pt =  new JU.P3 ();
-return this.addXPt (JU.CU.colorPtFromString (s, pt));
+return this.addXPt (JU.CU.colorPtFromString (JS.SV.sValue (x2)));
 case 2:
 case 3:
 return this.addXPt (this.vwr.getColorPointForPropertyValue (JS.SV.fValue (x2)));

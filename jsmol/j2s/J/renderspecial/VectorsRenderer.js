@@ -2,6 +2,7 @@ Clazz.declarePackage ("J.renderspecial");
 Clazz.load (["J.render.ShapeRenderer", "JU.P3", "$.P3i", "$.V3"], "J.renderspecial.VectorsRenderer", ["J.shape.Shape", "JU.Vibration"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.pointVectorStart = null;
+this.ptTemp = null;
 this.pointVectorEnd = null;
 this.pointArrowHead = null;
 this.screenVectorStart = null;
@@ -24,6 +25,7 @@ Clazz.instantialize (this, arguments);
 }, J.renderspecial, "VectorsRenderer", J.render.ShapeRenderer);
 Clazz.prepareFields (c$, function () {
 this.pointVectorStart =  new JU.P3 ();
+this.ptTemp =  new JU.P3 ();
 this.pointVectorEnd =  new JU.P3 ();
 this.pointArrowHead =  new JU.P3 ();
 this.screenVectorStart =  new JU.P3i ();
@@ -94,16 +96,19 @@ this.standardVector = true;
 this.drawShaft = (0.1 + Math.abs (this.headScale / len) < Math.abs (this.vectorScale));
 this.headOffsetVector.setT (vib);
 this.headOffsetVector.scale (this.headScale / len);
-}var mod = null;
+}this.ptTemp.setT (atom);
+var mod = atom.getModulation ();
+if (this.vibrationOn && mod != null) this.vwr.tm.getVibrationPoint (mod, this.ptTemp, 1);
 if (isMod) {
 this.standardVector = false;
 this.drawShaft = true;
-this.pointVectorStart.setT (atom);
-this.pointVectorEnd.setT (atom);
 mod = vib;
+this.pointVectorStart.setT (this.ptTemp);
+this.pointVectorEnd.setT (this.ptTemp);
 if (mod.isEnabled ()) {
-if (this.vibrationOn) this.vwr.tm.getVibrationPoint (vib, this.pointVectorEnd, NaN);
-mod.addTo (this.pointVectorStart, NaN);
+if (this.vibrationOn) {
+this.vwr.tm.getVibrationPoint (vib, this.pointVectorEnd, NaN);
+}mod.addTo (this.pointVectorStart, NaN);
 } else {
 mod.addTo (this.pointVectorEnd, 1);
 }this.headOffsetVector.sub2 (this.pointVectorEnd, this.pointVectorStart);
@@ -113,13 +118,12 @@ this.drawShaft = (len > 0.01);
 this.headOffsetVector.scale (this.headScale / this.headOffsetVector.length ());
 } else if (this.vectorsCentered || isSpin) {
 this.standardVector = false;
-this.pointVectorEnd.scaleAdd2 (0.5 * this.vectorScale, vib, atom);
-this.pointVectorStart.scaleAdd2 (-0.5 * this.vectorScale, vib, atom);
+this.pointVectorEnd.scaleAdd2 (0.5 * this.vectorScale, vib, this.ptTemp);
+this.pointVectorStart.scaleAdd2 (-0.5 * this.vectorScale, vib, this.ptTemp);
 } else {
-this.pointVectorEnd.scaleAdd2 (this.vectorScale, vib, atom);
+this.pointVectorEnd.scaleAdd2 (this.vectorScale, vib, this.ptTemp);
 this.screenVectorEnd.setT (this.vibrationOn ? this.tm.transformPtVib (this.pointVectorEnd, vib) : this.tm.transformPt (this.pointVectorEnd));
 this.pointArrowHead.add2 (this.pointVectorEnd, this.headOffsetVector);
-if (atom.getAtomNumber () == 16) System.out.println ("vecrend " + vib + atom.x + " " + atom.y + " " + atom.z + " ptH=" + this.pointVectorEnd);
 this.screenArrowHead.setT (this.vibrationOn ? this.tm.transformPtVib (this.pointArrowHead, vib) : this.tm.transformPt (this.pointArrowHead));
 }if (!this.standardVector) {
 this.screenVectorEnd.setT (this.tm.transformPt (this.pointVectorEnd));

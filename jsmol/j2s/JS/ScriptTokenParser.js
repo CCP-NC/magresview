@@ -441,6 +441,7 @@ if (isWithin && distance == 3.4028235E38) switch (tok0) {
 case 1060866:
 break;
 case 1073741916:
+case 1073742128:
 case 135267335:
 case 135267336:
 case 1238369286:
@@ -837,12 +838,12 @@ case 2:
 this.getToken ();
 var val = this.theToken.intValue;
 if (val < 0 || val > 9999) return this.error (8);
-chain = this.vwr.getChainID ("" + val);
+chain = this.vwr.getChainID ("" + val, false);
 break;
 default:
 var strChain = "" + this.getToken ().value;
 if (strChain.equals ("?")) return true;
-chain = this.vwr.getChainID (strChain);
+chain = this.vwr.getChainID (strChain, false);
 break;
 }
 return this.generateResidueSpecCode (JS.T.tv (1048609, chain, "spec_chain"));

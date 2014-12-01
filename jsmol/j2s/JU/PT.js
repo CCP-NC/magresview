@@ -612,11 +612,15 @@ pt0 = pt + 1;
 sb.append (str.substring (pt0, str.length));
 str = sb.toString ();
 }
-for (i = str.length; --i >= 0; ) if (str.charCodeAt (i) > 0x7F) {
+return "\"" + JU.PT.escUnicode (str) + "\"";
+}, "~S");
+c$.escUnicode = Clazz.defineMethod (c$, "escUnicode", 
+function (str) {
+for (var i = str.length; --i >= 0; ) if (str.charCodeAt (i) > 0x7F) {
 var s = "0000" + Integer.toHexString (str.charCodeAt (i));
 str = str.substring (0, i) + "\\u" + s.substring (s.length - 4) + str.substring (i + 1);
 }
-return "\"" + str + "\"";
+return str;
 }, "~S");
 c$.escF = Clazz.defineMethod (c$, "escF", 
 function (f) {
@@ -972,6 +976,15 @@ pt.x = Math.round (pt.x * f) / f;
 pt.y = Math.round (pt.y * f) / f;
 pt.z = Math.round (pt.z * f) / f;
 }, "JU.T3,~N");
+c$.fixDouble = Clazz.defineMethod (c$, "fixDouble", 
+function (d, f) {
+return Math.round (d * f) / f;
+}, "~N,~N");
+c$.parseFloatFraction = Clazz.defineMethod (c$, "parseFloatFraction", 
+function (s) {
+var pt = s.indexOf ("/");
+return (pt < 0 ? JU.PT.parseFloat (s) : JU.PT.parseFloat (s.substring (0, pt)) / JU.PT.parseFloat (s.substring (pt + 1)));
+}, "~S");
 Clazz.defineStatics (c$,
 "tensScale", [10, 100, 1000, 10000, 100000, 1000000],
 "decimalScale", [0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001, 0.0000001, 0.00000001, 0.000000001],

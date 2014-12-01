@@ -159,14 +159,9 @@ Clazz.defineMethod (c$, "readShift",
  function () {
 var tokens = this.getTokens ();
 var pt = tokens.length - 3;
-this.ptOriginShift.set (this.fraction (tokens[pt++]), this.fraction (tokens[pt++]), this.fraction (tokens[pt]));
+this.ptOriginShift.set (JU.PT.parseFloatFraction (tokens[pt++]), JU.PT.parseFloatFraction (tokens[pt++]), JU.PT.parseFloatFraction (tokens[pt]));
 return true;
 });
-Clazz.defineMethod (c$, "fraction", 
- function (f) {
-var ab = JU.PT.split (f, "/");
-return (ab.length == 2 ? this.parseFloatStr (ab[0]) / this.parseFloatStr (ab[1]) : 0);
-}, "~S");
 Clazz.defineMethod (c$, "setPrimitiveVolumeAndDensity", 
  function () {
 if (this.primitiveVolume != 0) this.asc.setAtomSetModelProperty ("volumePrimitive", JU.DF.formatDecimal (this.primitiveVolume, 3));

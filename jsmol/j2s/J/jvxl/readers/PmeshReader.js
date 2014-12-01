@@ -49,7 +49,7 @@ this.br.read (buf, 0, 5);
 if (( String.instantialize (buf)).startsWith ("PM\u0001\u0000")) {
 this.br.close ();
 this.binarydoc = this.newBinaryDocument ();
-this.binarydoc.setStream (this.sg.getAtomDataServer ().getBufferedInputStream (fileName), (buf[4] == '\0'));
+this.setStream (fileName, (buf[4] == '\0'));
 return true;
 }this.br.reset ();
 } catch (e) {
@@ -172,7 +172,7 @@ Clazz.defineMethod (c$, "nextToken",
  function () {
 while (this.iToken >= this.tokens.length) {
 this.iToken = 0;
-this.readLine ();
+this.rd ();
 this.tokens = this.getTokens ();
 }
 return this.tokens[this.iToken++];

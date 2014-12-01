@@ -26,11 +26,15 @@ this.ac = 0;
 this.haveAtomMods = false;
 this.modCoord = false;
 this.finalized = false;
+this.symmetry = null;
+this.supercellSymmetry = null;
+this.legendres = null;
 this.atModel = "@0";
 this.modMatrices = null;
 this.qlist100 = null;
 this.qs = null;
 this.modCount = 0;
+this.modTUV = null;
 this.htSubsystems = null;
 this.minXYZ0 = null;
 this.maxXYZ0 = null;
@@ -56,18 +60,23 @@ this.modCell = r.getFilter ("MODCELL=");
 this.modSelected = r.parseIntStr ("" + r.getFilter ("MOD="));
 this.modVib = r.checkFilterKey ("MODVIB");
 this.modAverage = r.checkFilterKey ("MODAVE");
-this.setModDim (modDim);
+var smodTUV = r.getFilter ("MODT=");
+if (smodTUV != null || (smodTUV = r.getFilter ("MODTUV=")) != null) {
+this.modTUV =  new JU.P3 ();
+var tuv = (JU.PT.replaceAllCharacters (smodTUV, "{}()", "") + ",0,0,0").$plit (",");
+this.modTUV.x = JU.PT.parseFloatFraction (tuv[0]);
+this.modTUV.y = JU.PT.parseFloatFraction (tuv[1]);
+this.modTUV.z = JU.PT.parseFloatFraction (tuv[2]);
+if (Float.isNaN (this.modTUV.lengthSquared ())) {
+JU.Logger.error ("MSRdr cannot read modTUV=" + smodTUV);
+this.modTUV = null;
+}}this.setModDim (modDim);
 return modDim;
 }, "J.adapter.smarter.AtomSetCollectionReader,~N");
 Clazz.defineMethod (c$, "setSubsystemOptions", 
  function () {
-this.cr.doPackUnitCell = this.modPack;
-if (!this.cr.doApplySymmetry) {
-this.cr.doApplySymmetry = true;
-this.cr.latticeCells[0] = 1;
-this.cr.latticeCells[1] = 1;
-this.cr.latticeCells[2] = 1;
-}if (this.modCell != null) this.cr.addJmolScript ("unitcell {%" + this.modCell + "}");
+this.cr.forceSymmetry (this.modPack);
+if (this.modCell != null) this.cr.addJmolScript ("unitcell {%" + this.modCell + "}");
 });
 Clazz.defineMethod (c$, "setModDim", 
 function (ndim) {
@@ -97,21 +106,26 @@ break;
 if (!isOK) return;
 if (map == null) map = this.htModulation;
 if (id.indexOf ("@") < 0) id += "@" + (iModel >= 0 ? iModel : this.cr.asc.iSet);
-JU.Logger.info ("Adding " + id + " " + JU.Escape.e (pt));
+if (id.startsWith ("D_L#") || id.startsWith ("U_L")) {
+if (this.legendres == null) this.legendres =  new JU.Lst ();
+this.legendres.addLast (id);
+}JU.Logger.info ("Adding " + id + " " + JU.Escape.e (pt));
 map.put (id, pt);
 }, "java.util.Map,~S,~A,~N");
 Clazz.overrideMethod (c$, "setModulation", 
-function (isPost) {
+function (isPost, symmetry) {
 if (this.modDim == 0 || this.htModulation == null) return;
 if (this.modDebug) JU.Logger.debugging = JU.Logger.debuggingHigh = true;
 this.cr.asc.setInfo ("someModelsAreModulated", Boolean.TRUE);
+this.symmetry = symmetry;
 this.setModulationForStructure (this.cr.asc.iSet, isPost);
 if (this.modDebug) JU.Logger.debugging = JU.Logger.debuggingHigh = false;
-}, "~B");
+}, "~B,J.api.SymmetryInterface");
 Clazz.overrideMethod (c$, "finalizeModulation", 
 function () {
 if (!this.finalized && this.modDim > 0 && !this.modVib) {
-this.cr.asc.setInfo ("modulationOn", Boolean.TRUE);
+if (this.modTUV != null) this.cr.appendLoadNote ("modTUV=" + this.modTUV);
+this.cr.asc.setInfo ("modulationOn", this.modTUV == null ? Boolean.TRUE : this.modTUV);
 this.cr.addJmolScript ((this.haveOccupancy && !this.isCommensurate ? ";display occupancy >= 0.5" : ""));
 }this.finalized = true;
 });
@@ -140,8 +154,9 @@ this.cr.appendLoadNote (this.modCount + " modulations for " + this.ac + " modula
 if (!this.haveAtomMods) return;
 var n = this.cr.asc.ac;
 this.atoms = this.cr.asc.atoms;
-this.cr.symmetry = this.cr.asc.getSymmetry ();
-if (this.cr.symmetry != null) this.nOps = this.cr.symmetry.getSpaceGroupOperationCount ();
+if (this.symmetry != null) this.nOps = this.symmetry.getSpaceGroupOperationCount ();
+this.supercellSymmetry = this.cr.asc.getXSymmetry ().symmetry;
+if (this.supercellSymmetry === this.symmetry) this.supercellSymmetry = null;
 this.iopLast = -1;
 var i0 = this.cr.asc.getLastAtomSetAtomIndex ();
 for (var i = i0; i < n; i++) this.modulateAtom (this.atoms[i]);
@@ -153,19 +168,21 @@ this.htSubsystems = null;
 Clazz.defineMethod (c$, "initModForStructure", 
  function (iModel) {
 var key;
+if (this.legendres != null) this.fixLegendre ();
 this.sigma =  new JU.Matrix (null, this.modDim, 3);
 this.qs = null;
 this.modMatrices = [this.sigma, null];
+var pt;
 for (var i = 0; i < this.modDim; i++) {
-var pt = this.getMod ("W_" + (i + 1));
+pt = this.getMod ("W_" + (i + 1));
 if (pt == null) {
 JU.Logger.info ("Not enough cell wave vectors for d=" + this.modDim);
 return;
-}this.cr.appendLoadNote ("W_" + (i + 1) + " = " + JU.Escape.e (pt));
-this.cr.appendUunitCellInfo ("q" + (i + 1) + "=" + this.fixPt (pt[0]) + " " + this.fixPt (pt[1]) + " " + this.fixPt (pt[2]));
+}this.fixDouble (pt);
+this.cr.appendLoadNote ("W_" + (i + 1) + " = " + JU.Escape.e (pt));
+this.cr.appendUunitCellInfo ("q" + (i + 1) + "=" + pt[0] + " " + pt[1] + " " + pt[2]);
 this.sigma.getArray ()[i] = [pt[0], pt[1], pt[2]];
 }
-var pt;
 var map =  new java.util.Hashtable ();
 for (var e, $e = this.htModulation.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 if ((key = this.checkKey (e.getKey (), false)) == null) continue;
@@ -176,7 +193,7 @@ this.haveOccupancy = true;
 case 'D':
 case 'M':
 case 'U':
-if (pt[2] == 1 && key.charAt (2) != 'S' && key.charAt (2) != 'T') {
+if (pt[2] == 1 && key.charAt (2) != 'S' && key.charAt (2) != 'T' && key.charAt (2) != 'L') {
 var ipt = key.indexOf ("?");
 if (ipt >= 0) {
 var s = key.substring (ipt + 1);
@@ -212,7 +229,7 @@ if (!map.isEmpty ()) this.htModulation.putAll (map);
 if (this.htSubsystems == null) {
 this.haveAtomMods = false;
 } else {
-this.cr.altCell = null;
+this.cr.strSupercell = null;
 this.haveAtomMods = true;
 this.htAtomMods =  new java.util.Hashtable ();
 }for (var e, $e = this.htModulation.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
@@ -229,7 +246,7 @@ pt_ = key.indexOf ("#") + 1;
 var utens = null;
 switch (type) {
 case 'U':
-utens = key.substring (4, key.indexOf (";"));
+utens = key.substring (pt_, key.indexOf (";"));
 case 'O':
 case 'D':
 case 'M':
@@ -248,11 +265,26 @@ break;
 }
 }
 }, "~N");
-Clazz.defineMethod (c$, "fixPt", 
- function (d) {
-var i = Clazz.doubleToInt (d * 100000);
-return (i == 0 ? "0" : Math.abs (i) % 100 == 0 ? "" + i / 100000 : Math.abs (i + 1) % 100 == 0 ? "" + (i + 1) / 100000 : "" + d);
-}, "~N");
+Clazz.defineMethod (c$, "fixLegendre", 
+ function () {
+for (var i = this.legendres.size (); --i >= 0; ) {
+var key = this.legendres.get (i);
+var pt = this.htModulation.get (key);
+if (pt != null) {
+var key1 = "O_0#0" + key.substring (key.indexOf (";"));
+var pt1 = this.htModulation.get (key1);
+if (pt1 == null) {
+JU.Logger.error ("Crenel " + key1 + " not found for legendre modulation " + key);
+pt[2] = NaN;
+} else {
+this.htModulation.put (key, [pt1[0], pt1[1], pt[0], pt[1]]);
+}}}
+});
+Clazz.defineMethod (c$, "fixDouble", 
+ function (pt) {
+if (this.cr.fixJavaFloat) for (var i = pt.length; --i >= 0; ) pt[i] = JU.PT.fixDouble (pt[i], 100000.0);
+
+}, "~A");
 Clazz.overrideMethod (c$, "getQCoefs", 
 function (key) {
 var fn = Math.max (0, this.cr.parseIntStr (key.substring (2)));
@@ -267,7 +299,7 @@ Clazz.overrideMethod (c$, "getModType",
 function (key) {
 var type = key.charAt (0);
 var id = key.charAt (2);
-return (id == 'S' ? 's' : id == 'T' ? 't' : id == '0' ? 'c' : type == 'O' ? 'o' : type == 'U' ? 'u' : type == 'M' ? 'm' : 'f');
+return (id == 'S' ? 's' : id == 'T' ? 't' : id == 'L' ? (type == 'D' ? 'l' : 'L') : id == '0' ? 'c' : type == 'D' ? 'f' : type == 'O' ? 'o' : type == 'M' ? 'm' : type == 'U' ? 'u' : '?');
 }, "~S");
 Clazz.defineMethod (c$, "calculateQCoefs", 
  function (p) {
@@ -364,7 +396,7 @@ spt.toCartesian (ptc, true);
 }var list = this.htAtomMods.get (a.atomName);
 if (list == null && a.altLoc != '\0' && this.htSubsystems != null) {
 list =  new JU.Lst ();
-}if (list == null || this.cr.symmetry == null || a.bsSymmetry == null) return;
+}if (list == null || this.symmetry == null || a.bsSymmetry == null) return;
 var iop = Math.max (a.bsSymmetry.nextSetBit (0), 0);
 if (this.modLast) iop = Math.max ((a.bsSymmetry.length () - 1) % this.nOps, iop);
 if (JU.Logger.debuggingHigh) JU.Logger.debug ("\nsetModulation: i=" + a.index + " " + a.atomName + " xyz=" + a + " occ=" + a.foccupancy);
@@ -373,9 +405,9 @@ this.iopLast = iop;
 this.gammaE =  new JU.M3 ();
 this.getSymmetry (a).getSpaceGroupOperation (iop).getRotationScale (this.gammaE);
 }if (JU.Logger.debugging) {
-JU.Logger.debug ("setModulation iop = " + iop + " " + this.cr.symmetry.getSpaceGroupXyz (iop, false) + " " + a.bsSymmetry);
-}var ms =  new JU.ModulationSet ().setMod (a.index + " " + a.atomName, a, this.modDim, list, this.gammaE, this.getMatrices (a), iop, this.getSymmetry (a), Clazz.instanceOf (a.vib, JU.Vibration) ? a.vib : null);
-ms.calculate (null, false);
+JU.Logger.debug ("setModulation iop = " + iop + " " + this.symmetry.getSpaceGroupXyz (iop, false) + " " + a.bsSymmetry);
+}var ms =  new JU.ModulationSet ().setMod (a.index + " " + a.atomName, this.getAtomR0 (this.cr.asc.atoms[a.atomSite]), this.getAtomR0 (a), this.modDim, list, this.gammaE, this.getMatrices (a), iop, this.getSymmetry (a), Clazz.instanceOf (a.vib, JU.Vibration) ? a.vib : null);
+ms.calculate (this.modTUV, false);
 if (!Float.isNaN (ms.vOcc)) {
 var pt = this.getMod ("J_O#0;" + a.atomName);
 var occ0 = ms.vOcc0;
@@ -406,8 +438,8 @@ JU.Logger.debug ("setModulation Uij(initial)=" + JU.Escape.eAF (a.anisoBorU));
 JU.Logger.debug ("setModulation tensor=" + JU.Escape.e ((a.tensors.get (0)).getInfo ("all")));
 }for (var e, $e = ms.htUij.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) this.addUStr (a, e.getKey (), e.getValue ().floatValue ());
 
-var symmetry = this.getAtomSymmetry (a, this.cr.symmetry);
-t = this.cr.asc.getXSymmetry ().addRotatedTensor (a, symmetry.getTensor (a.anisoBorU), iop, false, symmetry);
+var sym = this.getAtomSymmetry (a, this.symmetry);
+t = this.cr.asc.getXSymmetry ().addRotatedTensor (a, sym.getTensor (this.cr.vwr, a.anisoBorU), iop, false, sym);
 t.isModulated = true;
 t.id = JU.Escape.e (a.anisoBorU);
 a.bfactor = a.anisoBorU[7] * 100;
@@ -417,6 +449,14 @@ JU.Logger.debug ("setModulation Uij(final)=" + JU.Escape.eAF (a.anisoBorU) + "\n
 JU.Logger.debug ("setModulation tensor=" + JU.Escape.e ((a.tensors.get (1)).getInfo ("all")));
 }}}if (Float.isNaN (ms.x)) ms.set (0, 0, 0);
 a.vib = ms;
+}, "J.adapter.smarter.Atom");
+Clazz.defineMethod (c$, "getAtomR0", 
+ function (atom) {
+var r0 = JU.P3.newP (atom);
+if (this.supercellSymmetry != null) {
+this.supercellSymmetry.toCartesian (r0, true);
+this.symmetry.toFractional (r0, true);
+}return r0;
 }, "J.adapter.smarter.Atom");
 Clazz.overrideMethod (c$, "getAtomSymmetry", 
 function (a, defaultSymmetry) {
@@ -437,7 +477,7 @@ return (ss == null ? this.modMatrices : ss.getModMatrices ());
 Clazz.defineMethod (c$, "getSymmetry", 
  function (a) {
 var ss = this.getSubsystem (a);
-return (ss == null ? this.cr.symmetry : ss.getSymmetry ());
+return (ss == null ? this.symmetry : ss.getSymmetry ());
 }, "J.adapter.smarter.Atom");
 Clazz.defineMethod (c$, "getSubsystem", 
  function (a) {
@@ -455,7 +495,10 @@ var pt =  new JU.P3 ();
 symmetry.toCartesian (pt0, true);
 symmetry.toCartesian (pt1, true);
 var pts = JU.BoxInfo.unitCubePoints;
-for (var e, $e = this.htSubsystems.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
+if (this.sigma == null) {
+JU.Logger.error ("Why are we in MSRdr.setMinMax0 without modulation init?");
+return;
+}for (var e, $e = this.htSubsystems.entrySet ().iterator (); $e.hasNext () && ((e = $e.next ()) || true);) {
 var sym = e.getValue ().getSymmetry ();
 for (var i = 8; --i >= 0; ) {
 pt.x = (pts[i].x == 0 ? pt0.x : pt1.x);
@@ -514,6 +557,7 @@ Clazz.overrideMethod (c$, "addLatticeVector",
 function (lattvecs, data) {
 var a = null;
 var c = data.charAt (0);
+var dim = this.modDim + 3;
 switch (c) {
 case 'P':
 case 'X':
@@ -530,8 +574,10 @@ this.addLatticeVector (lattvecs, "A");
 this.addLatticeVector (lattvecs, "B");
 this.addLatticeVector (lattvecs, "C");
 break;
+case 'M':
+dim++;
 case '0':
-if (data.indexOf (".") >= 0) a = J.adapter.smarter.AtomSetCollectionReader.getTokensFloat (data, null, this.modDim + 3);
+if (data.indexOf (".") >= 0) a = J.adapter.smarter.AtomSetCollectionReader.getTokensFloat (data, null, dim);
 break;
 default:
 return false;

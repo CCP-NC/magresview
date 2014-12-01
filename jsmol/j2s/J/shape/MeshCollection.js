@@ -383,7 +383,7 @@ if (this.meshes[i] != null && this.meshes[i].vc != 0 && id.equalsIgnoreCase (thi
 }
 return -1;
 }, "~S");
-Clazz.overrideMethod (c$, "setVisibilityFlags", 
+Clazz.overrideMethod (c$, "setModelVisibilityFlags", 
 function (bsModels) {
 var bsDeleted = this.vwr.getDeletedAtoms ();
 for (var i = this.meshCount; --i >= 0; ) {

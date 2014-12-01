@@ -154,7 +154,7 @@ if (pt.y - margin < xyzMin.y) xyzMin.y = pt.y - margin;
 if (pt.y + margin > xyzMax.y) xyzMax.y = pt.y + margin;
 if (pt.z - margin < xyzMin.z) xyzMin.z = pt.z - margin;
 if (pt.z + margin > xyzMax.z) xyzMax.z = pt.z + margin;
-}, "JU.T3,JU.P3,JU.P3,~N");
+}, "JU.T3,JU.T3,JU.T3,~N");
 c$.addPointXYZ = Clazz.defineMethod (c$, "addPointXYZ", 
 function (x, y, z, xyzMin, xyzMax, margin) {
 if (x - margin < xyzMin.x) xyzMin.x = x - margin;

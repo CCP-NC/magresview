@@ -894,7 +894,7 @@ style = "BoldItalic";
 break;
 }
 var font = this.vwr.getFont3D (face, style, fontSize == 0 ? 12 : fontSize * factor);
-var t = JM.Text.newLabel (this.vwr.gdata, font, label, this.getColix (colorIndex, 0), 0, 0, 0, labelOffset);
+var t = JM.Text.newLabel (this.vwr, font, label, this.getColix (colorIndex, 0), 0, 0, 0, labelOffset);
 return t;
 }, "~S,~A,~N,~N,~N");
 Clazz.defineMethod (c$, "setVersionSettings", 

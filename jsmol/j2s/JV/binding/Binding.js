@@ -231,9 +231,9 @@ c$.includes = Clazz.defineMethod (c$, "includes",
 return ((mouseAction & mod) == mod);
 }, "~N,~N");
 c$.newBinding = Clazz.defineMethod (c$, "newBinding", 
-function (name) {
-return J.api.Interface.getInterface ("JV.binding." + name + "Binding");
-}, "~S");
+function (vwr, name) {
+return J.api.Interface.getInterface ("JV.binding." + name + "Binding", vwr, "script");
+}, "JV.Viewer,~S");
 Clazz.defineStatics (c$,
 "LEFT", 16,
 "MIDDLE", 8,

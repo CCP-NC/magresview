@@ -266,7 +266,7 @@ var ib = iter.next ();
 if (isMultiModel && !bsB.get (ib)) continue;
 var atomB = this.atoms[ib];
 var isSameMolecule = (ad.atomMolecule[ia] == ad.atomMolecule[ib]);
-if (ia == ib || isSameMolecule && atomA.isWithinFourBonds (atomB)) continue;
+if (ia == ib || isSameMolecule && this.isWithinFourBonds (atomA, atomB)) continue;
 switch (intramolecularMode) {
 case 0:
 break;
@@ -321,6 +321,20 @@ if (JU.Logger.debugging) for (var i = 0; i < list.size (); i++) JU.Logger.debug 
 JU.Logger.info ("Contact pairs: " + list.size ());
 return list;
 }, "JU.BS,JU.BS,J.atomdata.RadiusData,~N,~B");
+Clazz.defineMethod (c$, "isWithinFourBonds", 
+ function (atomA, atomB) {
+if (atomA.mi != atomB.mi) return false;
+if (atomA.isCovalentlyBonded (atomB)) return true;
+var bondsOther = atomB.getBonds ();
+var bonds = atomA.getBonds ();
+for (var i = 0; i < bondsOther.length; i++) {
+var atom2 = bondsOther[i].getOtherAtom (atomB);
+if (atomA.isCovalentlyBonded (atom2)) return true;
+for (var j = 0; j < bonds.length; j++) if (bonds[j].getOtherAtom (atomA).isCovalentlyBonded (atom2)) return true;
+
+}
+return false;
+}, "JM.Atom,JM.Atom");
 c$.checkCp = Clazz.defineMethod (c$, "checkCp", 
  function (cp1, cp2, i1, i2) {
 if (cp1.myAtoms[i1] !== cp2.myAtoms[i2]) return 0;

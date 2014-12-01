@@ -66,7 +66,7 @@ Clazz.defineMethod (c$, "initShape",
 function () {
 Clazz.superCall (this, J.shape.Axes, "initShape", []);
 this.myType = "axes";
-this.font3d = this.gdata.getFont3D (14);
+this.font3d = this.vwr.gdata.getFont3D (14);
 var axesMode = this.vwr.g.axesMode;
 if (this.fixedOrigin == null) this.originPoint.set (0, 0, 0);
  else this.originPoint.setT (this.fixedOrigin);
@@ -124,7 +124,7 @@ for (var i = 0; i < this.labels.length; i++) if (this.labels[i] != null) sb.appe
 
 sb.append (";\n");
 }if (this.axisType != null) {
-sb.append ("  axes type " + this.axisType);
+sb.append ("  axes type " + JU.PT.esc (this.axisType));
 }return Clazz.superCall (this, J.shape.Axes, "getShapeState", []) + sb;
 });
 c$.pt0 = c$.prototype.pt0 =  new JU.P3 ();

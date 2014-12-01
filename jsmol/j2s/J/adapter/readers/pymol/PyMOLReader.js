@@ -555,7 +555,7 @@ if (group3.equals (" ")) group3 = "UNK";
 var sym = J.adapter.readers.pymol.PyMOLReader.stringAt (a, 7);
 if (sym.equals ("A")) sym = "C";
 var isHetero = (J.adapter.readers.pymol.PyMOLReader.intAt (a, 19) != 0);
-var ichain = this.vwr.getChainID (chainID);
+var ichain = this.vwr.getChainID (chainID, true);
 var atom = this.processAtom ( new J.adapter.smarter.Atom (), name, altLoc.charAt (0), group3, ichain, seqNo, insCode.charAt (0), isHetero, sym);
 if (!this.filterPDBAtom (atom, this.fileAtomIndex++)) return null;
 icoord *= 3;

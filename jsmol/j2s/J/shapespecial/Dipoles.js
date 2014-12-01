@@ -314,7 +314,7 @@ dipole.set2AtomValue (atom2, atom1, -value);
 } else {
 dipole.set2AtomValue (atom1, atom2, value);
 }dipole.type = 3;
-dipole.modelIndex = atom1.getModelIndex ();
+dipole.modelIndex = atom1.mi;
 }, "JM.Atom,JM.Atom,~N,~N");
 Clazz.defineMethod (c$, "getDipoleIndexFor", 
  function (dipoleInfo, thisID) {
@@ -438,7 +438,7 @@ if (this.currentDipole == null) return;
 this.currentDipole.visible = true;
 this.currentDipole.modelIndex = this.vwr.am.cmi;
 });
-Clazz.overrideMethod (c$, "setVisibilityFlags", 
+Clazz.overrideMethod (c$, "setModelVisibilityFlags", 
 function (bsModels) {
 for (var i = this.dipoleCount; --i >= 0; ) {
 var dipole = this.dipoles[i];

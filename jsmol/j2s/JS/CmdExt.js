@@ -252,7 +252,15 @@ case 1112541195:
 this.e.iToken = 1;
 bs1 = (this.slen == 2 ? null : this.atomExpressionAt (2));
 this.e.checkLast (this.e.iToken);
-if (!this.chk) this.vwr.calculatePartialCharges (bs1);
+if (!this.chk) try {
+this.vwr.calculatePartialCharges (bs1);
+} catch (e1) {
+if (Clazz.exceptionOf (e1, JV.JmolAsyncException)) {
+this.e.loadFileResourceAsync (e1.getFileName ());
+} else {
+throw e1;
+}
+}
 return;
 case 1073742102:
 if (!this.chk) this.showString (this.vwr.calculatePointGroup ());
@@ -326,79 +334,97 @@ Clazz.defineMethod (c$, "capture",
 if (!this.chk && !this.vwr.allowCapture ()) {
 this.showString ("Cannot capture on this platform");
 return;
-}var fps = this.vwr.getInt (553648132);
-var endTime = 10;
+}var params = this.vwr.captureParams;
+var type = (params == null ? "GIF" : params.get ("type"));
+var endTime = 0;
 var mode = 0;
+var slen = this.e.slen;
 var fileName = "";
-var params = this.vwr.captureParams;
 var looping = !this.vwr.am.animationReplayMode.name ().equals ("ONCE");
-var tok = this.tokAt (1);
-var sfps = "";
-switch (tok) {
-case 0:
-mode = 1150985;
-break;
+var i = 1;
+var tok = this.tokAt (i);
+var isTransparent = (tok == 603979967);
+if (isTransparent) tok = this.tokAt (++i);
+switch (tok == 0 ? (tok = 1150985) : tok) {
 case 4:
-fileName = this.e.optParameterAsString (1);
+fileName = this.e.optParameterAsString (i++);
 if (fileName.length == 0) {
 mode = 1150985;
 break;
-}if (!fileName.endsWith (".gif")) fileName += ".gif";
+}var lc = fileName.toLowerCase ();
+if (lc.endsWith (".gift") || lc.endsWith (".pngt")) {
+isTransparent = true;
+fileName = fileName.substring (0, fileName.length - 1);
+lc = fileName.toLowerCase ();
+} else if (!lc.endsWith (".gif") && !lc.contains (".png")) {
+fileName += ".gif";
+}if (lc.endsWith (".png")) {
+if (!lc.endsWith ("0.png")) fileName = fileName.substring (0, fileName.length - 4) + "0000.png";
+type = "PNG";
+} else {
+type = "GIF";
+}if (isTransparent) type += "T";
+var streaming = (fileName.indexOf ("0000.") != fileName.lastIndexOf (".") - 4);
+var isRock = false;
+if (this.tokAt (i) == 528410) {
+looping = true;
+tok = this.tokAt (++i);
+}switch (this.tokAt (i)) {
+case 1073742129:
+isRock = true;
+case 1611141175:
 var s = null;
 var axis = "y";
-var i = 2;
-switch (this.tokAt (i)) {
-case 1073742129:
 looping = true;
-i = 3;
-axis = (this.tokAt (3) == 2 ? "y" : this.e.optParameterAsString (i++).toLowerCase ());
-var n = (this.tokAt (i) == 0 ? 5 : this.intParameter (i++));
-s = "; rotate Y 10 10;delay 2.0; rotate Y -10 -10; delay 2.0;rotate Y -10 -10; delay 2.0;rotate Y 10 10;delay 2.0";
-s = JU.PT.rep (s, "10", "" + n);
-break;
-case 1611141175:
-looping = true;
-i = 3;
-axis = this.e.optParameterAsString (i).toLowerCase ();
-if (axis.length > 0) i++;
-s = "; rotate Y 360 30;delay 15.0;";
-if (this.tokAt (i) == 2) sfps = " " + (fps = this.intParameter (i++));
-break;
-case 3:
-endTime = this.floatParameter (2);
-break;
-case 2:
-fps = this.intParameter (2);
-break;
-}
-if (s != null) {
-if (!this.chk) this.vwr.setNavigationMode (false);
+i++;
+if (isRock) {
+if (i < slen && this.tokAt (i) != 2) axis = this.e.optParameterAsString (i++).toLowerCase ();
+s = "rotate Y 10 10;rotate Y -10 -10;rotate Y -10 -10;rotate Y 10 10";
+s = JU.PT.rep (s, "10", "" + (i < slen ? this.intParameter (i++) : 5));
+} else {
+if (i < slen) axis = this.e.optParameterAsString (i++).toLowerCase ();
+s = "rotate Y 360 30;";
+}if (this.chk) return;
+this.vwr.setNavigationMode (false);
 if (axis === "" || "xyz".indexOf (axis) < 0) axis = "y";
-s = JU.PT.rep (s, "Y", axis);
-s = "capture " + JU.PT.esc (fileName) + sfps + s + ";capture;";
+var wf = this.vwr.g.waitForMoveTo;
+s = "set waitformoveto true;" + JU.PT.rep (s, "Y", axis) + ";set waitformoveto " + wf;
+s = "capture " + (isTransparent ? "transparent " : "") + JU.PT.esc (fileName) + " LOOP;" + s + ";capture end;";
 this.e.cmdScript (0, null, s);
 return;
-}if (params != null) params =  new java.util.Hashtable ();
+case 3:
+case 2:
+endTime = this.floatParameter (i++);
+break;
+}
+if (this.chk) return;
 mode = 1073742032;
 params =  new java.util.Hashtable ();
+var fps = this.vwr.getInt (553648132);
+if (streaming) {
+params.put ("streaming", Boolean.TRUE);
 if (!looping) this.showString (J.i18n.GT.o (J.i18n.GT._ ("Note: Enable looping using {0}"), ["ANIMATION MODE LOOP"]));
 this.showString (J.i18n.GT.o (J.i18n.GT._ ("Animation delay based on: {0}"), ["ANIMATION FPS " + fps]));
-params.put ("captureFps", Integer.$valueOf (fps));
+}params.put ("captureFps", Integer.$valueOf (fps));
 break;
+case 1150985:
 case 1073741874:
+if (params != null) params.put ("captureSilent", Boolean.TRUE);
 case 1048589:
 case 1048588:
-this.checkLength (2);
+this.checkLength (-2);
 mode = tok;
 break;
 default:
 this.invArg ();
 }
 if (this.chk || params == null) return;
-params.put ("type", "GIF");
+params.put ("type", type);
+var c = Integer.$valueOf (this.vwr.getBackgroundArgb ());
+params.put ("backgroundColor", c);
 params.put ("fileName", fileName);
 params.put ("quality", Integer.$valueOf (-1));
-params.put ("endTime", Long.$valueOf (System.currentTimeMillis () + Clazz.floatToLong (endTime * 1000)));
+params.put ("endTime", Long.$valueOf (endTime <= 0 ? -1 : System.currentTimeMillis () + Clazz.floatToLong (endTime * 1000)));
 params.put ("captureMode", JS.T.nameOf (mode).toLowerCase ());
 params.put ("captureLooping", looping ? Boolean.TRUE : Boolean.FALSE);
 var msg = this.vwr.processWriteOrCapture (params);
@@ -517,7 +543,7 @@ var bsFrom = this.atomExpressionAt (++this.e.iToken);
 var coordTo = null;
 var bsTo = null;
 if (this.e.isArrayParameter (++this.e.iToken)) {
-coordTo = this.e.getPointArray (this.e.iToken, -1);
+coordTo = this.e.getPointArray (this.e.iToken, -1, false);
 } else if (this.tokAt (this.e.iToken) != 1141899265) {
 bsTo = this.atomExpressionAt (this.e.iToken);
 }var bsSubset = null;
@@ -568,7 +594,7 @@ bsAtoms2 = (coordTo == null && this.e.isArrayParameter (this.e.iToken + 1) ? nul
 if (bsSubset != null) {
 bsAtoms1.and (bsSubset);
 if (bsAtoms2 != null) bsAtoms2.and (bsSubset);
-}if (bsAtoms2 == null) coordTo = this.e.getPointArray (++this.e.iToken, -1);
+}if (bsAtoms2 == null) coordTo = this.e.getPointArray (++this.e.iToken, -1, false);
  else bsAtoms2.and (bsTo);
 if (vAtomSets == null) vAtomSets =  new JU.Lst ();
 vAtomSets.addLast ([bsAtoms1, bsAtoms2]);
@@ -606,6 +632,7 @@ if (Float.isNaN (nSeconds) || nSeconds < 0) nSeconds = 1;
  else if (!doRotate && !doTranslate) doRotate = doTranslate = true;
 doAnimate = (nSeconds != 0);
 var isAtoms = (!isQuaternion && strSmiles == null || coordTo != null);
+if (isAtoms) J.api.Interface.getInterface ("JU.Eigen", this.vwr, "script");
 if (vAtomSets == null && vQuatSets == null) {
 if (bsSubset == null) {
 bsAtoms1 = (isAtoms ? this.vwr.getAtomBitSet ("spine") :  new JU.BS ());
@@ -1001,7 +1028,7 @@ if (rd == null) rd =  new J.atomdata.RadiusData (rangeMinMax, 0, null, null);
 if (value == null) tickInfo.id = "default";
 if (value != null && strFormat != null && tokAction == 269484114) tokAction = 1060866;
 var text = null;
-if (font != null) text = (J.api.Interface.getInterface ("JM.Text")).newLabel (this.vwr.gdata, font, "", colix, 0, 0, 0, null);
+if (font != null) text = (J.api.Interface.getInterface ("JM.Text", this.vwr, "script")).newLabel (this.vwr, font, "", colix, 0, 0, 0, null);
 if (text != null) text.pymolOffset = offset;
 this.setShapeProperty (6, "measure", this.vwr.newMeasurementData (id, points).set (tokAction, null, rd, strFormat, null, tickInfo, isAllConnected, isNotConnected, intramolecular, isAll, mad, colix, text));
 return;
@@ -1428,17 +1455,19 @@ if (!eval.setMeshDisplayProperty (25, iptDisplayProperty, 0)) this.invArg ();
 if (bsA != null && (displayType == 1073742036 || localOnly)) {
 var volume = this.getShapeProperty (25, "volume");
 var v;
+var isFull = (displayType == 1073741961);
 if (JU.PT.isAD (volume)) {
 var vs = volume;
 v = 0;
-for (var i = 0; i < vs.length; i++) v += Math.abs (vs[i]);
+for (var i = 0; i < vs.length; i++) v += (isFull ? vs[i] : Math.abs (vs[i]));
 
 } else {
 v = (volume).floatValue ();
-}if (colorDensity || displayType != 1276117512) {
+}v = (Math.round (v * 1000) / 1000.);
+if (colorDensity || displayType != 1276117512) {
 var nsets = (this.getShapeProperty (25, "nSets")).intValue ();
-var s = "Contacts: " + nsets;
-if (v != 0) s += " with net volume " + v + " A^3";
+var s = "Contacts: " + (nsets < 0 ? Clazz.doubleToInt (-nsets / 2) : nsets);
+if (v != 0) s += ", with " + (isFull ? "approx " : "net ") + "volume " + v + " A^3";
 this.showString (s);
 }}return true;
 });
@@ -1672,7 +1701,7 @@ var nTriangles = 0;
 var points = null;
 var vpolygons = null;
 if (eval.isArrayParameter (++i)) {
-points = eval.getPointArray (i, -1);
+points = eval.getPointArray (i, -1, false);
 nVertices = points.length;
 } else {
 nVertices = Math.max (0, this.intParameter (i));
@@ -1735,7 +1764,8 @@ bsAtoms = (this.tokAt (i) == 10 || this.tokAt (i) == 1048577 ? this.atomExpressi
 i = eval.iToken + 1;
 }eval.checkLast (eval.iToken);
 if (!this.chk) {
-var s = this.vwr.getSymmetryInfo (bsAtoms, xyz, iSym, center, target, thisId, 135176);
+var s = this.vwr.getSymmetryInfoAtom (bsAtoms, xyz, iSym, center, target, thisId, 135176);
+this.showString (s.substring (0, s.indexOf ('\n') + 1));
 eval.runScript (s.length > 0 ? s : "draw ID \"sym_" + thisId + "*\" delete");
 }return false;
 case 4115:
@@ -2074,7 +2104,8 @@ d[2] = JU.BSUtil.copy (bs);
 d[3] = Integer.$valueOf (0);
 this.vwr.setData (dataType, d, ac, atomNumberField, atomNumberFieldColumnCount, propertyField, propertyFieldColumnCount);
 return;
-}var userType = JM.AtomCollection.getUserSettableType (dataType);
+}if ("occupany".equals (dataType)) dataType = "occupancy";
+var userType = JM.AtomCollection.getUserSettableType (dataType);
 if (userType >= 0) {
 this.vwr.setAtomData (userType, dataType, dataString, isDefault);
 return;
@@ -2237,6 +2268,7 @@ var sbCommand =  new JU.SB ();
 var pt;
 var plane = null;
 var lattice = null;
+var processLattice = false;
 var pts;
 var color = 0;
 var str = null;
@@ -2478,7 +2510,7 @@ var atoms = this.vwr.ms.at;
 this.vwr.autoCalculate (tokProperty);
 if (tokProperty != 1766856708) {
 pt =  new JU.P3 ();
-for (var iAtom = ac; --iAtom >= 0; ) data[iAtom] = JM.Atom.atomPropertyFloat (this.vwr, atoms[iAtom], tokProperty, pt);
+for (var iAtom = ac; --iAtom >= 0; ) data[iAtom] = atoms[iAtom].atomPropertyFloat (this.vwr, tokProperty, pt);
 
 }}if (tokProperty == 1766856708) colorScheme = "inherit";
 if (this.tokAt (i + 1) == 135266325) {
@@ -3203,7 +3235,7 @@ var strCutoff = (!firstPass || !Float.isNaN (cutoff) ? null : info[1]);
 if (strCutoff != null && !this.chk) {
 cutoff = NaN;
 try {
-var sfdat = this.vwr.getFileAsString (strCutoff, false);
+var sfdat = this.vwr.getFileAsString3 (strCutoff, false, null);
 JU.Logger.info (sfdat);
 sfdat = JU.PT.split (sfdat, "MAP_SIGMA_DENS")[1];
 cutoff = JU.PT.parseFloat (sfdat);
@@ -3308,7 +3340,11 @@ propertyName = "mapLattice";
 propertyValue = pt;
 } else {
 lattice = pt;
-}break;
+if (this.tokAt (i + 1) == 1048589) {
+sbCommand.append (" true");
+processLattice = true;
+i++;
+}}break;
 default:
 if (eval.theTok == 1073741824) {
 propertyName = "thisID";
@@ -3375,8 +3411,10 @@ this.setShapeProperty (iShape, "token", Integer.$valueOf (1073742018));
 this.setShapeProperty (iShape, "token", Integer.$valueOf (1073742046));
 isFrontOnly = true;
 sbCommand.append (" mesh nofill frontOnly");
-}}if (lattice != null) this.setShapeProperty (iShape, "lattice", lattice);
-if (symops != null) this.setShapeProperty (iShape, "symops", symops);
+}}if (lattice != null) {
+this.setShapeProperty (iShape, "lattice", lattice);
+if (processLattice) this.setShapeProperty (iShape, "processLattice", Boolean.TRUE);
+}if (symops != null) this.setShapeProperty (iShape, "symops", symops);
 if (isFrontOnly) this.setShapeProperty (iShape, "token", Integer.$valueOf (1073741960));
 if (iptDisplayProperty > 0) {
 if (!eval.setMeshDisplayProperty (iShape, iptDisplayProperty, 0)) this.invArg ();
@@ -3729,7 +3767,15 @@ this.invArg ();
 break;
 }
 
-if (!this.chk) this.vwr.minimize (steps, crit, bsSelected, bsFixed, 0, addHydrogen, isOnly, isSilent, false);
+if (!this.chk) try {
+this.vwr.minimize (this.e, steps, crit, bsSelected, bsFixed, 0, addHydrogen, isOnly, isSilent, false);
+} catch (e1) {
+if (Clazz.exceptionOf (e1, Exception)) {
+throw  new JS.ScriptInterruption (this.e, "minimize", 1);
+} else {
+throw e1;
+}
+}
 });
 Clazz.defineMethod (c$, "mo", 
  function (isInitOnly) {
@@ -4436,7 +4482,7 @@ se.sm = shapeManager;
 try {
 se.restoreScriptContext (context, true, false, false);
 se.allowJSThreads = false;
-se.dispatchCommands (false, false);
+se.dispatchCommands (false, false, false);
 } catch (ex) {
 if (Clazz.exceptionOf (ex, Exception)) {
 this.e.vwr.setStringProperty ("_errormessage", "" + ex);
@@ -4630,7 +4676,7 @@ if (pt0 < argCount) {
 val = JS.SV.sValue (this.tokenAt (pt, args));
 if (val.equalsIgnoreCase ("clipboard")) {
 if (this.chk) return "";
-} else if (JU.PT.isOneOf (val.toLowerCase (), ";jpg;jpeg;jpg64;jpeg64;gif;pdf;ppm;png;pngj;pngt;")) {
+} else if (JU.PT.isOneOf (val.toLowerCase (), ";jpg;jpeg;jpg64;jpeg64;gif;gift;pdf;ppm;png;pngj;pngt;")) {
 if (JS.CmdExt.tokAtArray (pt + 1, args) == 2 && JS.CmdExt.tokAtArray (pt + 2, args) == 2) {
 width = JS.SV.iValue (this.tokenAt (++pt, args));
 height = JS.SV.iValue (this.tokenAt (++pt, args));
@@ -4638,7 +4684,7 @@ height = JS.SV.iValue (this.tokenAt (++pt, args));
 } else if (JU.PT.isOneOf (val.toLowerCase (), ";xyz;xyzrn;xyzvib;mol;sdf;v2000;v3000;json;pdb;pqr;cml;")) {
 type = val.toUpperCase ();
 if (pt + 1 == argCount) pt++;
-}if (type.equals ("(image)") && JU.PT.isOneOf (val.toLowerCase (), ";jpg;jpeg;jpg64;jpeg64;gif;pdf;ppm;png;pngj;pngt;scene;")) {
+}if (type.equals ("(image)") && JU.PT.isOneOf (val.toLowerCase (), ";jpg;jpeg;jpg64;jpeg64;gif;gift;pdf;ppm;png;pngj;pngt;scene;")) {
 type = val.toUpperCase ();
 pt++;
 }}if (pt + 2 == argCount) {
@@ -4666,6 +4712,7 @@ this.invArg ();
 }
 if (type.equals ("IMAGE") || type.equals ("(image)") || type.equals ("FRAME") || type.equals ("VIBRATION")) {
 type = (fileName != null && fileName.indexOf (".") >= 0 ? fileName.substring (fileName.lastIndexOf (".") + 1).toUpperCase () : "JPG");
+if (JU.PT.isOneOf (type, ";PNGJ;PNGT;GIFT;")) fileName = fileName.substring (0, fileName.length - 1);
 }if (type.equals ("MNU")) {
 type = "MENU";
 } else if (type.equals ("WRL") || type.equals ("VRML")) {
@@ -4695,11 +4742,11 @@ type = "ZIPALL";
 } else if (type.equals ("HIS")) {
 type = "HISTORY";
 }if (type.equals ("COORD") || type.equals ("COORDS")) type = (fileName != null && fileName.indexOf (".") >= 0 ? fileName.substring (fileName.lastIndexOf (".") + 1).toUpperCase () : "XYZ");
-isImage = JU.PT.isOneOf (type.toLowerCase (), ";jpg;jpeg;jpg64;jpeg64;gif;pdf;ppm;png;pngj;pngt;scene;");
+isImage = JU.PT.isOneOf (type.toLowerCase (), ";jpg;jpeg;jpg64;jpeg64;gif;gift;pdf;ppm;png;pngj;pngt;scene;");
 if (scripts != null) {
 if (type.equals ("PNG")) type = "PNGJ";
 if (!type.equals ("PNGJ") && !type.equals ("ZIPALL")) this.invArg ();
-}if (!isImage && !isExport && !JU.PT.isOneOf (type, ";SCENE;JMOL;ZIP;ZIPALL;SPT;HISTORY;MO;ISOSURFACE;MESH;PMESH;VAR;FILE;FUNCTION;CML;JSON;XYZ;XYZRN;XYZVIB;MENU;MOL;PDB;PGRP;PQR;QUAT;RAMA;SDF;V2000;V3000;INLINE;")) this.e.errorStr2 (54, "COORDS|FILE|FUNCTIONS|HISTORY|IMAGE|INLINE|ISOSURFACE|JMOL|MENU|MO|POINTGROUP|QUATERNION [w,x,y,z] [derivative]|RAMACHANDRAN|SPT|STATE|VAR x|ZIP|ZIPALL  CLIPBOARD", "CML|GIF|JPG|JPG64|JMOL|JVXL|MESH|MOL|PDB|PMESH|PNG|PNGJ|PNGT|PPM|PQR|SDF|CD|JSON|V2000|V3000|SPT|XJVXL|XYZ|XYZRN|XYZVIB|ZIP" + driverList.toUpperCase ().$replace (';', '|'));
+}if (!isImage && !isExport && !JU.PT.isOneOf (type, ";SCENE;JMOL;ZIP;ZIPALL;SPT;HISTORY;MO;ISOSURFACE;MESH;PMESH;VAR;FILE;FUNCTION;CML;JSON;XYZ;XYZRN;XYZVIB;MENU;MOL;PDB;PGRP;PQR;QUAT;RAMA;SDF;V2000;V3000;INLINE;")) this.e.errorStr2 (54, "COORDS|FILE|FUNCTIONS|HISTORY|IMAGE|INLINE|ISOSURFACE|JMOL|MENU|MO|POINTGROUP|QUATERNION [w,x,y,z] [derivative]|RAMACHANDRAN|SPT|STATE|VAR x|ZIP|ZIPALL  CLIPBOARD", "CML|GIF|GIFT|JPG|JPG64|JMOL|JVXL|MESH|MOL|PDB|PMESH|PNG|PNGJ|PNGT|PPM|PQR|SDF|CD|JSON|V2000|V3000|SPT|XJVXL|XYZ|XYZRN|XYZVIB|ZIP" + driverList.toUpperCase ().$replace (';', '|'));
 if (this.chk) return "";
 var bytes = null;
 var doDefer = false;
@@ -4744,7 +4791,7 @@ data = this.vwr.getPdbAtomData (null, null);
 } else {
 doDefer = true;
 }} else if (data === "FILE") {
-if (isShow) data = this.vwr.getCurrentFileAsString ();
+if (isShow) data = this.vwr.getCurrentFileAsString ("script");
  else doDefer = true;
 if ("?".equals (fileName)) fileName = "?Jmol." + this.vwr.getP ("_fileType");
 } else if ((data === "SDF" || data === "MOL" || data === "V2000" || data === "V3000" || data === "CD" || data === "JSON") && isCoord) {
@@ -4843,6 +4890,7 @@ msg = this.vwr.writeFileData (fileName, type, 0, null);
 } else {
 params =  new java.util.Hashtable ();
 if (fileName != null) params.put ("fileName", fileName);
+params.put ("backgroundColor", Integer.$valueOf (this.vwr.getBackgroundArgb ()));
 params.put ("type", type);
 if (Clazz.instanceOf (bytes, String) && quality == -2147483648) params.put ("text", bytes);
  else if (Clazz.instanceOf (bytes, Array)) params.put ("bytes", bytes);
@@ -4973,7 +5021,7 @@ pt2 = this.centerParameter (++this.e.iToken);
 iop = (this.tokAt (2) == 2 ? this.intParameter (2) : 0);
 }type = (this.tokAt (this.e.iToken + 1) == 4 ? this.stringParameter (++this.e.iToken) : null);
 this.checkLength (len = ++this.e.iToken);
-if (!this.chk) msg = this.vwr.getSymmetryOperation (iop, pt1, pt2, type);
+if (!this.chk) msg = this.vwr.ms.getSymTemp (true).getSymmetryInfoString (this.vwr.ms, this.vwr.am.cmi, iop, pt1, pt2, null, type);
 break;
 case 1649412120:
 var vdwType = null;
@@ -5170,12 +5218,12 @@ break;
 case 1229984263:
 if (!this.chk) this.vwr.sm.clearConsole ();
 if (this.slen == 2) {
-if (!this.chk) msg = this.vwr.getCurrentFileAsString ();
+if (!this.chk) msg = this.vwr.getCurrentFileAsString ("script");
 if (msg == null) msg = "<unavailable>";
 break;
 }len = 3;
 value = this.paramAsStr (2);
-if (!this.chk) msg = this.vwr.getFileAsString (value, true);
+if (!this.chk) msg = this.vwr.getFileAsString3 (value, true, null);
 break;
 case 4115:
 if (this.tokAt (2) == 1048579 && (len = 3) > 0) msg = this.vwr.getModelFileInfoAll ();
@@ -5473,9 +5521,9 @@ sb.append (this.e.getErrorLineMessage2 ());
 Clazz.defineMethod (c$, "getAtomicPotentials", 
  function (bsSelected, bsIgnore, fileName) {
 var potentials =  Clazz.newFloatArray (this.vwr.getAtomCount (), 0);
-var m = J.api.Interface.getOption ("quantum.MlpCalculation");
+var m = J.api.Interface.getOption ("quantum.MlpCalculation", this.vwr, "script");
 m.set (this.vwr);
-var data = (fileName == null ? null : this.vwr.getFileAsString (fileName, false));
+var data = (fileName == null ? null : this.vwr.getFileAsString3 (fileName, false, null));
 m.assignPotentials (this.vwr.ms.at, potentials, this.vwr.getSmartsMatch ("a", bsSelected), this.vwr.getSmartsMatch ("/noAromatic/[$(C=O),$(O=C),$(NC=O)]", bsSelected), bsIgnore, data);
 return potentials;
 }, "JU.BS,JU.BS,~S");
@@ -5570,13 +5618,13 @@ pts =  new Array (bs.cardinality ());
 for (var k = 0, j = bs.nextSetBit (0); j >= 0; j = bs.nextSetBit (j + 1), k++) pts[k] = atoms[j];
 
 }} else {
-pts = eval.getPointArray (i, -1);
+pts = eval.getPointArray (i, -1, false);
 }if (pts.length == 0) {
 eval.iToken = i;
 this.invArg ();
 }data = [Float.$valueOf (d), pts, bs];
 } else {
-data = eval.getPointArray (i, 4);
+data = eval.getPointArray (i, 4, false);
 tok = 1679429641;
 }break;
 case 1679429641:

@@ -149,6 +149,7 @@ if (!Float.isNaN (jvxlData.pointSize)) J.jvxl.data.JvxlCoder.addAttrib (attribs,
  else if (jvxlData.diameter != 0) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  diameter", "" + jvxlData.diameter);
 if (!jvxlData.allowVolumeRender) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  allowVolumeRender", "false");
 if (jvxlData.jvxlPlane == null || vertexDataOnly) {
+if (jvxlData.processLattice != null && !vertexDataOnly) J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  processLattice", "" + jvxlData.processLattice);
 if (jvxlData.isContoured) {
 J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  contoured", "true");
 J.jvxl.data.JvxlCoder.addAttrib (attribs, "\n  colorMapped", "true");

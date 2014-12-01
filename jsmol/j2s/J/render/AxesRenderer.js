@@ -32,7 +32,7 @@ if (this.vwr.areAxesTainted ()) {
 var f = axes.font3d;
 axes.initShape ();
 if (f != null) axes.font3d = f;
-}this.font3d = this.g3d.getFont3DScaled (axes.font3d, this.imageFontScaling);
+}this.font3d = this.vwr.gdata.getFont3DScaled (axes.font3d, this.imageFontScaling);
 var modelIndex = this.vwr.am.cmi;
 var isUnitCell = (axesMode === J.c.AXES.UNITCELL);
 if (this.vwr.ms.isJmolDataFrameForModel (modelIndex) && !this.vwr.ms.getJmolFrameType (modelIndex).equals ("plot data")) return false;
@@ -53,7 +53,7 @@ labelPtr = (this.vwr.getBoolean (603979806) ? 15 : 9);
 if (nPoints != 3) nPoints = (axes.labels.length < 6 ? 3 : 6);
 labelPtr = -1;
 }var isDataFrame = this.vwr.isJmolDataFrame ();
-var slab = this.g3d.getSlab ();
+var slab = this.vwr.gdata.slab;
 var diameter = mad;
 var drawTicks = false;
 if (isXY) {

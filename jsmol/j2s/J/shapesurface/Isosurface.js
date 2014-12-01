@@ -234,6 +234,9 @@ if (this.connections[0] >= 0 && this.connections[0] < this.vwr.getAtomCount ()) 
 }if ("cutoffRange" === propertyName) {
 this.cutoffRange = value;
 return;
+}if ("processLattice" === propertyName) {
+if (this.thisMesh != null) this.thisMesh.processLattice (this.vwr);
+return;
 }if ("slab" === propertyName) {
 if (Clazz.instanceOf (value, Integer)) {
 if (this.thisMesh != null) this.thisMesh.jvxlData.slabValue = (value).intValue ();
@@ -464,7 +467,7 @@ data[2] = d;
 }return true;
 }if (property === "unitCell") {
 var m = this.getMesh (data[0]);
-return (m != null && (data[1] = m.getUnitCell ()) != null);
+return (m != null && (data[1] = m.getUnitCell (this.vwr)) != null);
 }if (property === "getCenter") {
 var index = (data[1]).intValue ();
 if (index == -2147483648) {
@@ -540,6 +543,7 @@ var f = this.thisMesh.jvxlData.voxelVolume;
 f *= (this.thisMesh.bsSlabDisplay == null ? this.thisMesh.vc : this.thisMesh.bsSlabDisplay.cardinality ());
 return this.thisMesh.calculatedVolume = Float.$valueOf (f);
 }var ret = meshData.calculateVolumeOrArea (this.thisMesh.jvxlData.thisSet, isArea, false);
+if (this.thisMesh.nSets <= 0) this.thisMesh.nSets = -meshData.nSets;
 if (isArea) this.thisMesh.calculatedArea = ret;
  else this.thisMesh.calculatedVolume = ret;
 return ret;
@@ -877,8 +881,13 @@ this.thisMesh.spanningVectors = this.sg.getSpanningVectors ();
 this.thisMesh.calculatedArea = null;
 this.thisMesh.calculatedVolume = null;
 var params = this.sg.getParams ();
-if (!this.thisMesh.isMerged) this.thisMesh.initialize (this.sg.isFullyLit () ? 1073741964 : 1073741958, null, this.sg.getPlane ());
-if (!params.allowVolumeRender) this.thisMesh.jvxlData.allowVolumeRender = false;
+if (!this.thisMesh.isMerged) {
+this.thisMesh.initialize (this.sg.isFullyLit () ? 1073741964 : 1073741958, null, this.sg.getPlane ());
+if (this.jvxlData.processLattice != null) {
+this.thisMesh.lattice = this.jvxlData.processLattice;
+this.thisMesh.processLattice (this.vwr);
+}return;
+}if (!params.allowVolumeRender) this.thisMesh.jvxlData.allowVolumeRender = false;
 this.thisMesh.setColorsFromJvxlData (this.sg.getParams ().colorRgb);
 if (this.thisMesh.jvxlData.slabInfo != null) this.vwr.runScript ("isosurface " + this.thisMesh.jvxlData.slabInfo);
 if (this.sg.getParams ().psi_monteCarloCount > 0) this.thisMesh.diameter = -1;
@@ -1006,7 +1015,7 @@ return true;
 }if (!this.vwr.getDrawHover ()) return false;
 var s = this.findValue (x, y, false, bsVisible);
 if (s == null) return false;
-if (this.gdata.isDisplayAntialiased ()) {
+if (this.vwr.gdata.antialiasEnabled) {
 x <<= 1;
 y <<= 1;
 }this.vwr.hoverOnPt (x, y, s, this.pickedMesh.thisID, this.pickedPt);
@@ -1032,7 +1041,7 @@ s = "" + (vContours[i].get (2)).floatValue ();
 var g = this.thisMesh.colorEncoder.quantize (f, true);
 f = this.thisMesh.colorEncoder.quantize (f, false);
 s = "" + g + " - " + f;
-}if (this.gdata.isAntialiased ()) {
+}if (this.vwr.gdata.isAntialiased ()) {
 x <<= 1;
 y <<= 1;
 }this.vwr.hoverOnPt (x, y, s, null, null);
@@ -1048,7 +1057,7 @@ function (x, y, action, bsVisible, drawPicking) {
 if (!drawPicking) return null;
 if (!this.vwr.isBound (action, 18)) return null;
 var dmin2 = 100;
-if (this.gdata.isAntialiased ()) {
+if (this.vwr.gdata.isAntialiased ()) {
 x <<= 1;
 y <<= 1;
 dmin2 <<= 1;
@@ -1096,7 +1105,7 @@ return m.visibilityFlags != 0 && (m.modelIndex < 0 || bsVisible.get (m.modelInde
 Clazz.defineMethod (c$, "findValue", 
  function (x, y, isPicking, bsVisible) {
 var dmin2 = 100;
-if (this.gdata.isAntialiased ()) {
+if (this.vwr.gdata.isAntialiased ()) {
 x <<= 1;
 y <<= 1;
 dmin2 <<= 1;

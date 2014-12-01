@@ -313,12 +313,11 @@ break;
 });
 Clazz.defineMethod (c$, "renderInfo", 
  function () {
-if (this.mesh.title == null || this.vwr.getDrawHover () || !this.g3d.setC (this.vwr.getColixBackgroundContrast ())) return;
+if (this.isExport || this.mesh.title == null || this.vwr.getDrawHover () || !this.g3d.setC (this.vwr.getColixBackgroundContrast ())) return;
 for (var i = this.dmesh.pc; --i >= 0; ) if (this.isPolygonDisplayable (i)) {
 var size = this.vwr.getFloat (570425356);
 if (size <= 0) size = 14;
-var fid = this.g3d.getFontFid (size * this.imageFontScaling);
-this.g3d.setFontFid (fid);
+this.vwr.gdata.setFontFid (this.vwr.gdata.getFontFid (size * this.imageFontScaling));
 var s = this.mesh.title[i < this.mesh.title.length ? i : this.mesh.title.length - 1];
 var pt = 0;
 if (s.length > 1 && s.charAt (0) == '>') {

@@ -14,6 +14,7 @@ this.isProgressive = false;
 this.isXLowToHigh = false;
 this.assocCutoff = 0.3;
 this.isQuiet = false;
+this.isPeriodic = false;
 this.vertexDataOnly = false;
 this.hasColorData = false;
 this.dataMin = 3.4028235E38;
@@ -514,7 +515,7 @@ if (this.params.colorBySets) return (this.minMax = [0, Math.max (this.meshData.n
 var min = 3.4028235E38;
 var max = -3.4028235E38;
 if (this.params.usePropertyForColorRange && this.params.theProperty != null) {
-for (var i = 0; i < this.params.theProperty.length; i++) {
+for (var i = this.params.theProperty.length; --i >= 0; ) {
 if (this.params.rangeSelected && !this.params.bsSelected.get (i)) continue;
 var p = this.params.theProperty[i];
 if (Float.isNaN (p)) continue;
@@ -606,11 +607,9 @@ this.volumetricOrigin.setT (this.center);
 Clazz.defineMethod (c$, "setBBoxAll", 
  function () {
 if (this.meshDataServer != null) this.meshDataServer.fillMeshData (this.meshData, 1, null);
-this.xyzMin = null;
-for (var i = 0; i < this.meshData.vc; i++) {
-var p = this.meshData.vs[i];
-if (!Float.isNaN (p.x)) this.setBBox (p, 0);
-}
+this.xyzMin =  new JU.P3 ();
+this.xyzMax =  new JU.P3 ();
+this.meshData.setBox (this.xyzMin, this.xyzMax);
 });
 Clazz.defineMethod (c$, "setBBox", 
 function (pt, margin) {

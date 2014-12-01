@@ -2,6 +2,7 @@ Clazz.declarePackage ("JU");
 Clazz.load (["JU.V3"], "JU.Vibration", null, function () {
 c$ = Clazz.decorateAsClass (function () {
 this.modDim = -1;
+this.modScale = NaN;
 Clazz.instantialize (this, arguments);
 }, JU, "Vibration", JU.V3);
 Clazz.defineMethod (c$, "setTempPoint", 

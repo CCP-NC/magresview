@@ -1,5 +1,5 @@
 Clazz.declarePackage ("JV");
-Clazz.load (["J.api.JmolPropertyManager", "java.util.Hashtable"], "JV.PropertyManager", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Arrays", "$.Date", "$.Map", "JU.AU", "$.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.P3", "$.PT", "$.SB", "$.V3", "J.api.Interface", "JM.Atom", "$.BondSet", "$.LabelToken", "JS.SV", "$.T", "JU.BSUtil", "$.C", "$.Edge", "$.Elements", "$.Escape", "$.JmolMolecule", "$.Logger", "JV.ActionManager", "$.JC", "$.Viewer", "JV.binding.Binding"], function () {
+Clazz.load (["J.api.JmolPropertyManager", "java.util.Hashtable"], "JV.PropertyManager", ["java.lang.Boolean", "$.Double", "$.Float", "java.util.Arrays", "$.Date", "$.Map", "JU.AU", "$.BArray", "$.BS", "$.Base64", "$.Lst", "$.M3", "$.M4", "$.P3", "$.PT", "$.SB", "$.V3", "J.api.Interface", "JM.BondSet", "$.LabelToken", "JS.SV", "$.T", "JU.BSUtil", "$.C", "$.Edge", "$.Elements", "$.Escape", "$.JmolMolecule", "$.Logger", "JV.ActionManager", "$.JC", "$.Viewer", "JV.binding.Binding"], function () {
 c$ = Clazz.decorateAsClass (function () {
 this.vwr = null;
 this.map = null;
@@ -273,7 +273,7 @@ case 2:
 return this.vwr.getFileHeader ();
 case 4:
 case 3:
-return (iHaveParameter ? this.vwr.getFileAsString (myParam.toString (), true) : this.vwr.getCurrentFileAsString ());
+return (iHaveParameter ? this.vwr.getFileAsString3 (myParam.toString (), true, null) : this.vwr.getCurrentFileAsString ("prop"));
 case 27:
 var params = myParam.toString ().toLowerCase ();
 return this.getImage (params, params.indexOf ("g64") < 0 && params.indexOf ("base64") < 0 && (returnType == null || returnType.equalsIgnoreCase ("java")));
@@ -407,7 +407,7 @@ var m = molecules[i];
 bsTemp.and (m.atomList);
 if (bsTemp.length () > 0) {
 var info =  new java.util.Hashtable ();
-info.put ("mf", m.getMolecularFormula (false));
+info.put ("mf", m.getMolecularFormula (false, null, false));
 info.put ("number", Integer.$valueOf (m.moleculeIndex + 1));
 info.put ("modelNumber", this.vwr.ms.getModelNumberDotted (m.modelIndex));
 info.put ("numberInModel", Integer.$valueOf (m.indexInModel + 1));
@@ -522,21 +522,6 @@ ligand.put ("residueList", reslist.substring (1));
 }
 return info;
 }, "~O");
-Clazz.overrideMethod (c$, "getSymmetryInfo", 
-function (bsAtoms, xyz, op, pt, pt2, id, type) {
-var iModel = -1;
-if (bsAtoms == null) {
-iModel = this.vwr.am.cmi;
-if (iModel < 0) return "";
-bsAtoms = this.vwr.getModelUndeletedAtomsBitSet (iModel);
-}var iAtom = bsAtoms.nextSetBit (0);
-if (iAtom < 0) return "";
-iModel = this.vwr.ms.at[iAtom].mi;
-var uc = this.vwr.ms.am[iModel].biosymmetry;
-if (uc == null) uc = this.vwr.ms.getUnitCell (iModel);
-if (uc == null) return "";
-return uc.getSymmetryInfo (this.vwr.ms, iModel, iAtom, uc, xyz, op, pt, pt2, id, type);
-}, "JU.BS,~S,~N,JU.P3,JU.P3,~S,~N");
 Clazz.overrideMethod (c$, "getModelExtract", 
 function (bs, doTransform, isModelKit, type) {
 var asV3000 = type.equalsIgnoreCase ("V3000");
@@ -788,17 +773,17 @@ case 1087373320:
 case 1087373319:
 var id = a.getChainID ();
 s = (id == 0 ? " " : a.getChainIDStr ());
-if (id > 255) s = JU.PT.esc (s);
+if (id >= 300) s = JU.PT.esc (s);
 switch (tok) {
 case 1073742120:
 s = "[" + a.getGroup3 (false) + "]" + a.getSeqcodeString () + ":" + s;
 break;
 case 1087373320:
 case 1087373319:
-if (a.getModelIndex () != modelLast) {
+if (a.mi != modelLast) {
 info.appendC ('\n');
 n = 0;
-modelLast = a.getModelIndex ();
+modelLast = a.mi;
 info.append ("Model " + a.getModelNumber ());
 glast = null;
 clast = null;
@@ -808,7 +793,7 @@ n = 0;
 clast = a.getChain ();
 info.append ("Chain " + s + ":\n");
 glast = null;
-}var g = a.getGroup ();
+}var g = a.group;
 if (g !== glast) {
 glast = g;
 if (tok == 1087373319) {
@@ -866,7 +851,7 @@ if (ms.vibrations != null && ms.vibrations[i] != null) ms.vibrations[i].getInfo 
 info.put ("bondCount", Integer.$valueOf (atom.getCovalentBondCount ()));
 info.put ("radius", Float.$valueOf ((atom.getRasMolRadius () / 120.0)));
 info.put ("model", atom.getModelNumberForLabel ());
-var shape = JM.Atom.atomPropertyString (this.vwr, atom, 1087373323);
+var shape = atom.atomPropertyString (this.vwr, 1087373323);
 if (shape != null) info.put ("shape", shape);
 info.put ("visible", Boolean.$valueOf (atom.checkVisible ()));
 info.put ("clickabilityFlags", Integer.$valueOf (atom.clickabilityFlags));
@@ -1259,7 +1244,7 @@ function (bs, atomsMax, addBonds) {
 var sb =  new JU.SB ();
 var nAtoms = JU.BSUtil.cardinalityOf (bs);
 if (nAtoms == 0) return "";
-J.api.Interface.getInterface ("JU.XmlUtil");
+J.api.Interface.getInterface ("JU.XmlUtil", this.vwr, "file");
 JU.XmlUtil.openTag (sb, "molecule");
 JU.XmlUtil.openTag (sb, "atomArray");
 var bsAtoms =  new JU.BS ();

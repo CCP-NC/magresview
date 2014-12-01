@@ -128,7 +128,7 @@ this.jvxlReadSurfaceInfo ();
 }, "~N,~N");
 Clazz.defineMethod (c$, "jvxlSkipData", 
 function (nPoints, doSkipColorData) {
-this.readLine ();
+this.rd ();
 this.xr.skipTag ("jvxlSurface");
 }, "~N,~B");
 Clazz.defineMethod (c$, "jvxlReadSurfaceInfo", 
@@ -203,6 +203,8 @@ this.edgeDataCount = 0;
 this.params.thePlane = null;
 this.surfaceDataCount = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "nSurfaceInts"));
 this.edgeDataCount = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "nBytesUncompressedEdgeData"));
+s = J.jvxl.readers.XmlReader.getXmlAttrib (data, "processLattice");
+if (s.indexOf ("{") >= 0) this.jvxlData.processLattice = JU.Escape.uP (s);
 }this.excludedVertexCount = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "nExcludedVertexes"));
 this.excludedTriangleCount = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "nExcludedTriangles"));
 this.invalidatedVertexCount = this.parseIntStr (J.jvxl.readers.XmlReader.getXmlAttrib (data, "nInvalidatedVertexes"));
@@ -333,7 +335,7 @@ var nThisValue = 0;
 while (bsVoxelPtr < nPoints) {
 nThisValue = this.parseInt ();
 if (nThisValue == -2147483648) {
-this.readLine ();
+this.rd ();
 if (this.line == null || (nThisValue = this.parseIntStr (this.line)) == -2147483648) {
 if (!this.endOfData) JU.Logger.error ("end of file in JvxlReader?" + " line=" + this.line);
 this.endOfData = true;

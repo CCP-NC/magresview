@@ -92,15 +92,15 @@ for (var i = i0; i >= 0; i = (isAll ? i - 1 : bsPolygons.nextSetBit (i + 1))) th
 }, "~A,~A,~N,JU.BS,~N");
 Clazz.overrideMethod (c$, "plotText", 
 function (x, y, z, colix, text, font3d) {
-this.g3d.plotText (x, y, z, this.g3d.getColorArgbOrGray (colix), 0, text, font3d, this.jmolRenderer);
+this.gdata.plotText (x, y, z, this.gdata.getColorArgbOrGray (colix), 0, text, font3d, this.jmolRenderer);
 }, "~N,~N,~N,~N,~S,javajs.awt.Font");
 Clazz.overrideMethod (c$, "plotImage", 
 function (x, y, z, image, bgcolix, width, height) {
-this.g3d.plotImage (x, y, z, image, this.jmolRenderer, bgcolix, width, height);
+this.gdata.plotImage (x, y, z, image, this.jmolRenderer, bgcolix, width, height);
 }, "~N,~N,~N,~O,~N,~N,~N");
 Clazz.overrideMethod (c$, "drawAtom", 
 function (atom) {
-var colix = atom.getColix ();
+var colix = atom.colixAtom;
 this.outputSphere (atom, atom.madAtom / 2000, colix, JU.C.isColixTranslucent (colix));
 }, "JM.Atom");
 Clazz.overrideMethod (c$, "drawCircle", 

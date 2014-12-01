@@ -275,8 +275,7 @@ function () {
 Clazz.defineMethod (c$, "recallCommand", 
 function (up) {
 var cmd = this.vwr.getSetHistory (up ? -1 : 1);
-if (cmd == null) return;
-this.input.setText (cmd);
+if (cmd != null) this.input.setText (JU.PT.escUnicode (cmd));
 }, "~B");
 Clazz.defineMethod (c$, "processKey", 
 function (kcode, kid, isControlDown) {
@@ -290,7 +289,7 @@ if (s.endsWith ("\n") || s.endsWith ("\t")) return 0;
 mode = 1;
 if (this.input.getCaretPosition () == s.length) {
 var cmd = this.completeCommand (s);
-if (cmd != null) this.input.setText (cmd.$replace ('\t', ' '));
+if (cmd != null) this.input.setText (JU.PT.escUnicode (cmd).$replace ('\t', ' '));
 this.nTab++;
 return mode;
 }break;

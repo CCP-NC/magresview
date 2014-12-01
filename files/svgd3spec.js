@@ -49,12 +49,6 @@ function svg_spectrum_plot(from_change)
                 if (typeof(ms_labels) != 'object') {
                     ms_labels = [ms_labels];
                 }
-
-            // Remove element name (temporary code)
-            /*for (var i = 0; i < ms_labels.length; ++i)
-            {
-                ms_labels[i] = ms_labels[i].split('_')[1];
-            }*/
         }
         
         var ref = parseFloat($('#ref_input_' + lab).val());
