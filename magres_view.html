@@ -47,6 +47,11 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
   	<!-- d3 is another very useful Javascript library. It does similar things to jQuery, but has the added benefit of being very good at handling data. Used for plots. -->
 
+    <script src="jquery/multiselect/jquery.multiselect.min.js"></script>
+    <link href="jquery/multiselect/jquery.multiselect.css" rel="stylesheet">
+
+    <!-- jQuery multiselect plugin, for nice multiselect drop down menus. By Eric Hynds, http://www.erichynds.com/blog/jquery-ui-multiselect-widget -->
+
 	<!-- Version definition -->
 
 	<script type="text/javascript" >
@@ -177,6 +182,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		
 		dndrop_popup_init();
 
+        sel_drop_init();
+
 		$("#euler_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
 		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
 		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
@@ -261,7 +268,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	.defaultsvg.el_links {
 	    fill: none !important;
 	    stroke-width: 1;
-	}  
+	}
 
 	</style>
 
@@ -336,14 +343,13 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					<h3 class="head" style="color: rgb(242, 154, 0)">Selection and options</h3>
 					<div>
 					<div id="main_sel_div" class="ctrl_left">
-							Select:<br>
-							<select id="sel_drop" onchange="sel_drop_handler(true)">
-								<option value="all">All species</option>
+							Select:<br><br>
+                            <div id="sel_drop_container">
+							<select id="sel_drop" multiple>
 							</select>
-							<select id="sel_atom_drop" onchange="sel_atom_drop_handler()">
-								<option value="all">All atoms</option>
+							<select id="sel_atom_drop" multiple>
 							</select>
-							<br>
+                            </div>
 							<br>
 							Last distance measured:<br>
 							<span id="meas_1">N/A</span> to <span id="meas_2">N/A</span>&nbsp;=&nbsp;<span id="meas_val" style="color: rgb(242, 154, 0)">N/A</span>&nbsp;&Aring;

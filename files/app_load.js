@@ -476,7 +476,7 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		get_atom_info();
 		load_data_asproperty();
 
-		dropdown_update();
+		sel_drop_update();
 		ref_table_gen();		//Generates the shield reference table for output
 
 		enable_NMR_controls();
@@ -521,7 +521,7 @@ var last_atom_picked = 1;
 
 function pick_callback(id, atom, i)
 {
-	if (document.getElementById("sel_drop").value != "custom")
+	if (sel_drop_selected().length != 0)
 	{
 		document.getElementById("range_atom_picked").innerHTML = "" + atom.substring(atom.indexOf(':') + 1, atom.lastIndexOf(' '));
 		last_atom_picked = parseInt(atom.substring(atom.lastIndexOf('#') + 1));

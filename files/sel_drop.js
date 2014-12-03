@@ -7,99 +7,177 @@
 
 //This file contains functions useful for handling the "select species" and "select atom" dropdown menus
 
+// This function initializes the sel_drop menus with jQuery multiselect
+
+function sel_drop_init()
+{
+	var contW = $('#sel_drop_container').width();
+
+    $("#sel_drop").multiselect({
+    	minWidth: contW/2.2,
+    	checkAllText: "All species",
+    	uncheckAllText: "Pick selection",
+    	noneSelectedText: "Pick atoms to select",
+    	selectedText: "# species of # selected",
+    	selectedList: 9,				// A default value
+        show: ['clip', 200],
+        hide: ['clip', 200],
+        classes: 'mySelDrop',
+        click: sel_drop_handler,		// Same handler for any change 
+        checkAll: sel_drop_handler,
+        uncheckAll: sel_drop_handler,
+    });
+
+
+    $("#sel_atom_drop").multiselect({
+    	minWidth: contW/2.2,
+    	checkAllText: "All atoms",
+    	uncheckAllText: "None",
+    	noneSelectedText: "No atom selected",
+    	selectedText: "# atoms of # selected",
+        show: ['clip', 200],
+        hide: ['clip', 200],
+        classes: 'mySelDrop',
+        click: sel_atom_drop_handler,
+        checkAll: sel_atom_drop_handler,
+        uncheckAll: sel_atom_drop_handler,
+    });
+}
+
+function sel_drop_selected()
+{
+	return $('#sel_drop').multiselect('getChecked').map(function() {return this.value;}).get();
+}
+
+function sel_atom_drop_selected()
+{
+	return $('#sel_atom_drop').multiselect('getChecked').map(function() {return this.value;}).get();
+}
+
 //This function edits the dropdown menu for selection of single species adding in the various labels
 
-function dropdown_update()
+function sel_drop_update()
 {
-	var dropd = document.getElementById("sel_drop");
-	var dropd_atoms = document.getElementById("sel_atom_drop");
+	var dropd = $("#sel_drop");
 
 	// This dropdown menu, used in file output, is updated at the same time 
 	
-	dropd.options.length = atom_set.speciesno + 2; //The additional ones are the "all" and the "custom" option
-	dropd_atoms.options.length = 1;
+	// First, clear them out altogether
+	dropd.html('');
 
-	if(atom_set.atom_species_sites == null)
-		dropd_atoms.disabled = true;
-
+	// Now create the options for the various species
 	for (var s = 0; s < atom_set.speciesno; ++s)
 	{
-		dropd.options[s+1] = new Option(atom_set.atom_species_labels[s], atom_set.atom_species_labels[s]);
+		var sp = atom_set.atom_species_labels[s];
+		var s_opt = $('<option>').attr('value', sp).text(sp);
+		dropd.append(s_opt);
 	}
 
-	dropd.options[atom_set.speciesno + 1] = new Option("Custom", "custom");
-	
-	// To update range_file_atom_drop and vvleck_atom_drop
-//	range_file_species_drop_handler();
-//	vvleck_species_drop_handler();
-	
+	// Finally, refresh the multiselect menus or nothing will change
+	dropd.multiselect('refresh');
+	dropd.multiselect('checkAll');
 }
 
-function sel_drop_handler(from_change)
+function sel_atom_drop_update()
 {
-	var sp = document.getElementById("sel_drop").value;
-	var dropd_atoms = document.getElementById("sel_atom_drop");
-	
-	select_script = "";
-	
-	if (sp == "all")
+	var dropd_atoms = $("#sel_atom_drop");
+
+	// Get list of selected species on sel_drop
+	var sel = sel_drop_selected();
+
+	dropd_atoms.html('');
+
+	for (var s = 0; s < sel.length; ++s)
 	{
-		dropd_atoms.disabled = true;
-		dropd_atoms.options.length = 1;
-		select_script += "set pickingstyle select none; set picking measure distance; select displayed;";
+		var sp = sel[s];
+		var sp_optgroup = $('<optgroup>').attr('label', sp);
+		for (var i = 0; i < atom_set.atom_species_sites[sp].length; ++i)
+		{
+			var sp_site = atom_set.atom_species_sites[sp][i];
+			var a_opt = $('<option>').attr('value', sp + '_' + sp_site).text(sp + '_' + sp_site);
+			sp_optgroup.append(a_opt);
+		}
+		dropd_atoms.append(sp_optgroup);
 	}
-	else if (sp == "custom")
+
+	dropd_atoms.multiselect('refresh');
+	dropd_atoms.multiselect('checkAll');
+}
+
+function sel_drop_handler(evt)
+{
+	// Get the selected elements
+	var sel = sel_drop_selected();
+	var dropd_atoms = $("#sel_atom_drop");
+	
+	if (sel.length == 0)
 	{
-		dropd_atoms.disabled = true;
-		dropd_atoms.options.length = 1;
-		document.getElementById("halos_check").checked = true;
-		select_script += "selectionhalos on; set pickingstyle select drag; set picking select atom;";
+		// Custom selection is on
+		dropd_atoms.multiselect('option', 'noneSelectedText', 'Pick atoms to select');
+		dropd_atoms.multiselect('option', 'selectedText', 'Pick atoms to select');
+		dropd_atoms.multiselect('disable');
+		var select_script = "selectionhalos on; set pickingstyle select drag; set picking select atom; message 'selected_change';";
+		$('#halos_check').prop('checked', true);
+		Jmol.script(mainJmol, select_script);
 	}
 	else
 	{
-		if (atom_set.atom_species_sites == null)
+		// Regular stuff; selection is left to sel_atom_drop_handler
+		dropd_atoms.multiselect('enable');
+		dropd_atoms.multiselect('option', 'noneSelectedText', 'No atom selected');
+		dropd_atoms.multiselect('option', 'selectedText', '# atoms of # selected');
+		sel_atom_drop_update();
+	}
+
+}
+
+function sel_atom_drop_handler(evt)
+{
+	var dropd_atoms = $("#sel_atom_drop");
+	var sel 		= sel_drop_selected();
+	var sel_atom 	= sel_atom_drop_selected();
+
+	var max_sel_atom = dropd_atoms.find('option').length; 	// To check for an 'all' condition
+
+	// Resetting the aftermath of a potential "picking" selection
+	var select_atom_script = "set pickingstyle select none; set picking measure distance; select displayed";
+
+	// Now for the various possible combinations
+	if (sel_atom.length == max_sel_atom)
+	{
+		if(sel.length == atom_set.speciesno)
 		{
-			dropd_atoms.disabled = true;
-			select_script += "set pickingstyle select none; set picking measure distance; select displayed and {_" + sp + "};";
-		}
-		else if (from_change)	// from_change prevents resetting the selection when sel_drop_handler is not called as a callback of sel_drop
-		{
-			dropd_atoms.disabled = false;
-			dropd_atoms.options.length = atom_set.atom_species_sites[sp].length + 1;
-			for (var i = 1; i < dropd_atoms.options.length; ++i)
-				dropd_atoms.options[i] = new Option(atom_set.atom_species_sites[sp][i-1], atom_set.atom_species_sites[sp][i-1]);
-			select_script += "set pickingstyle select none; set picking measure distance; select displayed and " + sp + "_*;";
+			// We're selecting EVERYTHING
+			select_atom_script += ";";
 		}
 		else
 		{
-			sel_atom_drop_handler();
+			select_atom_script += " and (";
+			// We're just selecting whole species...
+			for (var s = 0; s < sel.length; ++s)
+			{
+				select_atom_script += sel[s] + '_*' + (s < (sel.length-1)? ' or ' : ');');
+			}
 		}
 	}
-
-	if (select_script != "")
+	else if (sel_atom.length > 0)
 	{
-		select_script += "message 'selected_change';";
-		Jmol.script(mainJmol, select_script);
+		// Single selection
+		select_atom_script += " and (";
+		// We're just selecting whole species...
+		for (var s = 0; s < sel_atom.length; ++s)
+		{
+			select_atom_script += sel_atom[s] + (s < (sel_atom.length-1)? ' or ' : ');');
+		}
 	}
-	
-}
-
-function sel_atom_drop_handler(turn_flag_on)
-{
-	var sp = document.getElementById("sel_drop").value;
-	var ind = document.getElementById("sel_atom_drop").value;
-	
-	select_atom_script = "";
-
-	if (sp == "all")
-		select_atom_script += "select displayed;";
-	else if (ind == "all")
-		select_atom_script += "select displayed and " + sp + "_*;";
 	else
-		select_atom_script += "select displayed and " + sp + "_" + ind + ";";
+	{
+		select_atom_script += " and none;";
+	}
 
 	select_atom_script += "message 'selected_change';";
 	Jmol.script(mainJmol, select_atom_script);
+
 }
 
 function halos_check_handler()

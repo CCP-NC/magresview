@@ -44,11 +44,11 @@ function svg_spectrum_plot(from_change)
         var ms_shifts = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.tensor('ms', 'isotropy')");
         
         if (plabs_on) {
-            var ms_labels = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.atomname");        
+            ms_labels = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.atomname");        
             // To take care of the case where only one atom is present
-                if (typeof(ms_labels) != 'object') {
-                    ms_labels = [ms_labels];
-                }
+            if (typeof(ms_labels) != 'object') {
+                ms_labels = [ms_labels];
+            }
         }
         
         var ref = parseFloat($('#ref_input_' + lab).val());
@@ -71,6 +71,8 @@ function svg_spectrum_plot(from_change)
         spectrum_data[lab] = {'ms': ms_shifts, 'labels': ms_labels};
 
     }
+
+    console.log(spectrum_data);
 
     // Clean up the automated values
 

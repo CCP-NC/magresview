@@ -87,10 +87,10 @@ div.ctrl_right {
 
 div.popupdiv {
     font-weight: normal;
-    font-size: 80%;
+    font-size: 100%;
     text-align: left;
     position: absolute;
-  z-index: 2;
+    z-index: 2;
 }
 
 div.titlediv {
@@ -207,3 +207,11 @@ td {
   text-align: center;
   
 }
+
+.ui-multiselect.mySelDrop {
+  font-size: 1em;
+}
+
+.ui-multiselect-menu.mySelDrop {
+}
+
