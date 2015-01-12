@@ -30,7 +30,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 	<!-- This section serves the purpose of loading jQuery, jQuery UI, and the graphic theme "Vader" -->	  		
   	
-	<link href="jquery/css/vader/jquery-ui.css" rel="stylesheet">
+	<link id="jquery_theme" href="jquery/css/theme_dark/jquery-ui.css" rel="stylesheet">
   	<link rel="icon" type="image/png" href="images/favico.png">
 	<script src="jquery/js/jquery-ui.min.js"></script>
     
@@ -95,6 +95,22 @@ It provides the possibility to load example files from a dropdown menu but it ma
     <!-- Species selection dropdown menu handling -->
     
     <script type="text/javascript" src="files/sel_drop.js"></script>
+
+    <!-- Magnetic shielding plotting -->
+
+    <script type="text/javascript" src="files/ms.js"></script>
+
+    <!-- Electric field gradient plotting -->
+
+    <script type="text/javascript" src="files/efg.js"></script>
+
+    <!-- Internal spin coupling plotting -->
+
+    <script type="text/javascript" src="files/isc.js"></script>     
+
+    <!-- Dipolar coupling plotting -->
+
+    <script type="text/javascript" src="files/dipolar.js"></script>
 
     <!-- File input handling functions -->
     
@@ -273,7 +289,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	</style>
 
   </head>
-  <body id="main_page_body">  
+  <body id="main_page_body" class="theme_dark">  
   <div id="main_div" class="main">
   
   <script type="text/javascript" >
@@ -284,10 +300,10 @@ It provides the possibility to load example files from a dropdown menu but it ma
   </script>
   
   <div class="titlediv">
-  <img src="images/stfc_logo.png" alt="STFC" height="70%" style="float: left; margin: 0px;">
+  <img id="stfc_logo" src="images/dark/stfc_logo.png" alt="STFC" height="70%" style="float: left; margin: 0px;">
   <span style="color: rgb(242, 154, 0); margin: 0px;">M</span>agres<span style="color: rgb(242, 154, 0)">V</span>iew
   <span style="font-size: 50%; margin: 0px;"> <script type="text/javascript">document.write(magresview_version_number);</script></span>
-  <img src="images/small_epsrc.png" alt="EPSRC" height="70%" style="float:right; margin: 0px;">
+  <img id="epsrc_logo" src="images/dark/small_epsrc.png" alt="EPSRC" height="70%" style="float:right; margin: 0px;">
   </div>
 	  		<div id="main_app_div" class="appdiv">
 			      <div id="jmol_div" style="position: relative"></div>
@@ -432,11 +448,10 @@ It provides the possibility to load example files from a dropdown menu but it ma
 									
 									-->
 
-							<h3 id="ms_head" class="head">Visualize magnetic shielding (symmetric component)</h3>					
-							<div>
-							<script type="text/javascript" src="files/ms.js"></script>
+							<h3 id="ms_head" class="head">Visualize magnetic shielding (symmetric component)</h3>	
+                            <div>				
 							<div id="ms_ell_div" class="ctrl_left">
-											
+
 											<br>
 											<input type="checkbox" id="ms_check"
 											title="Ellipsoids oriented along the principal axes, with the three dimensions a, b, c proportional to the absolute value of the magnetic shielding eigenvalues."
@@ -487,20 +502,26 @@ It provides the possibility to load example files from a dropdown menu but it ma
 												title="Asymmetry, defined as (s_2-s_1)/(s_3-s_iso)" 
 												value="2" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled"><span id="ms_par_2">Asymmetry</span> </input> <br>
 											</form>
+
+                                <div id="ms_disabled_div" class="disabled_div_right">
+                                    <br>
+                                    <br>
+                                    Magnetic Shielding data is not available for this system
+                                </div>
+                                            
 								</div>
 								</div>
 								</div>
 		
 								<h3  id="efg_head" class="head">Visualize electric field gradient</h3>					
 								<div>
-								<script type="text/javascript" src="files/efg.js"></script>
-								Component: 
-								<select id="efg_drop" onchange="efg_drop_handler(event)" disabled="disabled">
-					  				<option value="efg">EFG</option>
-					  			</select>
-					  			
 					  			<div id="efg_ell_div" class="ctrl_left">
 								
+                                            Component: 
+                                            <select id="efg_drop" onchange="efg_drop_handler(event)" disabled="disabled">
+                                                <option value="efg">EFG</option>
+                                            </select>
+                                            <br>
 											<br>
 											<input type="checkbox" id="efg_check"
 					  						title="Ellipsoids oriented along the principal axes, with the three dimensions a, b, c proportional to the absolute value of the electric field gradient eigenvalues. Scale is arbitrary and optimized for better visualization."
@@ -510,7 +531,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
 											<br><br>
 			  						
 					  			<div id="efg_label_div" class="ctrl_right">
-		
+
+                                            <br><br>	
 					  						<input type="checkbox" id="efg_check_2" 
 					  						title="Visualize numerical values for quantities identifying the electric field gradient tensor. Eigenvalue ordering is |Vzz|>|Vxx|>|Vyy|."
 					  						onchange="efg_label_handler(event)" autocomplete="off" disabled="disabled">
@@ -535,19 +557,27 @@ It provides the possibility to load example files from a dropdown menu but it ma
 WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
 												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
 											</form>
+
+                                <div id="efg_disabled_div" class="disabled_div_right">
+                                    <br>
+                                    <br>
+                                    Electric Field Gradient data is not available for this system
+                                </div>
+
 					  			</div>
 					  			</div>
 					  			</div>
 					  	
 								<h3  id="isc_head" class="head">Visualize indirect spin-spin coupling</h3>					
-								<div>						
-								<script type="text/javascript" src="files/isc.js"></script>
-								Component:
-								<select id="isc_drop" onchange="isc_drop_handler(event)" disabled="disabled">
-					  							<option value="isc">isc</option>
-					  			</select>
-					  			
-								<div id="isc_graph_div" class="ctrl_left">
+								<div>					
+								<div id="isc_graph_div" class="ctrl_cen">
+
+                                            Component:
+                                            <select id="isc_drop" onchange="isc_drop_handler(event)" disabled="disabled">
+                                                            <option value="isc">isc</option>
+                                            </select>
+                                            <br>
+                                
 											<input type="checkbox" id="isc_check"
 											title="Visualize numerical values for the isotropic value of the J coupling."
 											onchange="isc_label_handler(event)" autocomplete="off" disabled="disabled">
@@ -556,10 +586,6 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 											<br><br><br>
 
 		
-								<div id="isc_label_div" class="ctrl_right">
-		
-								</div>
-								</div>
 								Click on any atom to show its couplings with the rest of the selection (the picking will not work when the selection is in "Custom" mode)							
 								<br>
 				  				Visualized range (magnitude):
@@ -569,11 +595,18 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 				  				<input type="text" id="isc_max" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
 				  				title="Maximum value of the magnitude of the isotropic J-coupling to visualize"></input>
 				  												<span style="color: rgb(128, 255, 0)">Hz</span>
+
+                                <div id="isc_disabled_div" class="disabled_div_cen">
+                                    <br>
+                                    <br>
+                                    Internal Spin Coupling data is not available for this system
+                                </div>
+                                
+                                </div>
 								</div>
 							
 							<h3  id="dip_head" class="head">Calculate dipolar couplings</h3>
 							<div>
-							<script type="text/javascript" src="files/dipolar.js"></script>
 							
 							<div id="dipolar_ctrl_left" class="ctrl_left">							
 								
@@ -783,6 +816,16 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					</div>
 					</div>
 					-->	
+
+                    <h3 class="head">Theme</h3>
+                    <div>
+                        MagresView theme: &nbsp;<br><br>
+                        <select id="opt_theme" autocomplete="off" title="Choose display theme for the window"
+                        onchange="opt_theme_handler(event)">
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                    </div>
 
 					<h3 class="head">Plotting options</h3>
 					<div>

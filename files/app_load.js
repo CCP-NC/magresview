@@ -133,6 +133,9 @@ function enable_NMR_controls()
 		document.getElementById("eultype2_ms").disabled = false;
 		document.getElementById("align_t_2").disabled = false;
 		document.getElementById("nmr2d_butt").disabled = false;
+
+		// Hide the disabled_div 
+		$('#ms_disabled_div').css('display', 'none');
 	}
 
 	if (atom_set.has_efg)
@@ -155,6 +158,9 @@ function enable_NMR_controls()
 			document.getElementById("eultype2_efg").checked = true;
 		}
 		efg_dropdown_update();
+
+		// Hide the disabled_div 
+		$('#efg_disabled_div').css('display', 'none');
 	}
 	
 	if (atom_set.has_isc)
@@ -162,6 +168,9 @@ function enable_NMR_controls()
 		document.getElementById("isc_drop").disabled = false;
 		document.getElementById("isc_check").disabled = false;
 		isc_dropdown_update();
+
+		// Hide the disabled_div 
+		$('#isc_disabled_div').css('display', 'none');
 	}
 	
 	document.getElementById("dipolar_check").disabled = false;
@@ -247,6 +256,11 @@ function disable_NMR_controls()
 
 			document.getElementById("euldiff_butt").disabled = true;
 			document.getElementById("eultab_butt").disabled = true;
+
+			$('#ms_disabled_div').css('display',  'inline');
+			$('#efg_disabled_div').css('display', 'inline');
+			$('#isc_disabled_div').css('display', 'inline');
+
 
 /*
 			Part of the experimental "susceptibility" feature. Unused
@@ -472,6 +486,8 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 				break;
 				
 		}
+
+		opt_theme_handler();	// Load the theme
 
 		get_atom_info();
 		load_data_asproperty();

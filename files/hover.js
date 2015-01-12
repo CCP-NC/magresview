@@ -7,7 +7,7 @@
 
 //This file handles the loading of files by hovering them on the page in HTML5
 
-var dragdrop_target = "#main_page_body";
+var dragdrop_target = "body";
 
 function hover_load() {
         
@@ -38,5 +38,6 @@ function drag_handler(e) {
     
     hover_on = (e.type == "dragover");
     $(dragdrop_target).toggleClass("hovered", hover_on);
+    console.log($(dragdrop_target).attr('class'));
     
 }
