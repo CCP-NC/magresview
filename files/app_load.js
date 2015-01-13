@@ -13,6 +13,7 @@
 var winW = 630, winH = 460;
 
 var current_framework = "JS";
+var current_theme = 'dark'; 		// Useful to keep this in a variable for the 2D NMR tool to check
 
 if (document.body && document.body.offsetWidth) {
  winW = document.body.offsetWidth;

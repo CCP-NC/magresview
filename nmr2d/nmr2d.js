@@ -27,10 +27,10 @@ function document_ready_callback() {
 	// Assign visual effects and correspondences to buttons
 	$('.visual_button')
 	.mouseover(function() {
-		$(this).css("background-color", "rgb(45,45,45)");
+		$(this).toggleClass("highlighted");
 	})	
 	.mouseout(function() {
-		$(this).css("background-color", "rgb(35,35,35)");
+		$(this).toggleClass("highlighted");
 	});
 
 	$('.load_button_fake').click(function() {
@@ -55,6 +55,7 @@ function document_ready_callback() {
 		reference_list[lab] = ref;
     }
 
+    set_theme();
     compile_lists();
 
     // Get the maximum size for an image
@@ -764,7 +765,8 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	.attr('x1', function(d) {return x(d.ms);})
 	.attr('y1', function(d) {return axis_points.y.range[0];})
 	.attr('x2', function(d) {return x(d.ms);})
-	.attr('y2', function(d) {return axis_points.y.range[1];});
+	.attr('y2', function(d) {return axis_points.y.range[1];})
+	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
 
 	// .exit
 	x_lablines_sel
@@ -792,7 +794,7 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	.transition()
 	.duration(800)
 	.style('opacity', 1.0*show_lablines)
-	.attr('transform', function(d) {return ' translate('+x(d.ms)+','+axis_points.y.range[1]+') rotate(-90 0,0)';});
+	.attr('transform', function(d) {return ' translate(' + (x(d.ms) + axis_points.x.p0[0]) + ',' + (axis_points.y.range[1] + axis_points.y.p0[1]) + ') rotate(-90 0,0)';});
 
 	// .exit
 	x_labtext_sel
@@ -823,7 +825,8 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	.attr('x1', function(d) {return axis_points.x.range[0];})
 	.attr('y1', function(d) {return y(d.ms);})
 	.attr('x2', function(d) {return axis_points.x.range[1];})
-	.attr('y2', function(d) {return y(d.ms);});
+	.attr('y2', function(d) {return y(d.ms);})
+	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
 
 	// .exit
 	y_lablines_sel
@@ -851,7 +854,8 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	.duration(800)
 	.style('opacity', 1.0*show_lablines)
 	.attr('x', axis_points.x.range[1])
-	.attr('y', function(d) {return y(d.ms);});
+	.attr('y', function(d) {return y(d.ms);})
+	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
 
 	// .exit
 	y_labtext_sel
@@ -893,5 +897,19 @@ function svg_download()
 	.replace(/'/g, '%27'));
 
 	return true;
+
+}
+
+function set_theme()
+{
+	// Check the theme from the original window
+	var current_theme = window.opener.current_theme;
+
+	// Change the color of the page
+	$('body').removeClass("theme_light theme_dark");
+	$('body').addClass("theme_" + current_theme);
+
+	// Now on to changing the jQuery theme
+	$('#jqueryUI_style').attr('href', '../jquery/css/theme_' + current_theme + '/jquery-ui.css');
 
 }

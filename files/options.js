@@ -210,21 +210,21 @@ function snap_handler()
 
 function opt_theme_handler()
 {
-	var theme = $('#opt_theme').val();
+	current_theme = $('#opt_theme').val();
 
 	// Change the color of the page
 	$('body').removeClass("theme_light theme_dark");
-	$('body').addClass("theme_" + theme);
+	$('body').addClass("theme_" + current_theme);
 
 	// Now on to changing the jQuery theme
-	$('#jquery_theme').attr('href', 'jquery/css/theme_' + theme + '/jquery-ui.css');
+	$('#jquery_theme').attr('href', 'jquery/css/theme_' + current_theme + '/jquery-ui.css');
 
 	// Now the logos
-	$('#stfc_logo').attr('src', 'images/' + theme + '/stfc_logo.png');
-	$('#epsrc_logo').attr('src', 'images/' + theme + '/small_epsrc.png');
+	$('#stfc_logo').attr('src', 'images/' + current_theme + '/stfc_logo.png');
+	$('#epsrc_logo').attr('src', 'images/' + current_theme + '/small_epsrc.png');
 
 	// Now Jmol
-	switch(theme)
+	switch(current_theme)
 	{
 		case 'dark':
 			Jmol.script(mainJmol, 'background black');

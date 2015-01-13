@@ -830,7 +830,7 @@ body .ui-tooltip {
 /* Component containers
 ----------------------------------*/
 .theme_light .ui-widget {
-	font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.9em;
 }
 .theme_light .ui-widget .ui-widget {
@@ -840,7 +840,7 @@ body .ui-tooltip {
 .theme_light .ui-widget select,
 .theme_light .ui-widget textarea,
 .theme_light .ui-widget button {
-	font-family: Trebuchet MS,Tahoma,Verdana,Arial,sans-serif;
+	font-family: Verdana,Arial,sans-serif;
 	font-size: 1em;
 }
 .theme_light .ui-widget-content {
