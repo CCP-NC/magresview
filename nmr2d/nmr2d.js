@@ -110,8 +110,8 @@ function ref_table_popup_handler()
 		reference_list[lab] = parseFloat($('#ref_input_' + lab).val());		
 	}
 
-	reset_scale('x');
-	reset_scale('y');
+	//reset_scale('x');
+	//reset_scale('y');
 	redraw_all();
 
 }
@@ -461,7 +461,8 @@ function axes_visibility_handler(axis)
 	var vis = $('#display_' + axis + '_ax').prop('checked');
 	var plot = d3.select('#main_plot');
 
-	plot.selectAll('.' + axis).attr('display', {true: 'inline', false: 'none'}[vis]);
+	plot.selectAll('.' + axis + '.axis').attr('display', {true: 'inline', false: 'none'}[vis]);
+	plot.selectAll('.' + axis + '.axislabel').attr('display', {true: 'inline', false: 'none'}[vis]);
 
 	return vis;
 }
@@ -672,24 +673,14 @@ function plot_data()
 
 
 			datapoints.push({'msx': ms1*q1, 'msy': ms2*q2, 'r': r});
+			y_lablines.push({'ms': ms2*q2, 'lab': lab2});
 		}
 
 		x_lablines.push({'ms': ms1*q1, 'lab': lab1});
 
 	}
 
-	for (var j=0; j < species_id_list[sp2].length; ++j)
-	{
-		var id2 = species_id_list[sp2][j];
-		var lab2 = id_label_list[id2];
-		var ms2 = id_ms_list[id2];
-
-		y_lablines.push({'ms': ms2*q2, 'lab': lab2});
-
-	}
-
 	// 1.5 Normalize the r values to psize
-
 
 	for (var i = 0; i < datapoints.length; ++i)
 	{
