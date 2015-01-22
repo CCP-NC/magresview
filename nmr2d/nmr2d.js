@@ -5,6 +5,7 @@ var reference_list = {};
 var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
 var id_label_list = {};		// label classified by id
 var id_ms_list = {};		// ms classified by id
+var id_r_list = {};			// distance classified by id
 var id_dip_list = {};		// dip classified by id
 var id_isc_list = {};		// isc classified by id
 
@@ -93,11 +94,27 @@ function ref_table_init()
 		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'ref_label_' + atom_set.atom_species_labels[s]).addClass('ref_td'));
 		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({
 			'id': 'ref_input_' + lab, 
-			'value': (isNaN(reference_list[lab])? '' : reference_list[lab])})));
+			'value': (isNaN(reference_list[lab])? '' : reference_list[lab])})
+		.keypress(ref_change_handler)));
 		
 		$('.ref_table').append(t_row);
 	}
 	
+}
+
+function ref_change_handler(evt)
+{
+	//Compatibility code - see console.js for details
+	var evt = window.event || evt;
+	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
+	
+	console.log(myKey);
+
+	if (myKey == 13)
+	{
+		evt.preventDefault();
+		ref_table_popup_handler();
+	}
 }
 
 function ref_table_popup_handler()
@@ -119,7 +136,7 @@ function ref_table_popup_handler()
 function compile_lists()
 {
 	var atom_raw_list = data_set['atoms']['atom'];
-	var ms_raw_list   = data_set['magres']['ms'];
+	var ms_raw_list   = data_set['magres']['ms'];	
 	var dip_raw_list   = data_set['magres']['dip'];
 	var isc_raw_list   = data_set['magres']['isc']; // This will be null if there are no isc
 
@@ -152,7 +169,11 @@ function compile_lists()
 		if (!(min_id in id_dip_list))
 			id_dip_list[min_id] = {};
 
+		if (!(min_id in id_r_list))
+			id_r_list[min_id] = {};
+
 		id_dip_list[min_id][max_id] = dip.mview_data[0];
+		id_r_list[min_id][max_id]   = dip.r;
 
 	}
 
@@ -626,9 +647,13 @@ function plot_data()
 	var x_lablines   = [];
 	var y_lablines   = [];
 
+	var ptype = $('#ptype').val();
 	var psize_coup = $('#psize_coup').val();
 	var psize = parseFloat($('#psize_slide').val());
 	var opcty = parseFloat($('#psize_opcty').val());
+	var pcut  = parseFloat($('#psize_cut').val());
+
+	var show_out = $('#pshow_out').prop('checked');
 
 	var max_r = 0;
 
@@ -659,6 +684,10 @@ function plot_data()
 					case 'isc':
 						r = Math.abs(id_isc_list[idmin][idmax]);
 						break;
+					case 'cut':
+						if (id_r_list[idmin][idmax] <= pcut)
+							r = 1;
+						break;
 					default:
 						r = 1;
 						break;
@@ -671,7 +700,6 @@ function plot_data()
 				r = NaN;
 			}
 
-
 			datapoints.push({'msx': ms1*q1, 'msy': ms2*q2, 'r': r});
 			y_lablines.push({'ms': ms2*q2, 'lab': lab2});
 		}
@@ -681,6 +709,12 @@ function plot_data()
 	}
 
 	// 1.5 Normalize the r values to psize
+
+	if (max_r == 0)
+	{
+		// No points visualized! Set it to 1 to avoid dividing by zero
+		max_r = 1;
+	}
 
 	for (var i = 0; i < datapoints.length; ++i)
 	{
@@ -698,35 +732,87 @@ function plot_data()
 	.selectAll('.plotdot')
 	.data(datapoints);
 
-	// .enter	
-	plot_sel.enter()
-	.append('circle')
-	.classed('plotdot', true)
-	.attr('cx',  0 )
-	.attr('cy',  axis_points.y.range[0])
-	.attr('r', 0);
+	switch(ptype)
+	{
+		case 'cross':
 
-	// .update
-	plot_sel
-	.transition()
-	.duration(800)
-	.style('opacity', opcty)
-	.attr('cx',  function(d) { return x(d.msx);} )
-	.attr('cy',  function(d) { return y(d.msy);} )
-	.attr('r',   function(d) { return d.r;     } )
-	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
+			// .enter	
+			plot_sel.enter()
+			.append('path')
+			.classed('plotdot', true)
+			.attr('d', function(d) {
+				return cross_path(0, axis_points.y.range[0], 0);
+			});
 
-	// .exit
-	plot_sel.exit()
-	.transition()
-	.duration(800)
-	.style('opacity', 0.0)
-	.remove();
+			// .update
+			plot_sel
+			.transition()
+			.duration(800)
+			.style('opacity', function(d) {
+				if (!show_out) {
+					if (!(is_between(d.msx, axis_scales.x)) || !(is_between(d.msy, axis_scales.y)))
+					{
+						return 0.0;
+					}
+				}
+				return opcty;
+			})
+			.attr('d', function(d) {
+				return cross_path(x(d.msx), y(d.msy), d.r);
+			})
+			.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
+
+			// .exit
+			plot_sel.exit()
+			.transition()
+			.duration(800)
+			.style('opacity', 0.0)
+			.remove();
+
+			break;
+		case 'circle':
+			// .enter	
+			plot_sel.enter()
+			.append('circle')
+			.classed('plotdot', true)
+			.attr('cx',  0 )
+			.attr('cy',  axis_points.y.range[0])
+			.attr('r', 0);
+
+			// .update
+			plot_sel
+			.transition()
+			.duration(800)
+			.style('opacity', function(d) {
+				if (!show_out) {
+					if (!(is_between(d.msx, axis_scales.x)) || !(is_between(d.msy, axis_scales.y)))
+					{
+						return 0.0;
+					}
+				}
+				return opcty;
+			})
+			.attr('cx',  function(d) { return x(d.msx);} )
+			.attr('cy',  function(d) { return y(d.msy);} )
+			.attr('r',   function(d) { return d.r;     } )
+			.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
+
+			// .exit
+			plot_sel.exit()
+			.transition()
+			.duration(800)
+			.style('opacity', 0.0)
+			.remove();
+
+			break;
+
+		default:
+			break;
+	}
 
 	// 3. Add label dotted lines (if required)
 
 	draw_lablines(x_lablines, y_lablines, x, y, opcty);
-
 
 }
 
@@ -734,6 +820,7 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 {
 
 	var show_lablines = $('#label_on_check').prop('checked');
+	var show_out = $('#pshow_out').prop('checked');
 
 	var x_lablines_sel = d3.select('.plot_area')
 	.selectAll('.x.lablines')
@@ -752,7 +839,17 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	x_lablines_sel
 	.transition()
 	.duration(800)
-	.style('opacity', opcty*show_lablines)
+	.style('opacity', function(d) {
+
+		if (!show_out) {
+					if (!(is_between(d.ms, axis_scales.x)))
+					{
+						return 0.0;
+					}
+		}
+
+		return opcty*show_lablines;
+	})
 	.attr('x1', function(d) {return x(d.ms);})
 	.attr('y1', function(d) {return axis_points.y.range[0];})
 	.attr('x2', function(d) {return x(d.ms);})
@@ -784,7 +881,17 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	.attr('transform', function(d) {return 'rotate(-90 0,0)';})
 	.transition()
 	.duration(800)
-	.style('opacity', 1.0*show_lablines)
+	.style('opacity', function(d) {
+
+		if (!show_out) {
+					if (!(is_between(d.ms, axis_scales.x)))
+					{
+						return 0.0;
+					}
+		}
+
+		return 1.0*show_lablines;
+	})
 	.attr('transform', function(d) {return ' translate(' + (x(d.ms) + axis_points.x.p0[0]) + ',' + (axis_points.y.range[1] + axis_points.y.p0[1]) + ') rotate(-90 0,0)';});
 
 	// .exit
@@ -812,7 +919,17 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	y_lablines_sel
 	.transition()
 	.duration(800)
-	.style('opacity', opcty*show_lablines)
+	.style('opacity', function(d) {
+
+		if (!show_out) {
+					if (!(is_between(d.ms, axis_scales.y)))
+					{
+						return 0.0;
+					}
+		}
+
+		return opcty*show_lablines;
+	})
 	.attr('x1', function(d) {return axis_points.x.range[0];})
 	.attr('y1', function(d) {return y(d.ms);})
 	.attr('x2', function(d) {return axis_points.x.range[1];})
@@ -843,7 +960,17 @@ function draw_lablines(x_lablines, y_lablines, x, y, opcty)
 	.html(function(d) {return d.lab;})
 	.transition()
 	.duration(800)
-	.style('opacity', 1.0*show_lablines)
+	.style('opacity', function(d) {
+
+		if (!show_out) {
+					if (!(is_between(d.ms, axis_scales.y)))
+					{
+						return 0.0;
+					}
+		}
+
+		return 1.0*show_lablines;
+	})
 	.attr('x', axis_points.x.range[1])
 	.attr('y', function(d) {return y(d.ms);})
 	.attr("transform", "translate( "+ axis_points.x.p0[0] + "," + axis_points.y.p0[1] + " )");
@@ -903,4 +1030,56 @@ function set_theme()
 	// Now on to changing the jQuery theme
 	$('#jqueryUI_style').attr('href', '../jquery/css/theme_' + current_theme + '/jquery-ui.css');
 
+}
+
+function ptype_handler(e)
+{
+	d3.select('.plot_area')
+	.selectAll('.plotdot')
+	.remove();
+
+	redraw_all();
+}
+
+function psize_handler(e)
+{
+	if ($('#psize_coup').val() == 'cut')
+	{
+		$('#psize_cut').attr('disabled', false);
+		$('#psize_cut').val('10');		
+	}
+	else
+	{
+		$('#psize_cut').attr('disabled', true);
+		$('#psize_cut').val('N/A');				
+	}
+
+	redraw_all();
+}
+
+function psize_cut_handler(evt)
+{
+	//Compatibility code - see console.js for details
+	evt = window.event || evt;
+	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
+
+	if (myKey == 13)
+	{
+		redraw_all();
+	}
+}
+
+// Very simple utility functions
+
+function is_between(x, xrange)
+{
+	var min = Math.min(xrange[0], xrange[1]);
+	var max = Math.max(xrange[0], xrange[1]);
+
+	return (x >= min) && (x <= max);
+}
+
+function cross_path(cx, cy, r)
+{
+	return 'M' + (cx-r) + ' ' + (cy) + ' L' + (cx+r) + ' ' + (cy) + ' M' + (cx) + ' ' + (cy-r) + ' L' + (cx) + ' ' + (cy+r); 
 }

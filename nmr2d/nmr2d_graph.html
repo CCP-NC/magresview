@@ -91,11 +91,18 @@
 
         <table style="font-weight: inherit">
           <tr>
+            Type: <select id="ptype" onchange="ptype_handler()">
+              <option id="cross_opt" value="cross">Crosses</option>
+              <option id="circle_opt" value="circle">Circles</option>
+            </select>
+          </tr>
+          <tr>
             <td>
-              Size: <select id="psize_coup" onchange="redraw_all()">
+              Size:&nbsp;<select id="psize_coup" onchange="psize_handler()">
+                <option id="fix_opt" value='fix'>None (fixed size)</option>
+                <option id="cut_opt" value='cut'>Closer than cutoff</option>
                 <option id="dip_opt" value='dip'>Dipolar coupling</option>
                 <option id="isc_opt" value='isc'>J-coupling</option>
-                <option id="fix_opt" value='fix'>None (fixed size)</option>
               </select>
             </td>
             <td>
@@ -107,7 +114,7 @@
           </tr>
           <tr>
             <td>
-              &nbsp;
+              Cutoff:&nbsp;<input type="text" id="psize_cut" maxlength="5" size="3" value="N/A" onkeypress="psize_cut_handler(event)" disabled>
             </td>
             <td>
               Opacity:
@@ -115,6 +122,11 @@
             <td>
                <input type="range" id="psize_opcty" onchange="psize_slide_handler(event)" min="0.1" max="1" step="0.1" value="1.0"> <span id="psize_opcty_val"></span>
              </td>
+          </tr>
+          <tr>
+            <td>
+              <input type="checkbox" id="pshow_out" onchange="redraw_all()" checked>Show points and labels outside the axes' box</input>
+            </td>
           </tr>
         </table>
 

@@ -1319,7 +1319,7 @@ function init_data_set(data_set)
 
 //Fill in the data_set with the required atoms
 
-function compile_data_set(ds, ac, use_all, ignore_refs)
+function compile_data_set(ds, ac, use_all, ignore_refs, include_r)
 {
 	var eul_conv = "zyz"; //May be changed in future
 	var conv_table = {
@@ -1327,6 +1327,8 @@ function compile_data_set(ds, ac, use_all, ignore_refs)
 		"zxz": "%5" 
 	}
 	
+	include_r = include_r || false;	// This one is basically used only by the 2D NMR tool
+
 	ds.soft_targ = document.getElementById("soft_targ_drop").value;
 	
 	var atom_n = 0;    //All atoms in data_set will be simply ordered by an increasing number, no crystallographic labels
@@ -1622,24 +1624,26 @@ function compile_data_set(ds, ac, use_all, ignore_refs)
 		if (rotated_lattice_script) {
 			dip_calc_script += "r = rot_q % r;";
 		}
-		dip_calc_script += "mod = sqrt(r*r); dip_info = dip_info or [r/mod];}}";
+		dip_calc_script += "mod = sqrt(r*r); dip_info = dip_info or [r/mod, mod];}}";
 		
 		Jmol.scriptWait(mainJmol, dip_calc_script);
 		var dip_info = Jmol.evaluateVar(mainJmol, "dip_info");
 		
-		for (var i = 0; i < dip_info.length-1; i += 2)
+		for (var i = 0; i < dip_info.length-1; i += 3)
 		{
 			var a_dip = dip_info[i][0].split('\t');
 			var a_b = parseFloat(a_dip[1])*1000.0;		//Coupling constant in Hz
 			var a_no_1 = parseInt(a_dip[3].substring(a_dip[3].indexOf('#')+1));
 			var a_no_2 = parseInt(a_dip[4].substring(a_dip[4].indexOf('#')+1));
 			var a_r = dip_info[i+1];
+			var a_dist = dip_info[i+2];
 						
 			var a_alpha = rad2deg(Math.atan2(a_r[1], a_r[0]));
 			var a_beta = rad2deg(Math.acos(a_r[2]));
 			
-			ds.magres.dip[i/2] = {
+			ds.magres.dip[i/3] = {
 				mview_data: [a_b, a_alpha, a_beta, 0.0],
+				r: a_dist,
 				atom1_id: "" + a_no_1, 
 				atom2_id: "" + a_no_2,
 			}
@@ -1711,7 +1715,7 @@ function compile_data_set(ds, ac, use_all, ignore_refs)
 		}
 		
 	}
-	
+
 	return true;
 }
 
