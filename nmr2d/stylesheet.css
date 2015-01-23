@@ -16,11 +16,15 @@ html, body {
   margin: 0;
   padding: 0;
   font-weight: bold;
-  font-size: 11pt;
+  font-size: 90%;
 }
 
 .section_div {
 	position: absolute;
+}
+
+#control_div {
+        overflow-y: auto;
 }
 
 #image_div {
@@ -58,7 +62,7 @@ html, body {
 }
 
 .header {
-  font-size: 13pt;
+  font-size: 120%;
   color: rgb(255, 128, 0);
 }
 
@@ -83,7 +87,7 @@ html, body {
 	border: solid;
 	border-width: 2pt;
 	text-align: center;
-	font-size: 11pt;
+	font-size: inherit;
 	line-height: 25pt;
 	cursor: default;
 
@@ -138,7 +142,7 @@ html, body {
 	border-width: 5pt;
 	border-radius: 20pt;
 	text-align: center;
-	font-size: 30pt;
+	font-size: 270%;
 
 }
 
@@ -170,7 +174,7 @@ html, body {
 	text-align: right;
 	border-spacing: 7pt;
 	font-weight: bold;
-	font-size: 11pt;
+	font-size: inherit;
 }
 
 #pick_message {
@@ -204,10 +208,14 @@ div.svgstyle_box {
 
 div.popupdiv {
 	font-weight: normal;
-	font-size: 80%;
+	font-size: 120%;
 	text-align: left;
     position: absolute;
-  z-index: 2;
+    z-index: 2;
+}
+
+table {
+    font-size: inherit;
 }
 
 .ref_table {
@@ -215,6 +223,7 @@ div.popupdiv {
   border-collapse: collapse;
   border: 1px;
   text-align: center;
+  font-weight: bold;
   
 }
 

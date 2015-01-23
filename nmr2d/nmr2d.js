@@ -383,7 +383,6 @@ function clean_up_svg(w, h)
 	'top': (imdiv_h-h)/2.0,
 	'left': (imdiv_w-w)/2.0,});
 
-
 	// This fix is needed for webkit based browsers to redraw the whole thing and not render the thing in a buggy way when changing sizes.
 	// On the matter of why it works I must quote stackoverflow user Charlie Martin:
 	// << I tried everything above this, but only this one worked for me. WTF webkit! This is not computer science! This is black magic!>>
