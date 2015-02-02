@@ -47,8 +47,10 @@ function document_ready_callback() {
     atom_set = window.opener.atom_set;
 
     window.opener.init_data_set(data_set);
+    var t_0 = (new Date()).getTime()/1000.0;
     window.opener.compile_data_set(data_set, {'t': 'all'}, true, true);   // Ignore shifts, they will be read later
-
+    console.log((new Date()).getTime()/1000.0 - t_0);
+    
     for (var s = 0; s < atom_set.speciesno; ++s)
     {
 		var lab = atom_set.atom_species_labels[s];
@@ -596,11 +598,6 @@ function pick_axis(axis)
 				'y': [0.0, ry-axis_points[axis].p0[1]]
 			}[axis];
 
-			/*if (axis == 'x' && rx < axis_points[axis].p0[0])
-			{
-				axis_points[axis].p0 = [rx, ry];
-			}*/
-
 			$('#main_plot').off('click');
 			$('#main_plot').off('mousemove');
 
@@ -683,14 +680,13 @@ function plot_data()
 					case 'isc':
 						r = Math.abs(id_isc_list[idmin][idmax]);
 						break;
-					case 'cut':
-						if (id_r_list[idmin][idmax] <= pcut)
-							r = 1;
-						break;
 					default:
-						r = 1;
+						r = 1.0;
 						break;
 				}
+				// Remove the point if it's beyond cutoff though
+				if (!isNaN(pcut) && id_r_list[idmin][idmax] > pcut)
+					r = 0.0;
 				if (r > max_r)
 					max_r = r;
 			}
@@ -720,6 +716,8 @@ function plot_data()
 		datapoints[i].r *= psize/max_r;
 		if (isNaN(datapoints[i].r))
 			datapoints[i].r = psize;
+		else if (datapoints[i].r <= 0.5)
+			datapoints[i].r = 0;
 	}
 
 	// 2. Do the plotting
@@ -749,7 +747,7 @@ function plot_data()
 			.duration(800)
 			.style('opacity', function(d) {
 				if (!show_out) {
-					if (!(is_between(d.msx, axis_scales.x)) || !(is_between(d.msy, axis_scales.y)))
+					if (!(is_between(d.msx, axis_scales.x)) || !(is_between(d.msy, axis_scales.y)) || d.r == 0.0)
 					{
 						return 0.0;
 					}
@@ -770,6 +768,7 @@ function plot_data()
 
 			break;
 		case 'circle':
+		case 'dot':
 			// .enter	
 			plot_sel.enter()
 			.append('circle')
@@ -784,7 +783,7 @@ function plot_data()
 			.duration(800)
 			.style('opacity', function(d) {
 				if (!show_out) {
-					if (!(is_between(d.msx, axis_scales.x)) || !(is_between(d.msy, axis_scales.y)))
+					if (!(is_between(d.msx, axis_scales.x)) || !(is_between(d.msy, axis_scales.y)) || d.r == 0.0)
 					{
 						return 0.0;
 					}
@@ -802,6 +801,11 @@ function plot_data()
 			.duration(800)
 			.style('opacity', 0.0)
 			.remove();
+
+			if (ptype == 'dot')
+				plot_sel.classed('fill', true);
+			else
+				plot_sel.classed('fill', false);
 
 			break;
 
@@ -1000,11 +1004,17 @@ function svg_download()
 {
 	// Put everything in URI form associated with the download button
 
+	var svg_to_save = $('#main_plot').clone().prepend($('<style>').html($('.svgstyle_box').html()));
+
+	svg_to_save.find('.lablines').filter(function() { console.log($(this).css('opacity')); return $(this).css('opacity') == 0.0;}).remove();
+	svg_to_save.find('.labtext').filter(function() { console.log($(this).css('opacity')); return $(this).css('opacity') == 0.0;}).remove();
+	svg_to_save.find('.plotdot').filter(function() { console.log($(this).css('opacity')); return $(this).css('opacity') == 0.0;}).remove();
+
 	$('.download_button')
 	.attr('target', '_blank')
 	.attr('download', 'nmr2d.svg')
 	.attr('href', "data:text/plain," + 
-		$('<div>').append($('#main_plot').clone().prepend($('<style>').html($('.svgstyle_box').html()))).html()
+	$('<div>').append(svg_to_save).html()
 	.replace(/%/g, '%25')			//The % symbol must be replaced first, or everything goes down the drain!
 	.replace(/\n/g, '%0A')
 	.replace(/\t/g, '%09')
@@ -1040,9 +1050,9 @@ function ptype_handler(e)
 	redraw_all();
 }
 
-function psize_handler(e)
+function psize_cut_on_handler(evt)
 {
-	if ($('#psize_coup').val() == 'cut')
+	if ($('#psize_cut_on').prop('checked'))
 	{
 		$('#psize_cut').attr('disabled', false);
 		$('#psize_cut').val('10');		
@@ -1051,7 +1061,7 @@ function psize_handler(e)
 	{
 		$('#psize_cut').attr('disabled', true);
 		$('#psize_cut').val('N/A');				
-	}
+	}	
 
 	redraw_all();
 }

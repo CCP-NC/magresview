@@ -94,13 +94,13 @@
             Type: <select id="ptype" onchange="ptype_handler()">
               <option id="cross_opt" value="cross">Crosses</option>
               <option id="circle_opt" value="circle">Circles</option>
+              <option id="dot_opt" value="dot">Dots</option>
             </select>
           </tr>
           <tr>
             <td>
-              Size:&nbsp;<select id="psize_coup" onchange="psize_handler()">
+              Size:&nbsp;<select id="psize_coup" onchange="redraw_all()">
                 <option id="fix_opt" value='fix'>None (fixed size)</option>
-                <option id="cut_opt" value='cut'>Closer than cutoff</option>
                 <option id="dip_opt" value='dip'>Dipolar coupling</option>
                 <option id="isc_opt" value='isc'>J-coupling</option>
               </select>
@@ -112,8 +112,9 @@
                <input type="range" id="psize_slide" onchange="psize_slide_handler(event)" min="5" max="20"> <span id="psize_val"></span>
             </td>
           </tr>
-          <tr>
+          <tr>            
             <td>
+              <input type="checkbox" id="psize_cut_on" onchange="psize_cut_on_handler(event)">
               Cutoff:&nbsp;<input type="text" id="psize_cut" maxlength="5" size="3" value="N/A" onkeypress="psize_cut_handler(event)" disabled>
             </td>
             <td>
@@ -214,6 +215,11 @@
         stroke-width: 2.0;
         fill: none;
       }
+
+      .plotdot.fill {
+        stroke: none;
+        fill: rgb(50, 100, 150);
+      }      
 
       .lablines {
         stroke: rgb(0, 40, 75);

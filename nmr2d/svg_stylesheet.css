@@ -47,6 +47,11 @@
 	fill: none;
 }
 
+.plotdot.fill {
+	stroke: none;
+	fill: rgb(255, 128, 0);
+}
+
 .lablines {
 	stroke: rgb(255, 128, 0);
 	stroke-width: 0.5;
