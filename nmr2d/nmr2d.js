@@ -218,6 +218,13 @@ function update_species()
 
 }
 
+function sel_order_handler()
+{
+	reset_scale('x');
+	reset_scale('y');
+	redraw_all();
+}
+
 function sel_species_handler(axis)
 {
 	reset_scale(axis);
@@ -231,10 +238,7 @@ function reset_scale(axis)
 		return;
 
 	var sp = $('#sel_species_' + axis).val();
-	var q = 1.0;
-	if (axis == 'y') {
-		q  = $('#sel_order').val();
-	}
+	var q = $('#sel_order').val();
 
 	var min = NaN; 
 	var max = NaN;
@@ -251,9 +255,51 @@ function reset_scale(axis)
 		if (isNaN(max) || ms > max)
 			max = ms;
 	}
+	if (q == 2) {
+		// For double quantum we need maximum and minimum on BOTH axes
+		var axis2 = {'x': 'y', 'y': 'x'}[axis];
+		var sp2 = $('#sel_species_' + axis2).val();
 
-	axis_0 = Math.ceil(max*q);
-	axis_1 = Math.floor(min*q);
+		var min2 = NaN; 
+		var max2 = NaN;
+
+		if (sp2 != sp) {
+			for (var i=0; i<species_id_list[sp2].length; ++i)
+			{
+				var id = species_id_list[sp2][i];
+				var ms = id_ms_list[id];
+				ms = isNaN(reference_list[sp2])?ms:(reference_list[sp2]-ms);
+				if (isNaN(min2) || ms < min2)
+					min2 = ms;
+				if (isNaN(max2) || ms > max2)
+					max2 = ms;
+			}
+		}
+		else {
+			min2 = min;
+			max2 = max;
+		}
+
+		console.log(min, min2);
+		console.log(max, max2);
+
+		switch(axis) {
+			case 'x':
+				// The minimum is the absolute minimum, the maximum same
+				min = Math.min(min, min2);
+				max = Math.max(max, max2);
+				break;
+			case 'y':
+				// The minimum is the sum of the two minima, same for the maximum
+				min = min+min2;
+				max = max+max2;
+				break
+		}
+					
+	}
+
+	axis_0 = Math.ceil(max);
+	axis_1 = Math.floor(min);
 
 	axis_scales[axis] = [axis_0, axis_1];
 
@@ -708,11 +754,13 @@ function plot_data()
 			{
 				datapoints.push({'msx': ms1, 'msy': ms2, 'r': r});
 				if (r > 0)
-					y_lablines[ms2] = {'ms': ms2, 'lab': lab2};				
+					y_lablines[lab2] = {'ms': ms2, 'lab': lab2};				
 				if (is_homonuclear) {
 					datapoints.push({'msx': ms2, 'msy': ms1, 'r': r});
-					y_lablines[ms1] = {'ms': ms1, 'lab': lab1};				
-					x_lablines[ms2] = {'ms': ms2, 'lab': lab2};				
+					if (r > 0) {
+						y_lablines[lab1] = {'ms': ms1, 'lab': lab1};				
+						x_lablines[lab2] = {'ms': ms2, 'lab': lab2};				
+					}
 				}
 
 			}
@@ -723,9 +771,10 @@ function plot_data()
 					continue;
 				datapoints.push({'msx': ms1, 'msy': ms1+ms2, 'r': r});
 				datapoints.push({'msx': ms2, 'msy': ms1+ms2, 'r': r});
-				if (r > 0)
-					y_lablines[ms1+ms2] = {'ms': ms1+ms2, 'lab': lab1 + "+" + lab2};				
-					x_lablines[ms2] = {'ms': ms2, 'lab': lab2};
+				if (r > 0) {
+					y_lablines[lab1+"+"+lab2] = {'ms': ms1+ms2, 'lab': lab1 + "+" + lab2};				
+					x_lablines[lab2] = {'ms': ms2, 'lab': lab2};
+				}
 			}
 
 			any_r = any_r || (r > 0);
@@ -733,7 +782,7 @@ function plot_data()
 		}
 
 		if (any_r)
-			x_lablines[ms1] = {'ms': ms1, 'lab': lab1};
+			x_lablines[lab1] = {'ms': ms1, 'lab': lab1};
 
 	}
 
