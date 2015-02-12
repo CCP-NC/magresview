@@ -231,7 +231,10 @@ function reset_scale(axis)
 		return;
 
 	var sp = $('#sel_species_' + axis).val();
-	var q  = $('#sel_order_' + axis).val();
+	var q = 1.0;
+	if (axis == 'y') {
+		q  = $('#sel_order').val();
+	}
 
 	var min = NaN; 
 	var max = NaN;
@@ -446,7 +449,7 @@ function draw_axis(axis)
 
 	var ax = d3.scale.linear().domain(axis_scales[axis]).range(axis_points[axis].range);
     var fullAxis = d3.svg.axis().scale(ax).ticks(4).orient({'x': "bottom", 'y': "left"}[axis]);
-    var axisLabel = $("#sel_species_" + axis).val() + " (" + $("#sel_order_"+axis).val() + "Q, ppm)";
+    var axisLabel = $("#sel_species_" + axis).val() + " (" + (axis=='x'? "1" : $("#sel_order").val()) + "Q, ppm)";
 
     ax_sel =plot_area.select('.'+axis+'.axis');
 
@@ -636,12 +639,11 @@ function plot_data()
 	var sp1 = $('#sel_species_x').val();
 	var sp2 = $('#sel_species_y').val();
 
-	var q1 = $('#sel_order_x').val();
-	var q2 = $('#sel_order_y').val();
+	var q = $('#sel_order').val();
 
 	var datapoints = [];
-	var x_lablines   = [];
-	var y_lablines   = [];
+	var x_lablines   = {};
+	var y_lablines   = {};
 
 	var ptype = $('#ptype').val();
 	var psize_coup = $('#psize_coup').val();
@@ -653,6 +655,8 @@ function plot_data()
 
 	var max_r = 0;
 
+	var is_homonuclear = (sp1 == sp2);
+
 	for (var i=0; i < species_id_list[sp1].length; ++i)
 	{
 		var id1 = species_id_list[sp1][i];
@@ -660,7 +664,12 @@ function plot_data()
 		var ms1 = id_ms_list[id1];
 		ms1 = isNaN(reference_list[sp1])?ms1:(reference_list[sp1]-ms1);
 
-		for (var j=0; j < species_id_list[sp2].length; ++j)
+		var start_j = is_homonuclear? i : 0;
+
+		var any_r = false; // Keep track if there's a need for an x labline on this specific value of x
+		// - namely, if r > 0.0 for any of the corresponding y points
+
+		for (var j=start_j; j < species_id_list[sp2].length; ++j)
 		{
 			var id2 = species_id_list[sp2][j];
 			var lab2 = id_label_list[id2];
@@ -695,11 +704,36 @@ function plot_data()
 				r = NaN;
 			}
 
-			datapoints.push({'msx': ms1*q1, 'msy': ms2*q2, 'r': r});
-			y_lablines.push({'ms': ms2*q2, 'lab': lab2});
+			if (q == 1)
+			{
+				datapoints.push({'msx': ms1, 'msy': ms2, 'r': r});
+				if (r > 0)
+					y_lablines[ms2] = {'ms': ms2, 'lab': lab2};				
+				if (is_homonuclear) {
+					datapoints.push({'msx': ms2, 'msy': ms1, 'r': r});
+					y_lablines[ms1] = {'ms': ms1, 'lab': lab1};				
+					x_lablines[ms2] = {'ms': ms2, 'lab': lab2};				
+				}
+
+			}
+			else if (q == 2)
+			{
+				// No diagonal points
+				if (is_homonuclear && i == j)
+					continue;
+				datapoints.push({'msx': ms1, 'msy': ms1+ms2, 'r': r});
+				datapoints.push({'msx': ms2, 'msy': ms1+ms2, 'r': r});
+				if (r > 0)
+					y_lablines[ms1+ms2] = {'ms': ms1+ms2, 'lab': lab1 + "+" + lab2};				
+					x_lablines[ms2] = {'ms': ms2, 'lab': lab2};
+			}
+
+			any_r = any_r || (r > 0);
+
 		}
 
-		x_lablines.push({'ms': ms1*q1, 'lab': lab1});
+		if (any_r)
+			x_lablines[ms1] = {'ms': ms1, 'lab': lab1};
 
 	}
 
@@ -819,11 +853,23 @@ function plot_data()
 
 }
 
-function draw_lablines(x_lablines, y_lablines, x, y, opcty)
+function draw_lablines(x_lablines_dict, y_lablines_dict, x, y, opcty)
 {
 
 	var show_lablines = $('#label_on_check').prop('checked');
 	var show_out = $('#pshow_out').prop('checked');
+
+	// Here for convenience lablines are prepared as tables/dictionaries, but we will convert them to arrays now
+
+	x_lablines = [];
+	y_lablines = [];
+
+	for (i in x_lablines_dict)
+		x_lablines.push(x_lablines_dict[i]);
+	for (i in y_lablines_dict)
+		y_lablines.push(y_lablines_dict[i]);
+
+	console.log(x_lablines);
 
 	var x_lablines_sel = d3.select('.plot_area')
 	.selectAll('.x.lablines')
