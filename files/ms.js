@@ -191,6 +191,23 @@ function ms_color_handler()
 		 		shielding_ref = document.getElementById("ms_shield_ref").value;
 		 		l_type = -1;
 		 	}
+		 	else if (l_type_radios[i].value == "shield_reftable")
+		 	{
+		 		l_type = -2;
+		 		shielding_ref = {};
+
+		 		for (var l = 0; l < atom_set.speciesno; ++l) {
+
+		 			var lab = atom_set.atom_species_labels[l];
+			        var ref = parseFloat($('#ref_input_' + lab).val());
+
+			        // If not present, treat it as zero
+			        ref = isNaN(ref)?0:ref;
+
+			        shielding_ref[lab] = ref;
+		 		}
+
+		 	}
 		 	else
 		 	{
 				l_type = parseInt(l_type_radios[i].value);
@@ -211,7 +228,15 @@ function ms_color_handler()
 
 	if(ms_plot_on)
 	{
-		ms_plot_jmol_script += "color {displayed} {200, 200, 200}; {all}.property_ms_colorscale = NaN; {selected}.property_ms_colorscale = {selected}.";
+		// Here's a bit more complicated than with labels, due to JMol's funny treatment of color scale.
+		// Basically, in JMol color scales ALWAYS span the whole range of a property. Therefore, to have the scale span
+		// only the range of the property on the selected atoms, we need to generate a custom property set to NaN on all non selected atoms.
+		// This requires special care when dealing with multiple reference values... (l_type == -2)
+
+		ms_plot_jmol_script += "color {displayed} {200, 200, 200}; {all}.property_ms_colorscale = NaN;"
+		if (l_type >= -1) {
+			ms_plot_jmol_script += "{selected}.property_ms_colorscale = {selected}.";
+		}
 		switch(l_type)
 		{
 			case 0:
@@ -246,8 +271,21 @@ function ms_color_handler()
 			case -1:
 				ms_plot_jmol_script += "tensor('ms', 'isotropy').mul(-1).add(" + shielding_ref + ")";
 				break;
+			case -2:
+				// A special case
+		 		for (var l = 0; l < atom_set.speciesno; ++l) {
+
+		 			var lab = atom_set.atom_species_labels[l];
+					ms_plot_jmol_script += "{_" + lab + " and selected}.property_ms_colorscale = {_" + lab + " and selected}.";
+					ms_plot_jmol_script += "tensor('ms', 'isotropy').mul(-1).add(" + shielding_ref[lab] + ").mul(-1);";
+		 		}
+		 		break;
 		}
-		ms_plot_jmol_script += ".mul(-1); color {selected} property_ms_colorscale;";
+		if (l_type >= -1) 
+		{
+			ms_plot_jmol_script += ".mul(-1);";			
+		}
+		ms_plot_jmol_script += " color {selected} property_ms_colorscale;";
 	}
 	else
 	{
