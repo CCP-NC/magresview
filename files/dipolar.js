@@ -113,11 +113,14 @@ function vvleck_sphere_handler()
 function dip_label_handler()
 {	
 
-	console.log("dip_label_handler called");
+	var current_theme = $('#opt_theme').val();
 
 	var dip_plot_on = document.getElementById('dipolar_check').checked;
+	var lab_color = (current_theme == "dark")? "{0 230 230}" : "{51 51 102}";
 
-	dip_plot_jmol_script = "color measure {0 230 230}; measure delete;";
+	console.log(lab_color);
+
+	dip_plot_jmol_script = "measure delete; color measure " + lab_color + ";";
 
 	var r = parseFloat(document.getElementById("vvleck_r").value);
 

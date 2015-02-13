@@ -210,7 +210,7 @@ function snap_handler()
 
 function opt_theme_handler()
 {
-	current_theme = $('#opt_theme').val();
+	var current_theme = $('#opt_theme').val();
 
 	// Change the color of the page
 	$('body').removeClass("theme_light theme_dark");
@@ -233,5 +233,8 @@ function opt_theme_handler()
 			Jmol.script(mainJmol, 'background white');
 			break;
 	}
+
+	// Replot for things that need to change color
+	plot_update();
 
 }
