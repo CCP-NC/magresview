@@ -234,17 +234,12 @@ function euler_eigvaldiff(aname1, type1, aname2, type2, conv)
 var euldiff_pick_atom1 = null;
 var euldiff_pick_atom2 = null;
 
-function euler_diff_calc_handler()
+function euler_diff_script(init)
 {
+	// Returns the Jmol script for initializing or terminating the Euler angles difference thing
 	var euldiff_init_script = 'unbind "left-click"; unbind "right-click"; unbind "left-down"; unbind "right-down";';
-	
-	//A bit of jQuery magic to check whether the active tab is the "Visualization" one. It just works.
 
-	var tab_active = $("#main_tabs").tabs("option", "active");
-	var acc_active = $("#visual_accordion").accordion("option", "active");
-	if(tab_active == tab_index("#visual_accordion") &&													//Is the Visualization tab active?
-		document.getElementById("euldiff_butt").disabled == false &&									//Is the Euler angles difference calculation active?
-		acc_active == 4)														  						//Is the Euler angles accordion section active?
+	if(init)
 	{
 		var left_type_radios = document.getElementsByName("eultype1");
 		var right_type_radios = document.getElementsByName("eultype2");
@@ -255,19 +250,26 @@ function euler_diff_calc_handler()
 		var left_color = (left_type == "ms"? "{192 96 0}":"{0 96 192}");
 		var right_color = (right_type == "ms"? "{192 96 0}":"{0 96 192}");
 
-		euldiff_init_script += "set disablePopupMenu TRUE; unbind _setMeasure; set picking off; bind \"left-down\" \"+: if (_ATOM != ({})) {draw id euldiff_circle_1 delete; draw id euldiff_circle_1 circle {_ATOM} mesh nofill color " + left_color +" diameter @{{_ATOM}.radius*2.5};"
-		+ " print 'lc_" + left_type + "#_ATOM#'+{_ATOM}.tensor('" + left_type + "', 'quaternion');}\";";
-		euldiff_init_script += "bind \"right-down\" \"if (_ATOM != ({})) {draw id euldiff_circle_2 delete; draw id euldiff_circle_2 circle {_ATOM} mesh nofill color " +right_color +" diameter @{{_ATOM}.radius*2.6};"
-		+ " print 'rc_" + right_type + "#_ATOM#'+{_ATOM}.tensor('" + right_type + "', 'quaternion');}\"";
+        euldiff_init_script += "set disablePopupMenu TRUE; unbind _setMeasure; set picking off;";
+        euldiff_init_script += "bind \"left-down\" \"+: if (_ATOM != ({})) {draw id euldiff_circle_1 delete; draw id euldiff_circle_1 circle {_ATOM} mesh nofill color " + left_color +" diameter @{{_ATOM}.radius*2.5};"
+        + " print 'lc_" + left_type + "#_ATOM#'+{_ATOM}.tensor('" + left_type + "', 'quaternion');}\";";
+        euldiff_init_script += "bind \"right-down\" \"if (_ATOM != ({})) {draw id euldiff_circle_2 delete; draw id euldiff_circle_2 circle {_ATOM} mesh nofill color " + right_color +" diameter @{{_ATOM}.radius*2.6};"
+        + " print 'rc_" + right_type + "#_ATOM#'+{_ATOM}.tensor('" + right_type + "', 'quaternion');}\";";
 	}
 	else
 	{
 		euldiff_init_script += "unbind; set disablePopupMenu FALSE; set picking measure; draw id euldiff_circle_1 delete; draw id euldiff_circle_2 delete;";
 	}
-	
-	console.log(euldiff_init_script);
 
-	Jmol.script(mainJmol, euldiff_init_script);
+	return euldiff_init_script;
+
+}
+
+function euler_diff_calc_handler()
+{
+	
+	//A bit of jQuery magic to check whether the active tab is the "Visualization" one. It just works.
+	Jmol.script(mainJmol, euler_diff_script(true));
 }
 
 function euldiff_butt_handler()

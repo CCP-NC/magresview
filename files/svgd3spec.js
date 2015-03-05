@@ -72,8 +72,6 @@ function svg_spectrum_plot(from_change)
 
     }
 
-    console.log(spectrum_data);
-
     // Clean up the automated values
 
     rounder = d3.format('.1f');

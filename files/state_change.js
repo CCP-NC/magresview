@@ -31,6 +31,9 @@ function state_machine() {
             isc_accordion: (acc_active == 2),
             isc_check: $("isc_check").prop("checked"),
 
+            eul_accordion: (acc_active == 4),
+            eul_enabled: !($("#euldiff_butt").prop("disabled")),
+
             file_sphere_check: $("#range_sphere_check").prop("checked"),
             file_not_recap: $("#file_type_drop").val() != "recap",                   //Is the JSON or the Tabulated file generation active?
             file_range: $("#sel_file_drop").val().indexOf("range") > -1,
@@ -112,13 +115,13 @@ function state_machine() {
 
         if ((current.accordion_tab && current.isc_accordion) || current.isc_check)
         {
-                var aexpr = '{*}[' + last_atom_picked + ']';
+            var aexpr = '{*}[' + last_atom_picked + ']';
 
-                isc_closest_script += "fx0=" + aexpr + ".fx; fy0=" + aexpr + ".fy; fz0=" + aexpr + ".fz;";
-                isc_closest_script += "fxmin=fx0-0.5; fxmax=fx0+0.5;";
-                isc_closest_script += "fymin=fy0-0.5; fymax=fy0+0.5;";
-                isc_closest_script += "fzmin=fz0-0.5; fzmax=fz0+0.5;";
-                display_group += " or {fx>fxmin and fx<=fxmax and fy>fymin and fy<=fymax and fz>fzmin and fz<=fzmax}";
+            isc_closest_script += "fx0=" + aexpr + ".fx; fy0=" + aexpr + ".fy; fz0=" + aexpr + ".fz;";
+            isc_closest_script += "fxmin=fx0-0.5; fxmax=fx0+0.5;";
+            isc_closest_script += "fymin=fy0-0.5; fymax=fy0+0.5;";
+            isc_closest_script += "fzmin=fz0-0.5; fzmax=fz0+0.5;";
+            display_group += " or {fx>fxmin and fx<=fxmax and fy>fymin and fy<=fymax and fz>fzmin and fz<=fzmax}";
         }
 
         state_change_script += isc_closest_script;
@@ -142,22 +145,30 @@ function state_machine() {
 
         state_change_script += file_sphere_script;
 
-        // Now build the complete script and run it
+        // The Euler angles and align stuff both compete for "binding" the mouse clicks, so we work on them together
+        // First come all the unbinding scripts, THEN the binding ones
+        if (!current.align_tab)
+        {
+            state_change_script += align_unbind_script();            
+        }
+        if (!(current.accordion_tab && current.eul_accordion && current.eul_enabled))
+        {
+            state_change_script += euler_diff_script(false);            
+        }
+        else
+        {
+            state_change_script += euler_diff_script(true);            
+        }
+        if (current.align_tab)
+        {
+            state_change_script += align_bind_script();            
+        }
 
         state_change_script += "display " + display_group + ";";                                 // Display the proper atoms
         state_change_script += "color {displayed and not default_displaygroup} translucent;"     // Color 
         state_change_script += "message 'displayed_change';";                                    // Explicitly triggers the call to a display change
 
         // Now add the align script (another thing controlled purely by state)
-
-        if (current.align_tab)
-        {
-            state_change_script += align_bind_script();
-        }
-        else
-        {
-            state_change_script += align_unbind_script();
-        }
 
         Jmol.script(mainJmol, state_change_script);
 

@@ -175,24 +175,24 @@ It provides the possibility to load example files from a dropdown menu but it ma
 				
   		$(function() {
 
-    		$( "#visual_accordion" ).accordion({
+		$( "#visual_accordion" ).accordion({
       		collapsible: true,
       		heightStyle: "content",
       		autoHeight: false,
       		activate: function(event, ui) {
-            global_state_machine.handle_change('state');
-		}
-    		});
-    		
-    		$( "#options_accordion" ).accordion({
-      		collapsible: true,
-      		heightStyle: "content",
-      		autoHeight: false
-    		});
+                global_state_machine.handle_change('state');
+		    }
+		});
+		
+		$( "#options_accordion" ).accordion({
+  		collapsible: true,
+  		heightStyle: "content",
+  		autoHeight: false
+		});
 
 		$("#main_tabs").tabs({
 			activate: function(event, ui) {
-        global_state_machine.handle_change('state');
+                global_state_machine.handle_change('state');
 			}
 		});
 		
