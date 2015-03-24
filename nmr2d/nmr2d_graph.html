@@ -35,9 +35,9 @@
   		<div class='box_div'>
 	  		<p class="header" >Create plot</p>
 	  		<div id="virtual_load_button" class="row_div">
-		  		<input type="file" class="load_button load_button_true" autocomplete="off"
+		  		<input type="file" id="image_file_load_button" class="load_button load_button_true" autocomplete="off"
 		  		onchange="load_image_file(event)"></input>
-		  		<div class="load_button visual_button">Load file</div>
+		  		<div class="load_button visual_button" onclick="$('#image_file_load_button').click();">Load file</div>
 		  	</div>
 			<div class="row_div">
 				or
