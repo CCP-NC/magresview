@@ -165,6 +165,14 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 	 <script type="text/javascript" src="files/json2.js"></script>
 
+    <!-- Larmor frequency handling for quadrupolar shifts -->
+
+     <script type="text/javascript" src="files/larmor.js"></script>
+
+    <!-- Spins for common isotopes -->
+
+     <script type="text/javascript" src="files/spin_data.js"></script>
+
 	 <script>
 		
 		/* This script initializes the jQuery UI controls. The options mean:
@@ -204,8 +212,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
 		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
  		$("#ref_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: ref_table_popup_handler});
-		
-  		});  		
+        $("#larmor_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: larmor_table_popup_handler});		
+        });         
   		
   </script>
 
@@ -529,7 +537,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					  						<br>Scale (0 = auto): <input type="text" id="efg_ell_scale" maxlength="5" size="3" autocomplete="off" disabled="disabled" onkeypress="efg_ell_scale_handler(event)" value="0"></input> 
 											<br><br>
 											<br><br>
-			  						
+                                            <br><br>
+
 					  			<div id="efg_label_div" class="ctrl_right">
 
                                             <br><br>	
@@ -546,16 +555,27 @@ It provides the possibility to load example files from a dropdown menu but it ma
 												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_1" 
 												title="Vzz as electric gradient"
 												value="0" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled" checked>V<sub>zz</sub> (<span style="color: rgb(0, 128, 255)">au</span>)</input> <br> 
-												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_2"
+												
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_2"
 												title="Anisotropy, defined as Vzz-(Vxx+Vyy)/2"
 												value="1" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled"><span id="efg_par_1">Anisotropy</span> (<span style="color: rgb(0, 128, 255)">au</span>)</input> <br>
-												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_3"
+												
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_3"
 												title="Asymmetry, defined as (Vyy-Vxx)/Vzz"
 												value="2" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled"><span id="efg_par_2">Asymmetry</span> </input> <br>
-												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_4"
+												
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_4"
 												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered.
 WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
 												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
+
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_5"
+                                                title="Total shift in ppm, including both quadrupolar and magnetic shielding shifts. Requires 
+                                                inserting Larmor frequencies for each species of interest.
+WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
+                                                value="4" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Total shift (<span style="color: rgb(0, 128, 255)">ppm</span>)
+                                                &nbsp;<input type="button" id="efg_larmtable_butt" value="Larmor frequency table" onclick="$('#larmor_table_popup').dialog('open');">
+                                                </input> <br>
 											</form>
 
                                 <div id="efg_disabled_div" class="disabled_div_right">
@@ -782,11 +802,15 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					<input type="checkbox" id="isc_file_check" autocomplete="off" disabled="disabled">Indirect spin-spin coupling</input>
 					</div>
 					</div>
+                    <br>
 					Options:
 					<div class="ctrl_left">
 					<input type="checkbox" id="rot_file_check" autocomplete="off"
 					title="Rotate geometry and tensors according to the current visualization orientation rather than the default reference frame">Use on-screen rotation</input>
 					<div class="ctrl_right">
+                    <input type="checkbox" id="round_file_check" autocomplete="off"
+                    title="Use the floating point precision specified in options for labels when writing quantities in files">
+                    Use label precision</input>
 					</div>
 					</div>
 					
@@ -919,6 +943,17 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 			  
 			</div>
 
+            <div id="larmor_table_popup" title="Larmor frequency" class="popupdiv">
+              
+              <table id="larmor_table" class="ref_table">
+                <tr>
+                  <td>Element</td>
+                  <td>Larmor frequency (MHz)</td>
+                </tr>
+              </table>
+              
+            </div>
+
   </div>
   </div>  
   <div class="creditdiv" id="credit_div">
@@ -939,7 +974,7 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 		      test_req.open('get', 'mview_config.js', true);
 		      test_req.send();
 		    }
-		    $("#jmol_div").html(Jmol.getAppletHtml("mainJmol",main_info));
+		    $("#jmol_div").html(Jmol.getAppletHtml(jmolAppName, main_info));
 		  }
 		  catch(e)
 		  {
@@ -958,9 +993,9 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 		  
 		  //Handles the reloading of the page if needed because Java applet is required
 		  
-	          if (typeof(use_java_framework) == "boolean" && use_java_framework && window.location.search == "") {
-		    window.location.search = "?_USE=SIGNED";
-	          }
+          if (typeof(use_java_framework) == "boolean" && use_java_framework && window.location.search == "") {
+	          window.location.search = "?_USE=SIGNED";
+          }
 		  
 		  switch_handler(false);
 		  

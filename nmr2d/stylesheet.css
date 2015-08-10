@@ -162,6 +162,8 @@ html, body {
 	border-width: 3pt;
 	border-color: rgb(255,128,0);
 	border-radius: 5pt;
+    font-family: helvetica;
+    font-weight: bold;
 
 }
 

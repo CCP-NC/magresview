@@ -485,7 +485,6 @@ function draw_axis(axis)
 	if (!axes_visibility_handler(axis))
 		return;
 
-
 	//var width = $("#main_plot").width()*(1.0-2.0*default_border);
 	//var height = $("#main_plot").height()*(1.0-2.0*default_border);
 
@@ -1105,6 +1104,7 @@ function svg_download()
 	svg_to_save.find('.labtext').filter(function() { console.log($(this).css('opacity')); return $(this).css('opacity') == 0.0;}).remove();
 	svg_to_save.find('.plotdot').filter(function() { console.log($(this).css('opacity')); return $(this).css('opacity') == 0.0;}).remove();
 
+	/*
 	$('.download_button')
 	.attr('target', '_blank')
 	.attr('download', 'nmr2d.svg')
@@ -1117,6 +1117,31 @@ function svg_download()
 	.replace(/#/g, '%23')
 	.replace(/"/g, '%22')
 	.replace(/'/g, '%27'));
+	*/
+
+	// Testing pdf generation functionality here
+
+	var scale = 72.0/96.0;		// Pixel/pt ratio
+	var svg = $('#main_plot');
+	var w = svg.width()*scale;
+	var h = svg.height()*scale;
+	var pdf = new jsPDF('p', 'pt', [w, h]);
+    pdf.addSVG(svg.get(0), 0, 0, {
+	    scale: scale, // this is the ratio of px to pt units
+	    removeInvalid: true // this removes elements that could not be translated to pdf from the source svg
+    });
+
+    $('.download_button')
+		.attr('target', '_blank')
+		.attr('download', 'nmr2d.pdf')
+		.attr('href', pdf.output('datauristring')
+			.replace(/%/g, '%25')			//The % symbol must be replaced first, or everything goes down the drain!
+			.replace(/\n/g, '%0A')
+			.replace(/\t/g, '%09')
+			.replace(/&/g, '%26')
+			.replace(/#/g, '%23')
+			.replace(/"/g, '%22')
+			.replace(/'/g, '%27'));	
 
 	return true;
 

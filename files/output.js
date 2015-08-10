@@ -234,6 +234,7 @@ function include_controls_switch()
 		
 		document.getElementById("dip_file_check").disabled = false;
 		document.getElementById("sel_file_drop").disabled = false;
+		document.getElementById("round_file_check").disabled = false;
 	}
 	else if (filetype == "table" || filetype == "magres")
 	{
@@ -255,6 +256,7 @@ function include_controls_switch()
 		
 		document.getElementById("dip_file_check").disabled = false;
 		document.getElementById("sel_file_drop").disabled = false;
+		document.getElementById("round_file_check").disabled = false;
 	}
 	else
 	{
@@ -266,6 +268,7 @@ function include_controls_switch()
 		document.getElementById("isc_file_check").disabled = true;
 		document.getElementById("dip_file_check").disabled = true;
 		document.getElementById("sel_file_drop").disabled = true;
+		document.getElementById("round_file_check").disabled = true;
 	}
 	
 	range_sphere_handler();
@@ -365,7 +368,12 @@ function trim_num(n, d)
 
 function recap_file_gen(data_set, out)
 {
-	//This kind of file is meant to be a recap with readability as its main purpose. As such, it will be spaced and commented as much as possible
+	// Defining precision
+	var prec = parseInt(document.getElementById("opt_lab_prec").value);	
+	prec = isNaN(prec)? 1 : prec;		// If it's NaN or something, use default value
+
+	var coup_prec = parseInt(document.getElementById("opt_coup_lab_prec").value);	
+	coup_prec = isNaN(coup_prec)? 2 : coup_prec;		// If it's NaN or something, use default value		//This kind of file is meant to be a recap with readability as its main purpose. As such, it will be spaced and commented as much as possible
 	
 	//Uses the same method as the json one to gather data from Jmol
 		
@@ -484,9 +492,11 @@ function recap_file_gen(data_set, out)
 			*/
 			
 			//Write down Haeberlen parameters
-			out.write("\nHaeberlen parameters:\ns_iso: " + haeb[0] + " ppm\t\taniso: " + haeb[1] + " ppm\t\tasymm: " + haeb[2] + "\n");			
+			out.write("\nHaeberlen parameters:\ns_iso: " + haeb[0].toFixed(prec) 
+					+ " ppm\t\taniso: " + haeb[1].toFixed(prec) + " ppm\t\tasymm: " + haeb[2].toFixed(prec) + "\n");			
 			//Write down Euler angles
-			out.write("\nEuler angles:\nalpha: " + eul_ang[0] + "\t\tbeta: " + eul_ang[1] + "\t\tgamma: " + eul_ang[2] + "\n");			
+			out.write("\nEuler angles:\nalpha: " + eul_ang[0].toFixed(prec) 
+					+ "\t\tbeta: " + eul_ang[1].toFixed(prec) + "\t\tgamma: " + eul_ang[2].toFixed(prec) + "\n");			
 			
 			//Dividing line
 			out.write("\n\n--------------------------------------------------------------------------------------\n\n");
@@ -532,9 +542,11 @@ function recap_file_gen(data_set, out)
 			}
 			
 			//Write down Haeberlen parameters
-			out.write("\nHaeberlen parameters:\nChi: " + haeb[0] + " Hz\t\tasymm: " + haeb[1] + "\n");			
+			out.write("\nHaeberlen parameters:\nChi: " + haeb[0].toFixed(prec)
+					+ " Hz\t\tasymm: " + haeb[1].toFixed(prec) + "\n");			
 			//Write down Euler angles
-			out.write("\nEuler angles:\nalpha: " + eul_ang[0] + "\t\tbeta: " + eul_ang[1] + "\t\tgamma: " + eul_ang[2] + "\n");			
+			out.write("\nEuler angles:\nalpha: " + eul_ang[0].toFixed(prec)
+				    + "\t\tbeta: " + eul_ang[1].toFixed(prec) + "\t\tgamma: " + eul_ang[2].toFixed(prec) + "\n");			
 			
 			//Dividing line
 			out.write("\n\n--------------------------------------------------------------------------------------\n\n");
@@ -649,11 +661,12 @@ function recap_file_gen(data_set, out)
 			*/
 			
 			//Write down coupling constant
-			out.write("\nCoupling:\nJ: " + haeb[0]+ " Hz\n");			
+			out.write("\nCoupling:\nJ: " + haeb[0].toFixed(coup_prec) + " Hz\n");			
 			//Write down Haeberlen parameters
-			out.write("\nHaeberlen parameters:\neta: " + haeb[1] + " Hz\t\tasymm: " + haeb[2] + "\n");			
+			out.write("\nHaeberlen parameters:\neta: " + haeb[1].toFixed(coup_prec) + " Hz\t\tasymm: " + haeb[2].toFixed(coup_prec) + "\n");			
 			//Write down Euler angles
-			out.write("\nEuler angles:\nalpha: " + eul_ang[0] + "\t\tbeta: " + eul_ang[1] + "\t\tgamma: " + eul_ang[2] + "\n");			
+			out.write("\nEuler angles:\nalpha: " + eul_ang[0].toFixed(prec)
+				    + "\t\tbeta: " + eul_ang[1].toFixed(prec) + "\t\tgamma: " + eul_ang[2].toFixed(prec) + "\n");			
 			
 			//Dividing line
 			out.write("\n\n--------------------------------------------------------------------------------------\n\n");
@@ -666,6 +679,19 @@ function recap_file_gen(data_set, out)
 //An output in normal .magres format
 
 function magres_file_gen(data_set, out) {
+
+	// Precision to use is determined based on options
+	var prec = 8; // Default
+	var coup_prec = 8;
+
+	if (document.getElementById("round_file_check").checked) {
+		// Defining precision
+		prec = parseInt(document.getElementById("opt_lab_prec").value);	
+		prec = isNaN(prec)? 1 : prec;		// If it's NaN or something, use default value
+
+		coup_prec = parseInt(document.getElementById("opt_coup_lab_prec").value);	
+		coup_prec = isNaN(coup_prec)? 2 : coup_prec;		// If it's NaN or something, use default value		//This kind of file is meant to be a recap with readability as its main purpose. As such, it will be spaced and commented as much as possible		
+	}
 	
 	//Outputs as a new .magres file
 	
@@ -751,7 +777,7 @@ function magres_file_gen(data_set, out) {
 		
 		for (var i = 0; i < 3; ++i) {
 			for (var j = 0; j < 3; ++j) {
-				out.write(data_set.atoms.lattice[0][i][j] + " ");
+				out.write(data_set.atoms.lattice[0][i][j].toFixed(coup_prec) + " ");
 			}
 		}
 		out.write("\n");
@@ -764,7 +790,7 @@ function magres_file_gen(data_set, out) {
 		var a = data_set.atoms.atom[i];
 		out.write("atom " + a.species + " " + a.label + " " + i_to_info[a.id][2]);
 		for (var j = 0; j < 3; ++j) {
-			out.write(" " + a.position[j]);
+			out.write(" " + a.position[j].toFixed(coup_prec));
 		}
 		out.write("\t#" + a.label + "_" + a.index);
 		out.write("\n");
@@ -794,7 +820,7 @@ function magres_file_gen(data_set, out) {
 				{
 					for (var k = 0; k < 3; ++k)
 					{
-						out.write(" " + ms.sigma[j][k]);
+						out.write(" " + ms.sigma[j][k].toFixed(prec));
 					}
 				}
 				out.write("\n");
@@ -814,7 +840,7 @@ function magres_file_gen(data_set, out) {
 				{
 					for (var k = 0; k < 3; ++k)
 					{
-						out.write(" " + efg.V[j][k]);
+						out.write(" " + efg.V[j][k].toFixed(prec));
 					}
 				}
 				out.write("\n");
@@ -835,7 +861,7 @@ function magres_file_gen(data_set, out) {
 				{
 					for (var k = 0; k < 3; ++k)
 					{
-						out.write(" " + isc.sigma[j][k]);					
+						out.write(" " + isc.sigma[j][k].toFixed(coup_prec));					
 					}
 				}
 				out.write("\n");
@@ -876,7 +902,7 @@ function magres_file_gen(data_set, out) {
 			out.write("dip " + i_to_info[dip.atom1_id][0] + " " + i_to_info[dip.atom1_id][2] + " " + i_to_info[dip.atom2_id][0] + " " + i_to_info[dip.atom2_id][2]);
 			for (var j = 0; j < 3; ++j)
 			{
-				out.write(" " + dip.mview_data[j]);
+				out.write(" " + dip.mview_data[j].toFixed(coup_prec));
 			}
 			out.write("\n");
 			
@@ -891,6 +917,19 @@ function magres_file_gen(data_set, out) {
 
 function spinsys_file_gen(data_set, out)
 {
+	// Precision to use is determined based on options
+	var prec = 8; // Default
+	var coup_prec = 8;
+
+	if (document.getElementById("round_file_check").checked) {
+		// Defining precision
+		prec = parseInt(document.getElementById("opt_lab_prec").value);	
+		prec = isNaN(prec)? 1 : prec;		// If it's NaN or something, use default value
+
+		coup_prec = parseInt(document.getElementById("opt_coup_lab_prec").value);	
+		coup_prec = isNaN(coup_prec)? 2 : coup_prec;		// If it's NaN or something, use default value		//This kind of file is meant to be a recap with readability as its main purpose. As such, it will be spaced and commented as much as possible		
+	}
+
 	//Print crystallographic labels and compile id -> label and element table
 	
 	var i_to_info = {};
@@ -993,8 +1032,9 @@ function spinsys_file_gen(data_set, out)
 			if ('mview_data' in ms)
 			{
 				var n = atom_lookup[ms.atom_id].n;
-				out.write(" shift\t" + n + " " + (-ms.mview_data[0]) + "p " + (-ms.mview_data[1])
-				+ "p " + (ms.mview_data[2]) + " " + (ms.mview_data[3]) + " " + (ms.mview_data[4]) + " " + (ms.mview_data[5]) + "\n");
+				out.write(" shift\t" + n + " " + (-ms.mview_data[0].toFixed(prec)) + "p " + (-ms.mview_data[1].toFixed(prec))
+				+ "p " + (ms.mview_data[2].toFixed(prec)) + " " + (ms.mview_data[3].toFixed(prec))
+				 + " " + (ms.mview_data[4].toFixed(prec)) + " " + (ms.mview_data[5].toFixed(prec)) + "\n");
 			}
 		}
 	}
@@ -1012,8 +1052,9 @@ function spinsys_file_gen(data_set, out)
 				{
 				    continue;
 				}
-				out.write(" quadrupole\t" + n + " 2 " + (efg.mview_data[0]) + " " + (efg.mview_data[1]) 
-				+ " " + (efg.mview_data[2]) + " " + (efg.mview_data[3]) + " " + (efg.mview_data[4]) + "\n");
+				out.write(" quadrupole\t" + n + " 2 " + (efg.mview_data[0].toFixed(prec)) + " " + (efg.mview_data[1].toFixed(prec)) 
+				+ " " + (efg.mview_data[2].toFixed(prec)) + " " + (efg.mview_data[3].toFixed(prec))
+				+ " " + (efg.mview_data[4].toFixed(prec)) + "\n");
 			}
 		}
 	}
@@ -1028,8 +1069,9 @@ function spinsys_file_gen(data_set, out)
 			{
 				n1 = atom_lookup[dip.atom1_id].n;
 				n2 = atom_lookup[dip.atom2_id].n;
-				out.write(" dipole\t" + n2 + " " + n1 + " " + (dip.mview_data[0]/(2.0*Math.PI))
-				+ " " + (dip.mview_data[1]) + " " + (dip.mview_data[2]) + " " + (dip.mview_data[3]) + "\n");
+				out.write(" dipole\t" + n2 + " " + n1 + " " + (dip.mview_data[0]/(2.0*Math.PI)).toFixed(coup_prec)
+				+ " " + (dip.mview_data[1].toFixed(coup_prec)) + " " + (dip.mview_data[2].toFixed(coup_prec))
+				+ " " + (dip.mview_data[3].toFixed(coup_prec)) + "\n");
 			}
 		}
 	}
@@ -1045,8 +1087,10 @@ function spinsys_file_gen(data_set, out)
 	                    n1 = atom_lookup[isc.atom1_id].n;
 	                    n2 = atom_lookup[isc.atom2_id].n;				
 			}
-	                out.write(" jcoupling\t" + n2 + " " + n1 + " " + (isc.mview_data[0]) + " " + (isc.mview_data[1])
-			+ " " + (isc.mview_data[2]) + " " + (isc.mview_data[3]) + " " + (isc.mview_data[4]) + " " + (isc.mview_data[5]) + "\n");
+	                out.write(" jcoupling\t" + n2 + " " + n1 + " " + (isc.mview_data[0].toFixed(coup_prec))
+	                 		+ " " + (isc.mview_data[1].toFixed(coup_prec)) + " " + (isc.mview_data[2].toFixed(coup_prec)) 
+	                 		+ " " + (isc.mview_data[3].toFixed(coup_prec)) + " " + (isc.mview_data[4].toFixed(coup_prec)) 
+	                 		+ " " + (isc.mview_data[5].toFixed(coup_prec)) + "\n");
 		}
 	}
 	
@@ -1062,6 +1106,20 @@ function spinsys_file_gen(data_set, out)
 
 function table_file_gen(data_set, out)
 {
+
+	// Precision to use is determined based on options
+	var prec = 8; // Default
+	var coup_prec = 8;
+
+	if (document.getElementById("round_file_check").checked) {
+		// Defining precision
+		prec = parseInt(document.getElementById("opt_lab_prec").value);	
+		prec = isNaN(prec)? 1 : prec;		// If it's NaN or something, use default value
+
+		coup_prec = parseInt(document.getElementById("opt_coup_lab_prec").value);	
+		coup_prec = isNaN(coup_prec)? 2 : coup_prec;		// If it's NaN or something, use default value		//This kind of file is meant to be a recap with readability as its main purpose. As such, it will be spaced and commented as much as possible		
+	}
+
 	//This kind of file is meant to be a recap with easy parsing as its main purpose
 	
 	//Uses the same method as the json one to gather data from Jmol	
@@ -1144,9 +1202,9 @@ function table_file_gen(data_set, out)
 			//Write down atomic label
 			out.write("\n" + sp_label + "_" + atom_i);
 			//Write down Haeberlen and eigenvalue representations and Euler angles
-			out.write("\t" + haeb[0] + "\t" + haeb[1] + "\t" + haeb[2]);
-			out.write("\t" + eigvals[0] + "\t" + eigvals[1] + "\t" + eigvals[2]);
-			out.write("\t" + eul_ang[0] + "\t" + eul_ang[1] + "\t" + eul_ang[2]);			
+			out.write("\t" + haeb[0].toFixed(prec) + "\t" + haeb[1].toFixed(prec) + "\t" + haeb[2].toFixed(prec));
+			out.write("\t" + eigvals[0].toFixed(prec) + "\t" + eigvals[1].toFixed(prec) + "\t" + eigvals[2].toFixed(prec));
+			out.write("\t" + eul_ang[0].toFixed(prec) + "\t" + eul_ang[1].toFixed(prec) + "\t" + eul_ang[2].toFixed(prec));			
 		}
 		
 		out.write("\n\n");
@@ -1178,9 +1236,9 @@ function table_file_gen(data_set, out)
 			//Write down atomic label
 			out.write("\n" + sp_label + "_" + atom_i);
 			//Write down Haeberlen and eigenvalue representations and Euler angles
-			out.write("\t" + haeb[0] + "\t" + haeb[1]);
-			out.write("\t" + eigvals[0] + "\t" + eigvals[1] + "\t" + eigvals[2]);
-			out.write("\t" + eul_ang[0] + "\t" + eul_ang[1] + "\t" + eul_ang[2]);			
+			out.write("\t" + haeb[0].toFixed(prec) + "\t" + haeb[1].toFixed(prec));
+			out.write("\t" + eigvals[0].toFixed(prec) + "\t" + eigvals[1].toFixed(prec) + "\t" + eigvals[2].toFixed(prec));
+			out.write("\t" + eul_ang[0].toFixed(prec) + "\t" + eul_ang[1].toFixed(prec) + "\t" + eul_ang[2].toFixed(prec));			
 		}
 		
 		out.write("\n\n");
@@ -1210,7 +1268,7 @@ function table_file_gen(data_set, out)
 			//Write down atomic labels
 			out.write("\n" + sp1_label + "_" + atom1_i + "\t" + sp2_label + "_" + atom2_i);
 			//Write down couplings and angles
-			out.write("\t" + dip_c + "\t" + eul_ang[0] + "\t" + eul_ang[1]);
+			out.write("\t" + dip_c.toFixed(coup_prec) + "\t" + eul_ang[0].toFixed(coup_prec) + "\t" + eul_ang[1].toFixed(coup_prec));
 		}
 		out.write("\n\n");
 	
@@ -1244,9 +1302,9 @@ function table_file_gen(data_set, out)
 			//Write down atomic labels
 			out.write("\n" + sp1_label + "_" + atom1_i + "\t" + sp2_label + "_" + atom2_i);
 			//Write down data
-			out.write("\t" + haeb[0] + "\t" + haeb[1] + "\t" + haeb[2]);
-			out.write("\t" + eigvals[0] + "\t" + eigvals[1] + "\t" + eigvals[2]);
-			out.write("\t" + eul_ang[0] + "\t" + eul_ang[1] + "\t" + eul_ang[2]);
+			out.write("\t" + haeb[0].toFixed(coup_prec) + "\t" + haeb[1].toFixed(coup_prec) + "\t" + haeb[2].toFixed(coup_prec));
+			out.write("\t" + eigvals[0].toFixed(coup_prec) + "\t" + eigvals[1].toFixed(coup_prec) + "\t" + eigvals[2].toFixed(coup_prec));
+			out.write("\t" + eul_ang[0].toFixed(coup_prec) + "\t" + eul_ang[1].toFixed(coup_prec) + "\t" + eul_ang[2].toFixed(coup_prec));
 		}
 		
 		out.write("\n\n");
@@ -1483,7 +1541,7 @@ function compile_data_set(ds, ac, use_all, ignore_refs, include_r)
 				catch(err)
 				{
 					return false;
-				}
+				}				
 				for (var iso = 0; iso < isos.length; ++iso)
 				{
 					if (isos[iso][0] < 0)
@@ -1718,7 +1776,7 @@ function compile_data_set(ds, ac, use_all, ignore_refs, include_r)
 
 function ref_table_gen() {
 	
-	$('.ref_table').html('').append('<tr><td>Element</td><td>Reference (ppm)</td></tr>');
+	$('#ref_table').html('').append('<tr><td>Element</td><td>Reference (ppm)</td></tr>');
 	
 	for (var s = 0; s < atom_set.speciesno; ++s)
 	{
@@ -1726,7 +1784,7 @@ function ref_table_gen() {
 		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'ref_label_' + atom_set.atom_species_labels[s]));
 		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({'id': 'ref_input_' + atom_set.atom_species_labels[s], 'value': ''})));
 		
-		$('.ref_table').append(t_row);
+		$('#ref_table').append(t_row);
 	}
 	
 }

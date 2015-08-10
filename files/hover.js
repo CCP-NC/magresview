@@ -18,7 +18,7 @@ function hover_load() {
 }
 
 function drop_handler(e) {
-    
+
     if (e.preventDefault)
     {
         e.preventDefault();
@@ -38,6 +38,5 @@ function drag_handler(e) {
     
     hover_on = (e.type == "dragover");
     $(dragdrop_target).toggleClass("hovered", hover_on);
-    console.log($(dragdrop_target).attr('class'));
     
 }

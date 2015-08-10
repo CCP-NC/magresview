@@ -97,10 +97,25 @@ function efg_label_handler()
 		 }
 	}
 
-	var conv = document.getElementById("t_conv_choice").value;
-	
+	var conv = document.getElementById("t_conv_choice").value;	
 	var efg_plot_jmol_script = "";
 	
+
+	// This bit of code runs if we need to calculate the total shifts
+	if (l_type == 4) {
+		for (var l = 0; l < atom_set.speciesno; ++l) {
+ 			var lab = atom_set.atom_species_labels[l];
+	        var larm = parseFloat($('#larmor_input_' + lab).val());
+
+	        // If not present, treat it as 100 MHz
+	        larm = isNaN(larm)?100:larm;
+
+	        // And add it up
+ 			efg_plot_jmol_script += "{" + lab + "_*}.property_" + tag + "_tot_shift = {" + lab + "_*}.tensor('ms', 'isotropy').add( \
+ 									 {" + lab + "_*}.property_" + tag + "_delta_Q.mul(" + (1.0/(larm*larm)) + "));";
+ 		}
+	}
+
 	label_components[2] = "";
 
 	if(efg_plot_on)
@@ -139,10 +154,14 @@ function efg_label_handler()
 			case 3:
 				prop = "chi";
 				break;
+			case 4:
+				prop = "tot_shift";
+				break;
 		}
 
 		// The expression is a bit conditional because of units
-		label_components[2] = prop + " = %." + prec + "[property_" + tag + "_" + prop + (l_type == 3? "_" + q_units : "") + "]" + (l_type < 2? " au" : (l_type == 3? " " + q_units : ""));
+		l_units = [" au", " au", " ", " " + q_units, " ppm"];
+		label_components[2] = prop + " = %." + prec + "[property_" + tag + "_" + prop + (l_type == 3? "_" + q_units : "") + "]" + l_units[l_type];
 	}
 	
 	efg_plot_jmol_script += label_composer();

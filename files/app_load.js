@@ -30,6 +30,9 @@ if (window.innerWidth && window.innerHeight) {
  winH = window.innerHeight;
 }
 
+// The base name for the Jmol applet
+var jmolAppName = "mainJmol";
+
 //The JMol applet's size is calculated on the basis of the window size. It is 95% of the size of the main_app division, which is 60% of the page in width and 80% of the page in height
 
 var jmolW = Math.floor(0.6*0.95*winW);
@@ -60,7 +63,6 @@ var main_info = {
 }
 
 //This line prevents drag-and-dropping on the Jmol applet
-
 Jmol._Applet.prototype._setDragDrop = function(){};
 
 //These "safe" functions allow to extract information from the Jmol applet safely - i.e. without the applet lagging behind the javascript and causing weird behaviour
@@ -158,6 +160,10 @@ function enable_NMR_controls()
 			document.getElementById("eultype1_efg").checked = true;
 			document.getElementById("eultype2_efg").checked = true;
 		}
+		else
+		{
+			document.getElementById("efg_ltype_5").disabled = false; // Enabled only if both are present!			
+		}
 		efg_dropdown_update();
 
 		// Hide the disabled_div 
@@ -236,6 +242,7 @@ function disable_NMR_controls()
 			document.getElementById("efg_ltype_2").disabled = true;
 			document.getElementById("efg_ltype_3").disabled = true;
 			document.getElementById("efg_ltype_4").disabled = true;
+			document.getElementById("efg_ltype_5").disabled = true;
 			document.getElementById("efg_ell_scale").value = "0";
 			document.getElementById("efg_ell_scale").disabled = true;
 			document.getElementById("eultype1_efg").disabled = true;
@@ -347,12 +354,16 @@ function reset_visualization_options() {
 			
 }
 
-//This serves the purpose of turning localization OFF
-//It's crucial because localized versions of Jmol will send different messages that won't be properly parsed by afterscript_callback
-
 function appready_callback()
 {
+	//This serves the purpose of turning localization OFF
+	//It's crucial because localized versions of Jmol will send different messages that won't be properly parsed by afterscript_callback
 	Jmol.script(mainJmol, 'set languageTranslation OFF');
+    // This one more line instead deactivates Jmol's default drop event catching, 
+    // so that MagresView's will be always working, even if one drops on the applet
+    $("#" + jmolAppName + "_appletdiv").off("drop");
+    // And load the spin table
+    load_spin_inJmol();
 }
 
 //This callback gets called when Jmol executes a line of script [with Jmol.script(...)]. The callback's purpose is to recognize when the script has been executed and provide the necessary actions.
@@ -495,6 +506,7 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 
 		sel_drop_update();
 		ref_table_gen();		//Generates the shield reference table for output
+		larmor_table_gen();		//Same for Larmor frequency
 
 		enable_NMR_controls();
 

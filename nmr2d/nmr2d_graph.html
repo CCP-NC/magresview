@@ -5,6 +5,9 @@
     <script type="text/javascript" src="../d3/d3.min.js"></script>
     <script type="text/javascript" src="../jquery/js/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="../jquery/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="svg2pdf/jspdf.min.js"></script>
+    <script type="text/javascript" src="svg2pdf/rgbcolor.js"></script>
+    <script type="text/javascript" src="svg2pdf/svgToPdf.js"></script>
     <script type="text/javascript" src="nmr2d.js"></script>
 
     <link rel="icon" type="image/png" href="images/favico.png">
@@ -123,6 +126,7 @@
             <td>
               <input type="checkbox" id="psize_cut_on" onchange="psize_cut_on_handler(event)">
               Cutoff:&nbsp;<input type="text" id="psize_cut" maxlength="5" size="3" value="N/A" onkeypress="psize_cut_handler(event)" disabled>
+              &nbsp; <span style="font-weight: normal">&#8491;</span>
             </td>
             <td>
               Opacity:
