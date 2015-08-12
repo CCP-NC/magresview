@@ -151,6 +151,7 @@ function enable_NMR_controls()
 		document.getElementById("efg_ltype_2").disabled = false;
 		document.getElementById("efg_ltype_3").disabled = false;
 		document.getElementById("efg_ltype_4").disabled = false;
+		document.getElementById("efg_ltype_5").disabled = false;
 		document.getElementById("efg_ell_scale").disabled = false;
 		document.getElementById("eultype1_efg").disabled = false;
 		document.getElementById("eultype2_efg").disabled = false;
@@ -160,10 +161,7 @@ function enable_NMR_controls()
 			document.getElementById("eultype1_efg").checked = true;
 			document.getElementById("eultype2_efg").checked = true;
 		}
-		else
-		{
-			document.getElementById("efg_ltype_5").disabled = false; // Enabled only if both are present!			
-		}
+
 		efg_dropdown_update();
 
 		// Hide the disabled_div 

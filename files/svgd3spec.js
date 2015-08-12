@@ -13,6 +13,7 @@ function svg_spectrum_plot(from_change)
 {
     var style = $('#spec_style_drop').val();
     var plabs_on = $('#spec_plabel_check').prop('checked');
+    var add_qshifts = $('#spec_quadshift_butt').prop('checked');
 
     // First, gather the data
 
@@ -42,7 +43,12 @@ function svg_spectrum_plot(from_change)
         
         var lab = atom_set.atom_species_labels[l];
         var ms_shifts = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.tensor('ms', 'isotropy')");
-        
+        if (add_qshifts) {
+            var q_shifts = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.tensor('efg', 'chi')");
+            var q_etas = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.tensor('efg', 'asymmetry')");
+            var q_isos = [].concat(Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.element"));
+        }    
+
         if (plabs_on) {
             ms_labels = Jmol.evaluateVar(mainJmol, "{" + lab + "_* and selected}.atomname");        
             // To take care of the case where only one atom is present
@@ -52,8 +58,15 @@ function svg_spectrum_plot(from_change)
         }
         
         var ref = parseFloat($('#ref_input_' + lab).val());
-        
+        var larm = get_larmor(lab);
+
         for (var i = 0; i < ms_shifts.length; ++i) {
+
+            // First let's add the quadrupolar bit if needed
+            if (add_qshifts) {
+                ms_shifts[i] += efg_total_shift_calc(q_shifts[i], q_etas[i], q_isos[i], larm);
+            }
+
             if (!isNaN(ref)) {
                 ms_shifts[i] = ref - ms_shifts[i];
             }

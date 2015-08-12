@@ -1377,7 +1377,7 @@ function init_data_set(data_set)
 
 //Fill in the data_set with the required atoms
 
-function compile_data_set(ds, ac, use_all, ignore_refs, include_r)
+function compile_data_set(ds, ac, use_all, ignore_refs)
 {
 	var eul_conv = "zyz"; //May be changed in future
 	var conv_table = {
@@ -1385,8 +1385,6 @@ function compile_data_set(ds, ac, use_all, ignore_refs, include_r)
 		"zxz": "%5" 
 	}
 	
-	include_r = include_r || false;	// This one is basically used only by the 2D NMR tool
-
 	ds.soft_targ = document.getElementById("soft_targ_drop").value;
 	
 	var atom_n = 0;    //All atoms in data_set will be simply ordered by an increasing number, no crystallographic labels

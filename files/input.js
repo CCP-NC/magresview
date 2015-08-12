@@ -406,12 +406,15 @@ function get_atom_info()
 
 function load_data_asproperty()
 {
+	console.log("Loading data as properties in Jmol...");
 	load_data_script = load_data_asproperty_script();
 	Jmol.script(mainJmol, load_data_script);
+	console.log("Loading data complete");
 }
 
 function load_data_asproperty_script()
 {
+
 	load_data_script = "";
 
 	if(atom_set.has_ms)
@@ -440,19 +443,6 @@ function load_data_asproperty_script()
 			{all}.property_" + tag + "_chi_MHz = a.div(1e6);   \
 			{all}.property_" + tag + "_chi_kHz = a.div(1e3);";
 		}
-
-		
-		// Now define the property for the quadrupolar shifts
-		load_data_script += "function delta_Q_" + tag + "_calc {	\
-			var I = abs(spin_data_table[_x.element]);		\
-			if (I < 1) { return 0.0; }				\
-			var m = I - (I \\ 1);					\
-			var Pq = _x.property_" + tag + "_chi_MHz*sqrt(1.0+(_x.property_" + tag + "_asymm**2)/3.0); \
-			return -(3.0/40.0)*(Pq**2)*(I*(I+1)-9.0*m*(m-1)-3.0)/(I**2*(2*I-1)**2)*1e6;	\
-		};";
-
-		// And store it
-		load_data_script += "{all}.property_" + tag + "_delta_Q = {all}.delta_Q_" + tag + "_calc.all;";
 
 	}
 

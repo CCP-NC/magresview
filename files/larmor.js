@@ -7,6 +7,7 @@
 
 //This file contains all the functions related to Larmor frequency (used for quadrupolar shifts)
 
+// Default generators and handlers for Larmor frequency table (see reference shifts one for the same identical stuff)
 function larmor_table_gen() {
     
     $('#larmor_table').html('').append('<tr><td>Element</td><td>Larmor frequency (MHz)</td></tr>');
@@ -31,9 +32,15 @@ function larmor_table_popup_handler()
     plot_update();
 }
 
-function load_spin_inJmol() {
+// Recover a Larmor frequency value
+function get_larmor(lab) {
+        var larm = parseFloat($('#larmor_input_' + lab).val());
+        // If not present, treat it as 100 MHz
+        return isNaN(larm)?100:larm;
+}
 
-    // To be ran only once: this bit loads the whole spin data dict inside Jmol!
+// To be ran only once: this bit loads the whole spin data dict inside Jmol!
+function load_spin_inJmol() {
     Jmol.script(mainJmol, "spin_data_table = " + spin_data_string + ";");
 
 }

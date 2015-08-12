@@ -1,10 +1,12 @@
 var data_set = {};
 var atom_set = {};
 var reference_list = {};
+var larmorfreq_list = {};
 
 var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
 var id_label_list = {};		// label classified by id
 var id_ms_list = {};		// ms classified by id
+var id_efg_list = {};		// efg (chi and eta) classified by id
 var id_r_list = {};			// distance classified by id
 var id_dip_list = {};		// dip classified by id
 var id_isc_list = {};		// isc classified by id
@@ -49,13 +51,15 @@ function document_ready_callback() {
     window.opener.init_data_set(data_set);
     var t_0 = (new Date()).getTime()/1000.0;
     window.opener.compile_data_set(data_set, {'t': 'all'}, true, true);   // Ignore shifts, they will be read later
-    console.log("Total loading time: " + (new Date()).getTime()/1000.0 - t_0 + " s");
+    console.log("Total loading time: " + ((new Date()).getTime()/1000.0 - t_0) + " s");
     
     for (var s = 0; s < atom_set.speciesno; ++s)
     {
 		var lab = atom_set.atom_species_labels[s];
     	var ref = parseFloat(window.opener.document.getElementById('ref_input_' + lab).value);
+    	var larm = parseFloat(window.opener.document.getElementById('larmor_input_' + lab).value);
 		reference_list[lab] = ref;
+		larmorfreq_list[lab] = larm;
     }
 
     set_theme();
@@ -68,12 +72,14 @@ function document_ready_callback() {
 
 	dndrop_init();
 	ref_table_init();
+	larmor_table_init();
 	update_species();
 	reset_scale('x');
 	reset_scale('y');	
 
 }
 
+// Initializers for reference and Larmor frequency popups
 function ref_table_init()
 {
 	$("#ref_table_popup").dialog({
@@ -81,13 +87,13 @@ function ref_table_init()
 		modal: true, 
 		position: {my: 'right', at: 'right', of: window}, 
 		width: '330pt', 
-		close: ref_table_popup_handler});
+		close: table_popup_handler});
 
 	var header = $('<tr></tr>');
 	header.append($('<td></td>').html("Element").addClass("ref_td"));
 	header.append($('<td></td>').html("Reference (ppm)").addClass("ref_td"));
 
-	$('.ref_table').html('').append(header);
+	$('#ref_table').html('').append(header);
 	
 	for (var s = 0; s < atom_set.speciesno; ++s)
 	{
@@ -97,48 +103,74 @@ function ref_table_init()
 		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({
 			'id': 'ref_input_' + lab, 
 			'value': (isNaN(reference_list[lab])? '' : reference_list[lab])})
-		.keypress(ref_change_handler)));
+		.keypress(popup_change_handler)));
 		
-		$('.ref_table').append(t_row);
+		$('#ref_table').append(t_row);
 	}
 	
 }
 
-function ref_change_handler(evt)
+function larmor_table_init()
+{
+	$("#larmor_table_popup").dialog({
+		autoOpen: false, 
+		modal: true, 
+		position: {my: 'right', at: 'right', of: window}, 
+		width: '330pt', 
+		close: table_popup_handler});
+
+	var header = $('<tr></tr>');
+	header.append($('<td></td>').html("Element").addClass("ref_td"));
+	header.append($('<td></td>').html("Larmor frequency (MHz)").addClass("ref_td"));
+
+	$('#larmor_table').html('').append(header);
+	
+	for (var s = 0; s < atom_set.speciesno; ++s)
+	{
+		var t_row = $('<tr></tr>');
+		var lab = atom_set.atom_species_labels[s];
+		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'larmor_label_' + atom_set.atom_species_labels[s]).addClass('ref_td'));
+		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({
+			'id': 'larmor_input_' + lab, 
+			'value': (isNaN(larmorfreq_list[lab])? '' : larmorfreq_list[lab])})
+		.keypress(popup_change_handler)));
+		
+		$('#larmor_table').append(t_row);
+	}
+	
+}
+
+// These two functions basically are easier if we make them common for Larmor and reference popups. The differences are minimal anyway
+function popup_change_handler(evt)
 {
 	//Compatibility code - see console.js for details
 	var evt = window.event || evt;
 	var myKey = (evt.keyCode)? evt.keyCode: evt.charCode;
-	
-	console.log(myKey);
-
 	if (myKey == 13)
 	{
 		evt.preventDefault();
-		ref_table_popup_handler();
+		table_popup_handler();
 	}
 }
 
-function ref_table_popup_handler()
+function table_popup_handler()
 {
-	// Update the reference list, then the plot and everything else, really
-
+	// Update the reference and the larmor frequency list, then the plot and everything else, really
 	for (var s = 0; s < atom_set.speciesno; ++s)
 	{
 		var lab = atom_set.atom_species_labels[s];
 		reference_list[lab] = parseFloat($('#ref_input_' + lab).val());		
+		larmorfreq_list[lab] = parseFloat($('#larmor_input_' + lab).val());		
 	}
 
-	//reset_scale('x');
-	//reset_scale('y');
 	redraw_all();
-
 }
 
 function compile_lists()
 {
 	var atom_raw_list = data_set['atoms']['atom'];
 	var ms_raw_list   = data_set['magres']['ms'];	
+	var efg_raw_list   = data_set['magres']['efg'];	
 	var dip_raw_list   = data_set['magres']['dip'];
 	var isc_raw_list   = data_set['magres']['isc']; // This will be null if there are no isc
 
@@ -159,6 +191,13 @@ function compile_lists()
 	{
 		var ms = ms_raw_list[i];
 		id_ms_list[ms.atom_id] = ms.mview_data[0];
+	}
+
+	// Now for efg-by-id
+	for (var i=0; i < efg_raw_list.length; ++i)
+	{
+		var efg = efg_raw_list[i];
+		id_efg_list[efg.atom_id] = [efg.mview_data[0], efg.mview_data[1]];
 	}
 
 	// Now a dip-by-id one. Each id only contains the pairing with the ids higher or equal

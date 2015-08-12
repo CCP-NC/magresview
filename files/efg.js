@@ -103,17 +103,7 @@ function efg_label_handler()
 
 	// This bit of code runs if we need to calculate the total shifts
 	if (l_type == 4) {
-		for (var l = 0; l < atom_set.speciesno; ++l) {
- 			var lab = atom_set.atom_species_labels[l];
-	        var larm = parseFloat($('#larmor_input_' + lab).val());
-
-	        // If not present, treat it as 100 MHz
-	        larm = isNaN(larm)?100:larm;
-
-	        // And add it up
- 			efg_plot_jmol_script += "{" + lab + "_*}.property_" + tag + "_tot_shift = {" + lab + "_*}.tensor('ms', 'isotropy').add( \
- 									 {" + lab + "_*}.property_" + tag + "_delta_Q.mul(" + (1.0/(larm*larm)) + "));";
- 		}
+		efg_plot_jmol_script += efg_total_shifts_script(tag);
 	}
 
 	label_components[2] = "";
@@ -204,15 +194,17 @@ function efg_color_handler()
 	}
 	
 	if(efg_plot_on)
-	{
-		efg_plot_jmol_script += "color {displayed} {200, 200, 200}; {all}.property_efg_colorscale = NaN;";
+	{	
 		if (l_type == 3) {
-			efg_plot_jmol_script += " var p_e_c = {selected}";
+			efg_plot_jmol_script += "function abs_chi {return abs(_x.property_" + tag + "_chi);};";	// Used only for l_type == 3
 		}
-		else
-		{
-			efg_plot_jmol_script += " {selected}.property_efg_colorscale = {selected}";			
+		else if (l_type == 4) {
+			efg_plot_jmol_script += efg_total_shifts_script(tag);
 		}
+
+		efg_plot_jmol_script += "color {displayed} {200, 200, 200}; {all}.property_efg_colorscale = NaN;";
+		efg_plot_jmol_script += " {selected}.property_efg_colorscale = {selected}";
+
 		switch(l_type)
 		{
 			case 0:
@@ -245,14 +237,14 @@ function efg_color_handler()
 				}
 				break; 
 			case 3:
-				efg_plot_jmol_script += ".tensor(\"" + tag + "\", \"chi\")";
+				efg_plot_jmol_script += ".abs_chi.all";
+				break;
+			case 4:
+				efg_plot_jmol_script += ".property_" + tag + "_tot_shift.all";
 				break;
 		}
 		
 		efg_plot_jmol_script += ".mul(-1);";
-		if (l_type == 3) {
-			efg_plot_jmol_script += " for (var i=p_e_c.length; i > 0; --i) {p_e_c[i] = -abs(p_e_c[i])}; {selected}.property_efg_colorscale = p_e_c;";
-		}
 		efg_plot_jmol_script += " color {selected} property_efg_colorscale;";
 	}
 	else
@@ -302,4 +294,52 @@ function efg_ell_scale_handler(evt)
 		evt.preventDefault();
 		efg_plot_handler();		
 	}
+}
+
+// Used for total shifts
+function efg_total_shifts_script(tag) {
+
+	efg_plot_jmol_script = "";
+
+	for (var l = 0; l < atom_set.speciesno; ++l) {
+
+		var lab = atom_set.atom_species_labels[l];
+		// Get the Larmor frequency (the wrapper is convenient since it implements the default value for NaNs)
+        var larm = get_larmor(lab);
+
+		// Now define the property for the quadrupolar shifts.
+		// Doing everything here allows for working only on DISPLAYED atoms, which reduces greatly the computational load
+		efg_plot_jmol_script += "function delta_Q_" + tag + "_calc {	\
+			var I = abs(spin_data_table[_x.element]);		\
+			if (I < 1) { return 0.0; }				\
+			var m = I - (I \\ 1);					\
+			var Pq = _x.property_" + tag + "_chi_MHz*sqrt(1.0+(_x.property_" + tag + "_asymm**2)/3.0); \
+			return -(3.0/40.0)*((Pq/" + larm + ")**2)*(I*(I+1)-9.0*m*(m-1)-3.0)/(I**2*(2*I-1)**2)*1e6;	\
+		};";
+
+        // And add it up
+        if (atom_set.has_ms) {
+			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift = {" + lab + "_*}.tensor('ms', 'isotropy').add( \
+									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc);";
+		}
+		else {
+			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift =  \
+									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc.all;";			
+		}
+	}
+
+	return efg_plot_jmol_script;	
+}
+
+// Calculate total shift from given chi, eta and element
+function efg_total_shift_calc(chi, eta, el, larm) {
+	var I = Math.abs(spin_data_table[el]);
+	if (isNaN(I) || I < 1) {
+		// Something went wrong, element not found!
+		// ...or it simply ain't quadrupolar
+		return 0.0;
+	}
+	var m = I%1;
+	var Pq = (chi*1.0e-6)*Math.sqrt(1.0+(eta*eta)/3.0);
+	return (-(3.0/40.0)*(Math.pow((Pq/larm),2.0))*(I*(I+1)-9.0*m*(m-1)-3.0)/(I*I*Math.pow((2*I-1),2.0))*1.0e6);
 }

@@ -722,23 +722,28 @@ WARNING: when visualizing color scale, the absolute value of the constant will b
 					  onkeypress='spec_replot_handler(event)' disabled=true> &nbsp; ppm
 					  <br><br>
 					  <input type="checkbox" id="spec_plabel_check" autocomplete="off" onchange="svg_spectrum_plot(false)" checked>Show atom labels next to the peaks
-					  
+					  <br><br>
+                      <br><br>
 					  <div id="spec_options_2_div" class="ctrl_right">
 					    X axis range: &nbsp; <input type="text" id="spec_xrange_min" value='0' maxlength='4' size='4'
 					  title='X range - minimum' onkeypress='spec_replot_handler(event)'> &nbsp; - &nbsp;
-            <input type="text" id="spec_xrange_max" value='1' maxlength='4' size='4'
-					  title='X range - maximum' onkeypress='spec_replot_handler(event)'> &nbsp; 
-            (step: <input type="text" id="spec_xrange_step" value='0' maxlength='4' size='4'
-            title='X range - space between tics' onkeypress='spec_replot_handler(event)'> &nbsp;)
-            ppm
+                        <input type="text" id="spec_xrange_max" value='1' maxlength='4' size='4'
+            					  title='X range - maximum' onkeypress='spec_replot_handler(event)'> &nbsp; 
+                    (step: <input type="text" id="spec_xrange_step" value='0' maxlength='4' size='4'
+                    title='X range - space between tics' onkeypress='spec_replot_handler(event)'> &nbsp;)
+                    ppm
 					  <br><br>
 					  
 					  <input id="spec_reftable_butt" type="button" value="Reference table" onclick="$('#ref_table_popup').dialog('open');"
-					  title="Open a table to set up the chemical shift reference values for the various elements. To see the original shielding value, leave the field blank."></input>
+					  title="Open a table to set up the chemical shift reference values for the various elements. To see the original shielding value, leave the field blank."></input> &nbsp;
+                      <input id="spec_larmtable_butt" type="button" value="Larmor frequencies" onclick="$('#larmor_table_popup').dialog('open');"
+                      title="Open a table to set up the Larmor frequency for the various elements. A blank field will use the default value of 100 MHz."></input>
+                      <br><br>
+                      <input id="spec_quadshift_butt" type="checkbox" onchange="svg_spectrum_plot(true)" title="Include quadrupolar shifts in the spectral plot">Include quadrupolar shifts</input>
 					  <br><br>
 					  <a id="plot_download" href="" target="_blank" onclick="svg_download_update()" download="magres.svg">Download spectrum</a>
-            <br><br>
-            <input id="nmr2d_butt" type="button" value="NMR2D Tool" onclick="launch_NMR2D()" disabled="disabled"></input>
+                        <br><br>
+                        <input id="nmr2d_butt" type="button" value="NMR2D Tool" onclick="launch_NMR2D()" disabled="disabled"></input>
 					  </div>
 					  </div>
 
