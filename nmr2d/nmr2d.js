@@ -1227,7 +1227,7 @@ function svg_download()
 			.replace(/"/g, '%22')
 			.replace(/'/g, '%27'));	
 	*/
-	
+
 	return true;
 
 }
@@ -1257,10 +1257,15 @@ function ptype_handler(e)
 
 function psize_cut_on_handler(evt)
 {
+
 	if ($('#psize_cut_on').prop('checked'))
 	{
 		$('#psize_cut').attr('disabled', false);
 		$('#psize_cut').val('10');		
+		
+		// Standard alert message
+		alert("WARNING: the cutoff function refers ONLY to atoms visible when this tool was loaded.\n\
+		\nPeriodic copies will not be included if not explicitly made visible.")
 	}
 	else
 	{
