@@ -61,11 +61,11 @@
       <table class="axes_drop_table">
         <tr>
           <td>
-    	  		X axis: <select id="sel_species_x" class="sel_species" onchange="sel_species_handler('x')">
+    	  		X axis: <select id="sel_species_x" class="sel_species" onchange="rescale_axis_redraw('x')">
     		  	</select>
           </td>
           <td>
-    	  		Y axis: <select id="sel_species_y" class="sel_species" onchange="sel_species_handler('y')">
+    	  		Y axis: <select id="sel_species_y" class="sel_species" onchange="rescale_axis_redraw('y')">
     		  	</select>
           </td>
         </tr>
@@ -84,15 +84,27 @@
           <td>
           </td>
           <td>
-            Y axis order: <select id="sel_order" class="sel_order" onchange="sel_order_handler()">
+            Y axis order: <select id="sel_order" class="sel_order" onchange="rescale_redraw()">
               <option value='1'>1Q</option>
               <option value='2'>2Q</option>
             </select>
           </td>          
         </tr>
+        <tr>
+          <td>
+            <input type="checkbox" id="deltaq_check" onchange="rescale_redraw()"
+              title="Include quadrupolar shifts in the resulting plot. These are the isotropic second order quadrupolar shifts for the central transition. Lineshape factors are not taken into account.">Include quadrupolar shifts</input>
+          </td>
+          <td>
+          </td>
+        </tr>
         </table>
-        <br>
-        <div class="reftab_button visual_button" onclick="$('#ref_table_popup').dialog('open')">Reference table</div>        
+        <br>        
+
+        <div style="display: table; border-collapse: separate; border-spacing: 20px 0px;">
+          <div class="reftab_button visual_button" onclick="$('#ref_table_popup').dialog('open')">Reference table</div>        
+          <div class="reftab_button visual_button" onclick="$('#larmor_table_popup').dialog('open')">Larmor frequencies</div>        
+        </div>
 
   		</div>
 

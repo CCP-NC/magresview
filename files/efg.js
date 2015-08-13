@@ -306,6 +306,7 @@ function efg_total_shifts_script(tag) {
 		var lab = atom_set.atom_species_labels[l];
 		// Get the Larmor frequency (the wrapper is convenient since it implements the default value for NaNs)
         var larm = get_larmor(lab);
+        var ref = parseFloat($('#ref_input_' + lab).val());
 
 		// Now define the property for the quadrupolar shifts.
 		// Doing everything here allows for working only on DISPLAYED atoms, which reduces greatly the computational load
@@ -320,12 +321,19 @@ function efg_total_shifts_script(tag) {
         // And add it up
         if (atom_set.has_ms) {
 			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift = {" + lab + "_*}.tensor('ms', 'isotropy').add( \
-									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc);";
+									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc)";
 		}
 		else {
 			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift =  \
-									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc.all;";			
+									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc.all";			
 		}
+
+		// Final bit: referencing, if present
+		if (!isNaN(ref)) {
+			efg_plot_jmol_script += ".mul(-1).add(" + ref + ")";
+		}
+
+		efg_plot_jmol_script += ";";
 	}
 
 	return efg_plot_jmol_script;	

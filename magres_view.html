@@ -538,6 +538,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 											<br><br>
 											<br><br>
                                             <br><br>
+                                            <br><br>
 
 					  			<div id="efg_label_div" class="ctrl_right">
 
@@ -566,16 +567,16 @@ It provides the possibility to load example files from a dropdown menu but it ma
 												
                                                 &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_4"
 												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered.
-WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
+                                                WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
 												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
 
                                                 &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_5"
-                                                title="Total shift in ppm, including both quadrupolar and magnetic shielding shifts. Requires 
-                                                inserting Larmor frequencies for each species of interest.
-WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
-                                                value="4" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Total shift (<span style="color: rgb(0, 128, 255)">ppm</span>)
+                                                title="Total shielding/shift in ppm, including both quadrupolar and magnetic shieldings. Requires inserting Larmor frequencies for each species of interest. If reference values have been inserted, it will be visualized as chemical shift rather than absolute shielding."
+                                                value="4" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Total shift (<span style="color: rgb(0, 128, 255)">ppm</span>)<br>
+                                                <input id = "efg_file_ref" type="button" value="Reference table" onclick="$('#ref_table_popup').dialog('open');"></input>
+                                                </input>
                                                 &nbsp;<input type="button" id="efg_larmtable_butt" value="Larmor frequency table" onclick="$('#larmor_table_popup').dialog('open');">
-                                                </input> <br>
+ <br>
 											</form>
 
                                 <div id="efg_disabled_div" class="disabled_div_right">

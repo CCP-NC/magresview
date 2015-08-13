@@ -6,10 +6,11 @@ var larmorfreq_list = {};
 var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
 var id_label_list = {};		// label classified by id
 var id_ms_list = {};		// ms classified by id
-var id_efg_list = {};		// efg (chi and eta) classified by id
+var id_iso_list = {};		// Isotopes classified by id
 var id_r_list = {};			// distance classified by id
 var id_dip_list = {};		// dip classified by id
 var id_isc_list = {};		// isc classified by id
+var id_deltaQ_list = {};    // And here we store the quadrupolar shifts instead
 
 var axis_points = {'x': {'p0': [0.0, 0.0], 'range': [0.0, 0.0], 'angle': 0.0}, 'y': {'p0': [0.0, 0.0], 'range': [0.0, 0.0], 'angle': 0.0}};
 // NOTE: angle not implemented yet and may never be if not explicitly required
@@ -169,6 +170,7 @@ function table_popup_handler()
 function compile_lists()
 {
 	var atom_raw_list = data_set['atoms']['atom'];
+	var isos_raw_list = data_set['atoms']['isotopes'];
 	var ms_raw_list   = data_set['magres']['ms'];	
 	var efg_raw_list   = data_set['magres']['efg'];	
 	var dip_raw_list   = data_set['magres']['dip'];
@@ -184,6 +186,8 @@ function compile_lists()
 			species_id_list[a.label] = [a.id];
 
 		id_label_list[a.id] = a.label + '_' + a.index;
+		// Also compile the isotopes one
+		id_iso_list[a.id] = isos_raw_list[a.id][0]+isos_raw_list[a.id][1];
 	}
 
 	// Now an ms-by-id one
@@ -191,13 +195,6 @@ function compile_lists()
 	{
 		var ms = ms_raw_list[i];
 		id_ms_list[ms.atom_id] = ms.mview_data[0];
-	}
-
-	// Now for efg-by-id
-	for (var i=0; i < efg_raw_list.length; ++i)
-	{
-		var efg = efg_raw_list[i];
-		id_efg_list[efg.atom_id] = [efg.mview_data[0], efg.mview_data[1]];
 	}
 
 	// Now a dip-by-id one. Each id only contains the pairing with the ids higher or equal
@@ -239,6 +236,24 @@ function compile_lists()
 		// Disable the related option in psize_coup
 		$('#psize_coup').find('#isc_opt').attr('disabled', true)
 	}
+
+	// Now for a full shift one (only if there's efg data)
+	if (efg_raw_list != null) {
+		for (var i=0; i < efg_raw_list.length; ++i)
+		{
+			var efg = efg_raw_list[i];
+			var chi = efg.mview_data[0];
+			var eta = efg.mview_data[1];
+			var el  = id_iso_list[efg.atom_id];
+			id_deltaQ_list[efg.atom_id] = window.opener.efg_total_shift_calc(chi, eta, el, 1.0); // This one uses no Larmor frequency, that comes later
+		}
+	}
+	else {
+		// Disable the related control
+		$('#deltaq_check').attr('disabled', true)
+	}
+
+
 }
 
 function update_species()
@@ -257,14 +272,14 @@ function update_species()
 
 }
 
-function sel_order_handler()
+function rescale_redraw()
 {
 	reset_scale('x');
 	reset_scale('y');
 	redraw_all();
 }
 
-function sel_species_handler(axis)
+function rescale_axis_redraw(axis)
 {
 	reset_scale(axis);
 	redraw_all();
@@ -279,6 +294,12 @@ function reset_scale(axis)
 	var sp = $('#sel_species_' + axis).val();
 	var q = $('#sel_order').val();
 
+	var add_deltaq = $('#deltaq_check').prop('checked');
+
+	if (add_deltaq) {
+		var larm = larmorfreq_list[sp];
+	}
+
 	var min = NaN; 
 	var max = NaN;
 
@@ -288,6 +309,9 @@ function reset_scale(axis)
 	{
 		var id = species_id_list[sp][i];
 		var ms = id_ms_list[id];
+		if (add_deltaq) {
+			ms += id_deltaQ_list[id]/(larm*larm);
+		}
 		ms = isNaN(reference_list[sp])?ms:(reference_list[sp]-ms);
 		if (isNaN(min) || ms < min)
 			min = ms;
@@ -299,6 +323,10 @@ function reset_scale(axis)
 		var axis2 = {'x': 'y', 'y': 'x'}[axis];
 		var sp2 = $('#sel_species_' + axis2).val();
 
+		if (add_deltaq) {
+			var larm2 = larmorfreq_list[sp2];
+		}
+
 		var min2 = NaN; 
 		var max2 = NaN;
 
@@ -307,6 +335,9 @@ function reset_scale(axis)
 			{
 				var id = species_id_list[sp2][i];
 				var ms = id_ms_list[id];
+				if (add_deltaq) {
+					ms += id_deltaQ_list[id]/(larm2*larm2);
+				}
 				ms = isNaN(reference_list[sp2])?ms:(reference_list[sp2]-ms);
 				if (isNaN(min2) || ms < min2)
 					min2 = ms;
@@ -737,6 +768,13 @@ function plot_data()
 
 	var show_out = $('#pshow_out').prop('checked');
 
+	var add_deltaq = $('#deltaq_check').prop('checked');
+
+	if (add_deltaq) {
+		var larm1 = larmorfreq_list[sp1];
+		var larm2 = larmorfreq_list[sp2];
+	}
+
 	var max_r = 0;
 
 	var is_homonuclear = (sp1 == sp2);
@@ -746,6 +784,9 @@ function plot_data()
 		var id1 = species_id_list[sp1][i];
 		var lab1 = id_label_list[id1];
 		var ms1 = id_ms_list[id1];
+		if (add_deltaq) {
+			ms1 += id_deltaQ_list[id1]/(larm1*larm1);
+		}
 		ms1 = isNaN(reference_list[sp1])?ms1:(reference_list[sp1]-ms1);
 
 		var start_j = is_homonuclear? i : 0;
@@ -758,6 +799,9 @@ function plot_data()
 			var id2 = species_id_list[sp2][j];
 			var lab2 = id_label_list[id2];
 			var ms2 = id_ms_list[id2];
+			if (add_deltaq) {
+				ms2 += id_deltaQ_list[id2]/(larm2*larm2);
+			}
 			ms2 = isNaN(reference_list[sp2])?ms2:(reference_list[sp2]-ms2);
 
 			var r = 0;
@@ -1143,7 +1187,7 @@ function svg_download()
 	svg_to_save.find('.labtext').filter(function() { console.log($(this).css('opacity')); return $(this).css('opacity') == 0.0;}).remove();
 	svg_to_save.find('.plotdot').filter(function() { console.log($(this).css('opacity')); return $(this).css('opacity') == 0.0;}).remove();
 
-	/*
+	
 	$('.download_button')
 	.attr('target', '_blank')
 	.attr('download', 'nmr2d.svg')
@@ -1156,8 +1200,9 @@ function svg_download()
 	.replace(/#/g, '%23')
 	.replace(/"/g, '%22')
 	.replace(/'/g, '%27'));
-	*/
+	
 
+	/*
 	// Testing pdf generation functionality here
 
 	var scale = 72.0/96.0;		// Pixel/pt ratio
@@ -1181,7 +1226,8 @@ function svg_download()
 			.replace(/#/g, '%23')
 			.replace(/"/g, '%22')
 			.replace(/'/g, '%27'));	
-
+	*/
+	
 	return true;
 
 }

@@ -112,8 +112,9 @@ html, body {
 }
 
 .reftab_button {
-	width: 22%;
-	height: 25pt;	
+    display: table-cell;
+    width: 22%;
+    height: 25pt;
 }
 
 .create_button {
