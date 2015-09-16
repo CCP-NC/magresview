@@ -79,8 +79,8 @@ def json_to_simpson(dataset, path_and_name, sim_options, sim_options_num, sim_op
                     #If the atom is not present in the system, skip
                     sys.stderr.write("Warning - an MS interaction with no corresponding atom was found. File " + data_name + " might be corrupted.\n")
                     continue
-                spinsys_file.write(" shift\t" + str(i) + " " + str(-ms['mview_data'][0]) + "p " + str(-ms['mview_data'][1]) 
-                + "p " + str(ms['mview_data'][2]) + " " + str(ms['mview_data'][3]) + " " + str(ms['mview_data'][4]) + " " + str(ms['mview_data'][5]) + "\n")
+                spinsys_file.write(" shift\t" + str(i) + " " + str(-ms['mview_data'][0]) + "p " + str(-2.0/3.0*ms['mview_data'][1])                 # The factor is because Simpson uses reduced anisotropy
+                + "p " + str(ms['mview_data'][2]) + " " + str(ms['mview_data'][3]) + " " + str(ms['mview_data'][4]) + " " + str(ms['mview_data'][5]) + "\n")                                
     
     
     #Quadrupole interactions

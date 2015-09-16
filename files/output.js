@@ -53,8 +53,13 @@ function output_file_gen()
 	}
 	
 	var use_all = (filetype == "recap");
-	
-	if(!compile_data_set(data_set, atom_choice, use_all))
+	// What euler angles convention to use?
+	var eul_conv = "zyz"; // Default
+	if (filetype == "recap" || filetype == "table") {
+		eul_conv = document.getElementById("opt_euler_drop").value;
+	}
+
+	if(!compile_data_set(data_set, atom_choice, use_all, eul_conv))
 	{
 		file_destination.close();
 		return;
@@ -378,7 +383,9 @@ function recap_file_gen(data_set, out)
 	//Uses the same method as the json one to gather data from Jmol
 		
 	//Header
-	out.write("--------------   JMol Web - Summary file --------------\n");
+	out.write("--------------   MagresView - Summary file --------------\n");
+	out.write("Recap file generated with MagresView v." + magresview_version_number + "\n");
+	out.write("Euler angles convention adopted: " + data_set.eul_conv.toUpperCase() + "\n");
 
 	//Print total number of atoms
 	out.write("\n% Number of atoms: " + data_set.atoms.atom.length + "\n");
@@ -452,6 +459,7 @@ function recap_file_gen(data_set, out)
 			var el = i_to_info[id][2];
 			
 			var tens = data_set.magres.ms[i].sigma;
+
 			
 			var haeb = data_set.magres.ms[i].mview_data.slice(0, 3);
 			var eul_ang = data_set.magres.ms[i].mview_data.slice(3, 6);
@@ -493,7 +501,8 @@ function recap_file_gen(data_set, out)
 			
 			//Write down Haeberlen parameters
 			out.write("\nHaeberlen parameters:\ns_iso: " + haeb[0].toFixed(prec) 
-					+ " ppm\t\taniso: " + haeb[1].toFixed(prec) + " ppm\t\tasymm: " + haeb[2].toFixed(prec) + "\n");			
+					+ " ppm\t\taniso: " + haeb[1].toFixed(prec) + " ppm\t\treduced aniso: " + (2.0/3.0*haeb[1]).toFixed(prec)
+					+ " ppm\t\tasymm: " + haeb[2].toFixed(prec) + "\n");			
 			//Write down Euler angles
 			out.write("\nEuler angles:\nalpha: " + eul_ang[0].toFixed(prec) 
 					+ "\t\tbeta: " + eul_ang[1].toFixed(prec) + "\t\tgamma: " + eul_ang[2].toFixed(prec) + "\n");			
@@ -1032,7 +1041,7 @@ function spinsys_file_gen(data_set, out)
 			if ('mview_data' in ms)
 			{
 				var n = atom_lookup[ms.atom_id].n;
-				out.write(" shift\t" + n + " " + (-ms.mview_data[0].toFixed(prec)) + "p " + (-ms.mview_data[1].toFixed(prec))
+				out.write(" shift\t" + n + " " + (-ms.mview_data[0].toFixed(prec)) + "p " + ((-2.0/3.0*ms.mview_data[1]).toFixed(prec)) // Simpson uses reduced anisotropy!
 				+ "p " + (ms.mview_data[2].toFixed(prec)) + " " + (ms.mview_data[3].toFixed(prec))
 				 + " " + (ms.mview_data[4].toFixed(prec)) + " " + (ms.mview_data[5].toFixed(prec)) + "\n");
 			}
@@ -1175,13 +1184,16 @@ function table_file_gen(data_set, out)
 		system_stochiometry += l + "_" + atom_set.atom_species_sites[l].length + " ";
 	}
 	
-	out.write("Tabulated NMR data for " + system_stochiometry + "\n");
-	
+	// Header
+	out.write("% Tabulated NMR data for " + system_stochiometry + "\n");
+	out.write("% Table file generated with MagresView v." + magresview_version_number + "\n");
+	out.write("% Euler angles convention adopted: " + data_set.eul_conv.toUpperCase() + "\n%\n");
+
 	//If present, print isotropic magnetic shielding tensors
 	if ("ms" in data_set.magres)
 	{
 		out.write("Magnetic shielding data (symmetric component)\n");
-		out.write("Atom\ts_iso(ppm)\ts_aniso(ppm)\ts_asymm\ts_1(ppm)\ts_2(ppm)\ts_3(ppm)\talpha\tbeta\tgamma");
+		out.write("Atom\ts_iso(ppm)\ts_aniso(ppm)\ts_reduced_aniso(ppm)\ts_asymm\ts_1(ppm)\ts_2(ppm)\ts_3(ppm)\talpha\tbeta\tgamma");
 		for (var i = 0; i < data_set.magres.ms.length; ++i)
 		{
 			var id = data_set.magres.ms[i].atom_id;
@@ -1202,7 +1214,7 @@ function table_file_gen(data_set, out)
 			//Write down atomic label
 			out.write("\n" + sp_label + "_" + atom_i);
 			//Write down Haeberlen and eigenvalue representations and Euler angles
-			out.write("\t" + haeb[0].toFixed(prec) + "\t" + haeb[1].toFixed(prec) + "\t" + haeb[2].toFixed(prec));
+			out.write("\t" + haeb[0].toFixed(prec) + "\t" + haeb[1].toFixed(prec) + "\t" + (2.0/3.0*haeb[1]).toFixed(prec) + "\t" + haeb[2].toFixed(prec));
 			out.write("\t" + eigvals[0].toFixed(prec) + "\t" + eigvals[1].toFixed(prec) + "\t" + eigvals[2].toFixed(prec));
 			out.write("\t" + eul_ang[0].toFixed(prec) + "\t" + eul_ang[1].toFixed(prec) + "\t" + eul_ang[2].toFixed(prec));			
 		}
@@ -1377,14 +1389,15 @@ function init_data_set(data_set)
 
 //Fill in the data_set with the required atoms
 
-function compile_data_set(ds, ac, use_all, ignore_refs)
+function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 {
-	var eul_conv = "zyz"; //May be changed in future
+
 	var conv_table = {
 		"zyz": "%6",
 		"zxz": "%5" 
 	}
 	
+	ds.eul_conv = eul_conv;
 	ds.soft_targ = document.getElementById("soft_targ_drop").value;
 	
 	var atom_n = 0;    //All atoms in data_set will be simply ordered by an increasing number, no crystallographic labels
@@ -1596,12 +1609,21 @@ function compile_data_set(ds, ac, use_all, ignore_refs)
 		ds.magres.ms = [];
 
 		var ms_info = Jmol.evaluateVar(mainJmol, "ms_info");
-		
+
 		for (var i = 0; i < ms_info.length-5; i += 6)
 		{
 			var a_no = ms_info[i];
 			var ms_reference = parseFloat(document.getElementById('ref_input_' + ds.atoms.isotopes[a_no][1]).value);
-			var a_sigma = ms_info[i+1][0];
+			// The sigma needs a bit of unwrapping though
+			var raw_sigma = ms_info[i+1][0];
+			var a_sigma = [];
+			for (var j = 0; j < 3; ++j) {
+				a_sigma.push([]);
+				split_raw = raw_sigma[j].split(',');
+				for (var k = 0; k < 3; ++k) {
+					a_sigma[j].push(parseFloat(split_raw[k]));
+				}
+			}
 			var a_iso = ms_info[i+2][0];
 			if (!isNaN(ms_reference) && ignore_refs != true)
 			{
@@ -1654,7 +1676,15 @@ function compile_data_set(ds, ac, use_all, ignore_refs)
 		for (var i = 0; i < efg_info.length-4; i += 5)
 		{
 			var a_no = efg_info[i];
-			var a_V = efg_info[i+1][0];
+			var raw_V = efg_info[i+1][0];
+			var a_V = [];
+			for (var j = 0; j < 3; ++j) {
+				a_V.push([]);
+				split_raw = raw_V[j].split(',');
+				for (var k = 0; k < 3; ++k) {
+					a_V[j].push(parseFloat(split_raw[k]));
+				}
+			}
 			var a_chi = efg_info[i+2][0]
 			var a_asymm = efg_info[i+3][0]
 			var a_alpha = efg_info[i+4][0];
@@ -1740,7 +1770,15 @@ function compile_data_set(ds, ac, use_all, ignore_refs)
 			var a_eul_a = a_eulang[0];
 			var a_eul_b = a_eulang[1];
 			var a_eul_c = a_eulang[2];
-			var a_sigma = isc_info[i+4];
+			var raw_sigma = isc_info[i+4];
+			var a_sigma = [];
+			for (var j = 0; j < 3; ++j) {
+				a_sigma.push([]);
+				split_raw = raw_sigma[j].split(',');
+				for (var k = 0; k < 3; ++k) {
+					a_sigma[j].push(parseFloat(split_raw[k]));
+				}
+			}
 			var a_no_1 = isc_info[i+5];
 			var a_no_2 = isc_info[i+6];
 			
