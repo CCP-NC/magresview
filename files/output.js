@@ -194,7 +194,6 @@ function update_filetype_classes()
 	var filetype = document.getElementById("file_type_drop").value;	
 	var soft_targ = document.getElementById("soft_targ_drop");
 	
-	
 	if (filetype == "json")
 	{
 		soft_targ.options.length = 2;
@@ -208,6 +207,14 @@ function update_filetype_classes()
 		
 		soft_targ.options[0] = new Option("SIMPSON", "simpson");
 		soft_targ.options[1] = new Option("pNMRsim", "pnmr");		
+	}
+
+	// An additional line for displaying the warning message about anisotropy in case it's needed
+	if (filetype == "json" || filetype == "spinsys") {
+		$("#simpson_warning_msg").removeClass("nodisplay");
+	}
+	else {
+		$("#simpson_warning_msg").addClass("nodisplay");
 	}
 }
 
@@ -1806,6 +1813,8 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		}
 		
 	}
+
+	console.log(ds);
 
 	return true;
 }

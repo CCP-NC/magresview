@@ -218,6 +218,10 @@ a.hidden {
   visibility: hidden;
 }
 
+.warn_msg {
+  color: #cc2222;
+}
+
 .nodisplay {
   display: none;
 }

@@ -55,7 +55,26 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	<!-- Version definition -->
 
 	<script type="text/javascript" >
-		var magresview_version_number = "1.5";
+
+		//Version number handling
+
+		var _major_version = 1;
+		var _major_revision = 5;
+		var _minor_revision = 1;
+
+		function version_number_string() {
+
+			var numstr = _major_version + "." + _major_revision;
+			if (_minor_revision != 0) {
+				numstr += "." + _minor_revision;
+			}
+
+			return numstr;
+
+		}		
+
+		var magresview_version_number = version_number_string();
+
 	</script>    
    
 	<!-- Create title -->   
@@ -819,6 +838,13 @@ It provides the possibility to load example files from a dropdown menu but it ma
                     Use label precision</input>
 					</div>
 					</div>
+					
+
+					<p id="simpson_warning_msg" class="warn_msg nodisplay">
+					<br><br>
+						WARNING: for SIMPSON input generation (both JSON and .spinsys), old versions of MagresView had a bug which for shielding interactions caused the use of the full anisotropy rather than the reduced anisotropy (causing an error of a factor of 3/2).<br>
+						This has now been fixed starting with version 1.5.1. Please take care if you used previous versions for SIMPSON input.
+					</p>
 					
 					</div>
 					
