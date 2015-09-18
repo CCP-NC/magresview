@@ -65,7 +65,9 @@ function output_file_gen()
 		return;
 	}
 
-	
+	// Now the sorting
+	sort_data_set(data_set);
+
 	switch (filetype)
 	{
 		case "recap":
@@ -1508,6 +1510,8 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	}
 		
 	ds.atoms.units.push(["atom", "Angstrom"]);
+	// We are now fetching the various bits that we already stored in JMol internal variables
+	// And reinterpreting them in a more digestible JavaScript data structure
 	var coord_info = Jmol.evaluate(mainJmol, "coord_info").split('\n');
 
 	var species_indices = {};
@@ -1583,6 +1587,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 
 		if(atom_set.is_magres)
 		{
+			// You can trust in a format like <symbol>_<number> only when it's a .magres file
 			var a_label = a_name.substring(0, a_name.lastIndexOf('_'));
 			var a_index = parseInt(a_name.substring(a_name.lastIndexOf('_')+1));
 		}
@@ -1814,9 +1819,52 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		
 	}
 
-	console.log(ds);
-
 	return true;
+}
+
+function sort_data_set(ds) {
+	// Sort a data set so that atoms are grouped by elements and ordered by id
+
+	// So we manually "zip" together all the data in a "sortbox", then sort it, then put it back in place
+	sortbox = {};
+
+	for (var i = 0; i < ds.atoms.atom.length; ++i) {
+		var lab = ds.atoms.atom[i].label;
+		if (!(lab in sortbox)) {
+			sortbox[lab] = [];
+		}
+		sortbox[lab].push({'a': ds.atoms.atom[i]});		
+		// Now add all the other data
+		for (datatype in ds.magres) {
+			if (datatype == "units")
+				continue;
+			sortbox[lab][sortbox[lab].length-1][datatype] = ds.magres[datatype][i];
+		}
+	}
+
+	for (lab in sortbox) {
+		sortbox[lab].sort(function(a1, a2) {return a1.a.index > a2.a.index});
+	}
+
+	// And now reassign
+	ds.atoms.atom = [];
+	for (datatype in ds.magres) {
+		if (datatype == "units")
+			continue;
+		ds.magres[datatype] = [];
+	}
+
+	for (lab in sortbox) {
+		for (var i = 0; i < sortbox[lab].length; ++i) {
+			ds.atoms.atom.push(sortbox[lab][i].a);
+			for (datatype in ds.magres) {
+				if (datatype == "units")
+					continue;
+				ds.magres[datatype].push(sortbox[lab][i][datatype]);
+			}
+		}
+	}
+
 }
 
 function ref_table_gen() {
