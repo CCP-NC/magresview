@@ -823,7 +823,11 @@ function magres_file_gen(data_set, out) {
 		out.write("[magres]\n");
 		
 		for (var i = 0; i < data_set.magres.units.length; ++i) {
-			out.write("units " + data_set.magres.units[i][0] + " " + data_set.magres.units[i][1] + "\n");
+			// This only for magres-supported stuff
+			utype = data_set.magres.units[i][0];
+			if (utype == "dip")
+				continue;
+			out.write("units " + utype + " " + data_set.magres.units[i][1] + "\n");
 		}
 		
 		if ("ms" in data_set.magres) {
@@ -911,7 +915,7 @@ function magres_file_gen(data_set, out) {
 	if ("dip" in data_set.magres) {
 		
 		out.write("[dipolar]\n");
-		out.write("units dip kHz\n");
+		out.write("units dip Hz\n");
 		
 		for (var i = 0; i < data_set.magres.dip.length; ++i)
 		{
@@ -1079,7 +1083,7 @@ function spinsys_file_gen(data_set, out)
 
 	if ('dip' in data_set.magres)
 	{
-	        for (var i = 0; i < data_set.magres.dip.length; ++i)
+	    for (var i = 0; i < data_set.magres.dip.length; ++i)
 		{
 			var dip = data_set.magres.dip[i];
 			
@@ -1396,6 +1400,32 @@ function init_data_set(data_set)
 
 }
 
+// This function is an aide in parsing some 3x3 tensors that come out of JMol's evaluateVar method
+// Apparently different browsers handle these differently
+function robust_parse_tensor(rawT) {
+
+	outT = [];
+
+	for (var j = 0; j < 3; ++j) {
+		outT.push([]);
+		// As I said... 
+		if (typeof(rawT[j]) == "string") {
+			split_raw = rawT[j].split(',');
+			if (split_raw.length < 3) {
+				throw "Wrong format received from robust_parse_tensor, aborting";
+			}
+			for (var k = 0; k < 3; ++k) {
+				outT[j].push(parseFloat(split_raw[k]));
+			}
+		}
+		else {
+			outT[j] = rawT[j];			
+		}
+	}
+
+	return outT;
+}
+
 //Fill in the data_set with the required atoms
 
 function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
@@ -1628,13 +1658,17 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 			var ms_reference = parseFloat(document.getElementById('ref_input_' + ds.atoms.isotopes[a_no][1]).value);
 			// The sigma needs a bit of unwrapping though
 			var raw_sigma = ms_info[i+1][0];
-			var a_sigma = [];
-			for (var j = 0; j < 3; ++j) {
-				a_sigma.push([]);
-				split_raw = raw_sigma[j].split(',');
-				for (var k = 0; k < 3; ++k) {
-					a_sigma[j].push(parseFloat(split_raw[k]));
-				}
+			var a_sigma;
+			// Ok, so this is WEIRD. In some browsers, apparently, evaluateVar returns a tensor as an array of strings.
+			// In others, however, it returns a full array of arrays.
+			// This has NO LOGIC WHATSOEVER because I've seen both behaviours in Chrome - I suppose a consequence of different versions? Possibly a bug?
+			// Different platform? Be my guest. Point is, it DOES NOT ALWAYS WORK. Which forces me to use yet another bit of contrived logic here.
+			try {
+				a_sigma = robust_parse_tensor(raw_sigma);
+			}
+			catch (e) {
+				console.log("For MS data: " + e);
+				break;
 			}
 			var a_iso = ms_info[i+2][0];
 			if (!isNaN(ms_reference) && ignore_refs != true)
@@ -1690,12 +1724,13 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 			var a_no = efg_info[i];
 			var raw_V = efg_info[i+1][0];
 			var a_V = [];
-			for (var j = 0; j < 3; ++j) {
-				a_V.push([]);
-				split_raw = raw_V[j].split(',');
-				for (var k = 0; k < 3; ++k) {
-					a_V[j].push(parseFloat(split_raw[k]));
-				}
+			// Same logic as for MS
+			try {
+				a_V = robust_parse_tensor(raw_V);
+			}
+			catch (e) {
+				console.log("For EFG data: " + e);
+				break;
 			}
 			var a_chi = efg_info[i+2][0]
 			var a_asymm = efg_info[i+3][0]
@@ -1784,12 +1819,13 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 			var a_eul_c = a_eulang[2];
 			var raw_sigma = isc_info[i+4];
 			var a_sigma = [];
-			for (var j = 0; j < 3; ++j) {
-				a_sigma.push([]);
-				split_raw = raw_sigma[j].split(',');
-				for (var k = 0; k < 3; ++k) {
-					a_sigma[j].push(parseFloat(split_raw[k]));
-				}
+			// See MS bit for the logic used here
+			try {
+				a_sigma = robust_parse_tensor(raw_sigma);
+			}
+			catch (e) {
+				console.log("For ISC data: " + e);
+				break;
 			}
 			var a_no_1 = isc_info[i+5];
 			var a_no_2 = isc_info[i+6];
