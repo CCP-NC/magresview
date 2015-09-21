@@ -20,6 +20,6 @@ fi
 
 # Create two archives (.zip and .tar)
 echo "Publishing as ZIP"
-hg archive -X=$EXCLUDED_PATHS ../MagresView_$VSTRING.zip
+hg archive -X "$EXCLUDED_PATHS" ../MagresView_$VSTRING.zip
 echo "Publishing as TAR"
-hg archive -X=$EXCLUDED_PATHS ../MagresView_$VSTRING.tar
+hg archive -X "$EXCLUDED_PATHS" ../MagresView_$VSTRING.tar
