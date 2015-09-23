@@ -1792,8 +1792,8 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 			ds.magres.dip[i/3] = {
 				mview_data: [a_b, a_alpha, a_beta, 0.0],
 				r: a_dist,
-				atom1_id: "" + a_no_1, 
-				atom2_id: "" + a_no_2,
+				atom1_id: a_no_1, 
+				atom2_id: a_no_2,
 			}
 		}
 		
@@ -1859,48 +1859,48 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 }
 
 function sort_data_set(ds) {
-	// Sort a data set so that atoms are grouped by elements and ordered by id
+	// Sort a data set so that atoms are grouped by elements and ordered by index
 
-	// So we manually "zip" together all the data in a "sortbox", then sort it, then put it back in place
-	sortbox = {};
+	// First, we need to order the atoms themselves
+	ds.atoms.atom.sort(function(a1, a2) { return (a1.label != a2.label) ? (a1.label > a2.label) : (a1.index > a2.index)});
 
+	// Now that they are ordered, we create a list of their IDs so we can always find out who comes before who
+	var id_list = [];
 	for (var i = 0; i < ds.atoms.atom.length; ++i) {
-		var lab = ds.atoms.atom[i].label;
-		if (!(lab in sortbox)) {
-			sortbox[lab] = [];
+		id_list.push(parseInt(ds.atoms.atom[i].id));
+	}
+
+	// Now we reorder everything else
+	single_datatypes = ["ms", "efg"];
+	pair_datatypes = ["dip", "isc"];
+
+	single_sort = function(d1, d2) {
+		return id_list.indexOf(d1.atom_id) - id_list.indexOf(d2.atom_id);		
+	}
+
+	pair_sort = function(d1, d2) {
+		// Sort by atom 1: if they are equal, sort by atom 2
+		if (d1.atom1_id != d2.atom1_id) {
+			return (id_list.indexOf(d1.atom1_id) - id_list.indexOf(d2.atom1_id));
 		}
-		sortbox[lab].push({'a': ds.atoms.atom[i]});		
-		// Now add all the other data
-		for (datatype in ds.magres) {
-			if (datatype == "units")
-				continue;
-			sortbox[lab][sortbox[lab].length-1][datatype] = ds.magres[datatype][i];
-		}
-	}
-
-	for (lab in sortbox) {
-		sortbox[lab].sort(function(a1, a2) {return a1.a.index > a2.a.index});
-	}
-
-	// And now reassign
-	ds.atoms.atom = [];
-	for (datatype in ds.magres) {
-		if (datatype == "units")
-			continue;
-		ds.magres[datatype] = [];
-	}
-
-	for (lab in sortbox) {
-		for (var i = 0; i < sortbox[lab].length; ++i) {
-			ds.atoms.atom.push(sortbox[lab][i].a);
-			for (datatype in ds.magres) {
-				if (datatype == "units")
-					continue;
-				ds.magres[datatype].push(sortbox[lab][i][datatype]);
-			}
+		else {
+			return (id_list.indexOf(d1.atom2_id) - id_list.indexOf(d2.atom2_id));			
 		}
 	}
 
+	for (var i = 0; i < single_datatypes.length; ++i) {
+		var dt = single_datatypes[i];
+		if (dt in ds.magres) {
+			ds.magres[dt].sort(single_sort);
+		}
+	}
+
+	for (var i = 0; i < pair_datatypes.length; ++i) {
+		var dt = pair_datatypes[i];
+		if (dt in ds.magres) {
+			ds.magres[dt].sort(pair_sort);
+		}
+	}
 }
 
 function ref_table_gen() {
