@@ -1,0 +1,1055 @@
+<!DOCTYPE html  PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd" encoding="UTF-8">
+
+<!-- MagresView v 1.4
+by Simone Sturniolo
+
+A JMol based web viewer for ab-initio calculated NMR parameters stored in the .magres file format.
+A CCP-NC project funded by STFC and EPSRC.
+
+Copyright 2013 Science and Technology Facilities Council
+This program is distributed under the terms of the GNU General Public License (GNU GPL)
+Please refer to the file COPYING for the text of the license
+
+MagresView is built around the Java Applet version of JMol, a program by Robert Hanson distributed under the GNU Lesser General Public License (GNU LGPL)
+Copy of the license can be found as a text file in the /jmol folder
+-->
+
+<!-- NOTE: THIS FILE IS A SERVER-SIDE ONLY VERSION OF MAGRESVIEW.
+It provides the possibility to load example files from a dropdown menu but it makes heavy use of XMLHttpRequest, which won't work when the page is run locally.-->
+
+<html>
+  <head>
+
+    <!-- CSS stylesheets -->
+	<link href="stylesheet.css" rel="stylesheet">
+	<link href="svg_stylesheet.css" rel="stylesheet">
+
+	<!-- JMol applet scripts loading -->
+	    
+	<script src="jsmol/JSmol.min.js"></script>
+
+	<!-- This section serves the purpose of loading jQuery, jQuery UI, and the graphic theme "Vader" -->	  		
+  	
+	<link id="jquery_theme" href="jquery/css/theme_dark/jquery-ui.css" rel="stylesheet">
+  	<link rel="icon" type="image/png" href="images/favico.png">
+	<script src="jquery/js/jquery-ui.min.js"></script>
+    
+    <!-- jQuery is a Javascript library that allows lots of new functionalities, extending in fact the language to be more efficient and flexible.
+    jQuery UI introduces lots of nice interface tweaks, allowing for the use of tabs, expanding sections, sliders, animations, and so on.
+    In this project, jQuery UI is used to provide an interface as simple, efficient and pleasant as possible. jQuery selectors and functions are also occasionally used,
+    especially in the newer parts of the code.
+
+    jQuery is distributed under the MIT License. For further information refer to the headers of the jQuery source code files and to the web page http://jquery.org/license/  
+	 
+     -->    
+	
+  	<script src="d3/d3.min.js"></script>
+
+  	<!-- d3 is another very useful Javascript library. It does similar things to jQuery, but has the added benefit of being very good at handling data. Used for plots. -->
+
+    <script src="jquery/multiselect/jquery.multiselect.min.js"></script>
+    <link href="jquery/multiselect/jquery.multiselect.css" rel="stylesheet">
+
+    <!-- jQuery multiselect plugin, for nice multiselect drop down menus. By Eric Hynds, http://www.erichynds.com/blog/jquery-ui-multiselect-widget -->
+
+	<!-- Version definition -->
+
+	<script type="text/javascript" >
+
+		//Version number handling
+
+		var _major_version = 1;
+		var _major_revision = 5;
+		var _minor_revision = 1;
+
+		function version_number_string() {
+
+			var numstr = _major_version + "." + _major_revision;
+			if (_minor_revision != 0) {
+				numstr += "." + _minor_revision;
+			}
+
+			return numstr;
+
+		}		
+
+		var magresview_version_number = version_number_string();
+
+	</script>    
+   
+	<!-- Create title -->   
+   
+   <script type="text/javascript">
+   	document.write("<title>MagresView " + magresview_version_number + "</title>");
+   </script>
+
+    <!-- Loading configuration parameters. Wrapped into two functions that change default error handling so that no matter what is written in mview_config.js, nothing too bad happens -->
+    
+    <script type="text/javascript" src="files/def_config.js"></script>
+    
+    <script type="text/javascript">
+      $(window).error(function(e){
+       e.preventDefault();
+      });
+    </script>
+    <script type="text/javascript" src="mview_config.js"></script>
+    <script type="text/javascript">
+      //Back to default behaviour
+      $(window).error();
+    </script>
+    
+    
+    <!-- Matrix functions -->
+    
+    <script type="text/javascript" src="files/matrix.js"></script>
+
+    <!-- Euler angles calculations functions -->
+    
+    <script type="text/javascript" src="files/euler_angles.js"></script>
+
+	 <!-- JMol applet and controls loading -->
+    
+    <script type="text/javascript" src="files/app_load.js"></script>
+    
+    <!-- Species selection dropdown menu handling -->
+    
+    <script type="text/javascript" src="files/sel_drop.js"></script>
+
+    <!-- Magnetic shielding plotting -->
+
+    <script type="text/javascript" src="files/ms.js"></script>
+
+    <!-- Electric field gradient plotting -->
+
+    <script type="text/javascript" src="files/efg.js"></script>
+
+    <!-- Indirect spin coupling plotting -->
+
+    <script type="text/javascript" src="files/isc.js"></script>     
+
+    <!-- Dipolar coupling plotting -->
+
+    <script type="text/javascript" src="files/dipolar.js"></script>
+
+    <!-- File input handling functions -->
+    
+    <script type="text/javascript" src="files/input.js"></script>
+    
+    <!-- Output file format handling -->
+    
+    <script type="text/javascript" src="files/output.js"></script>
+    
+    <!-- Console handling functions -->
+    
+    <script type="text/javascript" src="files/console.js"></script>
+
+    <!-- Lattice periodic boundary conditions functions -->
+   
+    <script type="text/javascript" src="files/periodicity.js"></script>
+
+    <!-- Options handling functions -->
+   
+    <script type="text/javascript" src="files/options.js"></script>
+    
+    <!-- Hovering handling functions -->
+    
+    <script type="text/javascript" src="files/hover.js"></script>
+    
+    <!-- System alignment handling -->
+    
+    <script type="text/javascript" src="files/align.js"></script>
+    
+    <!-- Serverside requests handling -->
+    
+    <script type="text/javascript" src="files/serverside.js"></script>
+    
+    <!-- Drag-n-Drop magres conversion popup handling -->
+    
+    <script type="text/javascript" src="files/oldmagres.js"></script>
+    
+    <!-- Spectrum plotting - general SVG plotting functionality and specific ones -->
+    
+    <!-- 
+    <script type="text/javascript" src="files/svgplot.js"></script>
+    <script type="text/javascript" src="files/svgspectrum.js"></script>
+    -->
+
+    <script type="text/javascript" src="files/svgd3spec.js"></script>
+
+    <!-- Unified control of state changes -->
+    
+    <script type="text/javascript" src="files/state_change.js"></script>
+
+    <!-- JSON parser and stringifier, for passing values to the Python script -->
+
+	 <script type="text/javascript" src="files/json2.js"></script>
+
+    <!-- Larmor frequency handling for quadrupolar shifts -->
+
+     <script type="text/javascript" src="files/larmor.js"></script>
+
+    <!-- Spins for common isotopes -->
+
+     <script type="text/javascript" src="files/spin_data.js"></script>
+
+	 <script>
+		
+		/* This script initializes the jQuery UI controls. The options mean:
+		collapsible: true --> it is possible to close the active element in an accordion. The default is for the active element to be always open
+		heighStyle: "content" --> the height of each element adapts to its content (instead of using a single value for all elements)
+		autoHeight: false --> helps with preventing the appearance of scroll bars in the elements
+		*/
+				
+  		$(function() {
+
+		$( "#visual_accordion" ).accordion({
+      		collapsible: true,
+      		heightStyle: "content",
+      		autoHeight: false,
+      		activate: function(event, ui) {
+                global_state_machine.handle_change('state');
+		    }
+		});
+		
+		$( "#options_accordion" ).accordion({
+  		collapsible: true,
+  		heightStyle: "content",
+  		autoHeight: false
+		});
+
+		$("#main_tabs").tabs({
+			activate: function(event, ui) {
+                global_state_machine.handle_change('state');
+			}
+		});
+		
+		dndrop_popup_init();
+
+        sel_drop_init();
+
+		$("#euler_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
+		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
+		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
+ 		$("#ref_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: ref_table_popup_handler});
+        $("#larmor_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: larmor_table_popup_handler});		
+        });         
+  		
+  </script>
+
+  <!-- The default style for the SVG 1D spectral plot - exported in the downloadable version of the plot -->
+
+  <!-- NOTE: don't add comments inside this section, Inkscape doesn't take kindly to them. Lesson learned the hard way -->
+
+  <style id="svg_defaultstyle">
+	.defaultsvg.bkg {
+	    fill: rgb(255, 255, 255);
+	}
+
+	.defaultsvg.axis path {
+	    stroke: rgb(0, 0, 0);
+	    stroke-width: 2;
+	    fill: none;
+	}
+
+	.defaultsvg.axis line {
+	    stroke: rgb(0, 0, 0);
+	}
+
+	.defaultsvg.axis text {
+	    fill: rgb(0, 0, 0);
+	}  
+
+	.defaultsvg.pulses {
+	    stroke: none !important;
+	}
+
+	.defaultsvg.peaks {
+	    stroke-width: 2;
+	    fill: none !important;
+	}
+
+	.defaultsvg.col0 {
+	    stroke: rgb(255,0,0);
+	    fill:   rgb(255,0,0);
+	}
+
+	.defaultsvg.col1 {
+	    stroke: rgb(0,0,255);
+	    fill:   rgb(0,0,255);
+	}
+
+	.defaultsvg.col2 {
+	    stroke: rgb(0,255,0);
+	    fill:   rgb(0,255,0);
+	}
+
+	.defaultsvg.col3 {
+	    stroke: rgb(255,255,0);
+	    fill:   rgb(255,255,0);
+	}
+
+	.defaultsvg.col4 {
+	    stroke: rgb(0,255,255);
+	    fill:   rgb(0,255,255);
+	}
+
+	.defaultsvg.col5 {
+	    stroke: rgb(255,0,255);
+	    fill:   rgb(255,0,255);
+	}
+
+	.defaultsvg.legend text {
+	    stroke: none !important;
+	    font-size: 9px;
+	}
+
+	.defaultsvg.el_labels {
+	    stroke: none !important;
+	    font-size: 9px;
+	}
+
+	.defaultsvg.el_links {
+	    fill: none !important;
+	    stroke-width: 1;
+	}
+
+	</style>
+
+  </head>
+  <body id="main_page_body" class="theme_dark">  
+  <div id="main_div" class="main">
+  
+  <script type="text/javascript" >
+  //The font size for the main division is estimated on the basis of the total window's size. This is the font size for the title - everything else is scaled down proportionally
+
+  	document.getElementById("main_div").style.fontSize = Math.ceil(winH/14.0) + "px";
+    
+  </script>
+  
+  <div class="titlediv">
+  <img id="stfc_logo" src="images/dark/stfc_logo.png" alt="STFC" height="70%" style="float: left; margin: 0px;">
+  <span style="color: rgb(242, 154, 0); margin: 0px;">M</span>agres<span style="color: rgb(242, 154, 0)">V</span>iew
+  <span style="font-size: 50%; margin: 0px;"> <script type="text/javascript">document.write(magresview_version_number);</script></span>
+  <img id="epsrc_logo" src="images/dark/small_epsrc.png" alt="EPSRC" height="70%" style="float:right; margin: 0px;">
+  </div>
+	  		<div id="main_app_div" class="appdiv">
+			      <div id="jmol_div" style="position: relative"></div>
+			      <div id="main_cons_div" class="consdiv">
+				<br>
+		  		Console:<br>
+		  		<input id="jmol_console" type="text" size="95%" onkeyup="console_input(event)" autocomplete="off"></input>
+			      </div>
+			      <br>
+			      Jmol version: &nbsp;&nbsp; <span id="j_js_switch" class="switchdiv" onclick="switch_handler(true)">
+				<div class="switch_controldiv">
+				  JS
+				</div>
+			      </span>
+	  		</div>
+			<div id="main_ctrl_div" class="ctrldiv">
+	
+					<div id="main_system_load_div">
+					<h3 class="head" style="color: rgb(242, 154, 0)">Load file</h3>
+					<div id="main_load_div" class="ctrl_left">
+							File:<br>
+							<input type="file" id="load_button" name="Browse" onchange="load_file(event)" style="text-align: right;" size="15%" autocomplete="off"></input>
+							<script type="text/javascript">
+							  
+							  if (window.location.protocol != "file:") {
+							    $("#load_button").addClass("nodisplay");
+							    document.write('<select id="file_load_drop" style="width: 100pt;" onmouseup="file_load_drop_handler(event)"> \
+									    <option value="#user_file#">Load user file...</option> \
+									    </select>');
+							  }
+							  
+							</script>
+							<div class="ctrl_right">
+								<br>
+								<input type="button" id="reload_butt" value="Reload model" onclick="reload_butt_handler()"></input>
+								<br><br><br>
+								<input type="checkbox" id="ismol_check" autocomplete="off" onchange="ismol_check_handler()"
+								title="Load the system not as a whole unit cell, but as the minimum repeated unit. This is done by using an heuristic algorithm which might not be right 100% of the times, so care should be taken."></input>
+								<span title="Load the system not as a whole unit cell, but as the minimum repeated unit. This is done by using an heuristic algorithm which might not be right 100% of the times, so care should be taken.">Load as molecule/asymmetric unit</span>
+							</div>
+							<br><br>
+	  						Lattice:<br> 
+	  						x: <input id="x_lat" type="text" maxlength="2" size="2" value="1" autocomplete="off"
+	  						title="Insert a value greater than 1 to visualize multiple unit cells. This will not work if the loaded file does not contain cell parameter data"></input>
+	  						y: <input id="y_lat" type="text" maxlength="2" size="2" value="1" autocomplete="off"
+	  						title="Insert a value greater than 1 to visualize multiple unit cells. This will not work if the loaded file does not contain cell parameter data"></input>
+	  						z: <input id="z_lat" type="text" maxlength="2" size="2" value="1" autocomplete="off"
+	  						title="Insert a value greater than 1 to visualize multiple unit cells. This will not work if the loaded file does not contain cell parameter data"></input>
+	  						
+					</div>
+					</div>
+					<br>
+					<h3 class="head" style="color: rgb(242, 154, 0)">Selection and options</h3>
+					<div>
+					<div id="main_sel_div" class="ctrl_left">
+							Select:<br><br>
+                            <div id="sel_drop_container">
+							<select id="sel_drop" multiple>
+							</select>
+							<select id="sel_atom_drop" multiple>
+							</select>
+                            </div>
+							<br>
+							Last distance measured:<br>
+							<span id="meas_1">N/A</span> to <span id="meas_2">N/A</span>&nbsp;=&nbsp;<span id="meas_val" style="color: rgb(242, 154, 0)">N/A</span>&nbsp;&Aring;
+							<br>
+							<br>
+					<div id="main_check_div" class="ctrl_right">
+	  						<input type="checkbox" id="halos_check" title="Turn selection halos ON/OFF" onchange="halos_check_handler()" autocomplete="off">Enable selection halos</input><br>
+	  						<input type="checkbox" id="bonds_check" title="Turn bond visualization ON/OFF" onchange="bonds_check_handler()" autocomplete="off" checked>Show bonds</input><br>
+	  						<input type="checkbox" id="sticks_check"  title="Switch visualization between sticks and balls and wireframe" onchange="sticks_check_handler()"autocomplete="off" checked>Show sticks and balls</input><br>
+	  						<input type="checkbox" id="axes_check"  title="Turn axes and unit cell ON/OFF" onchange="axes_check_handler()" autocomplete="off" checked>Show axes and unit cell</input><br>
+	  						<input type="checkbox" id="labels_check"  title="Turn atom labels ON/OFF" onchange="labels_check_handler()" autocomplete="off" disabled="disabled">Show atom labels</input>
+					</div>
+					</div>
+					</div>
+					
+					<br>
+
+					<div id="main_tabs" style="font-size: 90%; position: absolute; z-index: 1; width: 100%">
+					
+					<!-- This is a jQuery TAB. It needs two things:
+								1) the content of the tabs organized in different divisions identified by an id;
+								2) an unordered list <ul> of links to the various divisions which constitute the tabs.
+								
+								The main TAB division (here aptly named main_tabs) needs to be initialized as a tab system with a jQuery script, see <head> section.
+								
+								-->
+					
+								<ul>
+									<li><a class="tablink" href="#visual_accordion">Visualization</a></li>
+									<li><a class="tablink" href="#iso_selection">Isotope selection</a></li>
+									<li><a class="tablink" href="#sys_align">Alignment</a></li>
+									<li><a class="tablink" href="#spec_plot">Spectral plot</a></li>
+									<li><a class="tablink" href="#file_gen">File generation</a></li>
+									<li><a class="tablink" href="#options_accordion">Options</a></li>
+									<!--
+									<li><a href="#spectral_plot">Spectrum</a></li>
+									-->
+								</ul>
+														
+							<div id="iso_selection">
+							<div id="main_el_div" class="ctrl_left">
+					  					<script type="text/javascript" src="files/iso_sel.js"></script>
+					  					Choose the isotope for the currently selected atom or group of atoms. If the atoms selected are not all the same element, the menu will be inactive.
+							<div id="main_iso_div" class="ctrl_right">					
+										Isotope: <select id="iso_drop" title="Isotope list for the current element. Default is the most abundant NMR active isotope for the element" onchange = "iso_drop_handler(event)">
+											<option value="def">Current</option>								
+											<option value="inac">Default</option>								
+										</select>
+							</div>
+							</div>
+							<br>
+							<br>
+							</div>
+							
+							<div id="sys_align">
+							  
+							  Align system with:<br><br>							  
+							  <form id="align_method">
+							    &nbsp <input type="radio" name="align_t" id="align_t_1" value="bond" autocomplete="off" onclick="align_radio_handler(event)"
+                  title="Align system with the line connecting two atoms of choice" checked>
+							    Align with dipolar coupling</input> <br>
+							    &nbsp <input type="radio" name="align_t" id="align_t_2" value="ms" autocomplete="off" onclick="align_radio_handler(event)"
+							    title="Align system with the principal axis system for the MS tensor on an atom of choice" disabled="disabled">
+							    Align with <span style="color: rgb(255, 128, 0)">MS</span> tensor</input> <br>
+							    &nbsp <input type="radio" name="align_t" id="align_t_3" value="efg" autocomplete="off" onclick="align_radio_handler(event)"
+							    title="Align system with the principal axis system for the EFG tensor on an atom of choice" disabled="disabled">
+							    Align with <span style="color: rgb(0, 128, 255)">EFG</span> tensor</input>
+						    
+							  </form>
+							  
+							</div>
+																					
+							<div id="visual_accordion">
+							
+							<!-- This is a jQuery ACCORDION. It needs:
+									1) the content of the various elements organized in different divisions;
+									2) an header <h3> before every division that we want to be an element.
+											
+									The main ACCORDION division (visual_accordion, etc.) needs to be initialized as an accordion with a jQuery script, see <head> section.
+									
+									-->
+
+							<h3 id="ms_head" class="head">Visualize magnetic shielding (symmetric component)</h3>	
+                            <div>				
+							<div id="ms_ell_div" class="ctrl_left">
+
+											<br>
+											<input type="checkbox" id="ms_check"
+											title="Ellipsoids oriented along the principal axes, with the three dimensions a, b, c proportional to the absolute value of the magnetic shielding eigenvalues."
+											onchange="ms_plot_handler(event)" autocomplete="off" disabled="disabled">Ellipsoids</input>
+											<br>
+											Scale (0 = auto): <input type="text" id="ms_ell_scale" maxlength="5" size="3" autocomplete="off" disabled="disabled" onkeypress="ms_ell_scale_handler(event)" value="0"></input> 
+											<br>
+											<br>
+											<br>
+											<br>
+											<br>
+											<br>
+											<br>
+		
+							<div id="ms_label_div" class="ctrl_right">
+		
+											<input type="checkbox" id="ms_check_2"
+											title="Visualize numerical values for quantities identifying the shielding tensor. Eigenvalue ordering is |s_3-s_iso|>|s_1-s_iso|>|s_2-s_iso|."
+											onchange="ms_label_handler(event)" autocomplete="off" disabled="disabled">
+											Labels</input>
+		
+					  						<input type="checkbox" id="ms_check_3"
+					  						title="Color scale goes from blue to red, respectively most positive and most negative value."
+					  						onchange="ms_color_handler(event)" autocomplete="off" disabled="disabled">
+					  						Color scale</input>
+		
+											<form id="ms_label_type">
+												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_1"
+												title="Isotropic component, defined as (s_1+s_2+s_3)/3"
+												value="0" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled" checked>Isotropic component, absolute (<span style="color: rgb(255, 128, 0)">ppm</span>)</input> <br> 
+
+												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_shield"
+												title="Isotropic component (see above) subtracted from a reference shielding value"
+												value="shield" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled">Isotropic component, with global shielding:
+												<input type="text" id="ms_shield_ref" size="3" value="0" onkeypress="ms_shield_ref_handler(event)" autocomplete="off" disabled="disabled"></input> (<span style="color: rgb(255, 128, 0)">ppm</span>) </input> <br> 
+
+												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_reftable"
+												title="Isotropic component (see above) subtracted from a reference shielding values provided in reference table"
+												value="shield_reftable" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled">Isotropic component, with shielding from reference table:
+												&nbsp;<input type="button" id="ms_reftable_butt" value="Reference table" onclick="$('#ref_table_popup').dialog('open');">
+												</input> <br>
+
+												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_2"
+												title="Anisotropy, defined as s_3-(s_1+s_2)/2"
+												value="1" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled"><span id="ms_par_1">Anisotropy</span> (<span style="color: rgb(255, 128, 0)">ppm</span>)</input> <br>
+
+												&nbsp <input type="radio" name="ms_ltype" id="ms_ltype_3"
+												title="Asymmetry, defined as (s_2-s_1)/(s_3-s_iso)" 
+												value="2" autocomplete="off" onclick="ms_radio_handler(event)" disabled="disabled"><span id="ms_par_2">Asymmetry</span> </input> <br>
+											</form>
+
+                                <div id="ms_disabled_div" class="disabled_div_right">
+                                    <br>
+                                    <br>
+                                    Magnetic Shielding data is not available for this system
+                                </div>
+                                            
+								</div>
+								</div>
+								</div>
+		
+								<h3  id="efg_head" class="head">Visualize electric field gradient</h3>					
+								<div>
+					  			<div id="efg_ell_div" class="ctrl_left">
+								
+                                            Component: 
+                                            <select id="efg_drop" onchange="efg_drop_handler(event)" disabled="disabled">
+                                                <option value="efg">EFG</option>
+                                            </select>
+                                            <br>
+											<br>
+											<input type="checkbox" id="efg_check"
+					  						title="Ellipsoids oriented along the principal axes, with the three dimensions a, b, c proportional to the absolute value of the electric field gradient eigenvalues. Scale is arbitrary and optimized for better visualization."
+					  						onchange="efg_plot_handler(event)" autocomplete="off" disabled="disabled">Ellipsoids</input>
+					  						<br>Scale (0 = auto): <input type="text" id="efg_ell_scale" maxlength="5" size="3" autocomplete="off" disabled="disabled" onkeypress="efg_ell_scale_handler(event)" value="0"></input> 
+											<br><br>
+											<br><br>
+                                            <br><br>
+                                            <br><br>
+
+					  			<div id="efg_label_div" class="ctrl_right">
+
+                                            <br><br>	
+					  						<input type="checkbox" id="efg_check_2" 
+					  						title="Visualize numerical values for quantities identifying the electric field gradient tensor. Eigenvalue ordering is |Vzz|>|Vxx|>|Vyy|."
+					  						onchange="efg_label_handler(event)" autocomplete="off" disabled="disabled">
+					  						Labels</input>
+		
+					  						<input type="checkbox" id="efg_check_3"
+					  						title="Color scale goes from blue to red, respectively most positive and most negative value."
+					  						onchange="efg_color_handler(event)" autocomplete="off" disabled="disabled">
+					  						Color scale</input>
+											<form id="efg_label_type">
+												&nbsp <input type="radio" name="efg_ltype" id="efg_ltype_1" 
+												title="Vzz as electric gradient"
+												value="0" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled" checked>V<sub>zz</sub> (<span style="color: rgb(0, 128, 255)">au</span>)</input> <br> 
+												
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_2"
+												title="Anisotropy, defined as Vzz-(Vxx+Vyy)/2"
+												value="1" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled"><span id="efg_par_1">Anisotropy</span> (<span style="color: rgb(0, 128, 255)">au</span>)</input> <br>
+												
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_3"
+												title="Asymmetry, defined as (Vyy-Vxx)/Vzz"
+												value="2" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled"><span id="efg_par_2">Asymmetry</span> </input> <br>
+												
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_4"
+												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered.
+                                                WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
+												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
+
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_5"
+                                                title="Total shielding/shift in ppm, including both quadrupolar and magnetic shieldings. Requires inserting Larmor frequencies for each species of interest. If reference values have been inserted, it will be visualized as chemical shift rather than absolute shielding."
+                                                value="4" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Total shift (<span style="color: rgb(0, 128, 255)">ppm</span>)<br>
+                                                <input id = "efg_file_ref" type="button" value="Reference table" onclick="$('#ref_table_popup').dialog('open');"></input>
+                                                </input>
+                                                &nbsp;<input type="button" id="efg_larmtable_butt" value="Larmor frequency table" onclick="$('#larmor_table_popup').dialog('open');">
+ <br>
+											</form>
+
+                                <div id="efg_disabled_div" class="disabled_div_right">
+                                    <br>
+                                    <br>
+                                    Electric Field Gradient data is not available for this system
+                                </div>
+
+					  			</div>
+					  			</div>
+					  			</div>
+					  	
+								<h3  id="isc_head" class="head">Visualize indirect spin-spin coupling</h3>					
+								<div>					
+								<div id="isc_graph_div" class="ctrl_cen">
+
+                                            Component:
+                                            <select id="isc_drop" onchange="isc_drop_handler(event)" disabled="disabled">
+                                                            <option value="isc">isc</option>
+                                            </select>
+                                            <br>
+                                
+											<input type="checkbox" id="isc_check"
+											title="Visualize numerical values for the isotropic value of the J coupling."
+											onchange="isc_label_handler(event)" autocomplete="off" disabled="disabled">
+											Labels (isotropic coupling, Hz, <span style="color: rgb(128, 255, 0)">positive</span> or <span style="color: rgb(255, 0, 128)">negative</span>)</input>
+								
+											<br><br><br>
+
+		
+								Click on any atom to show its couplings with the rest of the selection (the picking will not work when the selection is in "Custom" mode)							
+								<br>
+				  				Visualized range (magnitude):
+				  				<input type="text" id="isc_min" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
+				  				title="Minimum value of the magnitude of the isotropic J-coupling to visualize"></input>
+				  				-
+				  				<input type="text" id="isc_max" size="4" autocomplete="off" disabled="disabled" onchange="isc_minmax_handler()" value="0"
+				  				title="Maximum value of the magnitude of the isotropic J-coupling to visualize"></input>
+				  												<span style="color: rgb(128, 255, 0)">Hz</span>
+
+                                <div id="isc_disabled_div" class="disabled_div_cen">
+                                    <br>
+                                    <br>
+                                    Indirect Spin-Spin Coupling data is not available for this system
+                                </div>
+                                
+                                </div>
+								</div>
+							
+							<h3  id="dip_head" class="head">Calculate dipolar couplings</h3>
+							<div>
+							
+							<div id="dipolar_ctrl_left" class="ctrl_left">							
+								
+								<br>
+								
+								<input type="checkbox" id="dipolar_check" disabled="true" autocomplete = "off" onchange="dip_label_handler()"
+								title="Visualize numerical values for the dipolar coupling constant">
+								Labels (<span style="color: rgb(0, 230, 230)">kHz</span>)</input>															
+								<br>
+								<br>
+							
+							</div>
+							Click on any atom to show its couplings with the rest of the selection (the picking will not work when the selection is in "Custom" mode).<br>
+							Cutoff distance: 
+							<input type="text" id="vvleck_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true" onkeypress="vvleck_r_handler(event)"
+							title="Cutoff distance from selected atom for computation of RMS dipolar coupling"></input> &Aring;
+							<input type="checkbox" id="vvleck_sphere_check" autocomplete="off" disabled="true" onchange="vvleck_sphere_handler()"> Visualize range sphere
+							<br>
+							<br>
+							<br>
+							Evaluate root square sum dipolar coupling:
+							<br>								
+							<div class="ctrl_left">
+							<input type="button" id="vvleck_iso_eval" value="Isonuclear RSS coupling" disabled="true" autocomplete="off" onclick="vvleck_eval(true)"></input>
+							<div class="ctrl_right">
+							<input type="button" id="vvleck_tot_eval" value="Total RSS coupling" disabled="true" autocomplete="off" onclick="vvleck_eval(false)"></input>
+							</div>
+							</div>
+							</div>					
+
+							<h3 id="eul_head" class="head">Euler angles rotations</h3>
+							<div>
+							Calculate Euler angle rotations between tensors. Use a left click to select atom 1, and a right click to select atom 2:<br><br>
+							<div class="ctrl_left">
+
+							<form id="atom1_eul_type">
+								Atom 1:<br>
+								<input type="radio" name="eultype1" id="eultype1_ms"  value="ms"  autocomplete="off" onclick="euler_diff_calc_handler()" disabled="true"checked>Magnetic shielding<br>
+								<input type="radio" name="eultype1" id="eultype1_efg" value="efg" autocomplete="off" onclick="euler_diff_calc_handler()" disabled="true">Electric field gradient
+							</form>
+							<br>
+							<input type="button" id="euldiff_butt" value="Euler angle difference" onclick="euldiff_butt_handler()"
+							title="Shows the rotation, as Euler angles, between the tensors of the chosen type on the selected atoms. The default convention is the ZYZ one. To change the convention in use, go to the Options tab.">
+
+							<div class="ctrl_right">
+
+							<form id="atom2_eul_type">
+								Atom 2:<br>
+								<input type="radio" name="eultype2" id="eultype2_ms"  value="ms"  autocomplete="off" onclick="euler_diff_calc_handler()" disabled="true"checked>Magnetic shielding<br>
+								<input type="radio" name="eultype2" id="eultype2_efg" value="efg" autocomplete="off" onclick="euler_diff_calc_handler()" disabled="true">Electric field gradient
+							</form>
+
+							</div>
+							</div>
+							<br>
+							Table of rotations from <span style="color: rgb(255, 128, 0)">ms</span> to <span style="color: rgb(0, 128, 255)">efg</span> tensors on the same atom:
+							<br>
+							<div class="ctrl_left">
+							<input type="button" id="eultab_butt" onclick="eultab_calculate()" value="Generate table" disabled="true">
+							<div class="ctrl_right">
+							<input type="checkbox" id="eultab_check" autocomplete="off">Output in a new tab
+							<br><br>
+							<a id="eul_file_download" href="" class="hidden" target="_blank" download="">Download</a>
+							</div>
+							</div>
+							</div>					
+
+
+					</div>
+					
+					<div id="spec_plot" class="scrollable_tab">
+            <p id="warning_text" style="font-size: 90%">
+            WARNING: this spectral plot takes into account only magnetic shieldings. It ignores quadrupolar, dipolar and J couplings entirely, and is NOT a spectral simulation. Therefore it should always be considered only a graphical reference and not a realistic spectrum.<p><br>
+					  <div id="spec_container">
+			              <svg id="spec_plot_svg"></svg>
+					  </div>
+					  <br>
+					    <div id="spec_options_div" class="ctrl_left">
+					  Plot style: &nbsp;
+					  <select id="spec_style_drop" autocomplete="off" onchange="spec_style_drop_handler()" title="Select the style of the spectral plot. WARNING: Lorentzian broadening can be slow, especially with high numbers of points">
+					    <option value="pulses">Sticks</option>
+					    <option value="peaks">Lorentzian broadening</option>
+					  </select>
+					  <br><br>
+					  Interpolation points: &nbsp;
+					  <input type="text" id="spec_interp_n" value='400' maxlength='4' size='4'
+					  title='Select the number of interpolation points for the spline drawing the Lorentzian curve. Warning: high number of points might result in slow updates'
+					  onkeypress='spec_replot_handler(event)' disabled=true>
+					  <br><br>
+					  Line broadening: &nbsp;
+					  <input type="text" id="spec_broad" value='1' maxlength='4' size='4'
+					  title='Select the Lorentzian curve broadening in ppm.'
+					  onkeypress='spec_replot_handler(event)' disabled=true> &nbsp; ppm
+					  <br><br>
+					  <input type="checkbox" id="spec_plabel_check" autocomplete="off" onchange="svg_spectrum_plot(false)" checked>Show atom labels next to the peaks
+					  <br><br>
+                      <br><br>
+					  <div id="spec_options_2_div" class="ctrl_right">
+					    X axis range: &nbsp; <input type="text" id="spec_xrange_min" value='0' maxlength='4' size='4'
+					  title='X range - minimum' onkeypress='spec_replot_handler(event)'> &nbsp; - &nbsp;
+                        <input type="text" id="spec_xrange_max" value='1' maxlength='4' size='4'
+            					  title='X range - maximum' onkeypress='spec_replot_handler(event)'> &nbsp; 
+                    (step: <input type="text" id="spec_xrange_step" value='0' maxlength='4' size='4'
+                    title='X range - space between tics' onkeypress='spec_replot_handler(event)'> &nbsp;)
+                    ppm
+					  <br><br>
+					  
+					  <input id="spec_reftable_butt" type="button" value="Reference table" onclick="$('#ref_table_popup').dialog('open');"
+					  title="Open a table to set up the chemical shift reference values for the various elements. To see the original shielding value, leave the field blank."></input> &nbsp;
+                      <input id="spec_larmtable_butt" type="button" value="Larmor frequencies" onclick="$('#larmor_table_popup').dialog('open');"
+                      title="Open a table to set up the Larmor frequency for the various elements. A blank field will use the default value of 100 MHz."></input>
+                      <br><br>
+                      <input id="spec_quadshift_butt" type="checkbox" onchange="svg_spectrum_plot(true)" title="Include quadrupolar shifts in the spectral plot">Include quadrupolar shifts</input>
+					  <br><br>
+					  <a id="plot_download" href="" target="_blank" onclick="svg_download_update()" download="magres.svg">Download spectrum</a>
+                        <br><br>
+                        <input id="nmr2d_butt" type="button" value="NMR2D Tool" onclick="launch_NMR2D()" disabled="disabled"></input>
+					  </div>
+					  </div>
+
+
+					</div>
+					
+					<div id="file_gen">
+					
+					<div id="file_type_div" class="ctrl_left">
+					File type: <select id="file_type_drop" autocomplete="off" onchange="file_type_drop_handler()"
+					title="Select the desired file output type. Overview = a readable format for data summarizing - Tabulated = a data summary designed for parsing with Excel or Origin - JSON = formatted data for use by the json_tosim.py script - Spinsys = formatted data for inclusion in Simpson or pNMR simulations">
+						<option value="recap">Overview</option>
+						<option value="table">Tabulated</option>
+						<option value="magres">Magres</option>
+						<option value="json">JSON</option>
+						<option value="spinsys">Spinsys</option>
+					</select>
+					<div id="file_btn_div" class="ctrl_right">
+						<input type="button" value="Generate" onclick="output_file_gen()"></input>
+					</div>
+					</div>
+					<br>
+					<div class="ctrl_left">
+					Target software: <select id="soft_targ_drop" autocomplete="off" disabled="disabled" style="width: 100pt;"
+					title="Select the simulation software you want to use with your data - json_to_sim.py will create the appropriate files">
+						<option value="simpson">SIMPSON</option>
+						<option value="spinev">SPINEVOLUTION</option>
+					</select>
+					<br>
+					<div class="ctrl_right">
+					<input type="checkbox" id="file_newtab_check" autocomplete="off"
+					title="Output the content in a new tab instead of saving it as a file">Output in a new tab </input>
+					<br><br>
+					<a id="file_download" href="" class="hidden" target="_blank" download="">Download</a>
+					</div>
+					</div>
+					Atoms: <select id="sel_file_drop" autocomplete="off" disabled="disabled" onchange="sel_file_drop_handler()">
+						<option value="all">All atoms</option>
+						<option value="sel">Only selected</option>
+						<option value="range">All atoms within</option>
+						<option value="sel_range">All selected atoms within</option>
+					</select>
+
+					<div id="range_file_div" style="visibility:hidden">
+					<input type="text" id="range_file_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true" onkeypress="range_file_r_handler(event)"
+					title="Maximum distance from selected atom of nuclei to include"></input> &Aring; of <span id="range_atom_picked">N/A</span>
+					&nbsp;
+					<input type="checkbox" id="range_sphere_check" checked="true" autocomplete="off" disabled="true" onchange="range_sphere_handler()"> Visualize range sphere
+					</div>
+
+					<br>
+					Include:
+					<div class="ctrl_left">
+					<input type="checkbox" id="ms_file_check" autocomplete="off" disabled="disabled">Magnetic shielding</input>
+					(with reference: <input id = "ms_file_ref" type="button" value="Reference table" onclick="$('#ref_table_popup').dialog('open');"></input>)
+					<br>
+					<input type="checkbox" id="dip_file_check" autocomplete="off" disabled="disabled">Dipolar interactions</input>
+					<div class="ctrl_right">
+					<input type="checkbox" id="efg_file_check" autocomplete="off" disabled="disabled">Quadrupolar constants</input>
+					<br>
+					<input type="checkbox" id="isc_file_check" autocomplete="off" disabled="disabled">Indirect spin-spin coupling</input>
+					</div>
+					</div>
+                    <br>
+					Options:
+					<div class="ctrl_left">
+					<input type="checkbox" id="rot_file_check" autocomplete="off"
+					title="Rotate geometry and tensors according to the current visualization orientation rather than the default reference frame">Use on-screen rotation</input>
+					<div class="ctrl_right">
+                    <input type="checkbox" id="round_file_check" autocomplete="off"
+                    title="Use the floating point precision specified in options for labels when writing quantities in files">
+                    Use label precision</input>
+					</div>
+					</div>
+					
+
+					<p id="simpson_warning_msg" class="warn_msg nodisplay">
+					<br><br>
+						WARNING: for SIMPSON input generation (both JSON and .spinsys), old versions of MagresView had a bug which for shielding interactions caused the use of the full anisotropy rather than the reduced anisotropy (causing an error of a factor of 3/2).<br>
+						This has now been fixed starting with version 1.5.1. Please take care if you used previous versions for SIMPSON input.
+					</p>
+					
+					</div>
+					
+					<div id="options_accordion">
+					
+					<!--
+
+					Removed because unnecessary after implementation of centroids. Will be re-inserted if needed/asked
+
+					<h3 class="head">Shift molecule</h3>
+					<div>
+					<div class="ctrl_left">
+						Shift<br> 
+						a: <input type="text" id="opt_a_shift" maxlength="3" size="3" value="0" autocomplete="off"
+						title="Insert desired shift along the a unit cell direction in percent"></input>%
+						b: <input type="text" id="opt_b_shift" maxlength="3" size="3" value="0" autocomplete="off"
+						title="Insert desired shift along the b unit cell direction in percent"></input>%
+						c: <input type="text" id="opt_c_shift" maxlength="3" size="3" value="0" autocomplete="off"
+						title="Insert desired shift along the c unit cell direction axis in percent"></input>%
+					<div class="ctrl_right" style="text-align:center">
+						<br>
+						<input type="button" id="opt_btn_shift" value="Apply shift" onclick="shift_btn_handler()"
+						title="Shift all the atoms in the model of the percentage of the unit cell base vectors indicated. Will reset all plots and selections."></input>
+					</div>
+					</div>
+					</div>
+					-->	
+
+                    <h3 class="head">Theme</h3>
+                    <div>
+                        MagresView theme: &nbsp;<br><br>
+                        <select id="opt_theme" autocomplete="off" title="Choose display theme for the window"
+                        onchange="opt_theme_handler(event)">
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                    </div>
+
+					<h3 class="head">Plotting options</h3>
+					<div>
+						Ellipsoid translucency (0 = solid, 1 = invisible): &nbsp; <input type="text" id="opt_transl" maxlength="4" size="4" value="0.5" autocomplete="off"
+						title="Insert value desired for ellipsoid translucency" onkeypress="opt_transl_handler(event)" onchange="opt_transl_handler(event)"></input>
+						<br>
+						Ellipsoid type: &nbsp; <select id="opt_type" autocomplete="off"
+						title="Choose the type of visualization for ellipsoids. Can speed up rendering when using JSmol (Filled = slower, Axes Only = faster)."
+						onchange="opt_type_handler(event)">
+						  <option value="fill">Filled</option>
+						  <option value="axearcs">Axes and arcs</option>
+						  <option value="axes">Axes Only</option>
+						</select>
+						<br>
+						ISC graph thickness (0.4 = default): &nbsp; <input type="text" id="opt_width" maxlength="4" size="4" value="0.4" autocomplete="off"
+						title="Insert value desired for ISC graph line thickness" onkeypress="opt_width_handler(event)" onchange="opt_width_handler(event)"></input>			
+					</div>
+
+					<h3 class="head">Euler angles</h3>
+					<div>
+					WARNING: for the majority of NMR software and applications, the ZYZ convention (default setting) is the one used. Change this only if you are sure of what you are doing!
+					<br><br>
+					Convention: &nbsp; <select id="opt_euler_drop"
+					title="Choose here the convention you want to be used for the calculation of Euler angle differences. This will have no effect on the output to simulation programs">
+						<option value="zyz">Rose (ZYZ)</option>
+						<option value="zxz">Goldstein(ZXZ)</option>
+					</select>
+					</div>
+					
+					<h3 class="head">Units and conventions</h3>
+					<div>
+					Quadrupolar constants: &nbsp; <select id="q_units_choice"
+					title="Choose here the units to be used in quadrupolar constant labels"
+					onchange="q_units_choice_handler(event)">
+						<option value="MHz">MHz</option>
+						<option value="kHz">kHz</option>
+					</select>
+					<br><br>
+					Label precision (<span style="color: rgb(255, 128, 0)">ms</span> and <span style="color: rgb(0, 128, 255)">efg</span>): &nbsp;
+					<input type="text" id="opt_lab_prec" size="1" maxlength="1" value="1" onkeypress="opt_lab_prec_handler(event)"></input> decimal places
+					<br><br>
+					Label precision (<span style="color: rgb(128, 255, 0)">isc</span> and <span style="color: rgb(0, 230, 230)">dipolar</span>): &nbsp;
+					<input type="text" id="opt_coup_lab_prec" size="1" maxlength="1" value="2" onkeypress="opt_lab_prec_handler(event)"></input> decimal places
+					<br><br>
+					Tensor conventions: &nbsp; <select id="t_conv_choice"
+					title="Choose the convention you prefer for tensor representation. CASTEP output uses the Haeberlen one by default"
+					onchange="t_conv_choice_handler(event)" autocomplete="off">
+						<option value="haeb">Haeberlen</option>
+						<option value="haeb_red">Haeberlen (with reduced anisotropy)</option>
+						<option value="herber">Herzfeld-Berger</option>
+					</select>
+					</div>
+					
+					<h3 class="head">Save snapshot</h3>
+					<div>
+					W:     <input type="text" id="snap_w" autocomplete="off" maxlength="4" size="4" value="800" title="Width (pixels) of snapshot"></input> &nbsp; &nbsp;
+					H:     <input type="text" id="snap_h" autocomplete="off" maxlength="4" size="4" value="600" title="Height (pixels) of snapshot"></input> <br><br>
+					&nbsp; <input type="button" id="snap_button" onclick="snap_handler()" value="Save snapshot"></input>
+					<br><br>
+					<a id="snap_download" href="" class="hidden" target="_blank" download="">Download</a>
+					</div>
+
+					</div>
+					
+					
+			</div>
+			
+			<div id="euler_popup" title="Euler angles" class="popupdiv">
+				This is just a popup test. &alpha;, &beta;, &gamma;.
+			</div>
+			
+			<div id="vvleck_popup" title="Van Vleck second moment" class="popupdiv">
+				This is just a popup test. &alpha;, &beta;, &gamma;.
+			</div>
+			
+			<div id="oldmagres_convert_popup" title="Convert old Magres file" class="popupdiv">
+			  You tried to load an old .magres file. This format is now deprecated and needs to be converted.<br>
+			  Drag and drop the old .magres file and (optionally, if you want the lattice parameters to be included) the .castep file
+			  to get a converted new format .magres file you can drag straight on MagresView:<br><br>
+			      <div id="oldmagres_box" class="conv_popup obfuscated" style="float: left;"> Old .MAGRES </div>
+			      <div id="castep_box"    class="conv_popup obfuscated" style="float: left;"> .CASTEP </div>
+			      <div id="newmagres_box" class="conv_popup obfuscated" style="float: left;" draggable=false> New .MAGRES </div>
+			</div>
+			
+			<div id="ref_table_popup" title="Reference table" class="popupdiv">
+			  
+			  <table id="ref_table" class="ref_table">
+			    <tr>
+			      <td>Element</td>
+			      <td>Reference (ppm)</td>
+			    </tr>
+			  </table>
+			  
+			</div>
+
+            <div id="larmor_table_popup" title="Larmor frequency" class="popupdiv">
+              
+              <table id="larmor_table" class="ref_table">
+                <tr>
+                  <td>Element</td>
+                  <td>Larmor frequency (MHz)</td>
+                </tr>
+              </table>
+              
+            </div>
+
+  </div>
+  </div>  
+  <div class="creditdiv" id="credit_div">
+  <script type="text/javascript" >
+		//Like for the title, this font size needs to be estimated from the window size
+		//Resize console as well to avoid superposition
+		
+		$(document).ready( function() {
+		  $("#jmol_console").attr("size",Math.ceil(winW*0.6/9));
+		  $("#credit_div").css("fontSize", Math.ceil(winH/70.0) + "px");
+		  
+		  // Handles gracefully failure in case of browsers not supporting XMLHttpRequest:
+		  
+		  try
+		  {
+		    if (window.location.search != "?_USE=SIGNED") {
+		      test_req = new XMLHttpRequest();
+		      test_req.open('get', 'mview_config.js', true);
+		      test_req.send();
+		    }
+		    $("#jmol_div").html(Jmol.getAppletHtml(jmolAppName, main_info));
+		  }
+		  catch(e)
+		  {
+		    $("#jmol_div").width(jmolW).height(jmolH);
+		    $("#jmol_div").addClass('failed_jmol');
+		    $("#jmol_div").html('<br><br><br><br>\
+					\
+					It appears like your browser does not support MagresView at the moment.<br>\
+					This is probably due to restricted permissions.<br>\
+					If you&#39;re using JSmol (JavaScript), try switching to Java by clicking on the button below,<br>\
+					or check out the possible compatibility fixes on the wiki:<br>\
+					<a href="http://ccpforge.cse.rl.ac.uk/gf/project/magresview/wiki/?pagename=compatibility+fixes"\
+					target="_blank" style="color:rgb(150,150,200)">MagresView Wiki</a>');
+		  }
+		  
+		  
+		  //Handles the reloading of the page if needed because Java applet is required
+		  
+          if (typeof(use_java_framework) == "boolean" && use_java_framework && window.location.search == "") {
+	          window.location.search = "?_USE=SIGNED";
+          }
+		  
+		  switch_handler(false);
+		  
+		  reset_visualization_options();
+		  
+		  hover_load();
+		  
+		  if (window.location.protocol != "file:") {
+		    inspect_example_folder();
+		  }
+		  
+		});
+  </script>
+  
+  A CCP-NC project by Simone Sturniolo
+  <br>
+  Copyright (C) 2013 Science and Technology Facility Council
+  <br>
+  Distributed under the GNU General Public License
+  </div>
+  </body>
+
+</html>

@@ -1,0 +1,270 @@
+<html>
+  <head>
+    <title>MagresView - NMR 2D plot</title>
+
+    <script type="text/javascript" src="../d3/d3.min.js"></script>
+    <script type="text/javascript" src="../jquery/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="../jquery/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="svg2pdf/jspdf.min.js"></script>
+    <script type="text/javascript" src="svg2pdf/rgbcolor.js"></script>
+    <script type="text/javascript" src="svg2pdf/svgToPdf.js"></script>
+    <script type="text/javascript" src="nmr2d.js"></script>
+
+    <link rel="icon" type="image/png" href="images/favico.png">
+
+    <link id="html_style" href="stylesheet.css" rel="stylesheet" type="text/css">
+    <link id="svg_style"  href="svg_stylesheet.css" rel="stylesheet" type="text/css">
+    <link id="jqueryUI_style" href="../jquery/css/theme_dark/jquery-ui.css" rel="stylesheet">
+
+    <meta content="">
+
+    <style>
+    </style>
+
+  </head>
+
+  <body class="theme_dark">
+
+  	<div id='image_div' class='section_div'>
+  		<div class='dragbox_div'>
+  			<br><br>
+	  		Drag your image here
+  		</div>
+  		<svg id="main_plot"></svg>
+  	</div>
+
+  	<div id='control_div' class='section_div'>
+
+  		<div class='box_div'>
+	  		<p class="header" >Create plot</p>
+	  		<div id="virtual_load_button" class="row_div">
+		  		<input type="file" id="image_file_load_button" class="load_button load_button_true" autocomplete="off"
+		  		onchange="load_image_file(event)"></input>
+		  		<div class="load_button visual_button" onclick="$('#image_file_load_button').click();">Load file</div>
+		  	</div>
+			<div class="row_div">
+				or
+			</div>
+			<div class="row_div">		  	
+		  		<div class="create_button visual_button" onclick="create_empty_plot()">Create new</div>
+		  		<span class="create_size">
+		  			Width: <input id="create_w" type="text" maxlength="4" size="4" value="640" autocomplete="off">
+		  			</input>
+		  			Height: <input id="create_h" type="text" maxlength="4" size="4" value="480" autocomplete="off">
+		  			</input>
+		  		</span>
+		  	</div>
+  		</div>
+
+  		<div class='box_div'>
+	  		<p class="header" >Select species</p>
+      <table class="axes_drop_table">
+        <tr>
+          <td>
+    	  		X axis: <select id="sel_species_x" class="sel_species" onchange="rescale_axis_redraw('x')">
+    		  	</select>
+          </td>
+          <td>
+    	  		Y axis: <select id="sel_species_y" class="sel_species" onchange="rescale_axis_redraw('y')">
+    		  	</select>
+          </td>
+        </tr>
+        <tr>
+          <!-- 
+          
+          Commenting this out for now as I don't think it's actually necessary
+
+          <td>
+            X axis order: <select id="sel_order_x" class="sel_order" onchange="sel_species_handler('x')">
+              <option value='1'>1Q</option>
+              <option value='2'>2Q</option>
+            </select>
+          </td>
+          -->
+          <td>
+          </td>
+          <td>
+            Y axis order: <select id="sel_order" class="sel_order" onchange="rescale_redraw()">
+              <option value='1'>1Q</option>
+              <option value='2'>2Q</option>
+            </select>
+          </td>          
+        </tr>
+        <tr>
+          <td>
+            <input type="checkbox" id="deltaq_check" onchange="rescale_redraw()"
+              title="Include quadrupolar shifts in the resulting plot. These are the isotropic second order quadrupolar shifts for the central transition. Lineshape factors are not taken into account.">Include quadrupolar shifts</input>
+          </td>
+        </tr>
+        </table>
+        <br>        
+
+        <div style="display: table; border-collapse: separate; border-spacing: 20px 0px;">
+          <div class="reftab_button visual_button" onclick="$('#ref_table_popup').dialog('open')">Reference table</div>        
+          <div class="reftab_button visual_button" onclick="$('#larmor_table_popup').dialog('open')">Larmor frequencies</div>        
+        </div>
+
+  		</div>
+
+      <div class='box_div'>
+        <p class="header"> Points</p>
+
+        <table style="font-weight: inherit">
+          <tr>
+            Type: <select id="ptype" onchange="ptype_handler()">
+              <option id="cross_opt" value="cross">Crosses</option>
+              <option id="circle_opt" value="circle">Circles</option>
+              <option id="dot_opt" value="dot">Dots</option>
+            </select>
+          </tr>
+          <tr>
+            <td>
+              Size:&nbsp;<select id="psize_coup" onchange="redraw_all()">
+                <option id="fix_opt" value='fix'>None (fixed size)</option>
+                <option id="dip_opt" value='dip'>Dipolar coupling</option>
+                <option id="isc_opt" value='isc'>J-coupling</option>
+              </select>
+            </td>
+            <td>
+              Max size:
+            </td>
+            <td>
+               <input type="range" id="psize_slide" onchange="psize_slide_handler(event)" min="5" max="20"> <span id="psize_val"></span>
+            </td>
+          </tr>
+          <tr>            
+            <td>
+              <input type="checkbox" id="psize_cut_on" onchange="psize_cut_on_handler(event)">
+              Cutoff:&nbsp;<input type="text" id="psize_cut" maxlength="5" size="3" value="N/A" onkeypress="psize_cut_handler(event)" disabled>
+              &nbsp; <span style="font-weight: normal">&#8491;</span>
+            </td>
+            <td>
+              Opacity:
+            </td>
+            <td>
+               <input type="range" id="psize_opcty" onchange="psize_slide_handler(event)" min="0.1" max="1" step="0.1" value="1.0"> <span id="psize_opcty_val"></span>
+             </td>
+          </tr>
+          <tr>
+            <td>
+              <input type="checkbox" id="pshow_out" onchange="redraw_all()" checked>Show points and labels outside the axes' box</input>
+            </td>
+          </tr>
+        </table>
+
+
+      </div>
+
+      <div class='box_div'>
+        <p class="header">Labels and lines</p>
+
+        <input type="checkbox" id="label_on_check" onclick="redraw_all()" checked> Show labels and lines
+
+      </div>
+
+      <div class='box_div'>
+        <p class="header" >Axes scale</p>
+        X<sub>0</sub>: <input id="x_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
+        X<sub>1</sub>: <input id="x_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
+        <input type="button" class="pick_button" id="pick_x_button" onclick="pick_axis('x')" value="Pick X axis">
+        <input type="checkbox" id="display_x_ax" onclick="draw_axis('x')" checked=true> Visible
+        <br><br>
+        Y<sub>0</sub>: <input id="y_0_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
+        Y<sub>1</sub>: <input id="y_1_val" type="text" value="0" size="4" onkeypress="axes_scale_handler(event)"> &nbsp;&nbsp;
+        <input type="button" class="pick_button" id="pick_y_button" onclick="pick_axis('y')" value="Pick Y axis">
+        <input type="checkbox" id="display_y_ax" onclick="draw_axis('y')" checked=true> Visible
+        <br>
+        <p id="pick_message"></p>
+
+      </div>
+
+      <div class='box_div'>
+        <p class="header">Download plot</p>
+        <div id="virtual_download_button" class="row_div">
+          <a id="plot_download" class="download_button visual_button" onclick="svg_download()" href="" >Download SVG</a>
+          <!--<div class="download_button visual_button download_button_fake" onclick="download_button_click()">Load file</div>-->
+        </div>
+
+      </div>
+
+
+
+  	</div>
+
+  	<!-- Code to run on full document load -->
+
+  	<script type="text/javascript">
+
+  		$(document).ready(document_ready_callback);
+
+  	</script>
+
+    <div id="ref_table_popup" title="Reference table" class="popupdiv">
+      
+      <table id="ref_table" class="ref_table">
+        <tr>
+          <td>Element</td>
+          <td>Reference (ppm)</td>
+        </tr>
+      </table>
+        
+    </div>
+
+    <div id="larmor_table_popup" title="Larmor frequency" class="popupdiv">
+      
+      <table id="larmor_table" class="ref_table">
+        <tr>
+          <td>Element</td>
+          <td>Larmor frequency (MHz)</td>
+        </tr>
+      </table>
+      
+    </div>
+
+    <div class='svgstyle_box'>
+      .axis line {
+        stroke: rgb(0, 40, 75);
+      }
+
+      .axis text {
+        stroke: rgb(0, 40, 75);
+      }
+
+      .axis path {
+        stroke: rgb(0, 40, 75);
+        stroke-width: 2;
+        fill: none;
+      }
+
+      .axislabel {
+        stroke: rgb(0, 40, 75);
+         fill: rgb(0, 40, 75);
+       text-anchor: middle;
+      }
+
+      .plotdot {
+        stroke: rgb(50, 100, 150);
+        stroke-width: 2.0;
+        fill: none;
+      }
+
+      .plotdot.fill {
+        stroke: none;
+        fill: rgb(50, 100, 150);
+      }      
+
+      .lablines {
+        stroke: rgb(0, 40, 75);
+        stroke-width: 0.5;
+        stroke-dasharray: 2,5;
+        fill: none; 
+      }
+
+      .labtext {
+        stroke: rgb(0, 40, 75);
+        fill: rgb(0, 40, 75);
+      }      
+    </div>
+
+  </body>
+</html>

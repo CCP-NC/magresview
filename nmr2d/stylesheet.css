@@ -1,0 +1,274 @@
+.theme_dark {
+  background: rgb(30, 30, 30);	
+  color: rgb(245, 245, 235);
+}
+
+.theme_light {
+  background: rgb(245, 245, 235);	
+  color: rgb(30, 30, 30);
+}
+
+html, body {
+  width:100%;
+  height:100%;
+  box-sizing: border-box;
+  moz-box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-weight: bold;
+  font-size: 90%;
+}
+
+.section_div {
+	position: absolute;
+}
+
+#control_div {
+        overflow-y: auto;
+}
+
+#image_div {
+	width: 60%;
+	height: 100%;
+	top: 0%;
+	left: 0%;
+}
+
+.theme_dark #image_div {
+	background-color: rgb(35,35,35);	
+}
+
+.theme_light #image_div {
+	background-color: rgb(215,215,215);	
+}
+
+#control_div {
+	width: 40%;
+	height: 100%;
+	top: 0%;
+	left: 60%;
+}
+
+.box_div {
+	position: relative;
+	width: 90%;
+	left: 5%;
+}
+
+.row_div {
+	position: relative;
+	height: 25pt;
+	line-height: 25pt;
+}
+
+.header {
+  font-size: 120%;
+  color: rgb(255, 128, 0);
+}
+
+.load_button {
+
+	position: absolute;
+	top: 0;
+	width: 22%;
+	height: 25pt;
+
+}
+
+.load_button_true {
+
+	visibility: hidden;
+
+}
+
+.visual_button {
+
+	border-radius: 10pt;
+	border: solid;
+	border-width: 2pt;
+	text-align: center;
+	font-size: inherit;
+	line-height: 25pt;
+	cursor: default;
+
+}
+
+.theme_dark .visual_button {
+	background-color: rgb(35,35,35);
+	border-color: rgb(245,245,235);
+}
+
+.theme_dark .visual_button.highlighted {
+	background-color: rgb(45,45,45);
+}
+
+.theme_light .visual_button {
+	background-color: rgb(245,245,235);
+	border-color: rgb(35,35,35);
+}
+
+.theme_light .visual_button.highlighted {
+	background-color: rgb(225,225,225);
+}
+
+.reftab_button {
+    display: table-cell;
+    width: 22%;
+    height: 25pt;
+}
+
+.create_button {
+
+	position: absolute;	
+	top: 0pt;
+	width: 22%;
+	height: 25pt;
+}
+
+.create_size {
+
+	position: absolute;
+	left: 24%;
+
+}
+
+.dragbox_div {
+
+	position: relative;
+	top: 10%;
+	left: 10%;
+	height: 80%;
+	width: 80%;
+	border: dashed;
+	border-width: 5pt;
+	border-radius: 20pt;
+	text-align: center;
+	font-size: 270%;
+
+}
+
+.theme_dark .dragbox_div {
+	border-color: rgb(245,245,235);	
+}
+
+.theme_light .dragbox_div {
+	border-color: rgb(35,35,35);	
+}
+
+#main_plot {
+
+	position: absolute;
+	display: none;
+	border: solid;
+	border-width: 3pt;
+	border-color: rgb(255,128,0);
+	border-radius: 5pt;
+    font-family: helvetica;
+    font-weight: bold;
+
+}
+
+.sel_species {
+	width: 70pt;
+}
+
+.axes_drop_table {
+
+	text-align: right;
+	border-spacing: 7pt;
+	font-weight: bold;
+	font-size: inherit;
+}
+
+#pick_message {
+	color: rgb(200, 0, 0);
+}
+
+.download_button {
+	position: absolute;
+	top: 0;
+	width: 22%;
+	height: 25pt;
+  	color: rgb(245, 245, 235);
+  	text-decoration: none;
+}
+
+.theme_dark .download_button {
+  	color: rgb(245, 245, 235);
+}
+
+.theme_light .download_button {
+  	color: rgb(35,35,35);
+}
+
+.download_button_true {
+	visibility: hidden;
+}
+
+div.svgstyle_box {
+	display: none;
+}
+
+div.popupdiv {
+	font-weight: normal;
+	font-size: 120%;
+	text-align: left;
+    position: absolute;
+    z-index: 2;
+}
+
+table {
+    font-size: inherit;
+}
+
+.ref_table {
+  
+  border-collapse: collapse;
+  border: 1px;
+  text-align: center;
+  font-weight: bold;
+  
+}
+
+.theme_dark .ref_table {
+	border: 1px solid rgb(245,245,235);
+  	background-color: rgb(245,245,235);
+}
+
+.theme_light .ref_table {
+	border: 1px solid rgb(35,35,35);
+  	background-color: rgb(35,35,35);  	
+}
+
+.ref_td {
+  
+  border: 1px;
+  text-align: center;
+  width: 120pt;
+  
+}
+
+.theme_dark .ref_td {
+  border: 1px solid rgb(245,245,235);	
+  background-color: rgb(20, 20, 20);
+}
+
+.theme_light .ref_td {
+  border: 1px solid rgb(35,35,35);	
+  background-color: rgb(245,245,235);
+}
+
+.ref_input {
+  
+  color: inherit;
+  text-align: center;
+  
+}
+
+.theme_dark .ref_input {
+  background-color: rgb(20, 20, 20);
+}
+
+.theme_light .ref_input {
+  background-color: rgb(245,245,235);
+}
