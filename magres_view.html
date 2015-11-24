@@ -1008,6 +1008,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		      test_req.open('get', 'mview_config.js', true);
 		      test_req.send();
 		    }
+		    // This is where the actual loading of the applet itself happens
 		    $("#jmol_div").html(Jmol.getAppletHtml(jmolAppName, main_info));
 		  }
 		  catch(e)

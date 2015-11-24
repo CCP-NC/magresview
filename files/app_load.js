@@ -564,7 +564,7 @@ function pick_callback(id, atom, i)
 
 function last_atom_picked_name()
 {
-	return Jmol.evaluate(mainJmol, "{{*}[" + last_atom_picked + "]}.atomname");
+	return Jmol.evaluateVar(mainJmol, "{{*}[" + last_atom_picked + "]}.atomname");
 }
 
 //Handler for switching between Jmol and JSmol

@@ -1490,11 +1490,15 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	// DIP info
 	if (document.getElementById("dip_file_check").checked == true || use_all == true)
 	{
-		full_jmol_script += "dip_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {dip_info = dip_info or [measure(" + ch + "[i] " + ch + "[j], \"khz\")]; r = " + ch + "[i].xyz-" + ch + "[j].xyz;";
+		// This specific script has the task of picking up the closest periodic copy (and therefore the highest dipolar coupling)
+		full_jmol_script += "dip_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {jname = " + ch + "[j].atomname; \
+		j_id = " + ch + "[j].atomno; \
+		closest_j = {atomname=jname}.distance.min(" + ch + "[i], true); \
+		dip_info = dip_info or [measure(" + ch + "[i] closest_j, \"khz\")]; r = " + ch + "[i].xyz-closest_j.xyz;";
 		if (use_rotated_frame) {
 			full_jmol_script += "r = rot_q % r;";
 		}
-		full_jmol_script += "mod = sqrt(r*r); dip_info = dip_info or [r/mod, mod];}};";
+		full_jmol_script += "mod = sqrt(r*r); dip_info = dip_info or [j_id, r/mod, mod];}};";
 	}
 	// ISC info
 	if ((document.getElementById("isc_file_check").checked == true || use_all == true) && atom_set.has_isc)
@@ -1513,7 +1517,12 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		full_jmol_script += ch + "[i].atomno," + ch + "[j].atomno];}};";
 	}
 
-	Jmol.scriptWait(mainJmol, full_jmol_script);
+
+	//Jmol.scriptWait(mainJmol, full_jmol_script);
+	// Using evaluateVar instead of scriptWait is faster and more reliable
+	// But we need to escape the single quotes first
+	full_jmol_script.replace("'", "\\'");
+	Jmol.evaluateVar(mainJmol, "script('" + full_jmol_script + "');");
 
 	if (abc == null)
 	{
@@ -1769,34 +1778,34 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	}
 
 	//If required, cycle through dipolar couplings
-	
 	if (document.getElementById("dip_file_check").checked == true || use_all == true)
 	{
 		ds.magres.units.push(["dip", "Hz"]);
 		ds.magres.dip = [];
 		
 		var dip_info = Jmol.evaluateVar(mainJmol, "dip_info");
-		
-		for (var i = 0; i < dip_info.length-1; i += 3)
+
+		for (var i = 0; i < dip_info.length-1; i += 4)
 		{
 			var a_dip = dip_info[i][0].split('\t');
 			var a_b = parseFloat(a_dip[1])*1000.0;		//Coupling constant in Hz
 			var a_no_1 = parseInt(a_dip[3].substring(a_dip[3].indexOf('#')+1));
 			var a_no_2 = parseInt(a_dip[4].substring(a_dip[4].indexOf('#')+1));
-			var a_r = dip_info[i+1];
-			var a_dist = dip_info[i+2];
+			var a_no_2_base = dip_info[i+1];
+			var a_r = dip_info[i+2];
+			var a_dist = dip_info[i+3];
 						
 			var a_alpha = rad2deg(Math.atan2(a_r[1], a_r[0]));
 			var a_beta = rad2deg(Math.acos(a_r[2]));
 			
-			ds.magres.dip[i/3] = {
+			ds.magres.dip[i/4] = {
 				mview_data: [a_b, a_alpha, a_beta, 0.0],
 				r: a_dist,
 				atom1_id: a_no_1, 
-				atom2_id: a_no_2,
+				atom2_id: a_no_2_base,
+				atom2_id_pcopy: a_no_2,
 			}
-		}
-		
+		}		
 	}
 	
 	if ((document.getElementById("isc_file_check").checked == true || use_all == true) && atom_set.has_isc)
