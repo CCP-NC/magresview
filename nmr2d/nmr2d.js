@@ -51,7 +51,7 @@ function document_ready_callback() {
 
     window.opener.init_data_set(data_set);
     var t_0 = (new Date()).getTime()/1000.0;
-    window.opener.compile_data_set(data_set, {'t': 'all'}, true, 'zyz', true);   // Ignore shifts, they will be read later, use ZYZ convention (default)
+    window.opener.compile_data_set(data_set, {'t': 'all'}, true, 'zyz', true);   // Ignore shift references, they will be read later, use ZYZ convention (default)
     console.log("Total loading time: " + ((new Date()).getTime()/1000.0 - t_0) + " s");
     
     for (var s = 0; s < atom_set.speciesno; ++s)

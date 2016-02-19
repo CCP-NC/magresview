@@ -1521,7 +1521,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	//Jmol.scriptWait(mainJmol, full_jmol_script);
 	// Using evaluateVar instead of scriptWait is faster and more reliable
 	// But we need to escape the single quotes first
-	full_jmol_script.replace("'", "\\'");
+	full_jmol_script = full_jmol_script.replace(/'/g, "\\'");
 	Jmol.evaluateVar(mainJmol, "script('" + full_jmol_script + "');");
 
 	if (abc == null)
