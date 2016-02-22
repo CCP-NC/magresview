@@ -824,7 +824,7 @@ function plot_data()
 				}
 				// Remove the point if it's beyond cutoff though
 				if (!isNaN(pcut)) {
-					var rmin = minimum_periodic_copy(id_r_list[idmin][idmax], atom_set.lattice_pars, qmatrix);
+					var rmin = window.opener.minimum_periodic_copy(id_r_list[idmin][idmax], atom_set.lattice_pars, qmatrix);
 					if (rmin > pcut)
 						r = 0.0;
 				}
