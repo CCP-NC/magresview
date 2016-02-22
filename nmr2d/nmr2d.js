@@ -49,7 +49,7 @@ function document_ready_callback() {
 	// Fetch the atomic data from the main MagresView window
 
     atom_set = window.opener.atom_set;
-    qmatrix = qmatrix_from_latt(atom_set.lattice_pars);
+    qmatrix = window.opener.qmatrix_from_latt(atom_set.lattice_pars);
 
     window.opener.init_data_set(data_set);
     var t_0 = (new Date()).getTime()/1000.0;
