@@ -2,12 +2,13 @@ var data_set = {};
 var atom_set = {};
 var reference_list = {};
 var larmorfreq_list = {};
+var qmatrix; // Q Matrix for closest periodic copy calculations. Faster to calculate only once and store
 
 var species_id_list = {}; 	// Will keep species > ids of all atoms belonging to it
 var id_label_list = {};		// label classified by id
 var id_ms_list = {};		// ms classified by id
 var id_iso_list = {};		// Isotopes classified by id
-var id_r_list = {};			// distance classified by id
+var id_r_list = {};			// connecting vectors classified by id
 var id_dip_list = {};		// dip classified by id
 var id_isc_list = {};		// isc classified by id
 var id_deltaQ_list = {};    // And here we store the quadrupolar shifts instead
@@ -48,6 +49,7 @@ function document_ready_callback() {
 	// Fetch the atomic data from the main MagresView window
 
     atom_set = window.opener.atom_set;
+    qmatrix = qmatrix_from_latt(atom_set.lattice_pars);
 
     window.opener.init_data_set(data_set);
     var t_0 = (new Date()).getTime()/1000.0;
@@ -211,8 +213,7 @@ function compile_lists()
 			id_r_list[min_id] = {};
 
 		id_dip_list[min_id][max_id] = dip.mview_data[0];
-		id_r_list[min_id][max_id]   = dip.r;
-
+		id_r_list[min_id][max_id]   = dip.r_vec;		
 	}
 
 	// Now an isc_by_id one. Same rules as for the dip one apply
@@ -822,8 +823,11 @@ function plot_data()
 						break;
 				}
 				// Remove the point if it's beyond cutoff though
-				if (!isNaN(pcut) && id_r_list[idmin][idmax] > pcut)
-					r = 0.0;
+				if (!isNaN(pcut)) {
+					var rmin = minimum_periodic_copy(id_r_list[idmin][idmax], atom_set.lattice_pars, qmatrix);
+					if (rmin > pcut)
+						r = 0.0;
+				}
 				if (r > max_r)
 					max_r = r;
 			}
@@ -1262,10 +1266,6 @@ function psize_cut_on_handler(evt)
 	{
 		$('#psize_cut').attr('disabled', false);
 		$('#psize_cut').val('10');		
-		
-		// Standard alert message
-		alert("WARNING: the cutoff function refers ONLY to atoms visible when this tool was loaded.\n\
-		\nPeriodic copies will not be included if not explicitly made visible.")
 	}
 	else
 	{

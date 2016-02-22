@@ -1498,7 +1498,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		if (use_rotated_frame) {
 			full_jmol_script += "r = rot_q % r;";
 		}
-		full_jmol_script += "mod = sqrt(r*r); dip_info = dip_info or [j_id, r/mod, mod];}};";
+		full_jmol_script += "mod = sqrt(r*r); dip_info = dip_info or [j_id, r/mod, mod, r];}};";
 	}
 	// ISC info
 	if ((document.getElementById("isc_file_check").checked == true || use_all == true) && atom_set.has_isc)
@@ -1785,7 +1785,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		
 		var dip_info = Jmol.evaluateVar(mainJmol, "dip_info");
 
-		for (var i = 0; i < dip_info.length-1; i += 4)
+		for (var i = 0; i < dip_info.length-1; i += 5)
 		{
 			var a_dip = dip_info[i][0].split('\t');
 			var a_b = parseFloat(a_dip[1])*1000.0;		//Coupling constant in Hz
@@ -1794,13 +1794,15 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 			var a_no_2_base = dip_info[i+1];
 			var a_r = dip_info[i+2];
 			var a_dist = dip_info[i+3];
+			var a_r_vec = dip_info[i+4];
 						
 			var a_alpha = rad2deg(Math.atan2(a_r[1], a_r[0]));
 			var a_beta = rad2deg(Math.acos(a_r[2]));
 			
-			ds.magres.dip[i/4] = {
+			ds.magres.dip[i/5] = {
 				mview_data: [a_b, a_alpha, a_beta, 0.0],
 				r: a_dist,
+				r_vec : a_r_vec,
 				atom1_id: a_no_1, 
 				atom2_id: a_no_2_base,
 				atom2_id_pcopy: a_no_2,
