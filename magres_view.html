@@ -60,7 +60,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 		var _major_version = 1;
 		var _major_revision = 5;
-		var _minor_revision = 5;
+		var _minor_revision = 6;
 
 		function version_number_string() {
 
@@ -588,6 +588,10 @@ It provides the possibility to load example files from a dropdown menu but it ma
 												title="Quadrupolar constant, directly proportional to Vzz and dependent on the quadrupolar moment of the isotope considered.
                                                 WARNING: when visualizing color scale, the absolute value of the constant will be used. Labels keep the sign instead."
 												value="3" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Quadrupolar constant (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
+
+                                                &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_6"
+                                                title="Second order isotropic quadrupolar shielding/shift in ppm. Requires inserting Larmor frequencies for each species of interest. If reference values have been inserted, it will be visualized as chemical shift rather than absolute shielding."
+                                                value="5" autocomplete="off" onclick="efg_radio_handler(event)" disabled="disabled">Second-order quadrupolar shift (<span id="q_units" style="color: rgb(0, 128, 255)">MHz</span>)</input> <br>
 
                                                 &nbsp <input type="radio" name="efg_ltype" id="efg_ltype_5"
                                                 title="Total shielding/shift in ppm, including both quadrupolar and magnetic shieldings. Requires inserting Larmor frequencies for each species of interest. If reference values have been inserted, it will be visualized as chemical shift rather than absolute shielding."

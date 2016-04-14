@@ -50,8 +50,9 @@ function document_ready_callback() {
 
     atom_set = window.opener.atom_set;
     qmatrix = window.opener.qmatrix_from_latt(atom_set.lattice_pars);
+    return;
 
-    window.opener.init_data_set(data_set);
+ 	window.opener.init_data_set(data_set);
     var t_0 = (new Date()).getTime()/1000.0;
     window.opener.compile_data_set(data_set, {'t': 'all'}, true, 'zyz', true);   // Ignore shift references, they will be read later, use ZYZ convention (default)
     console.log("Total loading time: " + ((new Date()).getTime()/1000.0 - t_0) + " s");
@@ -1003,8 +1004,6 @@ function draw_lablines(x_lablines_dict, y_lablines_dict, x, y, opcty)
 		x_lablines.push(x_lablines_dict[i]);
 	for (i in y_lablines_dict)
 		y_lablines.push(y_lablines_dict[i]);
-
-	console.log(x_lablines);
 
 	var x_lablines_sel = d3.select('.plot_area')
 	.selectAll('.x.lablines')

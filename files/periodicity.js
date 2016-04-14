@@ -103,6 +103,8 @@ function minimum_periodic_copy(v, latt_cart, qmatrix) {
 	   	}
    	}
 
+   	console.log("Iterating over bounds: " + bounds);
+
    	// Now to actually find the minimum distance
    	r_min = max_r;
 

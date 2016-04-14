@@ -102,7 +102,7 @@ function efg_label_handler()
 	
 
 	// This bit of code runs if we need to calculate the total shifts
-	if (l_type == 4) {
+	if (l_type >= 4) {
 		efg_plot_jmol_script += efg_total_shifts_script(tag);
 	}
 
@@ -147,14 +147,18 @@ function efg_label_handler()
 			case 4:
 				prop = "tot_shift";
 				break;
+			case 5:
+				prop = "qiso_shift";
+				break;
 		}
 
 		// The expression is a bit conditional because of units
-		l_units = [" au", " au", " ", " " + q_units, " ppm"];
+		l_units = [" au", " au", " ", " " + q_units, " ppm", " ppm"];
 		label_components[2] = prop + " = %." + prec + "[property_" + tag + "_" + prop + (l_type == 3? "_" + q_units : "") + "]" + l_units[l_type];
 	}
 	
 	efg_plot_jmol_script += label_composer();
+	console.log(efg_plot_jmol_script);
 
 	Jmol.script(mainJmol, efg_plot_jmol_script);
 }
@@ -242,6 +246,9 @@ function efg_color_handler()
 			case 4:
 				efg_plot_jmol_script += ".property_" + tag + "_tot_shift.all";
 				break;
+			case 5:
+				efg_plot_jmol_script += ".property_" + tag + "_qiso_shift.all";
+				break;
 		}
 		
 		efg_plot_jmol_script += ".mul(-1);";
@@ -319,13 +326,15 @@ function efg_total_shifts_script(tag) {
 		};";
 
         // And add it up
+		efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_qiso_shift =  \
+								 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc.all;";			
         if (atom_set.has_ms) {
 			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift = {" + lab + "_* and displayed}.tensor('ms', 'isotropy').add( \
-									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc)";
+									 {" + lab + "_* and displayed}.property_" + tag + "_qiso_shift.all)";
 		}
 		else {
-			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift =  \
-									 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc.all";			
+			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift = \
+									 {" + lab + "_* and displayed}.property_" + tag + "_qiso_shift.all";
 		}
 
 		// Final bit: referencing, if present
