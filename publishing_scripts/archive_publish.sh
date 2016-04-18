@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Folders or files to NOT archive
 EXCLUDED_PATHS='publishing_scripts' 

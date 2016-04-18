@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Publishing logfile name (avoid conflicts)
 LOGFILE_NAME='publishing_logfile.txt'

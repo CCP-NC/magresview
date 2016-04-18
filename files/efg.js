@@ -322,7 +322,7 @@ function efg_total_shifts_script(tag) {
 			if (I < 1) { return 0.0; }				\
 			var m = I - (I \\ 1);					\
 			var Pq = _x.property_" + tag + "_chi_MHz*sqrt(1.0+(_x.property_" + tag + "_asymm**2)/3.0); \
-			return -(3.0/40.0)*((Pq/" + larm + ")**2)*(I*(I+1)-9.0*m*(m-1)-3.0)/(I**2*(2*I-1)**2)*1e6;	\
+			return (3.0/40.0)*((Pq/" + larm + ")**2)*(I*(I+1)-9.0*m*(m-1)-3.0)/(I**2*(2*I-1)**2)*1e6;	\
 		};";
 
         // And add it up
