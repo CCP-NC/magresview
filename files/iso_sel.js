@@ -97,7 +97,11 @@ function iso_drop_update()
 
 function iso_drop_handler()
 {
-	Jmol.script(mainJmol, "{selected}.element = \"" + iso_drop.value + "\"");
+	// In this case we want to change the isotope of all the equivalent sites, so we rely on JMol's labels here.
+
+	Jmol.script(mainJmol, "iso_change_group = [];" +
+						   "for (at in {selected}) {an = at.atomname; iso_change_group = (iso_change_group or {atomname = an})};" +
+						   "{iso_change_group}.element = \"" + iso_drop.value + "\"");
 	load_data_asproperty();
 	plot_update();
 }

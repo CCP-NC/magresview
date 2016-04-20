@@ -64,7 +64,7 @@ function svg_spectrum_plot(from_change)
 
             // First let's add the quadrupolar bit if needed
             if (add_qshifts) {
-                ms_shifts[i] += efg_total_shift_calc(q_shifts[i], q_etas[i], q_isos[i], larm);
+                ms_shifts[i] -= efg_total_shift_calc(q_shifts[i], q_etas[i], q_isos[i], larm);
             }
 
             if (!isNaN(ref)) {
