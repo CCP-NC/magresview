@@ -322,7 +322,7 @@ function efg_total_shifts_script(tag) {
 			if (I < 1) { return 0.0; }				\
 			var m = I - (I \\ 1);					\
 			var Pq = _x.property_" + tag + "_chi_MHz*sqrt(1.0+(_x.property_" + tag + "_asymm**2)/3.0); \
-			return (3.0/40.0)*((Pq/" + larm + ")**2)*(I*(I+1)-9.0*m*(m-1)-3.0)/(I**2*(2*I-1)**2)*1e6;	\
+			return -(3.0/40.0)*((Pq/" + larm + ")**2)*(I*(I+1)-9.0*m*(m-1)-3.0)/(I**2*(2*I-1)**2)*1e6;	\
 		};";
 
         // And add it up
@@ -330,11 +330,11 @@ function efg_total_shifts_script(tag) {
 								 {" + lab + "_* and displayed}.delta_Q_" + tag + "_calc.all;";			
         if (atom_set.has_ms) {
 			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift = {" + lab + "_* and displayed}.tensor('ms', 'isotropy').add( \
-									 {" + lab + "_* and displayed}.property_" + tag + "_qiso_shift.all)";
+									 {" + lab + "_* and displayed}.property_" + tag + "_qiso_shift.all.mul(-1))";
 		}
 		else {
 			efg_plot_jmol_script += "{" + lab + "_* and displayed}.property_" + tag + "_tot_shift = \
-									 {" + lab + "_* and displayed}.property_" + tag + "_qiso_shift.all";
+									 {" + lab + "_* and displayed}.property_" + tag + "_qiso_shift.all.mul(-1)";
 		}
 
 		// Final bit: referencing, if present
