@@ -27,32 +27,7 @@ var default_displaygroup = null;					//Basic Jmol atom expression for default di
 var label_components = ["", "", ""];				//This will hold the various pieces of the atom labels: [name, ms properties, efg properties]
 
 //Data structure holding some essential atom information
-
-var atom_set = {
-
-	atomno: 0,															//Total number of atoms in the system (used to check that no atom is deleted)
-
-	speciesno: 0,														//Total number of species (by crystallographic label) in the system
-		
-	atom_species_labels: [],											//Array: number -> label
-
-	atom_species_sites: {},											    //Hash: label -> array of sites with that label 
-	
-	lattice_pars: [], 													//Tensor object containing lattice parameters
-
-	has_ms: false,														//True if the current dataset has magnetic shielding data
-
-	has_efg: false,														//As above, for electric field gradient
-
-	efg_tags: [],														//Tags for various efg components
-
-	has_isc: false,														//As above, for indirect spin coupling
-
-	isc_tags: [],														//Tags for various isc components
-	
-	is_magres: true														//Flag to keep track if the original file was a .magres one or not
-	
-};
+var atom_set;
 
 function reset_system()
 {
@@ -67,29 +42,31 @@ function reset_system()
 
 	atom_set = {
 
-		atomno: 0,
+		model_name: '',														//Name of the loaded model
 
-		speciesno: 0,
-				
-		atom_species_labels: [],
-	
-		atom_species_sites: {},										
+		atomno: 0,															//Total number of atoms in the system (used to check that no atom is deleted)
 
-		lattice_pars: [],	
+		speciesno: 0,														//Total number of species (by crystallographic label) in the system
+			
+		atom_species_labels: [],											//Array: number -> label
 
-		has_ms: false,				
+		atom_species_sites: {},											    //Hash: label -> array of sites with that label 
+		
+		lattice_pars: [], 													//Tensor object containing lattice parameters
 
-		has_efg: false,		
+		has_ms: false,														//True if the current dataset has magnetic shielding data
 
-		efg_tags: [], 											
+		has_efg: false,														//As above, for electric field gradient
 
-		has_isc: false,												
+		efg_tags: [],														//Tags for various efg components
 
-		isc_tags: [], 											
+		has_isc: false,														//As above, for indirect spin coupling
 
-		is_magres: true
-	
-	};
+		isc_tags: [],														//Tags for various isc components
+		
+		is_magres: true														//Flag to keep track if the original file was a .magres one or not
+		
+	};	
 }
 
 //File loading handling
@@ -186,6 +163,7 @@ function load_file(evt)
 	};
 
 	jmol_rdr.readAsText(to_load);
+	atom_set.model_name = get_rootname(to_load.name);
 
 }
 
@@ -255,6 +233,9 @@ function load_string(id, file_as_string)
 	load_script += "center displayed; zoom {displayed} 0;"
 
 	Jmol.script(id, load_script);
+
+	// And finally if successful set up the model name
+	update_modelname();
 	
 }
 
@@ -515,4 +496,17 @@ function generate_molecular_dd()
 	
 }
 
+// Utility function, splits a file path to extract only the root name
+function get_rootname(path) {
+	// First the filename
+	var fname = path.split(/[\/\\]/).pop();
 
+	// Then the extension (yeah, I'm being a smartass here)
+	var rname = fname.split('.').reverse().splice(1).reverse().join('.');
+
+	return rname;	
+}
+
+function update_modelname() {
+	$('#model_name').html(atom_set.model_name);
+}

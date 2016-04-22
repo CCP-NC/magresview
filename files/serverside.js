@@ -68,6 +68,8 @@ function file_load_drop_handler()
         
         file_req.onload = forward_loadrequest;
         file_req.open('get', to_load, true);
+        // Store the name for future retrieval
+        file_req.model_name = get_rootname(to_load);
         file_req.send();
     }
     
@@ -87,5 +89,6 @@ function forward_loadrequest()
     reset_system();
     disable_NMR_controls();
     atom_set.is_magres = is_magres;
+    atom_set.model_name = this.model_name;
     load_string(mainJmol, last_loaded_file);
 }

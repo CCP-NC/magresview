@@ -394,6 +394,7 @@ function recap_file_gen(data_set, out)
 	//Header
 	out.write("--------------   MagresView - Summary file --------------\n");
 	out.write("Recap file generated with MagresView v." + magresview_version_number + "\n");
+	out.write("Model: " + data_set.model + "\n");
 	out.write("Euler angles convention adopted: " + data_set.eul_conv.toUpperCase() + "\n");
 
 	//Print total number of atoms
@@ -766,8 +767,9 @@ function magres_file_gen(data_set, out) {
 		system_stochiometry += l + "_" + elems_n[l] + " ";
 	}
 	
-	out.write("#.magres formatted NMR data for " + system_stochiometry + "\n");
-	out.write("#" + data_set.magres_view + "\n");
+	out.write("# .magres formatted NMR data for model: " + data_set.model + "\n");
+	out.write("# Formula: " + system_stochiometry + "\n");
+	out.write("# " + data_set.magres_view + "\n");
 	
 	// Write down 'calculation' block
 	
@@ -1198,7 +1200,8 @@ function table_file_gen(data_set, out)
 	}
 	
 	// Header
-	out.write("% Tabulated NMR data for " + system_stochiometry + "\n");
+	out.write("% Tabulated NMR data for model: " + data_set.model + "\n");
+	out.write("% Formula: " + system_stochiometry + "\n");
 	out.write("% Table file generated with MagresView v." + magresview_version_number + "\n");
 	out.write("% Euler angles convention adopted: " + data_set.eul_conv.toUpperCase() + "\n%\n");
 
@@ -1255,8 +1258,8 @@ function table_file_gen(data_set, out)
 			
 			var eigvals = [0.0, 0.0, 0.0];
 			eigvals[2] = 2.0/3.0*haeb[0];
-			eigvals[0] = (eigvals[2]-(haeb[1]*2.0/3.0*haeb[0]))/2.0;
-			eigvals[1] = (eigvals[2]+(haeb[1]*2.0/3.0*haeb[0]))/2.0;
+			eigvals[0] = -(1.0+haeb[1])*eigvals[2]/2.0;
+			eigvals[1] = -(1.0-haeb[1])*eigvals[2]/2.0;
 			
 			//Write down atomic label
 			out.write("\n" + sp_label + "_" + atom_i);
@@ -1390,13 +1393,13 @@ function choice_atomexp(ac)
 
 function init_data_set(data_set)
 {			
-	data_set.magres_view = "Made with MagresView " + magresview_version_number,		//Tagline
+	data_set.magres_view = "Made with MagresView " + magresview_version_number;		//Tagline
+
+	data_set.soft_targ = ""; //Software target of the JSON file, the final format to be generated for NMR simulation
 		
-	data_set.soft_targ = "", //Software target of the JSON file, the final format to be generated for NMR simulation
+	data_set.atoms = {units: [], lattice: [], atom: [], isotopes: {}};	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
 		
-	data_set.atoms = {units: [], lattice: [], atom: [], isotopes: {}},	//Will contain units, lattice, elements, isotopes and atom coordinates for the system
-		
-	data_set.magres = {units: []}	//Will contain efg, isc, ms, and dipolar interaction terms for the system
+	data_set.magres = {units: []};	//Will contain efg, isc, ms, and dipolar interaction terms for the system
 
 }
 
@@ -1437,6 +1440,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	}
 	
 	ds.eul_conv = eul_conv;
+	ds.model = atom_set.model_name;
 	ds.soft_targ = document.getElementById("soft_targ_drop").value;
 	
 	var atom_n = 0;    //All atoms in data_set will be simply ordered by an increasing number, no crystallographic labels
