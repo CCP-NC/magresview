@@ -10,14 +10,27 @@
 // Default generators and handlers for Larmor frequency table (see reference shifts one for the same identical stuff)
 function larmor_table_gen() {
     
+    var persist = $('#persistvals_check').prop('checked');
+
+    // Set starting values
+    var def_values = [];
+    for (var s = 0; s < atom_set.speciesno; ++s) {
+        if (persist) {
+            def_values.push(get_larmor(atom_set.atom_species_labels[s]));
+        }
+        else {
+            def_values.push(100);
+        }
+    }
+
     $('#larmor_table').html('').append('<tr><td>Element</td><td>Larmor frequency (MHz)</td></tr>');
     
     for (var s = 0; s < atom_set.speciesno; ++s)
     {
-        var t_row = $('<tr></tr>');
+        var t_row = $('<tr></tr>').addClass('larmor_table_entry');
         t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'larmor_label_' + atom_set.atom_species_labels[s]));
         t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input')
-                                   .attr({'id': 'larmor_input_' + atom_set.atom_species_labels[s], 'value': '100'})));
+                                   .attr({'id': 'larmor_input_' + atom_set.atom_species_labels[s], 'value': def_values[s]})));
         
         $('#larmor_table').append(t_row);
     }

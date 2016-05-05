@@ -97,10 +97,7 @@ function ms_label_handler()
 		 		for (var l = 0; l < atom_set.speciesno; ++l) {
 
 		 			var lab = atom_set.atom_species_labels[l];
-			        var ref = parseFloat($('#ref_input_' + lab).val());
-
-			        // If not present, treat it as zero
-			        ref = isNaN(ref)?0:ref;
+			        var ref = get_shieldref(lab);
 
 		 			ms_plot_jmol_script += "{" + lab + "_*}.property_ms_cs = {" + lab + "_*}.tensor('ms', 'isotropy').mul(-1).add(" + ref + ");";
 		 		}
@@ -199,12 +196,7 @@ function ms_color_handler()
 		 		for (var l = 0; l < atom_set.speciesno; ++l) {
 
 		 			var lab = atom_set.atom_species_labels[l];
-			        var ref = parseFloat($('#ref_input_' + lab).val());
-
-			        // If not present, treat it as zero
-			        ref = isNaN(ref)?0:ref;
-
-			        shielding_ref[lab] = ref;
+			        shielding_ref[lab] = get_shieldref(lab);
 		 		}
 
 		 	}

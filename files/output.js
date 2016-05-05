@@ -1920,13 +1920,28 @@ function sort_data_set(ds) {
 
 function ref_table_gen() {
 	
+	var persist = $('#persistvals_check').prop('checked');
+
+    // Set starting values
+    var def_values = [];
+    for (var s = 0; s < atom_set.speciesno; ++s) {
+        if (persist) {
+            def_values.push(get_shieldref(atom_set.atom_species_labels[s],
+            							  true));
+        }
+        else {
+            def_values.push(NaN);
+        }
+    }
+
 	$('#ref_table').html('').append('<tr><td>Element</td><td>Reference (ppm)</td></tr>');
 	
 	for (var s = 0; s < atom_set.speciesno; ++s)
 	{
 		var t_row = $('<tr></tr>');
 		t_row.append($('<td></td>').html(atom_set.atom_species_labels[s]).attr('id', 'ref_label_' + atom_set.atom_species_labels[s]));
-		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({'id': 'ref_input_' + atom_set.atom_species_labels[s], 'value': ''})));
+		t_row.append($('<td></td>').append($('<input></input>').addClass('ref_input').attr({'id': 'ref_input_' + atom_set.atom_species_labels[s],
+																							'value': isNaN(def_values[s])?'':def_values[s]})));
 		
 		$('#ref_table').append(t_row);
 	}
@@ -1939,6 +1954,16 @@ function ref_table_popup_handler()
 	if(active == tab_index("#spec_plot"))
 		svg_spectrum_plot(false);
 	plot_update();
+}
+
+function get_shieldref(lab, forceNaN)
+{
+	var ref = parseFloat($('#ref_input_' + lab).val());
+	// If not present, treat it as zero
+	if (!forceNaN)
+		return isNaN(ref)? 0 : ref;
+	else
+		return ref;
 }
 
 //Useful bit of code for Euler angles output

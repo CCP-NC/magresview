@@ -29,15 +29,6 @@ function document_ready_callback() {
 	function disableF5(e) { if ((e.which || e.keyCode) == 116) e.preventDefault(); };
 	$(document).on("keydown", disableF5);
 
-	// Assign visual effects and correspondences to buttons
-	$('.visual_button')
-	.mouseover(function() {
-		$(this).toggleClass("highlighted");
-	})	
-	.mouseout(function() {
-		$(this).toggleClass("highlighted");
-	});
-
 	$('.load_button_fake').click(function() {
 		$('.load_button_true').click();
 	});
@@ -50,7 +41,6 @@ function document_ready_callback() {
 
     atom_set = window.opener.atom_set;
     qmatrix = window.opener.qmatrix_from_latt(atom_set.lattice_pars);
-    return;
 
  	window.opener.init_data_set(data_set);
     var t_0 = (new Date()).getTime()/1000.0;
