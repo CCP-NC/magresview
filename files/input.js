@@ -435,9 +435,16 @@ function load_data_asproperty_script()
 function is_mol_crystal()
 {
 	var unitcell_n = Jmol.evaluate(mainJmol, "{cell=555}.length");
+	var is_mol_script = "define cell555closed {cell=555 and not (cell=655 or cell=565 or cell=556)}; \
+						 is_mol_cryst = True; \
+						 for (a in {cell555closed}) { \
+						 	is_mol_cryst = is_mol_cryst and not ({within(site, {a}) and within(molecule, {a})}.length > 1);\
+						 };";
+	Jmol.evaluateVar(mainJmol, 'script("' + is_mol_script + '");');
+	var ismol = Jmol.evaluateVar(mainJmol, 'is_mol_cryst');
 	var mol_n = Jmol.evaluate(mainJmol, "{within(molecule, {*}[1])}.length");
 	
-	if ((mol_n < unitcell_n) && (unitcell_n > 0))
+	if (ismol)
 	{
 		// Yes, it IS a molecular crystal
 		return 1;	
