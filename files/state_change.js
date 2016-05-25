@@ -33,11 +33,6 @@ function state_machine() {
 
             eul_accordion: (acc_active == 4),
             eul_enabled: !($("#euldiff_butt").prop("disabled")),
-
-            file_sphere_check: $("#range_sphere_check").prop("checked"),
-            file_not_recap: $("#file_type_drop").val() != "recap",                   //Is the JSON or the Tabulated file generation active?
-            file_range: $("#sel_file_drop").val().indexOf("range") > -1,
-
         }
 
 
@@ -129,10 +124,10 @@ function state_machine() {
         // Finally, the file range sphere
 
         file_sphere_script = "ellipsoid range_sphere_choice";
+        var r = range_sphere_getR();
 
-        if (current.filegen_tab && current.file_not_recap && current.file_range && current.file_sphere_check)
+        if (r > 0)
         {
-            var r = parseFloat($("#range_file_r").val());
 
             file_sphere_script += " axes {" + r + " 0 0} {0 " + r + " 0} {0 0 " + r + "} center {*}[" + last_atom_picked + "] color translucent 0.7 {200 200 200};";
             display_group += " or within(" + r + ", ({*}[" + last_atom_picked + "]))";

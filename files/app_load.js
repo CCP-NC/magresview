@@ -117,6 +117,7 @@ function jmolEvaluate_each(id, prop)
 function enable_NMR_controls()
 {
 	//reset_visualization_options();
+	console.log("Enabling NMR controls");
 	
 	document.getElementById("labels_check").disabled = false;
 
@@ -206,6 +207,8 @@ function enable_NMR_controls()
 
 function disable_NMR_controls()
 {
+			console.log("Disabling NMR controls");
+
 			document.getElementById("labels_check").checked = false;
 			document.getElementById("labels_check").disabled = true;
 			
@@ -450,47 +453,21 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 			case 1:
 				if (document.getElementById("ismol_check").checked == false)
 				{
-					default_displaygroup = default_displaygroup.replace(/cell/g, 'centroid');
-					Jmol.script(mainJmol, "display " + default_displaygroup);
+					default_displaygroup = centroid_displaygroup();
 				}
 				else
 				{
-					generate_molecular_dd();
-					var unique_mols = Jmol.evaluateVar(mainJmol, 'unique_mols');
-					
-					default_displaygroup = "{";
-					
-					for (var i = 0; i < unique_mols.length; ++i) {
-						default_displaygroup += " within(molecule, {*}[" + (unique_mols[i][0] + 1) + "]) ";
-						if (i < unique_mols.length - 1) {
-							default_displaygroup += "or";
-						}
-					}
-					default_displaygroup += "}";
-						
+					default_displaygroup = molecular_displaygroup();						
 				}
 				break;
 			case -1:
 				if (document.getElementById("ismol_check").checked == false)
 				{
-					default_displaygroup = 'all';
-					Jmol.script(mainJmol, "display " + default_displaygroup);
+					default_displaygroup = all_displaygroup();
 				}
 				else
 				{
-					generate_molecular_dd();
-					var unique_mols = Jmol.evaluateVar(mainJmol, 'unique_mols');
-					
-					default_displaygroup = "{";
-					
-					for (var i = 0; i < unique_mols.length; ++i) {
-						default_displaygroup += " within(molecule, {*}[" + (unique_mols[i][0] + 1) + "]) ";
-						if (i < unique_mols.length - 1) {
-							default_displaygroup += "or";
-						}
-					}
-					default_displaygroup += "}";
-						
+					default_displaygroup = molecular_displaygroup();						
 				}
 				break;
 			case 0:

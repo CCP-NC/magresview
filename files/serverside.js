@@ -58,7 +58,6 @@ function file_load_drop_update() {
 function file_load_drop_handler()
 {
     var to_load = $('#file_load_drop').val();
-    
     if (to_load == '#user_file#') {
         $('#load_button').click();
     }

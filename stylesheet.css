@@ -280,6 +280,12 @@ td .theme_light {
   
 }
 
+#displ_custom_box {
+  position: relative;
+  width: 70%;
+  height: 30%;
+}
+
 .ui-multiselect.mySelDrop {
   font-size: 1em;
 }

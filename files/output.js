@@ -185,7 +185,7 @@ function sel_file_drop_handler()
 		document.getElementById("range_sphere_check").disabled = true;
 	}
 
-	range_sphere_handler();	
+	range_sphere_update();	
 	
 }
 
@@ -285,7 +285,7 @@ function include_controls_switch()
 		document.getElementById("round_file_check").disabled = true;
 	}
 	
-	range_sphere_handler();
+	range_sphere_update();
 }
 
 //Updating the atom selection menu, built on the model of sel_drop_handler()
@@ -300,7 +300,7 @@ function range_file_species_drop_handler()
 	for (var i = 0; i < dropd_atoms.options.length; ++i)
 		dropd_atoms.options[i] = new Option(i+1, i+1);
 	
-	range_sphere_handler();
+	range_sphere_update();
 }
 
 //Updates the range sphere if ENTER was pressed in the radius textbox
@@ -313,38 +313,8 @@ function range_file_r_handler(evt)
 	
 	if (myKey == 13)
 	{
-		range_sphere_handler();
+		range_sphere_update();
 	}
-}
-
-//Draws a sphere visualizing the selected range
-
-function range_sphere_handler()
-{
-	sphere_script = "ellipsoid range_sphere_choice";
-	
-	//A bit of jQuery magic to check whether the active tab is the "File generation" one.
-
-	var active = $("#main_tabs").tabs("option", "active");
-	if(active == tab_index("#file_gen") &&				//Is the File generation tab active?
-		document.getElementById("file_type_drop").value != "recap" && 					//Is the JSON or the Tabulated file generation active?
-		document.getElementById("sel_file_drop").value.indexOf("range") > -1 &&			//Is one of the 'range' options selected?
-		document.getElementById("range_sphere_check").checked == true)					//Is the box "Visualize range sphere" ticked?
-	{
-		var r = parseFloat(document.getElementById("range_file_r").value);
-		
-		sphere_script += " axes {" + r + " 0 0} {0 " + r + " 0} {0 0 " + r + "} center {*}[" + last_atom_picked + "] color translucent 0.7 {200 200 200};";
-		sphere_script += " display {default_displaygroup or within(" + r + ", ({*}[" + last_atom_picked + "]))};";
-		sphere_script += " color {displayed and not default_displaygroup} translucent;"
-	}
-	else
-	{
-		sphere_script += " delete;";
-		sphere_script += "display default_displaygroup;"
-	}
-     
-   Jmol.script(mainJmol, sphere_script);		
-				       
 }
 
 //Trims numbers to print to a fixed length of d digits

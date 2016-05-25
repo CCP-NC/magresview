@@ -107,7 +107,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
     
     <script type="text/javascript" src="files/euler_angles.js"></script>
 
-	 <!-- JMol applet and controls loading -->
+	<!-- JMol applet and controls loading -->
     
     <script type="text/javascript" src="files/app_load.js"></script>
     
@@ -191,6 +191,14 @@ It provides the possibility to load example files from a dropdown menu but it ma
     <!-- Spins for common isotopes -->
 
      <script type="text/javascript" src="files/spin_data.js"></script>
+
+    <!-- Displaying atoms control -->
+    
+    <script type="text/javascript" src="files/displaygroup.js"></script>
+
+    <!-- Range sphere plotting -->
+    
+    <script type="text/javascript" src="files/range_sphere.js"></script>
 
 	 <script>
 		
@@ -353,15 +361,14 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					<div id="main_load_div" class="ctrl_left">
 							File:<br>
 							<input type="file" id="load_button" name="Browse" onchange="load_file(event)" style="text-align: right;" size="15%" autocomplete="off"></input>
-							<script type="text/javascript">
-							  
+                            <select id="file_load_drop" class="nodisplay" style="width: 100pt;" onmouseup="file_load_drop_handler(event)">
+                                                <option value="#user_file#">Load user file...</option> \
+                            </select>							
+                            <script type="text/javascript">
 							  if (window.location.protocol != "file:") {
 							    $("#load_button").addClass("nodisplay");
-							    document.write('<select id="file_load_drop" style="width: 100pt;" onmouseup="file_load_drop_handler(event)"> \
-									    <option value="#user_file#">Load user file...</option> \
-									    </select>');
+                                $("#file_load_drop").removeClass("nodisplay");
 							  }
-							  
 							</script>
 							<div class="ctrl_right">
 								<br>
@@ -412,7 +419,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					</div>
 					</div>
 					</div>
-					
+
 					<br>
 
 					<div id="main_tabs" style="font-size: 90%; position: absolute; z-index: 1; width: 100%">
@@ -723,6 +730,35 @@ It provides the possibility to load example files from a dropdown menu but it ma
 							</div>
 							</div>					
 
+                            <h3 id="displ_head" class="head">Change displayed atoms</h3>
+                            <div>
+                            Display only:
+                            <select id="displ_def_type" onchange="displ_def_type_handler()">
+                                <option value="auto">Auto</option>
+                                <option value="ucell">Unit cell (or supercell)</option>
+                                <option value="centroid">Centroids (for molecules)</option>
+                                <option value="molecule">Minimum molecular unit</option>
+                                <option value="element">Element</option>
+                                <option value="cluster">Spherical cluster</option>
+                                <option value="custom">Custom</option>
+                            </select>
+                            <br>
+                            <br>
+                            <div id="displ_def_type_forms">
+                                <div formOpt="element">
+                                    Elements (comma separated): <input type="text" size="20"></input>
+                                </div>
+                                <div formOpt="cluster">
+                                    Pick one atom as center of the cluster.<br>
+                                    Radius: <input type="text" size="5" maxwidth=5 onkeypress="displ_r_handler(event)" value="1" rangesphereR></input> &Aring;
+                                </div>
+                                <div formOpt="custom">
+                                    <textarea id="displ_custom_box" rows="5" columns="50">
+                                    </textarea>
+                                </div>
+                            </div>
+                            <br>
+                            </div>
 
 					</div>
 					
@@ -818,9 +854,9 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 					<div id="range_file_div" style="visibility:hidden">
 					<input type="text" id="range_file_r" maxlength="4" size="4" value="1.0" autocomplete="off" disabled="true" onkeypress="range_file_r_handler(event)"
-					title="Maximum distance from selected atom of nuclei to include"></input> &Aring; of <span id="range_atom_picked">N/A</span>
+					title="Maximum distance from selected atom of nuclei to include" rangesphereR></input> &Aring; of <span id="range_atom_picked">N/A</span>
 					&nbsp;
-					<input type="checkbox" id="range_sphere_check" checked="true" autocomplete="off" disabled="true" onchange="range_sphere_handler()"> Visualize range sphere
+					<input type="checkbox" id="range_sphere_check" checked="true" autocomplete="off" disabled="true" onchange="range_sphere_handler()" rangesphereON> Visualize range sphere
 					</div>
 
 					<br>

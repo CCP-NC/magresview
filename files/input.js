@@ -21,9 +21,6 @@ switch (current_framework) {
 	
 }
 
-
-var default_displaygroup = null;					//Basic Jmol atom expression for default displaying of the structure
-
 var label_components = ["", "", ""];				//This will hold the various pieces of the atom labels: [name, ms properties, efg properties]
 
 //Data structure holding some essential atom information
@@ -31,6 +28,7 @@ var atom_set;
 
 function reset_system()
 {
+	console.log("Resetting system");
 	switch (current_framework) {
 		case "Java":
 			var supercell_border = 2;				
@@ -171,42 +169,37 @@ function load_string(id, file_as_string)
 {
 	var load_script = "load data \"model current_model\"" + file_as_string + "end \"model current_model\"";
 	var load_as_mol = document.getElementById("ismol_check").checked;
-	
+
 	if (!load_as_mol)
 	{	
 
-		var x_lat = parseInt(document.getElementById("x_lat").value);
-		var y_lat = parseInt(document.getElementById("y_lat").value);
-		var z_lat = parseInt(document.getElementById("z_lat").value);
-		
-		//Check that there are no errors
-		if (x_lat <= 0)
-		{
-			x_lat = 1;
-			document.getElementById("x_lat").value = 1;
-		}
+	    var x_lat = parseInt($("#x_lat").val());
+	    var y_lat = parseInt($("#y_lat").val());
+	    var z_lat = parseInt($("#z_lat").val());
+	    
+	    //Check that there are no errors
+	    if (x_lat <= 0)
+	    {
+	        x_lat = 1;
+	        $("#x_lat").val(1);
+	    }
 
-		if (y_lat <= 0)
-		{
-			y_lat = 1;
-			document.getElementById("y_lat").value = 1;
-		}
+	    if (y_lat <= 0)
+	    {
+	        y_lat = 1;
+	        $("#y_lat").val(1);
+	    }
 
-		if (z_lat <= 0)
-		{
-			z_lat = 1;
-			document.getElementById("z_lat").value = 1;
-		}
+	    if (z_lat <= 0)
+	    {
+	        z_lat = 1;
+	        $("#z_lat").val(1);
+	    }
 
 		var mincell = "" + (5-supercell_border) + (5-supercell_border) + (5-supercell_border);
 		var maxcell = "" + (x_lat+4+supercell_border) + (y_lat+4+supercell_border) + (z_lat+4+supercell_border);
-		var displcells = "none";
-		for (var xl = 0; xl < x_lat; ++xl)
-			for (var yl = 0; yl < y_lat; ++yl)
-				for (var zl = 0; zl < z_lat; ++zl)
-						displcells += " or cell=" + (5+xl) + (5+yl) + (5+zl);
 
-		default_displaygroup = displcells;
+		default_displaygroup = supercell_displaygroup(x_lat, y_lat, z_lat);
 
 		load_script += "{" + mincell + " " + maxcell + " -1}; display " + default_displaygroup + ";";
 		
