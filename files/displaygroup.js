@@ -10,6 +10,39 @@
 
 var default_displaygroup = null;                    //Basic Jmol atom expression for default displaying of the structure
 
+function auto_displaygroup() {
+    // Return an automatic displaygroup based on the nature of the system
+    switch (is_mol_crystal())
+    {
+        case 1:
+            if (document.getElementById("ismol_check").checked == false)
+            {
+                return centroid_displaygroup();
+            }
+            else
+            {
+                return molecular_displaygroup();                        
+            }
+            break;
+        case -1:
+            if (document.getElementById("ismol_check").checked == false)
+            {
+                return all_displaygroup();
+            }
+            else
+            {
+                return molecular_displaygroup();                        
+            }
+            break;
+        case 0:
+        default:
+            break;
+            
+    }
+
+    return supercell_displaygroup();
+}
+
 function supercell_displaygroup(x_lat, y_lat, z_lat) {
     // Make a displaygroup including only the required visible cells for
     // a given supercell.
@@ -143,6 +176,34 @@ function and_displaygroup(dd1, dd2) {
     return "(" + dd1 + ") and (" + dd2 + ")";
 }
 
+// Types of dropdown and consequent handlers
+var displ_def_types = {
+    'auto': auto_displaygroup,
+    'ucell': supercell_displaygroup,
+    'centroid': centroid_displaygroup,
+    'molecule': molecular_displaygroup,
+    'element': function() {
+        // Grab the element list
+        elems_string = $('#displ_def_type_forms')
+                        .find('[formOpt=element]')
+                        .val();
+        elems = [];
+        elems_string = elems_string.split(',');
+        for (var i = 0; i < elems_string.length; ++i) {
+            elems.push(elems_string[i].trim());
+        }
+        return element_displaygroup(elems);
+    },
+    'cluster': function() {
+        var r = range_sphere_getR();
+        return sphere_displaygroup(r, picked_displaygroup());
+    },
+    'custom': function() {
+        return $('#displ_custom_box').val();
+    }
+
+}
+
 function displ_def_type_handler() {
     var val = $('#displ_def_type').val();
     var forms = $('#displ_def_type_forms');
@@ -150,8 +211,8 @@ function displ_def_type_handler() {
     forms.children().addClass('nodisplay');
     forms.find('[formOpt="'+val+'"]').removeClass('nodisplay');    
 
-    range_sphere_update();    
-    $('#displ_custom_box').text(default_displaygroup);
+    range_sphere_update();
+    $('#displ_custom_box').val(default_displaygroup);
 }
 
 function displ_r_handler(evt) {
@@ -162,5 +223,20 @@ function displ_r_handler(evt) {
     if (myKey == 13)
     {
         range_sphere_update();
+    }
+}
+
+function displ_def_submit(stop_change) {
+    var type = $('#displ_def_type').val();
+    test_displaygroup = displ_def_types[type]();
+    // Check if actually valid
+    sel = Jmol.evaluateVar(mainJmol, '{'+test_displaygroup+'}');
+    if (sel == "ERROR") {
+        $('#displ_custom_box').val(default_displaygroup);
+    }
+    else {
+        default_displaygroup = test_displaygroup;
+        if (!stop_change)
+            global_state_machine.handle_change('state');
     }
 }

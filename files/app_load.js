@@ -447,36 +447,14 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 {
 	if (state == 3)
 	{
-	
-		switch (is_mol_crystal())
-		{
-			case 1:
-				if (document.getElementById("ismol_check").checked == false)
-				{
-					default_displaygroup = centroid_displaygroup();
-				}
-				else
-				{
-					default_displaygroup = molecular_displaygroup();						
-				}
-				break;
-			case -1:
-				if (document.getElementById("ismol_check").checked == false)
-				{
-					default_displaygroup = all_displaygroup();
-				}
-				else
-				{
-					default_displaygroup = molecular_displaygroup();						
-				}
-				break;
-			case 0:
-			default:
-				break;
-				
-		}
+		
+		// Automatic displaygroup setting
+		$('#displ_def_type').prop('selectedIndex', 0);
+		displ_def_type_handler();
+		displ_def_submit(true);
 
 		opt_theme_handler();	// Load the theme
+		opt_jmol_theme_handler();
 
 		get_atom_info();
 		load_data_asproperty();

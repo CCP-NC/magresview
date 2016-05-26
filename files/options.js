@@ -223,7 +223,15 @@ function opt_theme_handler()
 	$('#stfc_logo').attr('src', 'images/' + current_theme + '/stfc_logo.png');
 	$('#epsrc_logo').attr('src', 'images/' + current_theme + '/small_epsrc.png');
 
-	// Now Jmol
+	// Replot for things that need to change color
+	plot_update();
+
+}
+
+function opt_jmol_theme_handler()
+{
+	var current_theme = $('#opt_jmol_theme').val();
+
 	switch(current_theme)
 	{
 		case 'dark':
@@ -233,8 +241,5 @@ function opt_theme_handler()
 			Jmol.script(mainJmol, 'background white');
 			break;
 	}
-
-	// Replot for things that need to change color
-	plot_update();
 
 }

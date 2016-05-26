@@ -59,8 +59,8 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		//Version number handling
 
 		var _major_version = 1;
-		var _major_revision = 5;
-		var _minor_revision = 9;
+		var _major_revision = 6;
+		var _minor_revision = 0;
 
 		function version_number_string() {
 
@@ -757,6 +757,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
                                     </textarea>
                                 </div>
                             </div>
+                            <input type="button" value="Submit" onclick="displ_def_submit()"></input>
                             <br>
                             </div>
 
@@ -894,38 +895,24 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					</div>
 					
 					<div id="options_accordion">
-					
-					<!--
-
-					Removed because unnecessary after implementation of centroids. Will be re-inserted if needed/asked
-
-					<h3 class="head">Shift molecule</h3>
-					<div>
-					<div class="ctrl_left">
-						Shift<br> 
-						a: <input type="text" id="opt_a_shift" maxlength="3" size="3" value="0" autocomplete="off"
-						title="Insert desired shift along the a unit cell direction in percent"></input>%
-						b: <input type="text" id="opt_b_shift" maxlength="3" size="3" value="0" autocomplete="off"
-						title="Insert desired shift along the b unit cell direction in percent"></input>%
-						c: <input type="text" id="opt_c_shift" maxlength="3" size="3" value="0" autocomplete="off"
-						title="Insert desired shift along the c unit cell direction axis in percent"></input>%
-					<div class="ctrl_right" style="text-align:center">
-						<br>
-						<input type="button" id="opt_btn_shift" value="Apply shift" onclick="shift_btn_handler()"
-						title="Shift all the atoms in the model of the percentage of the unit cell base vectors indicated. Will reset all plots and selections."></input>
-					</div>
-					</div>
-					</div>
-					-->	
-
+			
                     <h3 class="head">Theme</h3>
                     <div>
+                        <div class="ctrl_left">
                         MagresView theme: &nbsp;<br><br>
                         <select id="opt_theme" autocomplete="off" title="Choose display theme for the window"
                         onchange="opt_theme_handler(event)">
                             <option value="dark">Dark</option>
                             <option value="light">Light</option>
                         </select>
+                        <div class="ctrl_right">
+                        JMol theme: &nbsp;<br><br>
+                        <select id="opt_jmol_theme" autocomplete="off" title="Choose display theme for the JMol applet"
+                        onchange="opt_jmol_theme_handler(event)">
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                        </div></div>
                     </div>
 
 					<h3 class="head">Plotting options</h3>
