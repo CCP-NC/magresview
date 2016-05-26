@@ -450,7 +450,6 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		
 		// Automatic displaygroup setting
 		$('#displ_def_type').prop('selectedIndex', 0);
-		displ_def_type_handler();
 		displ_def_submit(true);
 
 		opt_theme_handler();	// Load the theme
