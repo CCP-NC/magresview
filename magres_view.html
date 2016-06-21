@@ -980,7 +980,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 					
 					
 			</div>
-			
+
 			<div id="euler_popup" title="Euler angles" class="popupdiv">
 				This is just a popup test. &alpha;, &beta;, &gamma;.
 			</div>
@@ -1023,66 +1023,67 @@ It provides the possibility to load example files from a dropdown menu but it ma
   </div>
   </div>  
   <div class="creditdiv" id="credit_div">
-  <script type="text/javascript" >
-		//Like for the title, this font size needs to be estimated from the window size
-		//Resize console as well to avoid superposition
-		
-		$(document).ready( function() {
-		  $("#jmol_console").attr("size",Math.ceil(winW*0.6/9));
-		  $("#credit_div").css("fontSize", Math.ceil(winH/70.0) + "px");
-		  
-		  // Handles gracefully failure in case of browsers not supporting XMLHttpRequest:
-		  
-		  try
-		  {
-		    if (window.location.search != "?_USE=SIGNED") {
-		      test_req = new XMLHttpRequest();
-		      test_req.open('get', 'mview_config.js', true);
-		      test_req.send();
-		    }
-		    // This is where the actual loading of the applet itself happens
-		    $("#jmol_div").html(Jmol.getAppletHtml(jmolAppName, main_info));
-		  }
-		  catch(e)
-		  {
-		    $("#jmol_div").width(jmolW).height(jmolH);
-		    $("#jmol_div").addClass('failed_jmol');
-		    $("#jmol_div").html('<br><br><br><br>\
-					\
-					It appears like your browser does not support MagresView at the moment.<br>\
-					This is probably due to restricted permissions.<br>\
-					If you&#39;re using JSmol (JavaScript), try switching to Java by clicking on the button below,<br>\
-					or check out the possible compatibility fixes on the wiki:<br>\
-					<a href="http://ccpforge.cse.rl.ac.uk/gf/project/magresview/wiki/?pagename=compatibility+fixes"\
-					target="_blank" style="color:rgb(150,150,200)">MagresView Wiki</a>');
-		  }
-		  
-		  
-		  //Handles the reloading of the page if needed because Java applet is required
-		  
-          if (typeof(use_java_framework) == "boolean" && use_java_framework && window.location.search == "") {
-	          window.location.search = "?_USE=SIGNED";
-          }
-		  
-		  switch_handler(false);
-		  
-		  reset_visualization_options();
-		  
-		  hover_load();
-		  
-		  if (window.location.protocol != "file:") {
-		    inspect_example_folder();
-		  }
-		  
-		});
-  </script>
-  
   A CCP-NC project by Simone Sturniolo
   <br>
   Copyright (C) 2013 Science and Technology Facility Council
   <br>
   Distributed under the GNU General Public License
+  <br>
+  Please cite <a href="http://dx.doi.org/10.1016/j.ssnmr.2016.05.004" title="doi:10.1016/j.ssnmr.2016.05.004">our paper</a>: Simone Sturniolo et al., "Visualization and processing of computed solid-state NMR parameters: MagresView and MagresPython", SSNMR (2016)
   </div>
+  <script type="text/javascript" >
+        //Like for the title, this font size needs to be estimated from the window size
+        //Resize console as well to avoid superposition
+        
+        $(document).ready( function() {
+          $("#jmol_console").attr("size",Math.ceil(winW*0.6/9));
+          $("#credit_div").css("fontSize", Math.ceil(winH/70.0) + "px");
+          
+          // Handles gracefully failure in case of browsers not supporting XMLHttpRequest:
+          
+          try
+          {
+            if (window.location.search != "?_USE=SIGNED") {
+              test_req = new XMLHttpRequest();
+              test_req.open('get', 'mview_config.js', true);
+              test_req.send();
+            }
+            // This is where the actual loading of the applet itself happens
+            $("#jmol_div").html(Jmol.getAppletHtml(jmolAppName, main_info));
+          }
+          catch(e)
+          {
+            $("#jmol_div").width(jmolW).height(jmolH);
+            $("#jmol_div").addClass('failed_jmol');
+            $("#jmol_div").html('<br><br><br><br>\
+                    \
+                    It appears like your browser does not support MagresView at the moment.<br>\
+                    This is probably due to restricted permissions.<br>\
+                    If you&#39;re using JSmol (JavaScript), try switching to Java by clicking on the button below,<br>\
+                    or check out the possible compatibility fixes on the wiki:<br>\
+                    <a href="http://ccpforge.cse.rl.ac.uk/gf/project/magresview/wiki/?pagename=compatibility+fixes"\
+                    target="_blank" style="color:rgb(150,150,200)">MagresView Wiki</a>');
+          }
+          
+          
+          //Handles the reloading of the page if needed because Java applet is required
+          
+          if (typeof(use_java_framework) == "boolean" && use_java_framework && window.location.search == "") {
+              window.location.search = "?_USE=SIGNED";
+          }
+          
+          switch_handler(false);
+          
+          reset_visualization_options();
+          
+          hover_load();
+          
+          if (window.location.protocol != "file:") {
+            inspect_example_folder();
+          }
+          
+        });
+  </script>
   </body>
 
 </html>

@@ -366,6 +366,8 @@ function recap_file_gen(data_set, out)
 	out.write("Recap file generated with MagresView v." + magresview_version_number + "\n");
 	out.write("Model: " + data_set.model + "\n");
 	out.write("Euler angles convention adopted: " + data_set.eul_conv.toUpperCase() + "\n");
+	out.write("Please cite our paper: Simone Sturniolo et al., \"Visualization and processing of computed" +
+			  " solid-state NMR parameters: MagresView and MagresPython\", SSNMR (2016), doi:10.1016/j.ssnmr.2016.05.004\n");
 
 	//Print total number of atoms
 	out.write("\n% Number of atoms: " + data_set.atoms.atom.length + "\n");
@@ -740,7 +742,8 @@ function magres_file_gen(data_set, out) {
 	out.write("# .magres formatted NMR data for model: " + data_set.model + "\n");
 	out.write("# Formula: " + system_stochiometry + "\n");
 	out.write("# " + data_set.magres_view + "\n");
-	
+	out.write("# Please cite our paper: Simone Sturniolo et al., \"Visualization and processing of computed" +
+			  " solid-state NMR parameters: MagresView and MagresPython\", SSNMR (2016), doi:10.1016/j.ssnmr.2016.05.004\n");	
 	// Write down 'calculation' block
 	
 	if (atom_set.is_magres) {
@@ -1174,6 +1177,8 @@ function table_file_gen(data_set, out)
 	out.write("% Formula: " + system_stochiometry + "\n");
 	out.write("% Table file generated with MagresView v." + magresview_version_number + "\n");
 	out.write("% Euler angles convention adopted: " + data_set.eul_conv.toUpperCase() + "\n%\n");
+	out.write("% Please cite our paper: Simone Sturniolo et al., \"Visualization and processing of computed" +
+			  " solid-state NMR parameters: MagresView and MagresPython\", SSNMR (2016), doi:10.1016/j.ssnmr.2016.05.004\n");
 
 	//If present, print isotropic magnetic shielding tensors
 	if ("ms" in data_set.magres)
