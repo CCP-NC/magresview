@@ -8,7 +8,7 @@ EXCLUDED_PATHS='examples|publishing_scripts'
 
 # External system details
 USERSCP='ccpnc'
-HOSTSCP='webs.materials.ox.ac.uk'
+HOSTSCP='ext-webs.materials.ox.ac.uk'
 FOLDSCP='public_html/magresview/magresview'
 
 echo "Publishing on CCPNC website"
