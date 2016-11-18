@@ -1423,7 +1423,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	
 	var abc = atom_set.lattice_pars;	//Storing the lattice parameters for convenience
 	var ch = choice_atomexp(ac);
-	
+
 	var use_rotated_frame = document.getElementById("rot_file_check").checked;
 	var rot_matrix = null;
 	
@@ -1470,9 +1470,10 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	if (document.getElementById("dip_file_check").checked == true || use_all == true)
 	{
 		// This specific script has the task of picking up the closest periodic copy (and therefore the highest dipolar coupling)
+		// Special care needs to be taken to not try and measure the coupling of an atom with ITSELF though - just its closest periodic copy, at most
 		full_jmol_script += "dip_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {jname = " + ch + "[j].atomname; \
 		j_id = " + ch + "[j].atomno; \
-		closest_j = {atomname=jname}.distance.min(" + ch + "[i], true); \
+		closest_j = {atomname=jname and not " + ch + "[i]}.distance.min(" + ch + "[i], true); \
 		dip_info = dip_info or [measure(" + ch + "[i] closest_j, \"khz\")]; r = " + ch + "[i].xyz-closest_j.xyz;";
 		if (use_rotated_frame) {
 			full_jmol_script += "r = rot_q % r;";
@@ -1763,9 +1764,12 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		ds.magres.dip = [];
 		
 		var dip_info = Jmol.evaluateVar(mainJmol, "dip_info");
+		console.log(dip_info);
 
 		for (var i = 0; i < dip_info.length-1; i += 5)
-		{
+		{	
+			console.log(i);
+			console.log(dip_info[i][0]);
 			var a_dip = dip_info[i][0].split('\t');
 			var a_b = parseFloat(a_dip[1])*1000.0;		//Coupling constant in Hz
 			var a_no_1 = parseInt(a_dip[3].substring(a_dip[3].indexOf('#')+1));
