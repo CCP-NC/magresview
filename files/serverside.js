@@ -49,7 +49,7 @@ function file_load_drop_update() {
         dropd.options[i] = new Option(example_file_list[i].slice(0,example_file_list[i].length - ext.length), 'examples/' + example_file_list[i]);
     }
     
-    dropd.options[dropd.options.length-1] = new Option('Load user file...', '#user_file#');
+    dropd.options[dropd.options.length-1] = new Option('Load database file...', '#database_file#');
     
     dropd.selectedIndex = -1;
     
@@ -58,8 +58,8 @@ function file_load_drop_update() {
 function file_load_drop_handler()
 {
     var to_load = $('#file_load_drop').val();
-    if (to_load == '#user_file#') {
-        $('#load_button').click();
+    if (to_load == '#database_file#') {
+        load_from_database();
     }
     else
     {
@@ -69,9 +69,25 @@ function file_load_drop_handler()
         file_req.open('get', to_load, true);
         // Store the name for future retrieval
         file_req.model_name = get_rootname(to_load);
-        file_req.send();
+        file_req.send();            
     }
     
+}
+
+function load_from_database() {
+    var query_id = window.prompt("Database ID of the required structure\n(example: 653683)");
+    // Send a query
+    var file_req = new XMLHttpRequest();
+
+    file_req.onload = forward_loadrequest;
+    file_req.open('get', 'http://localhost:5000/magresquery/' + query_id, true);
+    file_req.model_name = 'DB' + query_id;
+    file_req.onerror = function() {
+        // Something went wrong...
+        alert('Connection with server could not be established');
+    }
+
+    file_req.send();        
 }
 
 function forward_loadrequest()
