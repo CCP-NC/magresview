@@ -118,7 +118,7 @@ function enable_NMR_controls()
 {
 	//reset_visualization_options();
 	console.log("Enabling NMR controls");
-	
+
 	document.getElementById("labels_check").disabled = false;
 
 	if (atom_set.has_ms)
@@ -447,7 +447,6 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 {
 	if (state == 3)
 	{
-		
 		// Automatic displaygroup setting
 		$('#displ_def_type').prop('selectedIndex', 0);
 		displ_def_submit(true);

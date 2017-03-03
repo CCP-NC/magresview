@@ -358,12 +358,19 @@ function get_atom_info()
 		{
 			el = atomelems[i];
 
-			if (el != "" && atom_set.atom_species_labels.indexOf(el) < 0)
-			{
-				atom_set.atom_species_labels.push(el);
+			if (el == "") {				
+				continue;
 			}
 
-			atom_set.atom_species_sites = null;
+			if (atom_set.atom_species_labels.indexOf(el) < 0)
+			{
+				atom_set.atom_species_labels.push(el);
+				atom_set.atom_species_sites[el] = [1];
+			}
+			else {
+				atom_set.atom_species_sites[el].push(atom_set.atom_species_sites[el][atom_set.atom_species_sites[el].length-1]+1);				
+			}
+
 		}
 
 		atom_set.has_ms  = false;
