@@ -237,7 +237,6 @@ function include_controls_switch()
 		}
 		if(atom_set.is_magres && atom_set.has_efg)
 		{
-			console.log("Wut?");
 			document.getElementById("efg_file_check").disabled = false;
 		}
 		
@@ -1764,12 +1763,9 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		ds.magres.dip = [];
 		
 		var dip_info = Jmol.evaluateVar(mainJmol, "dip_info");
-		console.log(dip_info);
 
 		for (var i = 0; i < dip_info.length-1; i += 5)
 		{	
-			console.log(i);
-			console.log(dip_info[i][0]);
 			var a_dip = dip_info[i][0].split('\t');
 			var a_b = parseFloat(a_dip[1])*1000.0;		//Coupling constant in Hz
 			var a_no_1 = parseInt(a_dip[3].substring(a_dip[3].indexOf('#')+1));
