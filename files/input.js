@@ -293,87 +293,66 @@ function get_atom_info()
 		}
 	}
 
-	if (atom_set.is_magres)
+    if (!atom_set.is_magres) {
+        // If it's not a magres file, name the atoms accordingly so that the 
+        // follow up works
+        name_nonmagres();
+    }
+
+    // These are now standard for both magres and non-magres files, so we can
+    // rely on them
+	var atomnames = Jmol.evaluate(mainJmol, "{" + default_displaygroup + "}.atomname.all").split('\n');
+
+	//Espunge possible duplicates
+	for (var i = 0; i < atomnames.length; ++i)
 	{
-		//If the file was a magres file, we can rely on the fact that Jmol will use the naming convention label_site
-	
-		var atomnames = Jmol.evaluate(mainJmol, "{" + default_displaygroup + "}.atomname.all").split('\n');
-		
-
-		//Espunge possible duplicates
-
-		for (var i = 0; i < atomnames.length; ++i)
+		if (atomnames[i] == "" || atomnames.indexOf(atomnames[i]) < i)
 		{
-			if (atomnames[i] == "" || atomnames.indexOf(atomnames[i]) < i)
-			{
-				atomnames.splice(i--,1);
-			}
-		}
-
-		for (var i = 0; i < atomnames.length; ++i)
-		{
-			var name = atomnames[i];
-			var sp = name.substring(0, name.lastIndexOf('_'));
-			var ind = parseInt(name.substring(name.lastIndexOf('_')+1));
-
-			if (atom_set.atom_species_labels.indexOf(sp) < 0)
-			{
-				atom_set.atom_species_labels.push(sp);
-				atom_set.atom_species_sites[sp] = [];
-			}
-
-			if (atom_set.atom_species_sites[sp].indexOf(ind) < 0)
-				atom_set.atom_species_sites[sp].push(ind);			
-		}
-
-		//Find Magres data contained within the file
-
-		var magres_units = Jmol.getPropertyAsArray(mainJmol, "auxiliaryInfo.models[1].magresUnits");
-		for (key in magres_units)
-		{
-			if (magres_units.hasOwnProperty(key))
-			{
-				if (key.indexOf("ms") == 0)
-					atom_set.has_ms = true;
-				else if (key.indexOf("efg") == 0)
-				{
-					atom_set.has_efg = true;
-					atom_set.efg_tags.push(key);
-				}
-				else if (key.indexOf("isc") == 0)
-				{
-					atom_set.has_isc = true;
-					atom_set.isc_tags.push(key);
-				}
-			}
+			atomnames.splice(i--,1);
 		}
 	}
-	else
+
+	for (var i = 0; i < atomnames.length; ++i)
 	{
-		//If the file was not a magres file, we will just use elements as our reference
-	
-		var atomelems = Jmol.evaluate(mainJmol, "{" + default_displaygroup + "}.element").split('\n');
+		var name = atomnames[i];
+		var sp = name.substring(0, name.lastIndexOf('_'));
+		var ind = parseInt(name.substring(name.lastIndexOf('_')+1));
 
-		for (var i = 0; i < atomelems.length; ++i)
+		if (atom_set.atom_species_labels.indexOf(sp) < 0)
 		{
-			el = atomelems[i];
-
-			if (el == "") {				
-				continue;
-			}
-
-			if (atom_set.atom_species_labels.indexOf(el) < 0)
-			{
-				atom_set.atom_species_labels.push(el);
-				atom_set.atom_species_sites[el] = [1];
-			}
-			else {
-				atom_set.atom_species_sites[el].push(atom_set.atom_species_sites[el][atom_set.atom_species_sites[el].length-1]+1);				
-			}
-
+			atom_set.atom_species_labels.push(sp);
+			atom_set.atom_species_sites[sp] = [];
 		}
 
-		atom_set.has_ms  = false;
+		if (atom_set.atom_species_sites[sp].indexOf(ind) < 0)
+			atom_set.atom_species_sites[sp].push(ind);			
+	}
+
+	//Find Magres data contained within the file if present
+
+    if (atom_set.is_magres) {
+        var magres_units = Jmol.getPropertyAsArray(mainJmol, "auxiliaryInfo.models[1].magresUnits");
+        for (key in magres_units)
+        {
+            if (magres_units.hasOwnProperty(key))
+            {
+                if (key.indexOf("ms") == 0)
+                    atom_set.has_ms = true;
+                else if (key.indexOf("efg") == 0)
+                {
+                    atom_set.has_efg = true;
+                    atom_set.efg_tags.push(key);
+                }
+                else if (key.indexOf("isc") == 0)
+                {
+                    atom_set.has_isc = true;
+                    atom_set.isc_tags.push(key);
+                }
+            }
+        }
+    }
+    else {
+    	atom_set.has_ms  = false;
 		atom_set.has_efg = false;
 		atom_set.has_isc = false;
 	}
@@ -516,4 +495,28 @@ function get_rootname(path) {
 
 function update_modelname() {
 	$('#model_name').html(atom_set.model_name);
+}
+
+function name_nonmagres() {
+    /* Give all atoms in a non-magres file a "magres-like" name. In other words, they have to be named
+    based on their crystallographic position, and share the same name across unit cells with their
+    periodic copies.*/
+
+    // First, define a proper "unitcell"
+    jmol_script = "ucell_sel =  {cell=555 and not (cell=655 or cell=565 or cell=556)};";
+    // Now iterate over it
+    jmol_script += "var el_table = {};" +
+                   "for (a in ucell_sel) {" +
+                        "if (el_table[a.element] == null) {" +
+                            "el_table[a.element] = 1;" +
+                        "} else {" +
+                            "el_table[a.element] += 1;" +
+                        "}; tx = a.ux; ty = a.uy; tz = a.uz;" +
+                        "var sitename = a.element + '_' + el_table[a.element];" +
+                        "{ux=tx and uy=ty and uz=tz}.atomname = sitename; }";
+
+    /* It's important to run this synchronously (hence the evaluateVar syntax) since
+    we're reading the names immediately afterwards */
+
+    Jmol.evaluateVar(mainJmol, 'script("' + jmol_script + '");');
 }

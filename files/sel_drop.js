@@ -94,13 +94,7 @@ function sel_atom_drop_update()
 		for (var i = 0; i < atom_set.atom_species_sites[sp].length; ++i)
 		{
 			var sp_site = atom_set.atom_species_sites[sp][i];
-			var opt_val;
-			if (atom_set.is_magres) {
-				opt_val = sp + '_' + sp_site;
-			}
-			else {
-				opt_val = '{_' + sp + '}[' + sp_site + ']';
-			}
+			var opt_val = sp + '_' + sp_site;
 			var a_opt = $('<option>').attr('value', opt_val).text(sp + '_' + sp_site);
 			sp_optgroup.append(a_opt);
 		}
@@ -163,13 +157,7 @@ function sel_atom_drop_handler(evt)
 			// We're just selecting whole species...
 			for (var s = 0; s < sel.length; ++s)
 			{
-				var sp_sel;
-				if (atom_set.is_magres) {
-					sp_sel = sel[s] + '_*';
-				}
-				else {
-					sp_sel = '{_' + sel[s] + '}';
-				}
+				var sp_sel = sel[s] + '_*';
 				select_atom_script += sp_sel + (s < (sel.length-1)? ' or ' : ');');
 			}
 		}
