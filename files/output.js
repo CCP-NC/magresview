@@ -1472,7 +1472,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		// Special care needs to be taken to not try and measure the coupling of an atom with ITSELF though - just its closest periodic copy, at most
 		full_jmol_script += "dip_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {jname = " + ch + "[j].atomname; \
 		j_id = " + ch + "[j].atomno; \
-		closest_j = {atomname=jname and not " + ch + "[i]}.distance.min(" + ch + "[i], true); \
+		closest_j = {atomname=jname and not (" + ch + ")[i]}.distance.min(" + ch + "[i], true); \
 		dip_info = dip_info or [measure(" + ch + "[i] closest_j, \"khz\")]; r = " + ch + "[i].xyz-closest_j.xyz;";
 		if (use_rotated_frame) {
 			full_jmol_script += "r = rot_q % r;";
