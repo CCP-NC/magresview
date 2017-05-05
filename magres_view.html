@@ -252,10 +252,12 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 		$("#euler_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
 		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
+        $("#database_popup").dialog({autoOpen: true, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
 		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
  		$("#ref_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: ref_table_popup_handler});
         $("#larmor_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: larmor_table_popup_handler});		
-        });         
+        });
+
   		
   </script>
 
@@ -1003,7 +1005,21 @@ It provides the possibility to load example files from a dropdown menu but it ma
 			<div id="vvleck_popup" title="Van Vleck second moment" class="popupdiv">
 				This is just a popup test. &alpha;, &beta;, &gamma;.
 			</div>
-			
+
+            <div id="database_popup" title="Load database file" class="popupdiv">
+                MS:<br>
+                Min: <input id="db_min_ms" type="text" size="5"></input>
+                Max: <input id="db_max_ms" type="text" size="5"></input>
+                <br><br>
+                <button type="">Search</button>
+                <br><br>
+                <select id="db_select" name="">
+                    <option value=""></option>
+                </select>
+                <br><br>
+                <button type="">Load</button>
+            </div>
+
 			<div id="oldmagres_convert_popup" title="Convert old Magres file" class="popupdiv">
 			  You tried to load an old .magres file. This format is now deprecated and needs to be converted.<br>
 			  Drag and drop the old .magres file and (optionally, if you want the lattice parameters to be included) the .castep file
