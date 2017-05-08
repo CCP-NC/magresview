@@ -59,7 +59,7 @@ function file_load_drop_handler()
 {
     var to_load = $('#file_load_drop').val();
     if (to_load == '#database_file#') {
-        load_from_database();
+        $("#database_popup").dialog('open');
     }
     else
     {
@@ -74,20 +74,63 @@ function file_load_drop_handler()
     
 }
 
-function load_from_database() {
-    var query_id = window.prompt("Database ID of the required structure\n(example: 653683)");
+function load_from_database(query_id, is_fid) {
+    $('#database_popup').dialog('close');
     // Send a query
     var file_req = new XMLHttpRequest();
+    var qstr = 'http://localhost:5000/magresquery/';
+    if (is_fid) {
+        qstr += 'fileID-';
+    }
+    qstr += query_id;
 
     file_req.onload = forward_loadrequest;
-    file_req.open('get', 'http://localhost:5000/magresquery/' + query_id, true);
+    file_req.open('get', qstr, true);
     file_req.model_name = 'DB' + query_id;
     file_req.onerror = function() {
         // Something went wrong...
         alert('Connection with server could not be established');
     }
 
-    file_req.send();        
+    file_req.send();
+}
+
+function search_in_database() {
+    var minm = parseFloat($('#db_min_ms').val());
+    var maxm = parseFloat($('#db_max_ms').val());
+    var el = $('#db_elem').val();
+
+    // Create the query string
+    var qstr = 'http://localhost:5000/magresquery/minms' + minm.toFixed(5);
+    qstr += '/maxms' + maxm.toFixed(5) + '/sp' + el;
+
+    var search = new XMLHttpRequest();
+
+    search.onload = database_choices;
+    search.open('get', qstr, true);
+    search.onerror = function() {
+        // Something went wrong...
+        alert('Connection with server could not be established');
+    }
+
+    search.send();
+}
+
+function database_choices() {
+
+    var ans = JSON.parse(this.responseText);
+    var el = $('#db_elem').val();
+
+    // IDs?
+
+    var opts = $('#db_select');
+
+    opts.html('');
+
+    for (var id in ans) {
+        var opt = $('<option>').html(id).attr('value', id);
+        opts.append(opt);
+    }
 }
 
 function forward_loadrequest()

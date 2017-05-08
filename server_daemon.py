@@ -17,7 +17,11 @@ cors = CORS(app)
 def magresquery(query_id):
     ff = ccpnc.magresData.find({"icsdID": query_id})
     # Get the first magres file in the query
-    f = next(ff)
+    try:
+        f = next(ff)
+    except StopIteration:
+        # Nothing found
+        return "Not found"
     fileID = f['magresFilesID']
     return fileIDquery(fileID)
 
@@ -34,12 +38,12 @@ def minmaxquery(minms, maxms, sp):
          }
     ]})
 
-    text = ""
-    for f in ff:
-        text += str(f)
-        text += '<br><br>MagresFileID: <b>{0}</b>'.format(f['magresFilesID'])
-        text += '<br><br> ----- <br><br>'
-    return text
+    # Return a list of fileIDs
+
+    fileIDs = {str(f['magresFilesID']): {x: str(f[x]) for x in f}
+               for f in ff}
+
+    return json.dumps(fileIDs)
 
 
 @app.route("/magresquery/fileID-<fileID>")

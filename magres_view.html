@@ -252,7 +252,7 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 		$("#euler_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
 		$("#vvleck_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}});
-        $("#database_popup").dialog({autoOpen: true, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
+        $("#database_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
 		$("#oldmagres_convert_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt'});
  		$("#ref_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: ref_table_popup_handler});
         $("#larmor_table_popup").dialog({autoOpen: false, modal: true, position: {my: 'right', at: 'right', of: window}, width: '330pt', close: larmor_table_popup_handler});		
@@ -1008,16 +1008,17 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
             <div id="database_popup" title="Load database file" class="popupdiv">
                 MS:<br>
-                Min: <input id="db_min_ms" type="text" size="5"></input>
-                Max: <input id="db_max_ms" type="text" size="5"></input>
+                Min: <input id="db_min_ms" type="text" size="5" maxlength="6" value="460.0"></input>
+                Max: <input id="db_max_ms" type="text" size="5" maxlength="6" value="500.0"></input>
+                Species: <input id="db_elem" type="text" size="3" maxlength="2" value="Si"></input>
                 <br><br>
-                <button type="">Search</button>
+                <button type="" onclick="search_in_database()">Search</button>
                 <br><br>
-                <select id="db_select" name="">
+                <select id="db_select" name="" style="width: 300px">
                     <option value=""></option>
                 </select>
                 <br><br>
-                <button type="">Load</button>
+                <button type="" onclick="load_from_database($('#db_select').val(), true)">Load</button>
             </div>
 
 			<div id="oldmagres_convert_popup" title="Convert old Magres file" class="popupdiv">
