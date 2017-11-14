@@ -23,9 +23,9 @@ It provides the possibility to load example files from a dropdown menu but it ma
    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-78067301-2"></script>
    <script>
      // Only relevant if not local!
-     if (window.location.protocol == "http:" ||
-         window.location.protocol == "https:" && 
-         window.location.host.split('.') == "www") {
+     if ((window.location.protocol == "http:" ||
+         window.location.protocol == "https:") && 
+         window.location.host.split('.')[0] == "www") {
          window.dataLayer = window.dataLayer || [];
          function gtag(){dataLayer.push(arguments);}
          gtag('js', new Date());
