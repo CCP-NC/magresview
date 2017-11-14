@@ -19,6 +19,17 @@ It provides the possibility to load example files from a dropdown menu but it ma
 
 <html>
   <head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-78067301-2"></script>
+   <script>
+     // Only relevant if not local!
+     if (window.location.protocol == "http:" && window.location.host.split('.') == "www") {
+         window.dataLayer = window.dataLayer || [];
+         function gtag(){dataLayer.push(arguments);}
+         gtag('js', new Date());
+         gtag('config', 'UA-78067301-2');
+     }
+    </script>
 
     <!-- CSS stylesheets -->
 	<link href="stylesheet.css" rel="stylesheet">
@@ -324,18 +335,6 @@ It provides the possibility to load example files from a dropdown menu but it ma
 	}
 
 	</style>
-
-   <!-- Global site tag (gtag.js) - Google Analytics -->
-   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-78067301-2"></script>
-   <script>
-     // Only relevant if not local!
-    if (window.location.protocol == "http:" && window.location.host.split('.') == "www") {
-         window.dataLayer = window.dataLayer || [];
-         function gtag(){dataLayer.push(arguments);}
-         gtag('js', new Date());
-         gtag('config', 'UA-78067301-2');
-     }
-   </script>
 
 
   </head>
