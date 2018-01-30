@@ -20,6 +20,19 @@ It provides the possibility to load example files from a dropdown menu but it ma
 <html>
   <head>
 
+    <!-- Google Analytics code -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-78067301-2"></script>
+    <script type="text/javascript">
+      // Only relevant if not local!
+      if (window.location.protocol == "http:" && window.location.host.split('.')[0] == "www") {
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-78067301-2');
+      }
+    </script>
+
     <!-- CSS stylesheets -->
 	<link href="stylesheet.css" rel="stylesheet">
 	<link href="svg_stylesheet.css" rel="stylesheet">
@@ -76,21 +89,6 @@ It provides the possibility to load example files from a dropdown menu but it ma
 		var magresview_version_number = version_number_string();
 
 	</script>    
-
-    <!-- Google Analytics code -->
-    <script type="text/javascript">
-      // Only relevant if not local!
-      if (window.location.protocol == "http:" && window.location.host.split('.')[0] == "www") {
-          console.log("Sending Google Analytics report");
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-          ga('create', 'UA-78067301-2', 'auto');
-          ga('send', 'pageview');
-      }
-    </script>
    
 	<!-- Create title -->   
    
