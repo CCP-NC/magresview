@@ -12,6 +12,8 @@ var default_displaygroup = null;                    //Basic Jmol atom expression
 
 function auto_displaygroup() {
     // Return an automatic displaygroup based on the nature of the system
+    console.log('Auto displaygroup search...');
+
     switch (is_mol_crystal())
     {
         case 1:
@@ -235,7 +237,15 @@ function displ_def_submit(stop_change) {
         $('#displ_custom_box').val(default_displaygroup);
     }
     else {
-        default_displaygroup = test_displaygroup;
+
+        // None of this makes sense if there is no unit cell data to begin with...
+        if (atom_set.lattice_pars == null) {
+            default_displaygroup = 'all';
+        }
+        else {
+            default_displaygroup = test_displaygroup;
+        }
+    
         if (!stop_change)
             global_state_machine.handle_change('state');
     }

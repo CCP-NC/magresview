@@ -447,15 +447,15 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 {
 	if (state == 3)
 	{
-		// Automatic displaygroup setting
-		$('#displ_def_type').prop('selectedIndex', 0);
-		displ_def_submit(true);
-
 		opt_theme_handler();	// Load the theme
 		opt_jmol_theme_handler();
 
 		get_atom_info();
 		load_data_asproperty();
+
+        // Automatic displaygroup setting
+        $('#displ_def_type').prop('selectedIndex', 0);
+        displ_def_submit(true);
 
 		sel_drop_update();
 		ref_table_gen();		//Generates the shield reference table for output
