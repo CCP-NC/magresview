@@ -140,8 +140,10 @@ function isc_label_handler()
 
 function isc_drop_handler()
 {
-	document.getElementById("isc_min").disabled = true;
-	document.getElementById("isc_max").disabled = true;
+	if (!$('#isc_fix_rng').prop('checked')) {
+		document.getElementById("isc_min").disabled = true;
+		document.getElementById("isc_max").disabled = true;
+	}
 
 	isc_label_handler();	
 }

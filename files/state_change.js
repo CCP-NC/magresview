@@ -211,10 +211,13 @@ function state_machine() {
     {
         //If the selected group has changed, wait for the new selection to take effect, and then update the plots
         
-        //This is required in order to reset the maximum and minimum when replotting after a change of selection, or as a result the transparency scale will be wrong
-        //(and potentially broken)
-        $("#isc_min").attr("disabled", true);
-        $("#isc_max").attr("disabled", true);
+        //This is required in order to reset the maximum and minimum when replotting after a change of selection, 
+        // or as a result the transparency scale will be wrong
+        // (and potentially broken)
+        if (!$('#isc_fix_rng').prop('checked')) {
+            $("#isc_min").attr("disabled", true);
+            $("#isc_max").attr("disabled", true);            
+        }
 
         // Here come the updates in plot
         plot_update();
