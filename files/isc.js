@@ -14,7 +14,8 @@ function isc_dropdown_update()
 	var dropd = document.getElementById("isc_drop");
 	
 	dropd.options.length = atom_set.isc_tags.length;
-	
+	atom_set.isc_tags.sort(); // Sort to get the total as first option
+
 	for(var i=0; i < atom_set.isc_tags.length; ++i)
 	{
 		dropd.options[i] = new Option(atom_set.isc_tags[i], atom_set.isc_tags[i]);
