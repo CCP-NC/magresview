@@ -61,6 +61,8 @@ function reset_system()
 		has_isc: false,														//As above, for indirect spin coupling
 
 		isc_tags: [],														//Tags for various isc components
+
+		isc_center: null,													//Potential 'central atom' for isc
 		
 		is_magres: true														//Flag to keep track if the original file was a .magres one or not
 		

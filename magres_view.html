@@ -653,7 +653,13 @@ It provides the possibility to load example files from a dropdown menu but it ma
 											onchange="isc_label_handler(event)" autocomplete="off" disabled="disabled">
 											Labels (isotropic coupling, Hz, <span style="color: rgb(128, 255, 0)">positive</span> or <span style="color: rgb(255, 0, 128)">negative</span>)</input>
 								
-											<br><br><br>
+											<br>
+                                            <input type="checkbox" id="isc_center_atom"
+                                            title="Visualize J couplings only around 'central' atom, ignoring mouse picking
+                                            (active if all J couplings are calculated only around one atom)"
+                                            onchange="isc_label_handler(event)" autocomplete="off" disabled="disabled">
+                                            Plot around central atom
+                                            <br><br>
 
 		
 								Click on any atom to show its couplings with the rest of the selection (the picking will not work when the selection is in "Custom" mode)							

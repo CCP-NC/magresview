@@ -110,7 +110,12 @@ function state_machine() {
 
         if ((current.accordion_tab && current.isc_accordion) || current.isc_check)
         {
-            var aexpr = '{*}[' + last_atom_picked + ']';
+            var isc_atom = last_atom_picked;
+            if ($('#isc_center_atom').prop('checked')) {
+                isc_atom = Jmol.evaluateVar(mainJmol, '{default_displaygroup and ' + atom_set.isc_center + '}')[0]+1;
+            }
+
+            var aexpr = '{*}[' + isc_atom + ']';
 
             isc_closest_script += "fx0=" + aexpr + ".fx; fy0=" + aexpr + ".fy; fz0=" + aexpr + ".fz;";
             isc_closest_script += "fxmin=fx0-0.5; fxmax=fx0+0.5;";

@@ -174,6 +174,10 @@ function enable_NMR_controls()
 	{
 		document.getElementById("isc_drop").disabled = false;
 		document.getElementById("isc_check").disabled = false;
+
+		if (atom_set.isc_center != null) {
+			document.getElementById("isc_center_atom").disabled = false;
+		}
 		isc_dropdown_update();
 
 		// Hide the disabled_div 
@@ -255,6 +259,9 @@ function disable_NMR_controls()
 			document.getElementById("isc_drop").disabled = true;
 			document.getElementById("isc_check").checked = false;
 			document.getElementById("isc_check").disabled = true;
+			document.getElementById("isc_center_atom").checked = false;
+			document.getElementById("isc_center_atom").disabled = true;
+
 
 			document.getElementById("dipolar_check").checked = false;
 			document.getElementById("dipolar_check").disabled = true;
@@ -460,6 +467,7 @@ function afterload_callback(id, url, fname, ftitle, error, state)
 		sel_drop_update();
 		ref_table_gen();		//Generates the shield reference table for output
 		larmor_table_gen();		//Same for Larmor frequency
+		isc_detect_center();	//Detect J-coupling center
 
 		enable_NMR_controls();
 

@@ -9,6 +9,26 @@
 
 //This function is called with the enable_NMR_controls method and updates the dropdown for efg tag selection
 
+function isc_detect_center() {
+
+	if(atom_set.has_isc) {
+		var all_isc_values = Jmol.evaluateVar(mainJmol, "{all}.tensor('" + atom_set.isc_tags[0] + "', 'value')");
+		// Is there an isc_center?
+		atom_set.isc_center = all_isc_values[0][0];
+		for (var i = 1; i < all_isc_values.length; ++i) {
+			if (all_isc_values[i][0] != atom_set.isc_center) {
+				atom_set.isc_center = null;
+				break;
+			}
+		}
+	}
+
+	if (atom_set.isc_center != null) {
+		atom_set.isc_center = Jmol.evaluateVar(mainJmol, "{*}[" + (atom_set.isc_center + 1) + "].atomname");
+	}
+
+}
+
 function isc_dropdown_update()
 {
 	var dropd = document.getElementById("isc_drop");
@@ -28,7 +48,11 @@ function isc_closest_handler()
 	// Works on the model of vvleck_sphere_handler
 
 	var closest_script = " define default_displaygroup " + default_displaygroup + ";";
-	var aexpr = '{*}[' + last_atom_picked + ']';
+	var isc_atom = last_atom_picked;
+	if ($('#isc_center_atom').prop('checked')) {
+		isc_atom = Jmol.evaluateVar(mainJmol, '{default_displaygroup and ' + atom_set.isc_center + '}')[0]+1;
+	}
+	var aexpr = '{*}[' + isc_atom + ']';
 	
 	//A bit of jQuery magic to check whether the active tab is the "Visualization" one. It just works.
 
@@ -67,6 +91,11 @@ function isc_label_handler()
 	var isc_min = 0.0;
 	var isc_max = 0.0;
 
+	var isc_atom = last_atom_picked;
+	if ($('#isc_center_atom').prop('checked')) {
+		isc_atom = Jmol.evaluateVar(mainJmol, '{default_displaygroup and ' + atom_set.isc_center + '}')[0]+1;
+	}
+
 	isc_plot_jmol_script = "measure delete;";
 
 	// Label precision for couplings: default value is 2
@@ -76,7 +105,7 @@ function isc_label_handler()
 
 	if (isc_plot_on)
 	{
-		var isc_info = isc_info_eval(last_atom_picked, isc_tag);
+		var isc_info = isc_info_eval(isc_atom, isc_tag);
 
 		//Deactivate dipolar measures
 
@@ -123,11 +152,9 @@ function isc_label_handler()
 			else
 				isc_plot_jmol_script += "color measure {255 0 128};";
 
-			isc_plot_jmol_script += "measure {*}[" + last_atom_picked + "] {*}[" + id + "] \"" + isc.toFixed(prec) + " Hz\";";
+			isc_plot_jmol_script += "measure {*}[" + isc_atom + "] {*}[" + id + "] \"" + isc.toFixed(prec) + " Hz\";";
 
 		}
-
-		//isc_plot_jmol_script += "measure all {*}[" + last_atom_picked + "] {selected} \"2:%VALUE kHz//" + isc_tag + "_hz\";"
 	}
 	else
 	{
@@ -175,7 +202,6 @@ function isc_info_eval(a_num, tag)
 		var key = parseInt(isc_line[4].split(' ')[1].replace('#',''));
 
 		isc_info[key] =  parseFloat(isc_line[1]);
-		console.log(j, isc_info);
 	}
 
 	return isc_info;
