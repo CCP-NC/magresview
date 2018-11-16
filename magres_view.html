@@ -218,6 +218,30 @@ It provides the possibility to load example files from a dropdown menu but it ma
     
     <script type="text/javascript" src="files/range_sphere.js"></script>
 
+    <!-- Cookie notice -->
+    <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
+    <script>
+    window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+      "palette": {
+        "popup": {
+          "background": "#303030",
+          "text": "#ff8000"
+        },
+        "button": {
+          "background": "#0080ff",
+          "text": "#ffffee"
+        }
+      },
+      "position": "top",
+      "content": {
+        "message": "This website uses technical cookies (Local Storage) to make usage faster. No personal information is stored."
+      }
+    })});
+    </script>
+    
+
 	 <script>
 		
 		/* This script initializes the jQuery UI controls. The options mean:
