@@ -20,7 +20,7 @@ function ga_clean() {
 
     for (var c in ck) {
         if ('_ga' === c || '_gid' === c || c.includes('_gat')) {
-            Cookies.remove(c, { path: '/', domain:  });
+            Cookies.remove(c, { path: '/', domain:  domain });
         }
     }
 }
