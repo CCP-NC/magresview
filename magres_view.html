@@ -20,25 +20,11 @@ It provides the possibility to load example files from a dropdown menu but it ma
 <html>
   <head>
 
-    <!-- Google Analytics code 
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-78067301-2"></script>
 
-    <script type="text/javascript">
-      // Only relevant if not local!
-      if ((window.location.protocol == "http:" || window.location.protocol == "https:")
-          && window.location.host.split('.')[0] == "www") {
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-109654211-1"></script>
 
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-
-          gtag('config', 'UA-78067301-2');
-      }
-    </script>
-
-    -->
-
-    <!-- CSS stylesheets -->
+		<!-- CSS stylesheets -->
 	<link href="stylesheet.css" rel="stylesheet">
 	<link href="svg_stylesheet.css" rel="stylesheet">
 
@@ -116,7 +102,10 @@ It provides the possibility to load example files from a dropdown menu but it ma
       $(window).error();
     </script>
     
-    
+		<!-- Cookies -->
+
+    <script type="text/javascript" src="files/cookies.js"></script>
+
     <!-- Matrix functions -->
     
     <script type="text/javascript" src="files/matrix.js"></script>
@@ -221,24 +210,32 @@ It provides the possibility to load example files from a dropdown menu but it ma
     <!-- Cookie notice -->
     <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />
     <script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script>
     window.addEventListener("load", function(){
-    window.cookieconsent.initialise({
-      "palette": {
-        "popup": {
-          "background": "#303030",
-          "text": "#ff8000"
-        },
-        "button": {
-          "background": "#0080ff",
-          "text": "#ffffee"
-        }
-      },
-      "position": "top",
-      "content": {
-        "message": "This website uses technical cookies (Local Storage) to make usage faster. No personal information is stored."
-      }
-    })});
+	    window.cookieconsent.initialise({
+	      "palette": {
+	        "popup": {
+	          "background": "#303030",
+	          "text": "#ff8000"
+	        },
+	        "button": {
+	          "background": "#0080ff",
+	          "text": "#ffffee"
+	        }
+	      },
+			"type": "opt-in",
+	      "position": "top",
+	      "content": {
+	      	"allow": "Allow all",
+	      	"deny": "Only technical cookies",
+	      	"href": "https://www.ccpnc.ac.uk/cookie-policy",
+	        "message": "This website uses technical cookies (Local Storage) to make usage faster. Minimal anonymous data for usage statistics \
+	        can also be collected with your consent."
+	      },
+	      onStatusChange: cookie_callback,
+	    });
+	});
     </script>
     
 
