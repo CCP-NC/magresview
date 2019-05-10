@@ -15,10 +15,12 @@ function ga_clean() {
     window['ga-disable-UA-109654211-1'] = true; // Disable tracking
 
     var ck = Cookies.get();
+    var domain = document.location.hostname;
+    domain = domain.slice(domain.indexOf('.'));
 
     for (var c in ck) {
         if ('_ga' === c || '_gid' === c || c.includes('_gat')) {
-            Cookies.remove(c, { path: '/', domain: document.location.hostname });
+            Cookies.remove(c, { path: '/', domain:  });
         }
     }
 }
