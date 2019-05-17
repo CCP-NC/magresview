@@ -1424,6 +1424,7 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	var ch = choice_atomexp(ac);
 
 	var use_rotated_frame = document.getElementById("rot_file_check").checked;
+	var inv_euler = document.getElementById("einv_file_check").checked;
 	var rot_matrix = null;
 	
 	//To prevent errors if there is no lattice data; it will be irrelevant anyway, because in this case the k_*_max will all be zero
@@ -1452,18 +1453,18 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 	{
 		full_jmol_script += "ms_info = []; for (a in " + ch + ") {ms_info = ms_info or [a.atomno, a.tensor('ms', 'asymmatrix'), a.tensor('ms', 'isotropy'), a.tensor('ms', 'anisotropy'), a.tensor('ms', 'asymmetry'),";		
 		if (!use_rotated_frame)
-			full_jmol_script += " quaternion(a.tensor('ms', 'quaternion'))" + conv_table[eul_conv] + "];};";
+			full_jmol_script += " (" + (inv_euler? "!" : "") + "quaternion(a.tensor('ms', 'quaternion')))" + conv_table[eul_conv] + "];};";
 		else
-			full_jmol_script += " (quaternion(a.tensor('ms', 'quaternion')) * rot_q)" + conv_table[eul_conv] + "];};";
+			full_jmol_script += " (" + (inv_euler? "!" : "") + "(quaternion(a.tensor('ms', 'quaternion')) * rot_q))" + conv_table[eul_conv] + "];};";
 	}
 	// EFG info
 	if ((document.getElementById("efg_file_check").checked == true || use_all == true) && atom_set.has_efg)
 	{
 		full_jmol_script += "efg_info = []; for (a in " + ch + ") {efg_info = efg_info or [a.atomno, a.tensor('efg', 'asymmatrix'), a.tensor('efg', 'chi'), a.tensor('efg', 'asymmetry'),";
 		if (!use_rotated_frame)
-			full_jmol_script += " quaternion(a.tensor('efg', 'quaternion')) " + conv_table[eul_conv] + "];};";
+			full_jmol_script += " (" + (inv_euler? "!" : "") + "quaternion(a.tensor('efg', 'quaternion'))) " + conv_table[eul_conv] + "];};";
 		else
-			full_jmol_script += " (quaternion(a.tensor('efg', 'quaternion')) * rot_q)" + conv_table[eul_conv] + "];};";			
+			full_jmol_script += " (" + (inv_euler? "!" : "") + "(quaternion(a.tensor('efg', 'quaternion')) * rot_q))" + conv_table[eul_conv] + "];};";			
 	}
 	// DIP info
 	if (document.getElementById("dip_file_check").checked == true || use_all == true)
@@ -1485,15 +1486,16 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		full_jmol_script += "isc_info = []; for (i = 1; i < " + ch + ".length; ++i) {for (j=i+1; j<= " + ch + ".length; ++j) {isc_info = isc_info or [({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"j\")[1])[3], \
 								    ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"eta\")[1])[3], ({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"asymmetry\")[1])[3],";
 		if (!use_rotated_frame) {
-			full_jmol_script += "(({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3])" + conv_table[eul_conv] + ",";
+			full_jmol_script += "(" + (inv_euler? "!" : "") + "(({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3]))" + conv_table[eul_conv] + ",";
 		}
 		else
 		{
-			full_jmol_script += "((({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q) " + conv_table[eul_conv] + ",";
+			full_jmol_script += "(" + (inv_euler? "!" : "") + "((({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"quaternion\")[1])[3]) * rot_q)) " + conv_table[eul_conv] + ",";
 		}
 				
 		full_jmol_script += "({(" + ch + ")[i] or (" + ch + ")[j]}.tensor(\"isc\", \"asymmatrix\")[1])[3],";			   
 		full_jmol_script += ch + "[i].atomno," + ch + "[j].atomno];}};";
+
 	}
 
 
@@ -1796,6 +1798,8 @@ function compile_data_set(ds, ac, use_all, eul_conv, ignore_refs)
 		ds.magres.isc = [];
 		
 		var isc_info = Jmol.evaluateVar(mainJmol, "isc_info");
+
+		console.log(isc_info);
 		
 		nonzero_isc = 0;
 		
