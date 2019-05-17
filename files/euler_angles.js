@@ -368,7 +368,8 @@ function eultab_calculate()
 	var eul_angs = Jmol.evaluate(mainJmol, "ans");
 	eul_angs = eul_angs.split('\n\n');
 
-	file_destination.write('Atom\tAlpha\tBeta\tGamma\n');	
+	file_destination.write('Atom\tAngles (efg => ms)\tAngles (ms => efg)\n');
+	file_destination.write("Atom\tAlpha\tBeta\tGamma\tAlpha'\tBeta'\tGamma'\n");	
 
 	for (var ea=0; ea < eul_angs.length; ++ea)
 	{
@@ -376,7 +377,11 @@ function eultab_calculate()
 			continue;
 
 		var e = eul_angs[ea].split('\n');
-		file_destination.write(e[0] + '\t' + parseFloat(e[1]).toFixed(2) + '\t' + parseFloat(e[2]).toFixed(2) + '\t' + parseFloat(e[3]).toFixed(2) + '\n');
+		var a = parseFloat(e[1]);
+		var b = parseFloat(e[2]);
+		var c = parseFloat(e[3]);
+		file_destination.write(e[0] + '\t' + a.toFixed(2) + '\t' + b.toFixed(2) + '\t' + c.toFixed(2) + 
+		'\t' + (-c).toFixed(2) + '\t' + b.toFixed(2) + '\t' + (-a).toFixed(2) + '\n');
 	}
 
 	if(to_newtab == true)
